@@ -1,0 +1,314 @@
+package net.cmr.util;
+
+import java.util.HashMap;
+import java.util.Objects;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Disposable;
+
+/**
+ * The Audio class handles the management and playback of sound effects and music in the game.
+ */
+public class Audio implements Disposable {
+
+    private static final String SFX_PATH = "audio/sfx/";
+    private static final String MUSIC_PATH = "audio/music/";
+
+    /**
+     * Represents the sound effects used in the game.
+     */
+    public enum GameSFX {
+        BUTTON_CLICK("button_click.wav"),
+        BUTTON_HOVER("button_hover.wav"),
+        BUTTON_PRESS("button_press.wav"),
+        BUTTON_RELEASE("button_release.wav"),
+        BUTTON_UNHOVER("button_unhover.wav"),
+        ;
+
+        private final String fileName;
+
+        private GameSFX(String fileName) {
+            this.fileName = fileName;
+        }
+
+        /**
+         * Returns the unique ID of the sound effect.
+         *
+         * @return The ID of the sound effect.
+         */
+        public int getID() {
+            return name().hashCode();
+        }
+
+        /**
+         * Returns the file name of the sound effect.
+         *
+         * @return The file name of the sound effect.
+         */
+        public String getFileName() {
+            return fileName;
+        }
+
+        /**
+         * Returns the file handle of the sound effect.
+         *
+         * @return The file handle of the sound effect.
+         */
+        public FileHandle getFileHandle() {
+            return Gdx.files.internal(SFX_PATH + getFileName());
+        }
+    }
+
+    /**
+     * Represents the music tracks used in the game.
+     */
+    public enum GameMusic {
+        MAIN_MENU("main_menu.mp3"),
+        LOBBY("mus_lobby.mp3"),
+        SELL_IT("mus_sellit.mp3"),
+        DRAWING("mus_drawing.mp3"),
+        ;
+
+        private final String fileName;
+
+        private GameMusic(String fileName) {
+            this.fileName = fileName;
+        }
+
+        /**
+         * Returns the unique ID of the music track.
+         *
+         * @return The ID of the music track.
+         */
+        public int getID() {
+            return name().hashCode();
+        }
+
+        /**
+         * Returns the file name of the music track.
+         *
+         * @return The file name of the music track.
+         */
+        public String getFileName() {
+            return fileName;
+        }
+
+        /**
+         * Returns the file handle of the music track.
+         *
+         * @return The file handle of the music track.
+         */
+        public FileHandle getFileHandle() {
+            return Gdx.files.internal(MUSIC_PATH + getFileName());
+        }
+    }
+
+    private HashMap<Integer, Sound> sfxMap;
+    private HashMap<Integer, Music> musicMap;
+
+    private Music currentMusic = null;
+    private float musicVolume = 1f;
+    private float sfxVolume = 1f;
+
+    private Audio() {
+        sfxMap = new HashMap<>();
+        musicMap = new HashMap<>();
+
+        if(Gdx.files == null) {
+            return;
+        }
+
+        for (GameSFX sfx : GameSFX.values()) {
+            initializeSFX(sfx.getID(), sfx.getFileHandle());
+        }
+        for (GameMusic music : GameMusic.values()) {
+            initializeMusic(music.getID(), music.getFileHandle());
+        }
+
+        Log.info("Audio initialized");
+    }
+
+    /**
+     * Initializes a sound effect with the given ID and file handle.
+     *
+     * @param id     The ID of the sound effect.
+     * @param handle The file handle of the sound effect.
+     */
+    public void initializeSFX(int id, FileHandle handle) {
+        if(!handle.exists()) {
+            return;
+        }
+        Log.info("Initializing SFX: " + handle.name());
+        sfxMap.put(id, Gdx.audio.newSound(handle));
+    }
+
+    /**
+     * Initializes a music track with the given ID and file handle.
+     *
+     * @param id     The ID of the music track.
+     * @param handle The file handle of the music track.
+     */
+    public void initializeMusic(int id, FileHandle handle) {
+        if(!handle.exists()) {
+            return;
+        }
+        Log.info("Initializing music: " + handle.name());
+        musicMap.put(id, Gdx.audio.newMusic(handle));
+    }
+
+    /**
+     * Plays a sound effect with the given volume.
+     *
+     * @param sfx    The sound effect to play.
+     * @param volume The volume of the sound effect.
+     * @return The ID of the sound effect instance.
+     */
+    public long playSFX(GameSFX sfx, float volume) {
+        return playSFX(sfx.getID(), volume, 1, 0);
+    }
+
+    /**
+     * Plays a sound effect with the given volume and pitch.
+     *
+     * @param sfx    The sound effect to play.
+     * @param volume The volume of the sound effect.
+     * @param pitch  The pitch of the sound effect.
+     * @return The ID of the sound effect instance.
+     */
+    public long playSFX(GameSFX sfx, float volume, float pitch) {
+        return playSFX(sfx.getID(), volume, pitch, 0);
+    }
+
+    /**
+     * Plays a sound effect with the given volume, pitch, and pan.
+     *
+     * @param sfx    The sound effect to play.
+     * @param volume The volume of the sound effect.
+     * @param pitch  The pitch of the sound effect.
+     * @param pan    The pan of the sound effect.
+     * @return The ID of the sound effect instance.
+     */
+    public long playSFX(GameSFX sfx, float volume, float pitch, float pan) {
+        return playSFX(sfx.getID(), volume, pitch, pan);
+    }
+
+    /**
+     * Plays a sound effect with the given ID, volume, pitch, and pan.
+     *
+     * @param id     The ID of the sound effect.
+     * @param volume The volume of the sound effect.
+     * @param pitch  The pitch of the sound effect.
+     * @param pan    The pan of the sound effect.
+     * @return The ID of the sound effect instance.
+     */
+    public long playSFX(int id, float volume, float pitch, float pan) {
+        Sound sound = sfxMap.get(id);
+        if(Objects.isNull(sound)) {
+            return -1;
+        }
+        long output = sound.play(volume * sfxVolume, pitch, pan);
+        return output;
+    }
+
+    /**
+     * Plays the specified music track.
+     *
+     * @param music The music track to play.
+     */
+    public void playMusic(GameMusic music) {
+        playMusic(music.getID());
+    }
+
+    /**
+     * Plays the music track with the given ID.
+     *
+     * @param id The ID of the music track.
+     */
+    public void playMusic(int id) {
+        if (musicMap.get(id) == null) {
+            return;
+        }
+        if (currentMusic != null) {
+            currentMusic.stop();
+        }
+
+        currentMusic = musicMap.get(id);
+        currentMusic.setVolume(musicVolume);
+        currentMusic.setLooping(true);
+        currentMusic.setOnCompletionListener((Music music) -> {
+            currentMusic = null;
+        });
+        currentMusic.play();
+    }
+
+    public void stopMusic() {
+        if (currentMusic != null) {
+            currentMusic.stop();
+            currentMusic = null;
+        }
+    }
+
+    /**
+     * Sets the volume of the music.
+     *
+     * @param volume The volume of the music.
+     */
+    public void setMusicVolume(float volume) {
+        musicVolume = volume;
+        if (currentMusic != null) {
+            currentMusic.setVolume(volume);
+        }
+    }
+
+    /**
+     * Sets the volume of the sound effects.
+     *
+     * @param volume The volume of the sound effects.
+     */
+    public void setSFXVolume(float volume) {
+        sfxVolume = volume;
+    }
+
+    @Override
+    public void dispose() {
+        for (Sound sfx : sfxMap.values()) {
+            sfx.dispose();
+        }
+        for (Music music : musicMap.values()) {
+            music.dispose();
+        }
+    }
+
+    // Singleton
+
+    private static Audio instance;
+
+    /**
+     * Returns the singleton instance of the Audio class.
+     *
+     * @return The Audio instance.
+     */
+    public static Audio getInstance() {
+        if (instance == null) {
+            instance = new Audio();
+        }
+        return instance;
+    }
+
+    /**
+     * Initializes the Audio system.
+     */
+    public static void initializeAudio() {
+        getInstance();
+    }
+
+    /**
+     * Disposes the Audio system.
+     */
+    public static void disposeAudio() {
+        getInstance().dispose();
+    }
+}

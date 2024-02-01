@@ -154,7 +154,7 @@ jsonData: {
 			class: com.ray3k.skincomposer.data.FontData
 			name: default-font
 			flip: false
-			markupEnabled: false
+			markupEnabled: true
 			scaling: -1
 			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourDefault.fnt
 		}
@@ -1589,7 +1589,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.g2d.BitmapFont
 						name: font
 						optional: false
-						value: small-font
+						value: default-font
 					}
 					fontColor: {
 						type: com.badlogic.gdx.graphics.Color
@@ -1782,6 +1782,10 @@ jsonData: {
 	customClasses: []
 }
 preferences: {
+	export-fonts: {
+		class: java.lang.Boolean
+		value: false
+	}
 	id: {
 		class: java.lang.Integer
 		value: 596577229
@@ -1792,6 +1796,10 @@ preferences: {
 		g: 0.19607843
 		b: 0.19607843
 		a: 1
+	}
+	export-atlas: {
+		class: java.lang.Boolean
+		value: true
 	}
 	last-import-export-path: {
 		class: java.lang.String

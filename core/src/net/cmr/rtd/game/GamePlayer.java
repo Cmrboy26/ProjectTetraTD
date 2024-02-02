@@ -25,4 +25,9 @@ public class GamePlayer {
     public GameStream getStream() { return stream; }
     public String getUsername() { return username; }
 
+    public void update(float delta) {
+        // Update the player.
+        getStream().update();
+    }
+
 }

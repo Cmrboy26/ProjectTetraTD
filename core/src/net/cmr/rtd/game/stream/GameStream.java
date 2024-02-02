@@ -1,6 +1,7 @@
 package net.cmr.rtd.game.stream;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.esotericsoftware.kryo.util.Null;
 
@@ -35,12 +36,17 @@ public abstract class GameStream {
     }
 
     public static interface PacketListener {
-        public void packetReceived(Packet packet);
+        /**
+         * This method is called when a packet is received and is processed.
+         * @param packet The packet that was received.
+         * @param it An iterator that can be used to remove the listener from the list of listeners.
+         */
+        public void packetReceived(Packet packet, Iterator<PacketListener> it);
     }
 
     public static interface StateListener {
-        public void onClose();
-        public void onOpen();
+        public void onClose(Iterator<StateListener> it);
+        public void onOpen(Iterator<StateListener> it);
     }
 
     public void addListener(PacketListener listener) {
@@ -77,9 +83,10 @@ public abstract class GameStream {
         Packet p = (Packet) packet;
         processPacket(p);
         synchronized (listenerLock) {
-            // FIXME: ConcurrentModificatioException (because removeListener is called when ConnectPacket is recieved.)
-            for (PacketListener listener : listeners) {
-                listener.packetReceived(p);
+            Iterator<PacketListener> it = listeners.iterator();
+            while (it.hasNext()) {
+                PacketListener listener = it.next();
+                listener.packetReceived(p, it);
             }
         }
     }
@@ -128,8 +135,10 @@ public abstract class GameStream {
         if (!open) return;
         open = false;
         synchronized (stateListenerLock) {
-            for (StateListener listener : stateListeners) {
-                listener.onClose();
+            Iterator<StateListener> it = stateListeners.iterator();
+            while (it.hasNext()) {
+                StateListener listener = it.next();
+                listener.onClose(it);
             }
         }
     }
@@ -143,8 +152,10 @@ public abstract class GameStream {
         if (open) return;
         open = true;
         synchronized (stateListenerLock) {
-            for (StateListener listener : stateListeners) {
-                listener.onOpen();
+            Iterator<StateListener> it = stateListeners.iterator();
+            while (it.hasNext()) {
+                StateListener listener = it.next();
+                listener.onOpen(it);
             }
         }
     }

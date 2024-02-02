@@ -21,10 +21,10 @@ public class MainMenuScreen extends AbstractScreenEX {
         clientSender = streamPairs[0];
         serverSender = streamPairs[1];
 
-        clientSender.addListener((packet) -> {
+        clientSender.addListener((packet, it) -> {
             System.out.println("Client received packet: " + packet);
         });
-        serverSender.addListener((packet) -> {
+        serverSender.addListener((packet, it) -> {
             System.out.println("Server received packet: " + packet);
         });
 

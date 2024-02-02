@@ -14,6 +14,18 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 	}
 }
 com.badlogic.gdx.graphics.Color: {
+	CLEAR: {
+		r: 1
+		g: 0
+		b: 0
+		a: 0
+	}
+	SELECTED: {
+		r: 0.30588236
+		g: 1
+		b: 0
+		a: 1
+	}
 	TEXT_HIGHLIGHT: {
 		r: 0.6784314
 		g: 0.7176471
@@ -25,6 +37,39 @@ com.badlogic.gdx.graphics.Color: {
 		g: 1
 		b: 1
 		a: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable: {
+	checkmark: {
+		region: checkmark
+		minWidth: 32
+		minHeight: 32
+	}
+	x: {
+		region: x
+		minWidth: 32
+		minHeight: 32
+	}
+	xDisabled: {
+		region: xDisabled
+		minWidth: 32
+		minHeight: 32
+	}
+	checkmarkDisabled: {
+		region: checkmarkDisabled
+		minWidth: 32
+		minHeight: 32
+	}
+}
+com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable: {
+	boxYellow: {
+		patch: boxYellow
+		minWidth: 6
+		minHeight: 6
+		leftWidth: 0
+		rightWidth: 0
+		topHeight: 0
+		bottomHeight: 0
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
@@ -46,12 +91,106 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		checkedFocused: boxOver
 	}
 }
+com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
+	default: {
+		checkboxOn: checkmark
+		checkboxOff: x
+		checkboxOnDisabled: checkmarkDisabled
+		checkboxOffDisabled: xDisabled
+		font: default-font
+		up: box
+		down: boxSelected
+	}
+	small: {
+		parent: default
+		checkboxOn: checkmark
+		checkboxOff: x
+		checkboxOnDisabled: checkmarkDisabled
+		checkboxOffDisabled: xDisabled
+		font: small-font
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
+	default: {
+		up: box
+		down: boxSelected
+		over: boxOver
+		focused: boxOver
+		disabled: boxDisabled
+		checked: boxSelected
+		checkedOver: boxOver
+		checkedDown: boxSelected
+		checkedFocused: boxOver
+	}
+}
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
 		font: default-font
 	}
 	small: {
+		parent: default
 		font: default-font
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
+	default: {
+		font: small-font
+		fontColorSelected: white
+		fontColorUnselected: white
+		selection: TEXT_HIGHLIGHT
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
+	default-horizontal: {
+		background: box
+		disabledBackground: boxDisabled
+		knob: knob
+	}
+	default-vertical: {
+		parent: default-horizontal
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		background: box
+		hScrollKnob: knob
+		vScrollKnob: knob
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
+	default: {
+		font: default-font
+		fontColor: white
+		scrollStyle: default
+		listStyle: default
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
+	default-horizontal: {
+		background: box
+		knob: knob
+		knobBefore: boxYellow
+	}
+	default-vertical: {
+		parent: default-horizontal
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+	default: {
+		font: default-font
+		up: box
+		down: boxSelected
+		over: boxOver
+		focused: boxSelected
+		disabled: boxDisabled
+		checked: boxSelected
+		checkedOver: boxOver
+		checkedDown: boxSelected
+		checkedFocused: boxOver
+	}
+	small: {
+		parent: default
+		font: small-font
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
@@ -64,6 +203,27 @@ com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
 	default: {
 		label: default
+		background: box
+	}
+	small: {
+		parent: default
+		label: small
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
+	default: {
+		plus: checkmark
+		minus: x
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+	default: {
+		background: box
+		titleFont: default-font
+	}
+	small: {
+		parent: default
+		titleFont: small-font
 	}
 }
 }

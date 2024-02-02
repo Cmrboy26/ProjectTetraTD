@@ -134,6 +134,10 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
         stages.drawAll(batch);
     }
 
+    public void render(float delta) {
+        actDrawAll(delta);
+    }
+
     /**
      * Adds an actor to the stage with the given align.
      * @param align The align of the stage to add the actor to.

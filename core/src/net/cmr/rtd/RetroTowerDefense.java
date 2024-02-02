@@ -1,9 +1,9 @@
 package net.cmr.rtd;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.util.CMRGame;
 
 public class RetroTowerDefense extends CMRGame {
@@ -15,7 +15,7 @@ public class RetroTowerDefense extends CMRGame {
 	@Override
 	public void create () {
 		super.create();
-		showIntroScreen(null);
+		showIntroScreen(new MainMenuScreen());
 	}
 
 	@Override

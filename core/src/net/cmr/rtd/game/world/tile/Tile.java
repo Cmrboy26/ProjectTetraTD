@@ -148,6 +148,28 @@ public class Tile implements Collidable {
 
                 // if y-1, z-1 is floor, draw top
 
+                boolean drawLines = false;
+                Sprite lineSprite = Sprites.sprite("tile3");
+
+                if (eastIsFloor && !eastIsWall) {
+                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 90, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
+                    drawLines = true;
+                }
+                if (westIsFloor && !westIsWall) {
+                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 270, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
+                    drawLines = true;
+                }
+                if (southIsFloor && !southIsWall) {
+                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, true);
+                    drawLines = true;
+                }
+                if (northIsFloor && !northIsWall) {
+                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
+                    drawLines = true;
+                }
+
+                
+
                 boolean drewNubs = false;
                 Sprite nubSprite = Sprites.sprite("tile4");
                 if (northIsWall && eastIsWall && floorNeighbors[2][2] == TileType.FLOOR) {
@@ -172,26 +194,6 @@ public class Tile implements Collidable {
                 }
                 if (drewNubs) {
                     return;
-                }
-
-                boolean drawLines = false;
-                Sprite lineSprite = Sprites.sprite("tile3");
-
-                if (eastIsFloor && !eastIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 90, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
-                }
-                if (westIsFloor && !westIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 270, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
-                }
-                if (southIsFloor && !southIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, true);
-                    drawLines = true;
-                }
-                if (northIsFloor && !northIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
                 }
 
                 /*if (northIsWall && southIsWall && !eastIsWall && !westIsWall) {

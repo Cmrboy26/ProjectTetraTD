@@ -129,7 +129,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	}
 	small: {
 		parent: default
-		font: default-font
+		font: small-font
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
@@ -192,6 +192,17 @@ com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 		parent: default
 		font: small-font
 	}
+	toggle: {
+		parent: default
+		checked: box
+		checkedOver: boxOver
+		checkedDown: boxSelected
+		checkedFocused: boxOver
+	}
+	toggle-small: {
+		parent: toggle
+		font: small-font
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {
@@ -212,8 +223,8 @@ com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: {
-		plus: checkmark
-		minus: x
+		plus: x
+		minus: checkmark
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {

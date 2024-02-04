@@ -114,6 +114,11 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
         for(int align : initializeStages) {
             stages.registerStage(align);
         }
+    }
+
+    @Override
+    public void show() {
+        super.show();
         Gdx.input.setInputProcessor(stages);
     }
 

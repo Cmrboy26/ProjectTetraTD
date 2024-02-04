@@ -6,13 +6,15 @@ import com.badlogic.gdx.Preferences;
 @SuppressWarnings("unused")
 public class Settings {
     
-    public static final String PREFERENCES_LOCATION = "RTD-Settings";
+    public static final String PREFERENCES_LOCATION = "RTD-Settings.xml";
     public static final String MUSIC_VOLUME = "musicVolume";
     public static final String SFX_VOLUME = "sfxVolume";
+    public static final String USERNAME = "username";
+    private static Preferences preferences;
 
     public static void initializeSettings() {
         // Read settings from preferences
-        Preferences preferences = getPreferences();
+        preferences = getPreferences();
     }
 
     public static void resetSettings() {
@@ -24,6 +26,7 @@ public class Settings {
         
         defaultFloat(MUSIC_VOLUME, 0.5f, force, preferences);
         defaultFloat(SFX_VOLUME, 0.5f, force, preferences);
+        defaultString(USERNAME, System.getProperty("user.name"), force, preferences);
 
         preferences.flush();
     }
@@ -54,16 +57,19 @@ public class Settings {
         }
     }
 
-    public void applySettings() {
+    public static void applySettings() {
         // Set the default values if they don't exist
         setDefaults(false);
         Preferences preferences = getPreferences();
         // Apply the settings to the game
         Audio.getInstance().setMusicVolume(preferences.getFloat(MUSIC_VOLUME));
         Audio.getInstance().setSFXVolume(preferences.getFloat(SFX_VOLUME));
+
+        Log.info("Applied settings.");
     }
 
     public static Preferences getPreferences() {
+        if (preferences != null) return preferences;
         return Gdx.app.getPreferences(PREFERENCES_LOCATION);
     }
 

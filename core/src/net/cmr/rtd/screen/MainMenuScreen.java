@@ -1,42 +1,84 @@
 package net.cmr.rtd.screen;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+
+import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.packets.ConnectPacket;
+import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.SpriteType;
 
 public class MainMenuScreen extends AbstractScreenEX {
     
-    LocalGameStream clientSender, serverSender;
+    LocalGameStream clientsideStream, serversideStream;
+    GameManager manager;
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
 
-        GameManagerDetails details = new GameManagerDetails();
-        details.actAsServer(false);
-        GameManager gameManager = new GameManager(details);
+		Table table = new Table();
+		table.setFillParent(true);
 
-        LocalGameStream[] streamPairs = LocalGameStream.createStreamPair();
-        clientSender = streamPairs[0];
-        serverSender = streamPairs[1];
+		Label label = new Label("Retro Tower Defense", Sprites.skin(), "default");
+		label.setAlignment(Align.center);
+		table.add(label).padTop(20.0f).padBottom(20.0f);
 
-        clientSender.addListener((packet, it) -> {
-            System.out.println("Client received packet: " + packet);
-        });
-        serverSender.addListener((packet, it) -> {
-            System.out.println("Server received packet: " + packet);
-        });
+		String labelType = "toggle-small";
 
-        gameManager.onPlayerConnect(serverSender);
-        clientSender.sendPacket(new ConnectPacket("Username"));
+		table.row();
+		TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);
+		textButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				GameManagerDetails details = new GameManagerDetails();
+				GameSave save = new GameSave("testSave");
+				RetroTowerDefense.getInstance(RetroTowerDefense.class).joinSingleplayerGame(details, save);
+				//RetroTowerDefense.getInstance(RetroTowerDefense.class).joinOnlineGame("localhost", 11265);
+			}
+		});
+		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
+
+		table.row();
+		textButton = new TextButton("Settings", Sprites.skin(), labelType);
+		textButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				
+			}
+		});
+		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
+
+		table.row();
+		textButton = new TextButton("Exit", Sprites.skin(), labelType);
+		textButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				Gdx.app.exit();
+			}
+		});
+		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
+		add(Align.center, table);
     }
 
     @Override
     public void render(float delta) {
+        game.batch().setColor(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, 1);
         super.render(delta);
-        clientSender.update();
-        serverSender.update();
+    }
+    
+    @Override
+    public void hide() {
+        super.hide();
     }
 
 }

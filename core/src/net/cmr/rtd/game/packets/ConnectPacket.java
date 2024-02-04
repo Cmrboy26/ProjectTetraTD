@@ -10,4 +10,10 @@ public class ConnectPacket extends Packet {
         this.username = username;
     }
 
+    @Override
+    public Object[] packetVariables() {
+        return toPacketVariables(username);
+    }
+    
+
 }

@@ -1,7 +1,7 @@
 package net.cmr.util;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
@@ -29,6 +29,7 @@ public abstract class CMRGame extends Game {
 
     public static void initializeSystems(NativeFileChooser fileChooser) {
         Log.initializeLog();
+        Log.setLogLevel(DEBUG ? Application.LOG_DEBUG : Application.LOG_INFO);
         Audio.initializeAudio();
         Sprites.initializeSpriteManager();
         Files.initializeFiles(fileChooser);
@@ -70,6 +71,14 @@ public abstract class CMRGame extends Game {
                 throw new IllegalStateException("CMRGame instance has not been initialized.");
             }
             return instance;
+        }
+    }
+    public static <T extends CMRGame> T getInstance(Class<T> type) {
+        synchronized (instanceLock) {
+            if (instance == null) {
+                throw new IllegalStateException("Instance has not been initialized.");
+            }
+            return type.cast(instance);
         }
     }
 

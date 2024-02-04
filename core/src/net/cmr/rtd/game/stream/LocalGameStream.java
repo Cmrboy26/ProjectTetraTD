@@ -3,6 +3,7 @@ package net.cmr.rtd.game.stream;
 import java.util.ArrayList;
 
 import net.cmr.rtd.game.packets.Packet;
+import net.cmr.rtd.game.packets.PacketEncryption;
 
 public class LocalGameStream extends GameStream {
 
@@ -11,12 +12,12 @@ public class LocalGameStream extends GameStream {
     ArrayList<Object> packets;
 
     private LocalGameStream() {
-        super(null);
+        super(new PacketEncryption());
         packets = new ArrayList<Object>();
     }
 
     public LocalGameStream(LocalGameStream stream) {
-        super(null);
+        super(new PacketEncryption());
         this.otherStream = stream;
         packets = new ArrayList<Object>();
     }
@@ -32,12 +33,13 @@ public class LocalGameStream extends GameStream {
 
     @Override
     public void update() {
+        //System.out.println("Updating local game stream "+this);
         receivePackets();
     }
 
     @Override
     public void sendPacket(Packet packet) {
-        synchronized (packetLock) {
+        synchronized (otherStream.packetLock) {
             packet.beforeSend(getEncryptor());
             otherStream.packets.add(packet);
         }

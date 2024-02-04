@@ -9,5 +9,10 @@ public class DisconnectPacket extends Packet {
         super();
         this.reason = reason;
     }
+
+    @Override
+    public Object[] packetVariables() {
+        return toPacketVariables(reason);
+    }
     
 }

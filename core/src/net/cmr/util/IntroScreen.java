@@ -18,7 +18,7 @@ public class IntroScreen extends AbstractScreenEX {
         super(Align.center);
 		this.game = CMRGame.getInstance();
         this.nextScreen = nextScreen;
-        label = new Label("Cmrboy26", Sprites.getInstance().skin());
+        label = new Label("Cmrboy26", Sprites.skin());
         label.setPosition(360-label.getWidth()/2, 360/2-label.getHeight()/2);
         label.setOrigin(Align.center);
         label.setFontScale(1.3f);
@@ -44,7 +44,6 @@ public class IntroScreen extends AbstractScreenEX {
         game.batch().setColor(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha);
         label.setColor(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha);
         actDrawAll(delta);
-		game.batch().setProjectionMatrix(stages.get(Align.center).getCamera().combined);
         game.batch().begin();
         game.batch().draw(Sprites.sprite(SpriteType.CMRBOY26), 130, 130, 100, 100);
 		game.batch().end();

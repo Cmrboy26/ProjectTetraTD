@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.esotericsoftware.kryo.util.Null;
+import com.esotericsoftware.kryonet.Connection;
 
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
@@ -37,11 +38,14 @@ public abstract class GameStream {
 
     public static interface PacketListener {
         /**
-         * This method is called when a packet is received and is processed.
+         * This method is called when a packet is received.
          * @param packet The packet that was received.
-         * @param it An iterator that can be used to remove the listener from the list of listeners.
+         * @return IMPORTANT: return true to REMOVE the listener from the list of listeners.
          */
-        public void packetReceived(Packet packet, Iterator<PacketListener> it);
+        public void packetReceived(Packet packet);
+        public default boolean shouldRemoveListener() {
+            return false;
+        }
     }
 
     public static interface StateListener {
@@ -76,17 +80,25 @@ public abstract class GameStream {
      * @param packet The packet that was received.
      * @see #receivePackets()
      */
-    protected void notifyListeners(Object packet) {
+    protected synchronized void notifyListeners(Object packet) {
         if (!(packet instanceof Packet)) {
             return;
         }
         Packet p = (Packet) packet;
         processPacket(p);
+        
         synchronized (listenerLock) {
             Iterator<PacketListener> it = listeners.iterator();
             while (it.hasNext()) {
                 PacketListener listener = it.next();
-                listener.packetReceived(p, it);
+                listener.packetReceived(p);
+            }
+            it = listeners.iterator();
+            while (it.hasNext()) {
+                PacketListener listener = it.next();
+                if (listener.shouldRemoveListener()) {
+                    it.remove();
+                }
             }
         }
     }
@@ -160,8 +172,19 @@ public abstract class GameStream {
         }
     }
 
-    protected PacketEncryption getEncryptor() {
+    public boolean isOpen() {
+        return open;
+    }
+    public boolean isClosed() {
+        return !open;
+    }
+
+    public PacketEncryption getEncryptor() {
         return encryptor;
+    }
+
+    public void setEncryptor(@Null PacketEncryption encryptor) {
+        this.encryptor = encryptor;
     }
 
 }

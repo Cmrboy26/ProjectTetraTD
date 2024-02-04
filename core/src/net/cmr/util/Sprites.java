@@ -20,7 +20,9 @@ public class Sprites implements Disposable {
     private HashMap<String, Sprite> sprites;
 
     public enum SpriteType {
-        CMRBOY26("cmrboy26")
+        CMRBOY26("cmrboy26"),
+        FLOOR("building6"),
+        WALL("building1"),
         ;
 
         private String spriteName;
@@ -53,10 +55,12 @@ public class Sprites implements Disposable {
         Log.info("Sprites initialized and loaded: " + sprites.size());
     }
 
-    public Skin skin() {
+    public static Skin skin() {
+        return getInstance().getSkin();
+    }
+    public Skin getSkin() {
         return skin;
     }
-
     public static Sprite sprite(SpriteType type) {
         return getInstance().getSprite(type);
     }

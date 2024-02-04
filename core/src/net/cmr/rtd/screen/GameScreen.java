@@ -28,6 +28,7 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.AbstractScreenEX;
 
 public class GameScreen extends AbstractScreenEX {
@@ -85,9 +86,21 @@ public class GameScreen extends AbstractScreenEX {
         }
     }
 
+    int lastNumber = 0;
+
     @Override
     public void render(float delta) {
         ioStream.update();
+
+        boolean zero = Gdx.input.isKeyPressed(Input.Keys.NUM_0);
+        boolean one = Gdx.input.isKeyPressed(Input.Keys.NUM_1);
+        boolean two = Gdx.input.isKeyPressed(Input.Keys.NUM_2);
+        boolean three = Gdx.input.isKeyPressed(Input.Keys.NUM_3);
+        boolean four = Gdx.input.isKeyPressed(Input.Keys.NUM_4);
+        boolean five = Gdx.input.isKeyPressed(Input.Keys.NUM_5);
+        boolean six = Gdx.input.isKeyPressed(Input.Keys.NUM_6);
+
+        lastNumber = zero ? 0 : one ? 1 : two ? 2 : three ? 3 : four ? 4 : five ? 5 : six ? 6 : lastNumber;
 
         int x = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
         int y = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
@@ -115,12 +128,27 @@ public class GameScreen extends AbstractScreenEX {
         mousePos.x = (int) Math.floor(mousePos.x/Tile.SIZE) * Tile.SIZE;
         mousePos.y = (int) Math.floor(mousePos.y/Tile.SIZE) * Tile.SIZE;
 
+        int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
+        int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
+
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeType.Line);
         shapeRenderer.setColor(1, 1, 1, 1);
         shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
         shapeRenderer.end();
 
+        boolean left = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        boolean right = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
+        if (left || right) {
+            int z = 0;
+            if (right) {
+                z = 1;
+            }
+            if (!(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
+                System.out.println("Clicked on tile: " + tileX + ", " + tileY);
+                world.setTile(tileX, tileY, z, TileType.getType(lastNumber));
+            }
+        }
 
         super.render(delta);
     }

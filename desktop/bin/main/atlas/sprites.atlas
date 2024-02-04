@@ -6,57 +6,64 @@ filter: MipMapNearestNearest, MipMapNearestNearest
 repeat: xy
 badlogic
   rotate: false
-  xy: 1, 49
+  xy: 1, 58
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-building1
-  rotate: false
-  xy: 20, 30
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-building2
-  rotate: false
-  xy: 260, 289
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-building3
-  rotate: false
-  xy: 279, 289
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-building4
-  rotate: false
-  xy: 1, 11
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-building5
-  rotate: false
-  xy: 1, 30
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-building6
-  rotate: false
-  xy: 260, 270
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
 cmrboy26
   rotate: false
-  xy: 1, 1
+  xy: 20, 29
   size: 7, 7
   orig: 7, 7
+  offset: 0, 0
+  index: -1
+tile1
+  rotate: false
+  xy: 279, 298
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile2
+  rotate: false
+  xy: 1, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile3
+  rotate: false
+  xy: 1, 39
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile4
+  rotate: false
+  xy: 260, 279
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile5
+  rotate: false
+  xy: 260, 298
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile6
+  rotate: false
+  xy: 1, 1
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tile7
+  rotate: false
+  xy: 20, 39
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1

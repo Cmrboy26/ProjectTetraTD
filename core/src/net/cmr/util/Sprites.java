@@ -22,7 +22,7 @@ public class Sprites implements Disposable {
     public enum SpriteType {
         CMRBOY26("cmrboy26"),
         FLOOR("building6"),
-        WALL("building1"),
+        WALL("tile1"),
         ;
 
         private String spriteName;
@@ -60,6 +60,12 @@ public class Sprites implements Disposable {
     }
     public Skin getSkin() {
         return skin;
+    }
+    public static Sprite sprite(String name) {
+        return getInstance().getSprite(name);
+    }
+    public Sprite getSprite(String name) {
+        return sprites.get(name);
     }
     public static Sprite sprite(SpriteType type) {
         return getInstance().getSprite(type);

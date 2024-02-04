@@ -19,7 +19,7 @@ import net.cmr.rtd.game.world.tile.Tile.TileType;
  */
 public class World extends GameObject {
 
-    public static final int DEFAULT_WORLD_SIZE = 64;
+    public static final int DEFAULT_WORLD_SIZE = 10;
     public static final int LAYERS = 3;
     TileType tiles[][][];
     int worldSize;
@@ -46,6 +46,26 @@ public class World extends GameObject {
     @Override
     public void update(float delta) {
         super.update(delta);
+    }
+
+    public TileType getTile(int x, int y, int z) {
+
+        if (x < 0 || y < 0 || x >= worldSize || y >= worldSize) {
+            return null;
+        }
+        if (z < 0 || z >= LAYERS) {
+            return null;
+        }
+
+        return tiles[x][y][z];
+    }
+
+    public void setTile(int x, int y, int z, TileType type) {
+        tiles[x][y][z] = type;
+    }
+
+    public int getWorldSize() {
+        return worldSize;
     }
 
     @Override

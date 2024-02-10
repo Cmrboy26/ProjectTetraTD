@@ -5,8 +5,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import net.cmr.util.Log.LogLevel;
 
-@SuppressWarnings("unused")
 public abstract class CMRGame extends Game {
 
     private static CMRGame instance = null;
@@ -29,7 +29,7 @@ public abstract class CMRGame extends Game {
 
     public static void initializeSystems(NativeFileChooser fileChooser) {
         Log.initializeLog();
-        Log.setLogLevel(DEBUG ? Application.LOG_DEBUG : Application.LOG_INFO);
+        Log.setLogLevel(DEBUG ? LogLevel.DEBUG : LogLevel.INFO);
         Audio.initializeAudio();
         Sprites.initializeSpriteManager();
         Files.initializeFiles(fileChooser);

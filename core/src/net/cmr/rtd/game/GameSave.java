@@ -1,15 +1,14 @@
 package net.cmr.rtd.game;
 
-import com.badlogic.gdx.Files.FileType;
-
 import java.io.File;
-import java.nio.channels.FileLock;
 
+import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
+import net.cmr.util.Log;
 
 /**
  * A class to handle saving and loading game data
@@ -55,7 +54,6 @@ public class GameSave {
                 throw new IllegalArgumentException("Internal file type not supported for save folder");
             case Absolute:
                 String absoluteLocation = System.getProperty("user.dir");
-                System.out.println(absoluteLocation + File.separator + LOCATION + saveName);
                 return Gdx.files.absolute(absoluteLocation + File.separator + LOCATION + saveName);
             default:
                 throw new IllegalArgumentException("Invalid file type");

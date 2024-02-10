@@ -14,7 +14,6 @@ import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
-import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
@@ -61,7 +60,7 @@ public class RetroTowerDefense extends CMRGame {
 		OnlineGameStream.registerPackets(client.getKryo());
 		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
 
-		System.out.println("Connecting to " + ip + ":" + port + "...");
+		Log.info("Connecting to " + ip + ":" + port + "...");
 		client.start();
 		try {
 			client.connect(5000, ip, port);
@@ -75,8 +74,8 @@ public class RetroTowerDefense extends CMRGame {
 				Log.debug("Client received packet: " + packet);
 			}
 		});
-		System.out.println("Connected.");
-		GameScreen screen = new GameScreen(stream, null);
+		Log.info("Connected.");
+		GameScreen screen = new GameScreen(stream, null, null);
 		setScreen(screen);
 
 		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME)));
@@ -104,11 +103,11 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 
-		GameScreen screen = new GameScreen(clientsideStream, manager);
+		GameScreen screen = new GameScreen(clientsideStream, manager, null);
 		manager.initialize(new GameSave("default")); 
 		setScreen(screen);
 		manager.start();
-		manager.onPlayerConnect(serversideStream);
+		manager.onNewConnection(serversideStream);
 		
 		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME)));
 	}

@@ -14,6 +14,7 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.util.Log;
 
 public class OnlineGameStream extends GameStream {
 
@@ -52,7 +53,7 @@ public class OnlineGameStream extends GameStream {
         receivePackets();
         if (!connection.isConnected()) {
             onClose();
-            System.out.println("Connection closed: " + this);
+            Log.info("Connection closed: " + this);
         }
     }
 

@@ -1,6 +1,7 @@
 package net.cmr.rtd.game.packets;
 
 import java.security.PublicKey;
+import java.util.Base64;
 
 /**
  * Handles syncing encryption between the client and server.
@@ -24,7 +25,7 @@ public class RSAEncryptionPacket extends Packet {
 
     @Override
     public Object[] packetVariables() {
-        return toPacketVariables(RSAData.length);
+        return toPacketVariables(new String(Base64.getEncoder().encode(RSAData)));
     }
 
 

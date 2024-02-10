@@ -1,7 +1,11 @@
 package net.cmr.rtd.game.packets;
 
+import java.util.Base64;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import com.badlogic.gdx.utils.compression.lzma.Base;
 
 public class AESEncryptionPacket extends Packet {
 
@@ -23,7 +27,7 @@ public class AESEncryptionPacket extends Packet {
 
     @Override
     public Object[] packetVariables() {
-        return new Object[] { AESData.length, IVData.length };
+        return toPacketVariables(new String(Base64.getEncoder().encode(AESData)), new String(Base64.getEncoder().encode(IVData)));
     }
     
 }

@@ -102,7 +102,7 @@ public class Tile implements Collidable {
                 batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
                 break;
             case WALL:
-
+                // TODO: Create a better way to handle this (this sucks)
                 TileType[][] floorNeighbors = new TileType[3][3];
                 TileType[][] neighbors = new TileType[3][3];
                 for (int i = 0; i < 3; i++) {

@@ -16,7 +16,6 @@ import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.SpriteType;
 
 public class MainMenuScreen extends AbstractScreenEX {
     

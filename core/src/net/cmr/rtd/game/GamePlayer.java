@@ -2,6 +2,7 @@ package net.cmr.rtd.game;
 
 import java.security.PublicKey;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 import javax.crypto.SecretKey;
@@ -29,6 +30,8 @@ public class GamePlayer {
     public static final String USERNAME_TAKEN = "The username is already taken.";
     public static final String SERVER_CLOSING = "The server is closing.";
     public static final String QUIT = "Quit the game.";
+    public static final String KICKED = "You have been kicked.";
+    public static final String PASSWORD_INCORRECT = "The password is incorrect.";
     
     public static final int USERNAME_LENGTH = 16;
 
@@ -50,7 +53,6 @@ public class GamePlayer {
             @Override
             public void onClose(Iterator<StateListener> it) {
                 // Remove the player from the game.
-                System.out.println("Player disconnected: " + username);
                 onDisconnect();
                 it.remove();
             }
@@ -98,6 +100,15 @@ public class GamePlayer {
         getStream().sendPacket(packet);
     }
 
+    public void sendPackets(List<Packet> packets) {
+        // Send a collection of packets to the player.
+        Objects.requireNonNull(packets);
+        for (int i = 0; i < packets.size(); i++) {
+            Packet packet = packets.get(i);
+            sendPacket(packet);
+        }
+    }
+
     public GameStream getStream() { return stream; }
     public String getUsername() { return username; }
 
@@ -113,27 +124,6 @@ public class GamePlayer {
 
     public void onRecievePacket(Packet packet) {
         Log.debug("Player sent packet: " + packet);
-
-        if (packet instanceof RSAEncryptionPacket) {
-            // Set the RSA public key.
-            RSAEncryptionPacket rsaPacket = (RSAEncryptionPacket) packet;
-            PublicKey publicKey = PacketEncryption.publicKeyFromBytes(rsaPacket.RSAData);
-            if (getStream() instanceof OnlineGameStream) {
-                OnlineGameStream onlineStream = (OnlineGameStream) getStream();
-                onlineStream.getEncryptor().setRSAPublic(publicKey);
-            }
-        }
-        
-        if (packet instanceof AESEncryptionPacket) {
-            // Set the AES data.
-            AESEncryptionPacket aesPacket = (AESEncryptionPacket) packet;
-            SecretKey secretKey = PacketEncryption.secretKeyFromBytes(aesPacket.AESData);
-            IvParameterSpec iv = PacketEncryption.ivFromBytes(aesPacket.IVData);
-            if (getStream() instanceof OnlineGameStream) {
-                OnlineGameStream onlineStream = (OnlineGameStream) getStream();
-                onlineStream.getEncryptor().setAESData(secretKey, iv);
-            }
-        }
     }
 
 

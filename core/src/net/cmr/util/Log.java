@@ -5,10 +5,24 @@ import com.badlogic.gdx.Gdx;
 
 public class Log {
 
+    public enum LogLevel {
+        DEBUG(Application.LOG_DEBUG), 
+        INFO(Application.LOG_INFO), 
+        ERROR(Application.LOG_ERROR),
+        NONE(Application.LOG_NONE);
+
+        public final int logLevel;
+        LogLevel(int logLevel) {
+            this.logLevel = logLevel;
+        }
+    }
+
     public static final String DEBUG_HEADER = "DEBUG";
     public static final String INFO_HEADER = "INFO";
     public static final String WARNING_HEADER = "WARNING";
     public static final String ERROR_HEADER = "ERROR";
+
+    private LogLevel logLevel = LogLevel.INFO;
     private final boolean gdxAvailable;
 
     private Log() {
@@ -23,6 +37,9 @@ public class Log {
         if(getInstance().gdxAvailable) {
             Gdx.app.log(INFO_HEADER, message);
         } else {
+            if (getInstance().logLevel == LogLevel.NONE || getInstance().logLevel == LogLevel.ERROR) {
+                return;
+            }
             System.out.println("[" + INFO_HEADER + "] " + message);
         }
     }
@@ -31,6 +48,9 @@ public class Log {
         if(getInstance().gdxAvailable) {
             Gdx.app.log(WARNING_HEADER, message);
         } else {
+            if (getInstance().logLevel == LogLevel.NONE || getInstance().logLevel == LogLevel.ERROR) {
+                return;
+            }
             System.out.println("[" + WARNING_HEADER + "] " + message);
         }
     }
@@ -39,6 +59,9 @@ public class Log {
         if(getInstance().gdxAvailable) {
             Gdx.app.error(ERROR_HEADER, message, throwable);
         } else {
+            if (getInstance().logLevel == LogLevel.NONE) {
+                return;
+            }
             System.out.println("[" + ERROR_HEADER + "] " + message);
             throwable.printStackTrace();
         }
@@ -50,7 +73,7 @@ public class Log {
             if(object == null) {
                 continue;
             }
-            messageBuilder.append("\n");
+            messageBuilder.append("\n- ");
             messageBuilder.append(object.getClass().getSimpleName());
             messageBuilder.append(" = ");
             messageBuilder.append(object.toString());
@@ -58,6 +81,9 @@ public class Log {
         if(getInstance().gdxAvailable) {
             Gdx.app.debug(DEBUG_HEADER, messageBuilder.toString());
         } else {
+            if (getInstance().logLevel != LogLevel.DEBUG) {
+                return;
+            }
             System.out.println("[" + DEBUG_HEADER + "] " + messageBuilder.toString());
         }
     }
@@ -70,9 +96,12 @@ public class Log {
      * @see Application#LOG_NONE Application.LOG_NONE mutes all logging
      * @param logLevel The log level to set the application to.
      */
-    public static void setLogLevel(int logLevel) {
+    public static void setLogLevel(LogLevel logLevel) {
         if(getInstance().gdxAvailable) {
-            Gdx.app.setLogLevel(logLevel);
+            Gdx.app.setLogLevel(logLevel.logLevel);
+        } else {
+            Log log = getInstance();
+            log.logLevel = logLevel;
         }
     }
 

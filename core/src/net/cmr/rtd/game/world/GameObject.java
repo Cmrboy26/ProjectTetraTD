@@ -5,11 +5,13 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.util.Log;
 
 public abstract class GameObject {
@@ -21,6 +23,7 @@ public abstract class GameObject {
     public enum GameType {
 
         WORLD(World.class),
+        PLAYER(Player.class),
         ;
 
         private final Class<? extends GameObject> clazz;
@@ -69,7 +72,7 @@ public abstract class GameObject {
      * This will update the game object.
      * @param delta The time since the last update.
      */
-    public void update(float delta) {
+    public void update(float delta, UpdateData data) {
 
     }
 
@@ -90,7 +93,18 @@ public abstract class GameObject {
     }
     public Vector2 getPosition() { return position; }
 
+    public float getX() { return position.x; }
+    public float getY() { return position.y; }
+
+    /**
+     * Serialization:
+     * int id, float x, float y, GameObject serializedObject
+     * 
+     * @param object
+     * @return
+     */
     public static byte[] serializeGameObject(GameObject object) {
+        Objects.requireNonNull(object);
         DataBuffer buffer = new DataBuffer();
         try {
             buffer.writeInt(object.type.getID());
@@ -104,6 +118,13 @@ public abstract class GameObject {
     }
     protected abstract void serialize(DataBuffer buffer) throws IOException;
 
+    /**
+     * Deserialization:
+     * int id, float x, float y, GameObject serializedObject
+     * 
+     * @param data
+     * @return
+     */
     public static GameObject deserializeGameObject(byte[] data) {
         DataInputStream input = new DataInputStream(new ByteArrayInputStream(data));
         try {
@@ -117,6 +138,8 @@ public abstract class GameObject {
             GameObject object = type.getGameObjectClass().getConstructor().newInstance();
             object.setPosition(x, y);
             object.deserialize(object, input);
+
+            input.close();
             return object;
         } catch (IOException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
@@ -134,5 +157,11 @@ public abstract class GameObject {
      * @throws IOException If an I/O error occurs.
      */
     protected abstract void deserialize(GameObject object, DataInputStream input) throws IOException;
+
+    @Override
+    public String toString() {
+        return "[GameObject]{type=" + type.name()
+         + ", position=" + position + "}";
+    }
 
 }

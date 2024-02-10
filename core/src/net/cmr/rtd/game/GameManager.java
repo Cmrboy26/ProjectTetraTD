@@ -1,31 +1,44 @@
 package net.cmr.rtd.game;
 
+import java.io.DataInputStream;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
+import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
+import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.util.Log;
 
 /**
@@ -41,6 +54,7 @@ public class GameManager implements Disposable {
     private boolean running = false;
     private GameSave save = null;
 
+    private UpdateData data;
     private World world;
 
     /**
@@ -50,6 +64,7 @@ public class GameManager implements Disposable {
      */
     public GameManager(GameManagerDetails details) {
         this.details = details;
+        data = new UpdateData(this);
         if (details.isActingAsServer()) {
             // Create server objects
             server = new Server();
@@ -59,7 +74,7 @@ public class GameManager implements Disposable {
                 @Override
                 public void connected(Connection arg0) {
                     OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), arg0);
-                    onPlayerConnect(stream);
+                    onNewConnection(stream);
                 }
             });
             // Prepare server
@@ -70,15 +85,19 @@ public class GameManager implements Disposable {
     }
 
     /**
-     * Called when a player connects to the server.
+     * This method should be called when a player connects to the server.
+     * It will add the player to the game, establish encryption, validate if
+     * the player has the correct password, and send the player the world data.
      * @param clientRecieverStream
      * If it is of type {@link LocalGameStream}, then the argument passed should be the stream that recieves packets from the client, NOT the client sender.
      * If it is of type {@link OnlineGameStream}, then the argument passed should be a new online stream derived from the connection of a new client. 
      */
-    public void onPlayerConnect(GameStream clientRecieverStream) {
+    public void onNewConnection(GameStream clientRecieverStream) {
         Log.debug("A new player may want to join...", clientRecieverStream);
         clientRecieverStream.addListener(new PacketListener() {
             boolean remove = false;
+            GamePlayer player = null;
+
             @Override
             public void packetReceived(Packet packet) {
                 // When a player sends a ConnectPacket, set their username and put them in the players map.
@@ -103,17 +122,58 @@ public class GameManager implements Disposable {
                         return;
                     }
                     // Add the player to the players map.
+                    Log.info("Player joining the game... " + username);
                     GamePlayer player = new GamePlayer(GameManager.this, clientRecieverStream, username);
                     players.put(username, player);
-                    remove = true;
-                    Log.info("Player connected to game: " + username + " [" + players.size() + "/" + details.getMaxPlayers() + "]");
-                    
+                    this.player = player;
+
                     KeyPair keyPair = PacketEncryption.createRSAKeyPair();
                     RSAEncryptionPacket rsaPacket = new RSAEncryptionPacket(keyPair.getPublic());
                     player.sendPacket(rsaPacket);
-
-                    synchronizeGameWithPlayer(player);
+                    return;
                 }  
+
+                if (packet instanceof RSAEncryptionPacket) {
+                    // Set the RSA public key.
+                    RSAEncryptionPacket rsaPacket = (RSAEncryptionPacket) packet;
+                    PublicKey publicKey = PacketEncryption.publicKeyFromBytes(rsaPacket.RSAData);
+                    if (clientRecieverStream instanceof OnlineGameStream) {
+                        OnlineGameStream onlineStream = (OnlineGameStream) clientRecieverStream;
+                        onlineStream.getEncryptor().setRSAPublic(publicKey);
+                    }
+                    return;
+                }
+                
+                if (packet instanceof AESEncryptionPacket) {
+                    // Set the AES data.
+                    AESEncryptionPacket aesPacket = (AESEncryptionPacket) packet;
+                    SecretKey secretKey = PacketEncryption.secretKeyFromBytes(aesPacket.AESData);
+                    IvParameterSpec iv = PacketEncryption.ivFromBytes(aesPacket.IVData);
+                    if (clientRecieverStream instanceof OnlineGameStream) {
+                        OnlineGameStream onlineStream = (OnlineGameStream) clientRecieverStream;
+                        onlineStream.getEncryptor().setAESData(secretKey, iv);
+                    }
+                    // Encryption has been established.
+                    if (!details.usePassword()) {
+                        onPlayerJoin(player);
+                        remove = true;
+                    }
+                    return;
+                }
+
+                if (packet instanceof PasswordPacket) {
+                    // If the password is correct, then let the player join.
+                    if (details.getPassword().equals(((PasswordPacket) packet).getPassword())) {
+                        onPlayerJoin(player);
+                        remove = true;
+                    } else {
+                        // If the password is incorrect, send a disconnect packet.
+                        player.kick(GamePlayer.PASSWORD_INCORRECT);
+                        remove = true;
+                    }
+                    return;
+                }
+
                 return;
                 // If they send a GameInfoRequestPacket, send them information about the server.
             }
@@ -123,6 +183,15 @@ public class GameManager implements Disposable {
             }            
         });
         connectingStreams.add(clientRecieverStream);
+    }
+
+    /**
+     * This is called after encryption has been established and (optionally)
+     * the player has sent the correct password.
+     */
+    public void onPlayerJoin(GamePlayer player) {
+        // Add the player to the world
+        Log.info("Player joined game: " + player.getUsername() + " [" + players.size() + "/" + details.getMaxPlayers() + "]");
     }
 
     public void onPlayerDisconnect(GamePlayer player) {
@@ -157,6 +226,7 @@ public class GameManager implements Disposable {
         }
 
         running = true;
+        load(save);
         Thread updateThread = new Thread(() -> {
             long lastTime = System.nanoTime();
             while (running) {
@@ -192,6 +262,7 @@ public class GameManager implements Disposable {
             return;
         }
         Log.info("Game stopping...");
+        save();
 
         for (GamePlayer player : players.values()) {
             player.kick(GamePlayer.SERVER_CLOSING);
@@ -229,6 +300,27 @@ public class GameManager implements Disposable {
             saveFolder = save.getSaveFolder(FileType.Absolute);
         }
         saveFolder.mkdirs();
+
+        // Save the world
+        if (world != null) {
+            byte[] data = GameObject.serializeGameObject(world);
+            FileHandle worldFile = saveFolder.child("world.dat");
+            worldFile.writeBytes(data, false);
+            Log.info("Saved world to " + worldFile.path());
+        }
+
+        // Save the players
+        if (world != null) {
+            try {
+                FileHandle playersFile = saveFolder.child("players.dat");
+                DataBuffer buffer = new DataBuffer();
+                world.serializePlayerData(buffer);
+                playersFile.writeBytes(buffer.toArray(), false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
@@ -252,8 +344,28 @@ public class GameManager implements Disposable {
             initializeNewGame();
             return false;
         }
+
         // Load the game from the save
-        
+        FileHandle worldFile = saveFolder.child("world.dat");
+        if (worldFile.exists()) {
+            byte[] data = worldFile.readBytes();
+            world = (World) GameObject.deserializeGameObject(data);
+            Log.info("Loaded world from " + worldFile.path());
+        } else {
+            initializeNewGame();
+        }
+
+        FileHandle playersFile = saveFolder.child("players.dat");
+        if (playersFile.exists()) {
+            try {
+                DataInputStream stream = new DataInputStream(playersFile.read());
+                HashMap<String, Player> data = world.deserializePlayerData(stream);
+                world.setPlayerData(data);
+                Log.info("Loaded players from " + playersFile.path());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         return true;
     }
@@ -263,9 +375,18 @@ public class GameManager implements Disposable {
         world = new World();
     }
 
-    public void synchronizeGameWithPlayer(GamePlayer player) {
+    public void syncrhonizeWorld(GamePlayer player) {
         // Send the world data to the player.
-        player.sendPacket(new GameObjectPacket(world));
+        player.sendPackets(retrieveWorldSnapshot());
+    }
+
+    public List<Packet> retrieveWorldSnapshot() {
+        ArrayList<Packet> packets = new ArrayList<Packet>();
+        packets.add(new GameObjectPacket(world));
+        for (GamePlayer player : players.values()) {
+            packets.add(new PlayerPacket(player.getUsername(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
+        }
+        return packets;
     }
     
     public void update(float delta) {
@@ -290,6 +411,11 @@ public class GameManager implements Disposable {
                 it2.remove();
             }
         }
+
+        // Update the world
+        if (world != null) {
+            world.update(delta, data);
+        }
     }
 
     public void dispose() {
@@ -298,6 +424,7 @@ public class GameManager implements Disposable {
     }
 
     public boolean isRunning() { return running; }
+    public GameManagerDetails getDetails() { return details; }
 
     /**
      * The details of the game manager.
@@ -306,6 +433,7 @@ public class GameManager implements Disposable {
         private int maxPlayers = 4;
         private int tcpPort = 11265;
         private boolean actAsServer = false;
+        private String password = null;
 
         public GameManagerDetails() {
 
@@ -317,6 +445,9 @@ public class GameManager implements Disposable {
         public int getMaxPlayers() { return maxPlayers; }
         public void setTCPPort(int tcpPort) { this.tcpPort = tcpPort; }
         public int getTCPPort() { return tcpPort; }
+        public void setPassword(String password) { this.password = password; }
+        public String getPassword() { return password; }
+        public boolean usePassword() { return password != null; }
     }
 
 }

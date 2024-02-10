@@ -22,6 +22,11 @@ public class LocalGameStream extends GameStream {
         packets = new ArrayList<Object>();
     }
 
+    /**
+     * Creates a pair of local game streams that are connected to each other.
+     * This is only applicable to local/single player testing.
+     * @return
+     */
     public static LocalGameStream[] createStreamPair() {
         LocalGameStream[] streams = new LocalGameStream[2];
         streams[0] = new LocalGameStream();
@@ -33,7 +38,7 @@ public class LocalGameStream extends GameStream {
 
     @Override
     public void update() {
-        //System.out.println("Updating local game stream "+this);
+        //Log.info("Updating local game stream "+this);
         receivePackets();
     }
 
@@ -55,6 +60,9 @@ public class LocalGameStream extends GameStream {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "LocalGameStream{"+hashCode()+"}";
+    }
     
 }

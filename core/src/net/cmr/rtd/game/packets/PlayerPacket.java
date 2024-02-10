@@ -3,10 +3,10 @@ package net.cmr.rtd.game.packets;
 public class PlayerPacket extends Packet{
     
     public String username;
-    public boolean isConnecting;
+    public boolean isConnecting, initializingWorld;
 
     public enum PlayerPacketType {
-        CONNECTING(true), DISCONNECTING(false);
+        CONNECTING(true), DISCONNECTING(false), INITIALIZE_WORLD(true);
         private boolean value;
         private PlayerPacketType(boolean value) {
             this.value = value;
@@ -21,6 +21,7 @@ public class PlayerPacket extends Packet{
         super();
         this.username = username;
         this.isConnecting = type.getValue();
+        this.initializingWorld = type == PlayerPacketType.INITIALIZE_WORLD;
     }
 
     public boolean isConnecting() {
@@ -29,10 +30,13 @@ public class PlayerPacket extends Packet{
     public boolean isDisconnecting() {
         return !isConnecting;
     }
+    public boolean isInitializingWorld() {
+        return initializingWorld;
+    }
 
     @Override
     public Object[] packetVariables() {
-        return toPacketVariables(username, isConnecting);
+        return toPacketVariables(username, isConnecting, initializingWorld);
     }
 
 }

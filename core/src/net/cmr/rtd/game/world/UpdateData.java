@@ -30,5 +30,13 @@ public class UpdateData {
     public boolean isClient() {
         return !isServer;
     }
+
+    public World getWorld() {
+        if (isServer) {
+            return manager.getWorld();
+        } else {
+            return screen.getWorld();
+        }
+    }
     
 }

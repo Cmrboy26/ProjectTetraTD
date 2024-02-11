@@ -124,6 +124,7 @@ public class GameScreen extends AbstractScreenEX {
             if (playerPacket.isConnecting()) {
                 // Add a player object to the world
                 Player player = new Player(playerPacket.username);
+                player.setPosition(-Tile.SIZE*2, -Tile.SIZE*2);
                 world.addEntity(player);
             } else {
                 // Remove the player object from the world
@@ -153,6 +154,7 @@ public class GameScreen extends AbstractScreenEX {
         if (world != null) {
             world.update(delta, data);
         }
+        processInput(delta);
         updateCamera();
     }
 
@@ -165,13 +167,13 @@ public class GameScreen extends AbstractScreenEX {
             Player player = getLocalPlayer();
             if (player != null) {
                 OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-                camera.position.x = player.getX();
-                camera.position.y = player.getY();
+                camera.position.x = player.getX() + player.getWidth() / 2;
+                camera.position.y = player.getY() + player.getHeight() / 2;
             }
         }
     }
 
-    private void processInput() {
+    private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.setScreen(new MainMenuScreen());
             return;
@@ -185,11 +187,26 @@ public class GameScreen extends AbstractScreenEX {
 
         int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
         int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
+        processPlayerMovement(delta);
         processMouse(tileX, tileY);
     }
 
     private void processMouse(int tileX, int tileY) {
 
+    }
+
+    private void processPlayerMovement(float delta) {
+        if (getLocalPlayer() == null) {
+            return;
+        }
+        float vx = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
+        float vy = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
+        float speed = 5;
+
+        vx *= Tile.SIZE * speed;
+        vy *= Tile.SIZE * speed;
+
+        getLocalPlayer().setVelocity(new Vector2(vx, vy));
     }
 
     @Override
@@ -216,15 +233,6 @@ public class GameScreen extends AbstractScreenEX {
         int zoom = (Gdx.input.isKeyPressed(Input.Keys.E) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.Q) ? 1 : 0);
         camera.zoom += zoom * delta * (shift ? 5 : 1);
         camera.zoom = Math.max(0.1f, Math.min(1000f, camera.zoom));
-
-
-        if (world != null) {
-            viewport.apply();
-            batch.setProjectionMatrix(viewport.getCamera().combined);
-            batch.begin();
-            world.render(batch, delta);
-            batch.end();
-        }
 
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -254,6 +262,14 @@ public class GameScreen extends AbstractScreenEX {
             }
         }*/
 
+        if (world != null) {
+            viewport.apply();
+            batch.setProjectionMatrix(viewport.getCamera().combined);
+            batch.begin();
+            world.render(batch, delta);
+            batch.end();
+        }
+
         super.render(delta);
     }
 
@@ -277,6 +293,7 @@ public class GameScreen extends AbstractScreenEX {
         if (localPlayer != null) {
             return localPlayer;
         }
+        if (world == null) { return null; }
         for (Entity entity : world.getEntities()) {
             if (entity instanceof Player) {
                 Player player = (Player) entity;
@@ -287,6 +304,10 @@ public class GameScreen extends AbstractScreenEX {
             }
         }
         return null;
+    }
+
+    public World getWorld() {
+        return world;
     }
 
 }

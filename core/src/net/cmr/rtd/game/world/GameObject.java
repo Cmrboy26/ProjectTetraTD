@@ -91,6 +91,12 @@ public abstract class GameObject {
     public void setPosition(Vector2 position) {
         this.position = position;
     }
+    public void translate(float x, float y) {
+        this.position.add(x, y);
+    }
+    public void translate(Vector2 translation) {
+        this.position.add(translation);
+    }
     public Vector2 getPosition() { return position; }
 
     public float getX() { return position.x; }

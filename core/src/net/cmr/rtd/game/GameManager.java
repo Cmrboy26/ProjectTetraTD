@@ -192,6 +192,7 @@ public class GameManager implements Disposable {
     public void onPlayerJoin(GamePlayer player) {
         // Add the player to the world
         Log.info("Player joined game: " + player.getUsername() + " [" + players.size() + "/" + details.getMaxPlayers() + "]");
+        syncrhonizeWorld(player);
     }
 
     public void onPlayerDisconnect(GamePlayer player) {
@@ -448,6 +449,10 @@ public class GameManager implements Disposable {
         public void setPassword(String password) { this.password = password; }
         public String getPassword() { return password; }
         public boolean usePassword() { return password != null; }
+    }
+
+    public World getWorld() {
+        return world;
     }
 
 }

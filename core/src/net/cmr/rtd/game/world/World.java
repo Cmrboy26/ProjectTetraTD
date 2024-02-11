@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
@@ -245,6 +246,39 @@ public class World extends GameObject {
             entity.render(batch, delta);
         }
         super.render(batch, delta);
+    }
+
+    /**
+     * Moves the entity and handles with collision.
+     * @param entity The entity to move.
+     * @param delta The time since the last frame.
+     * @param velocity The velocity of the entity.
+     */
+    public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
+        Vector2 position = entity.getPosition();
+        float tempVelocityX = velocity.x;
+        float tempVelocityY = velocity.y;
+        final int collisionDetectionRange = 2;
+        for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
+            for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
+                // TODO: Make tileX and tileY actually correct
+                int tileX = (int) (position.x + x);
+                int tileY = (int) (position.y + y);
+                TileType type = getTile(tileX, tileY, 1);
+                if (type == null) {
+                    continue;
+                }
+                if (type.getSolid()) {
+                    if (x == 0) {
+                        tempVelocityY = 0;
+                    } else if (y == 0) {
+                        tempVelocityX = 0;
+                    }
+                }
+            }
+        }
+        position.x += tempVelocityX * delta;
+        position.y += tempVelocityY * delta;
     }
 
     @Override

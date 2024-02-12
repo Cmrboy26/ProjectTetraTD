@@ -87,7 +87,7 @@ public class Tile implements Collidable {
         public Tile getTile() {
             return tile;
         }
-        public boolean getSolid() {
+        public boolean isSolid() {
             return solid;
         }
     }

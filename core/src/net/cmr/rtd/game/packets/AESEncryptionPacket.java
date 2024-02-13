@@ -5,8 +5,6 @@ import java.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import com.badlogic.gdx.utils.compression.lzma.Base;
-
 public class AESEncryptionPacket extends Packet {
 
     public byte[] AESData;

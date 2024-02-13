@@ -8,7 +8,6 @@ import com.badlogic.gdx.files.FileHandle;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.util.Log;
 
 /**
  * A class to handle saving and loading game data

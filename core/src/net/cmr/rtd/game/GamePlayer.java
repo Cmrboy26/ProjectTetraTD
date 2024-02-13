@@ -1,22 +1,14 @@
 package net.cmr.rtd.game;
 
-import java.security.PublicKey;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-
-import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.Packet;
-import net.cmr.rtd.game.packets.PacketEncryption;
-import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
-import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.util.Log;
 
 /**

@@ -5,8 +5,8 @@ import net.cmr.rtd.screen.GameScreen;
 
 public class UpdateData {
 
-    final GameManager manager;
-    final GameScreen screen;
+    private final GameManager manager;
+    private final GameScreen screen;
     final boolean isServer;
 
     public UpdateData(GameManager manager) {

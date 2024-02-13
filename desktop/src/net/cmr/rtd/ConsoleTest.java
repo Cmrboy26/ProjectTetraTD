@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
@@ -30,7 +29,6 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.screen.GameScreen;
-import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.util.Log;
 import net.cmr.util.Log.LogLevel;
 
@@ -152,7 +150,12 @@ public class ConsoleTest {
 		});
 		manager.onNewConnection(serversideStream);
 		ioStream.sendPacket(new ConnectPacket("Usernamee"));
-		data = new UpdateData((GameScreen) null);
+		data = new UpdateData((GameScreen) null) {
+			@Override
+			public World getWorld() {
+				return world;
+			}
+		};
 
 		long now = System.currentTimeMillis();
 		while (System.currentTimeMillis() - now < RUN_TIME) {

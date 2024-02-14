@@ -105,7 +105,6 @@ public class Tile implements Collidable {
                 batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
                 break;
             case WALL:
-                // TODO: Create a better way to handle this (this sucks)
                 TileType[][] floorNeighbors = new TileType[3][3];
                 TileType[][] neighbors = new TileType[3][3];
                 for (int i = 0; i < 3; i++) {
@@ -145,7 +144,14 @@ public class Tile implements Collidable {
                 else { drawSprite = spriteName+16; }
 
                 if (!n && !s && e && w && floorNeighbors[1][0] == TileType.FLOOR) {
-                    drawSprite = spriteName+17;
+                    drawSprite = spriteName+17; // down wall
+                }
+                if (n && s && !e && !w) {
+                    if (floorNeighbors[0][1] == TileType.FLOOR && floorNeighbors[2][1] != TileType.FLOOR) {
+                        drawSprite = spriteName+18; // left wall
+                    } else if (floorNeighbors[2][1] == TileType.FLOOR && floorNeighbors[0][1] != TileType.FLOOR) {
+                        drawSprite = spriteName+19; // right wall
+                    }
                 }
                 
                 batch.draw(Sprites.sprite(drawSprite), x * SIZE, y * SIZE, SIZE, SIZE);
@@ -276,7 +282,7 @@ public class Tile implements Collidable {
         }
     }
     
-    private void draw(Batch batch, Sprite sprite, int x, int y, boolean flipX, boolean flipY) {
+    /*private void draw(Batch batch, Sprite sprite, int x, int y, boolean flipX, boolean flipY) {
         sprite.flip(flipX, flipY);
         batch.draw(sprite, x * SIZE, y * SIZE, SIZE, SIZE);
         sprite.flip(flipX, flipY);
@@ -289,7 +295,7 @@ public class Tile implements Collidable {
         sprite.draw(batch);
         sprite.setRotation(0);
         sprite.flip(flipX, flipY);
-    }
+    }*/
 
     @Override
     public boolean isCollidable() {

@@ -41,10 +41,10 @@ public class World extends GameObject {
         super(GameType.WORLD);
         this.worldSize = DEFAULT_WORLD_SIZE;
         this.entities = new HashMap<>();
-        this.tiles = new TileType[DEFAULT_WORLD_SIZE][DEFAULT_WORLD_SIZE][5];
+        this.tiles = new TileType[DEFAULT_WORLD_SIZE][DEFAULT_WORLD_SIZE][LAYERS];
         
-        for (int x = 0; x < worldSize; x++) {
-            for (int y = 0; y < worldSize; y++) {
+        for (int x = 1; x < worldSize-1; x++) {
+            for (int y = 1; y < worldSize-1; y++) {
                 tiles[x][y][0] = TileType.FLOOR;
             }
         }
@@ -58,7 +58,6 @@ public class World extends GameObject {
         }
         
         tiles[worldSize/2][worldSize/2][1] = TileType.WALL;
-        tiles[worldSize/2 + 1][worldSize/2 - 1][1] = TileType.WALL;
         tiles[worldSize/2 + 1][worldSize/2 - 1][1] = TileType.WALL;
     }
 
@@ -263,16 +262,17 @@ public class World extends GameObject {
         Vector2 position = entity.getPosition();
         float tempVelocityX = velocity.x * delta;
         float tempVelocityY = velocity.y * delta;
-        Object yVelocityObject = null;
-        boolean moveX = true;
-        boolean moveY = true;
+
+        final int playerTileX = Entity.getTileX(entity.getX());
+        final int playerTileY = Entity.getTileY(entity.getY());
 
         final int collisionDetectionRange = 3;
         final float threshold = 0.1f;
         for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
             for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
-                int tileX = Entity.getTileX(entity.getX()) + x;
-                int tileY = Entity.getTileY(entity.getY()) + y;
+                // TODO: AABB SWEEP a https://www.youtube.com/watch?v=Z9KB28mADfo
+                int tileX = playerTileX + x;
+                int tileY = playerTileY + y;
                 TileType type = getTile(tileX, tileY, 1);
 
                 if (type == null) {
@@ -304,8 +304,6 @@ public class World extends GameObject {
                     endTemp = processCollision(0, tempVelocityY, position, collisionDirection, entityBounds, tileBounds);
                     tempVelocityY = endTemp.y;
                 }
-
-                
             }
         }
         position.x += tempVelocityX;

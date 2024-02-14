@@ -56,6 +56,10 @@ public class World extends GameObject {
             tiles[0][y][1] = TileType.WALL;
             tiles[worldSize-1][y][1] = TileType.WALL;
         }
+        
+        tiles[worldSize/2][worldSize/2][1] = TileType.WALL;
+        tiles[worldSize/2 + 1][worldSize/2 - 1][1] = TileType.WALL;
+        tiles[worldSize/2 + 1][worldSize/2 - 1][1] = TileType.WALL;
     }
 
     @Override
@@ -257,109 +261,108 @@ public class World extends GameObject {
      */
     public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
         Vector2 position = entity.getPosition();
-        float tempVelocityX = velocity.x;
-        float tempVelocityY = velocity.y;
-        final int collisionDetectionRange = 2;
+        float tempVelocityX = velocity.x * delta;
+        float tempVelocityY = velocity.y * delta;
+        Object yVelocityObject = null;
+        boolean moveX = true;
+        boolean moveY = true;
+
+        final int collisionDetectionRange = 3;
+        final float threshold = 0.1f;
         for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
             for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
-                // TODO: Implement proper collision detection (consider using AABB or SAT)
-                // https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-                // https://www.sevenson.com.au/programming/sat/ TRY THIS!
-
-                // NOTE: Everything is a rectangle, so we can use AABB for now.
-                // Get the tile
-                int tileX = Entity.getTileX(entity.getX() + tempVelocityX) + x;
-                int tileY = Entity.getTileY(entity.getY() + tempVelocityY) + y;
+                int tileX = Entity.getTileX(entity.getX()) + x;
+                int tileY = Entity.getTileY(entity.getY()) + y;
                 TileType type = getTile(tileX, tileY, 1);
+
+                if (type == null) {
+                    continue;
+                }
                 if (!type.isSolid()) {
                     continue;
                 }
 
                 // Check to see if the entity will collide with the tile
                 Rectangle entityBounds = new Rectangle(position.x + tempVelocityX, position.y + tempVelocityY, entity.getWidth(), entity.getHeight());
-                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
+                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE - threshold / 2f, tileY * Tile.SIZE - threshold / 2f, Tile.SIZE - threshold, Tile.SIZE - threshold);
 
-                // Double check to see if this vector is correct
-                Vector2 tileCenterToEntityCenter = new Vector2(
-                    (entityBounds.x + entityBounds.width / 2) - (tileBounds.x + tileBounds.width / 2),
-                    (entityBounds.y + entityBounds.height / 2) - (tileBounds.y + tileBounds.height / 2)
-                );
-                tileCenterToEntityCenter.nor();
-                Vector2[] directions = new Vector2[] {
-                    new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, 0)
-                };
+                Vector2[] collisionDirection = null;
+                Vector2 endTemp = null;
 
-                // If calculated is false after the loop, then the player is
-                // EXACTLY in a corner of a tile (unlikely)
-                boolean calculated = false;
-                for (int i = 0; i < directions.length; i++) {
-                    float dot = tileCenterToEntityCenter.dot(directions[i]);
-                    if (dot > Math.sqrt(2d) / 2d) {
-                        // The specified direction vector is the face the entity is colliding with
-                        // Snap the opposite face of the entity to this side of the tile
-                        // Assume that the x and y coordinates of the tile and entity are the left bottom corner
-                        // of the tile and the bottom left corner of the entity, respectively.
-                        calculated = true;
-                        if (directions[i].x == 0) {
-                            // The entity is colliding with the top or bottom face of the tile
-                            if (directions[i].y > 0) {
-                                // The entity is colliding with the top face of the tile
-                                tempVelocityY = tileBounds.y + tileBounds.height - position.y;
-                            } else {
-                                // The entity is colliding with the bottom face of the tile
-                                tempVelocityY = tileBounds.y - entityBounds.height - position.y;
-                            }
-                        } else {
-                            // The entity is colliding with the left or right face of the tile
-                            if (directions[i].x > 0) {
-                                // The entity is colliding with the right face of the tile
-                                tempVelocityX = tileBounds.x + tileBounds.width - position.x;
-                            } else {
-                                // The entity is colliding with the left face of the tile
-                                tempVelocityX = tileBounds.x - entityBounds.width - position.x;
-                            }
-                        }
-                    }
-                }
-                if (!calculated) {
-                    Log.warning("CORNER COLLISION DETECTED!! (Unlikely to happen)");
+                // Calculate x direction collision
+                entityBounds = new Rectangle(position.x + tempVelocityX, position.y, entity.getWidth(), entity.getHeight());
+                if (entityBounds.overlaps(tileBounds)) {
+                    collisionDirection = getCollisionDirection(entityBounds, tileBounds);
+                    endTemp = processCollision(tempVelocityX, 0, position, collisionDirection, entityBounds, tileBounds);
+                    tempVelocityX = endTemp.x;
                 }
 
+                // Calculate y direction collision
+                entityBounds = new Rectangle(position.x, position.y + tempVelocityY, entity.getWidth(), entity.getHeight());
+                if (entityBounds.overlaps(tileBounds)) {
+                    collisionDirection = getCollisionDirection(entityBounds, tileBounds);
+                    endTemp = processCollision(0, tempVelocityY, position, collisionDirection, entityBounds, tileBounds);
+                    tempVelocityY = endTemp.y;
+                }
 
-                /*final int steps = 5; // Higher steps = more accurate collision detection
-                final float threshold = 0.5f;
-                Rectangle tileBounds = new Rectangle(tileX, tileY, Tile.SIZE, Tile.SIZE);
-                for (int i = 0; i < steps; i++) {
-                    boolean lastIteration = i == steps - 1;
-                    float stepIncrement = 1f / steps;
-                    float vx = i * tempVelocityX * stepIncrement;
-                    float vy = i * tempVelocityY * stepIncrement;
-                    
-                    // X collision detection
-                    Rectangle entityXBounds = new Rectangle(position.x + vx, position.y, entity.getWidth(), entity.getHeight());
-                    if (Math.abs(vx) > threshold && entityXBounds.overlaps(tileBounds)) {
-                        if (!lastIteration) {
-                            tempVelocityX = vx;
-                        } else {
-                            tempVelocityX = vx - stepIncrement;
-                        }
-                    }
-
-                    // Y collision detection
-                    Rectangle entityYBounds = new Rectangle(position.x, position.y + vy, entity.getWidth(), entity.getHeight());
-                    if (Math.abs(vy) > threshold && entityYBounds.overlaps(tileBounds)) {
-                        if (!lastIteration) {
-                            tempVelocityY = vy;
-                        } else {
-                            tempVelocityY = vy - stepIncrement;
-                        }
-                    }
-                }*/
-
+                
             }
         }
-        position.x += tempVelocityX * delta;
-        position.y += tempVelocityY * delta;
+        position.x += tempVelocityX;
+        position.y += tempVelocityY;
+    }
+
+    private Vector2[] getCollisionDirection(Rectangle entityBounds, Rectangle tileBounds) {
+        Vector2 tileCenterToEntityCenter = new Vector2(
+            (entityBounds.x + entityBounds.width / 2) - (tileBounds.x + tileBounds.width / 2),
+            (entityBounds.y + entityBounds.height / 2) - (tileBounds.y + tileBounds.height / 2)
+        );
+        tileCenterToEntityCenter.nor();
+        Vector2[] directions = new Vector2[] {
+            new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, 0)
+        };
+        for (int i = 0; i < directions.length; i++) {
+            float dot = tileCenterToEntityCenter.dot(directions[i]);
+            if (dot >= Math.sqrt(2d) / 2d) {
+                return new Vector2[] { directions[i] };
+            }
+        }
+        return new Vector2[] {};
+    }
+
+    private Vector2 processCollision(float tempX, float tempY, Vector2 position, Vector2[] collisionDirections, Rectangle entityBounds, Rectangle tileBounds) {
+        Vector2 velocity = new Vector2(tempX, tempY);
+        if (collisionDirections == null) {
+            return velocity;
+        }
+        for (int i = 0; i < collisionDirections.length; i++) {
+            Vector2 collisionDirection = collisionDirections[i];
+            if (collisionDirection.x == 0) {
+                // The entity is colliding with the top or bottom face of the tile
+                if (collisionDirection.y > 0) {
+                    // The entity is colliding with the top face of the tile
+                    //velocity.y = entityBounds.y + entityBounds.height - tileBounds.y;
+                    velocity.y = 0;
+                    position.y = tileBounds.y + tileBounds.height;
+                } else {
+                    // The entity is colliding with the bottom face of the tile
+                    velocity.y = 0;
+                    position.y = tileBounds.y - entityBounds.height;
+                }
+            } else {
+                // The entity is colliding with the left or right face of the tile
+                if (collisionDirection.x > 0) {
+                    // The entity is colliding with the right face of the tile
+                    velocity.x = 0;
+                    position.x = tileBounds.x + tileBounds.width;
+                } else {
+                    // The entity is colliding with the left face of the tile
+                    velocity.x = 0;
+                    position.x = tileBounds.x - entityBounds.width;
+                }
+            }
+        }
+        return velocity;
     }
 
     @Override

@@ -122,7 +122,7 @@ public class GameScreen extends AbstractScreenEX {
             if (playerPacket.isConnecting()) {
                 // Add a player object to the world
                 Player player = new Player(playerPacket.username);
-                player.setPosition(-Tile.SIZE*2, -Tile.SIZE*2);
+                player.setPosition(Tile.SIZE*2, Tile.SIZE*2);
                 world.addEntity(player);
             } else {
                 // Remove the player object from the world

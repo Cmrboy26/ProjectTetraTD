@@ -115,7 +115,42 @@ public class Tile implements Collidable {
                     }
                 }
 
-                boolean northIsWall = neighbors[1][2] == TileType.WALL;
+                boolean n = neighbors[1][2] == TileType.WALL;
+                boolean s = neighbors[1][0] == TileType.WALL;
+                boolean e = neighbors[2][1] == TileType.WALL;
+                boolean w = neighbors[0][1] == TileType.WALL;
+
+                final String spriteName = "wallSprites";
+                String drawSprite = spriteName;
+                // 16 tile combinations
+                // https://www.google.com/search?q=16+rule+tilemap&tbm=isch#imgrc=LqdrH_1mTnn3pM
+                // TODO: Make sure that the column and row sprites take into account the floor
+                
+                if (!n && !s && !e && !w) { drawSprite = spriteName+1; } 
+                else if (n && !s && !e && !w) { drawSprite = spriteName+2; } 
+                else if (!n && s && !e && !w) { drawSprite = spriteName+3; } 
+                else if (!n && !s && e && !w) { drawSprite = spriteName+4; } 
+                else if (!n && !s && !e && w) { drawSprite = spriteName+5; } 
+                else if (n && !s && !e && w) { drawSprite = spriteName+6; } 
+                else if (n && !s && e && !w) { drawSprite = spriteName+7; } 
+                else if (!n && s && e && !w) { drawSprite = spriteName+8; } 
+                
+                else if (!n && s && !e && w) { drawSprite = spriteName+9; } 
+                else if (n && !s && e && w) { drawSprite = spriteName+10; } 
+                else if (!n && !s && e && w) { drawSprite = spriteName+11; } 
+                else if (!n && s && e && w) { drawSprite = spriteName+12; } 
+                else if (n && !s && e && w) { drawSprite = spriteName+13; } 
+                else if (n && !s && e && w) { drawSprite = spriteName+14; } 
+                else if (n && s && !e && !w) { drawSprite = spriteName+15; } 
+                else { drawSprite = spriteName+16; }
+
+                if (!n && !s && e && w && floorNeighbors[1][0] == TileType.FLOOR) {
+                    drawSprite = spriteName+17;
+                }
+                
+                batch.draw(Sprites.sprite(drawSprite), x * SIZE, y * SIZE, SIZE, SIZE);
+
+                /*boolean northIsWall = neighbors[1][2] == TileType.WALL;
                 boolean southIsWall = neighbors[1][0] == TileType.WALL;
                 boolean eastIsWall = neighbors[2][1] == TileType.WALL;
                 boolean westIsWall = neighbors[0][1] == TileType.WALL;
@@ -197,7 +232,7 @@ public class Tile implements Collidable {
                 }
                 if (drewNubs) {
                     return;
-                }
+                }*/
 
                 /*if (northIsWall && southIsWall && !eastIsWall && !westIsWall) {
                     // if there are floors on the right, draw right line

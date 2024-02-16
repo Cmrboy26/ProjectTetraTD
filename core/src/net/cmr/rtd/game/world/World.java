@@ -21,7 +21,6 @@ import com.esotericsoftware.kryo.io.Output;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
-import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;

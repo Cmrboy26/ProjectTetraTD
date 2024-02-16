@@ -1,5 +1,7 @@
 package net.cmr.rtd;
 
+import java.util.Scanner;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
@@ -20,13 +22,27 @@ public class ServerLauncher {
         manager.initialize(new GameSave("host"));
         manager.start();
 
+        Scanner scanner = new Scanner(System.in);
         while(manager.isRunning()) {
+            String input = scanner.nextLine();
+            if (input.equals("exit")) {
+                Log.info("Recieved command: exit. Closing server...");
+                manager.stop();
+                break;
+            }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        scanner.close();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.exit(1);
     }
 
     public static void main(String[] args) {

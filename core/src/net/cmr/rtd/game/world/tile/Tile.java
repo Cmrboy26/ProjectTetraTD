@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import net.cmr.rtd.game.world.Collidable;
 import net.cmr.rtd.game.world.World;

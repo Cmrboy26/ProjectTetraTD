@@ -1,5 +1,4 @@
 buildscript {
-    
 
     repositories {
         mavenLocal()
@@ -10,8 +9,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.2'
-        
-
     }
 }
 
@@ -47,6 +44,7 @@ project(":desktop") {
 
     dependencies {
         implementation project(":core")
+        api "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
@@ -58,7 +56,6 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java-library"
-
 
     dependencies {
         implementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
@@ -96,4 +93,28 @@ project(":android") {
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         
     }
+}
+
+project(":tests") {
+    apply plugin: "java-library"
+
+    sourceSets.test.java.srcDirs = [ "src/test/" ]
+
+    dependencies {
+        implementation project(":core")
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+        testImplementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+        testImplementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        testImplementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        testImplementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
+        testImplementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
+    }
+
+    test {
+        useJUnitPlatform()
+        testLogging.showStandardStreams = true
+    }
+
 }

@@ -68,7 +68,6 @@ public class GameScreen extends AbstractScreenEX {
     int selectedTile = 2;
     int teamNumber = 0;
 
-
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password) {
         super(INITIALIZE_ALL);
         this.ioStream = ioStream;
@@ -337,8 +336,8 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processMouse(int tileX, int tileY) {
 
-        int lastMx = Gdx.input.getX() - Gdx.input.getDeltaX();
-        int lastMy = Gdx.input.getY() - Gdx.input.getDeltaY();
+        //int lastMx = Gdx.input.getX() - Gdx.input.getDeltaX();
+        //int lastMy = Gdx.input.getY() - Gdx.input.getDeltaY();
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
 

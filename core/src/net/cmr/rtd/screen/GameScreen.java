@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -33,6 +34,7 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
 
@@ -165,8 +167,8 @@ public class GameScreen extends AbstractScreenEX {
             Player player = getLocalPlayer();
             if (player != null) {
                 OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-                camera.position.x = player.getX() + player.getWidth() / 2;
-                camera.position.y = player.getY() + player.getHeight() / 2;
+                camera.position.x = player.getX() + player.getBounds().getWidth() / 2;
+                camera.position.y = player.getY() + player.getBounds().getHeight() / 2;
             }
         }
     }
@@ -207,30 +209,21 @@ public class GameScreen extends AbstractScreenEX {
         getLocalPlayer().setVelocity(new Vector2(vx, vy));
     }
 
+    int placeMode = 0;
+
     @Override
     public void render(float delta) {
         update(delta);
-
-        /*boolean zero = Gdx.input.isKeyPressed(Input.Keys.NUM_0);
-        boolean one = Gdx.input.isKeyPressed(Input.Keys.NUM_1);
-        boolean two = Gdx.input.isKeyPressed(Input.Keys.NUM_2);
-        boolean three = Gdx.input.isKeyPressed(Input.Keys.NUM_3);
-        boolean four = Gdx.input.isKeyPressed(Input.Keys.NUM_4);
-        boolean five = Gdx.input.isKeyPressed(Input.Keys.NUM_5);
-        boolean six = Gdx.input.isKeyPressed(Input.Keys.NUM_6);
-
-        lastNumber = zero ? 0 : one ? 1 : two ? 2 : three ? 3 : four ? 4 : five ? 5 : six ? 6 : lastNumber;
-
-        int x = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
-        int y = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
-        boolean shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
-        OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-        camera.position.x += x * delta * Tile.SIZE * 5 * (shift ? 5 : 1);
-        camera.position.y += y * delta * Tile.SIZE * 5 * (shift ? 5 : 1);
         
-        int zoom = (Gdx.input.isKeyPressed(Input.Keys.E) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.Q) ? 1 : 0);
-        camera.zoom += zoom * delta * (shift ? 5 : 1);
-        camera.zoom = Math.max(0.1f, Math.min(1000f, camera.zoom));
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
+            lastNumber = 2; // wall
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+            lastNumber = 1; // floor
+        }
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            lastNumber = 0; // clear
+        }
 
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -241,24 +234,26 @@ public class GameScreen extends AbstractScreenEX {
         int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
         int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
 
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.setColor(1, 1, 1, 1);
-        shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
-        shapeRenderer.end();
-
         boolean left = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
         boolean right = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
-        if (left || right) {
-            int z = 0;
-            if (right) {
-                z = 1;
+        if (left) {
+            if (lastNumber == 2) {
+                if (!(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
+                    world.setTile(tileX, tileY, 1, TileType.getType(lastNumber));
+                }
             }
+            if (lastNumber == 1) {
+                if (!(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
+                    world.setTile(tileX, tileY, 0, TileType.getType(lastNumber));
+                }
+            }
+        }
+        if (right) {
             if (!(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
-                Log.info("Clicked on tile: " + tileX + ", " + tileY);
-                world.setTile(tileX, tileY, z, TileType.getType(lastNumber));
+                world.setTile(tileX, tileY, 0, null);
+                world.setTile(tileX, tileY, 1, null);
             }
-        }*/
+        }
 
         if (world != null) {
             viewport.apply();
@@ -267,6 +262,12 @@ public class GameScreen extends AbstractScreenEX {
             world.render(batch, delta);
             batch.end();
         }
+
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeType.Line);
+        shapeRenderer.setColor(1, 1, 1, 1);
+        shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
+        shapeRenderer.end();
 
         super.render(delta);
     }

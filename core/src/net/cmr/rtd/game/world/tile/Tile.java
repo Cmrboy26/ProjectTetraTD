@@ -27,7 +27,7 @@ public class Tile implements Collidable {
     // Or you could just 
     public enum TileType {
 
-        FLOOR(1),
+        FLOOR(1, "wallSprites20"),
         WALL(2, true)
         ;
 
@@ -66,6 +66,22 @@ public class Tile implements Collidable {
             this.spriteName = "tile"+id;
             this.solid = solid;
             this.tile = function.apply(this);
+        }
+
+        TileType(int id, String spriteName) {
+            this.id = id;
+            types.put(id, this);
+            this.spriteName = spriteName;
+            this.solid = false;
+            this.tile = new Tile(this);
+        }
+
+        TileType(int id, String spriteName, boolean solid) {
+            this.id = id;
+            types.put(id, this);
+            this.spriteName = spriteName;
+            this.solid = solid;
+            this.tile = new Tile(this);
         }
 
         public int getID() {
@@ -153,6 +169,19 @@ public class Tile implements Collidable {
                         drawSprite = spriteName+19; // right wall
                     }
                 }
+                if (n && !s && !e && w && floorNeighbors[1][0] == TileType.FLOOR) {
+                    drawSprite = spriteName+5; // up wall
+                }
+                if (n && !s && e && !w && floorNeighbors[1][0] == TileType.FLOOR) {
+                    drawSprite = spriteName+4; // up wall
+                } 
+
+                if (!n && s && e && !w && floorNeighbors[0][1] == TileType.FLOOR && floorNeighbors[1][2] == TileType.FLOOR) { 
+                    drawSprite = spriteName+21; 
+                } 
+                if (!n && s && !e && w && floorNeighbors[2][1] == TileType.FLOOR && floorNeighbors[1][2] == TileType.FLOOR) { 
+                    drawSprite = spriteName+22; 
+                } 
                 
                 batch.draw(Sprites.sprite(drawSprite), x * SIZE, y * SIZE, SIZE, SIZE);
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
@@ -32,9 +33,6 @@ public class Player extends Entity {
         this.setID(UUID.nameUUIDFromBytes(username.getBytes()));
         // System.out.println(username + " > " + this.getID().toString());
     }
-
-    public float getWidth() { return Tile.SIZE; }
-    public float getHeight() { return Tile.SIZE; }
 
     @Override
     public void create() {
@@ -66,6 +64,11 @@ public class Player extends Entity {
     }
 
     @Override
+    public Rectangle getBounds() {
+        return new Rectangle(getX(), getY(), Tile.SIZE, Tile.SIZE/2f);
+    }
+
+    @Override
     protected void deserializeEntity(GameObject object, DataInputStream input) throws IOException {
         Player player = (Player) object;
         player.username = input.readUTF();
@@ -75,5 +78,7 @@ public class Player extends Entity {
     public String getName() { return username; }
     public void setVelocity(Vector2 velocity) { this.velocity = velocity; }
     public Vector2 getVelocity() { return velocity; }
+
+    
 
 }

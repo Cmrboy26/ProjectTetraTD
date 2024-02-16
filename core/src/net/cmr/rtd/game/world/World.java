@@ -1,6 +1,5 @@
 package net.cmr.rtd.game.world;
 
-import java.awt.geom.Line2D;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.UUID;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
@@ -260,6 +260,102 @@ public class World extends GameObject {
      * @param velocity The velocity of the entity.
      */
     public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
+
+        Vector2 temporaryVelocity = new Vector2(velocity.x * delta, velocity.y * delta);
+        Vector2 position = entity.getPosition();
+
+        final int playerTileX = Entity.getTileX(entity.getX() + velocity.x * delta);
+        final int playerTileY = Entity.getTileY(entity.getY() + velocity.y * delta);
+
+        final int collisionDetectionRange = 3;
+        final float threshold = 1f;
+
+        for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
+            for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
+                int tileX = playerTileX + x;
+                int tileY = playerTileY + y;
+                TileType type = getTile(tileX, tileY, 1);
+
+                if (type == null) {
+                    continue;
+                }
+                if (!type.isSolid()) {
+                    continue;
+                }
+
+                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
+
+                TileType above = getTile(tileX, tileY + 1, 1);
+                TileType below = getTile(tileX, tileY - 1, 1);
+                TileType left = getTile(tileX - 1, tileY, 1);
+                TileType right = getTile(tileX + 1, tileY, 1);
+                boolean tileAbove = above != null && above.isSolid();
+                boolean tileBelow = below != null && below.isSolid();
+                boolean tileLeft = left != null && left.isSolid();
+                boolean tileRight = right != null && right.isSolid();
+                if (tileAbove) { tileBounds.merge(new Rectangle(tileX * Tile.SIZE, (tileY + 1) * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
+                if (tileBelow) { tileBounds.merge(new Rectangle(tileX * Tile.SIZE, (tileY - 1) * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
+                if (tileLeft) { tileBounds.merge(new Rectangle((tileX - 1) * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
+                if (tileRight) { tileBounds.merge(new Rectangle((tileX + 1) * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
+
+                // Collision detection and response: use minkowski sums of the entity and the tile to ensure that the entity does not intersect with the tile
+                // Allow the entity to "slide" along the tiles
+                Rectangle entityBounds = entity.getBounds();
+                entityBounds.x += velocity.x * delta;
+                entityBounds.y += velocity.y * delta;
+                Rectangle minkowskiTileBounds = new Rectangle(tileBounds.x - entityBounds.width / 2, tileBounds.y - entityBounds.height / 2, tileBounds.width + entityBounds.width, tileBounds.height + entityBounds.height);
+                Vector2 entityCenter = new Vector2(entityBounds.x + entityBounds.width / 2, entityBounds.y + entityBounds.height / 2);
+
+                // Clamp the entity to the outside of the tile
+                if (minkowskiTileBounds.contains(entityCenter)) {
+                    // The entity is inside the tile
+                    float[] distances = new float[] {
+                        Math.abs(minkowskiTileBounds.x - entityBounds.x - entityBounds.width),
+                        Math.abs(minkowskiTileBounds.x + minkowskiTileBounds.width - entityBounds.x),
+                        Math.abs(minkowskiTileBounds.y - entityBounds.y - entityBounds.height),
+                        Math.abs(minkowskiTileBounds.y + minkowskiTileBounds.height - entityBounds.y)
+                    };
+                    
+                    float minDistance = Float.MAX_VALUE;
+                    int minIndex = -1;
+                    for (int i = 0; i < distances.length; i++) {
+                        if (distances[i] < minDistance) {
+                            minDistance = distances[i];
+                            minIndex = i;
+                        }
+                    }
+
+                    System.out.println(minIndex);
+
+                    if (minIndex == 0 && !tileLeft) {
+                        // The entity is colliding with the left face of the tile
+                        temporaryVelocity.x = 0;
+                        position.x = tileBounds.x - entityBounds.width - threshold;
+                    } else if (minIndex == 1 && !tileRight) {
+                        // The entity is colliding with the right face of the tile
+                        temporaryVelocity.x = 0;
+                        position.x = tileBounds.x + tileBounds.width + threshold;
+                    } else if (minIndex == 2 && !tileBelow) {
+                        // The entity is colliding with the bottom face of the tile
+                        temporaryVelocity.y = 0;
+                        position.y = tileBounds.y - entityBounds.height - threshold;
+                    } else if (minIndex == 3 && !tileAbove) {
+                        // The entity is colliding with the top face of the tile
+                        temporaryVelocity.y = 0;
+                        position.y = tileBounds.y + tileBounds.height + threshold;
+                    }
+                }
+            }
+        }
+
+        entity.position.x = position.x;
+        entity.position.y = position.y;
+        entity.position.x += temporaryVelocity.x;
+        entity.position.y += temporaryVelocity.y;
+
+    }
+
+    /*public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
         Vector2 position = entity.getPosition();
         float tempVelocityX = velocity.x * delta;
         float tempVelocityY = velocity.y * delta;
@@ -340,7 +436,6 @@ public class World extends GameObject {
                 // The entity is colliding with the top or bottom face of the tile
                 if (collisionDirection.y > 0) {
                     // The entity is colliding with the top face of the tile
-                    //velocity.y = entityBounds.y + entityBounds.height - tileBounds.y;
                     velocity.y = 0;
                     position.y = tileBounds.y + tileBounds.height;
                 } else {
@@ -362,148 +457,6 @@ public class World extends GameObject {
             }
         }
         return velocity;
-    }
-    /*public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
-        // Swept AABB collision detection
-        Vector2 position = entity.getPosition();
-        float tempVelocityX = velocity.x * delta;
-        float tempVelocityY = velocity.y * delta;
-
-        final int playerTileX = Entity.getTileX(entity.getX());
-        final int playerTileY = Entity.getTileY(entity.getY());
-
-        final int collisionDetectionRange = 3;
-        for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
-            for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
-                int tileX = playerTileX + x;
-                int tileY = playerTileY + y;
-                TileType type = getTile(tileX, tileY, 1);
-
-                if (type == null) {
-                    continue;
-                }
-                if (!type.isSolid()) {
-                    continue;
-                }
-
-                // Check to see if the entity will collide with the tile
-                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
-                float halfWidth = entity.getWidth() / 2f;
-                float halfHeight = entity.getHeight() / 2f;
-                Rectangle expanedTileBounds = new Rectangle(tileBounds.x - halfWidth, tileBounds.y - halfHeight, tileBounds.width + entity.getWidth(), tileBounds.height + entity.getHeight());
-
-                // Middle of the entity
-                Vector2 pointBegin = new Vector2(position.x + halfWidth, position.y + halfHeight);
-                // End of the entity movement
-                Vector2 pointEnd = new Vector2(position.x + halfWidth + tempVelocityX, position.y + halfHeight + tempVelocityY);
-                
-                Vector2[] intersections = segmentRectangleIntersection(new Vector2[] { pointBegin, pointEnd }, expanedTileBounds);
-                Vector2 closestIntersection = null;
-                for (int i = 0; i < intersections.length; i++) {
-                    // find the closest intersection to the entity
-                    if (intersections[i] == null) {
-                        continue;
-                    }
-                    if (closestIntersection == null) {
-                        closestIntersection = intersections[i];
-                    } else {
-                        if (pointBegin.dst2(intersections[i]) < pointBegin.dst2(closestIntersection)) {
-                            closestIntersection = intersections[i];
-                        }
-                    }
-                }
-                if (closestIntersection != null) {
-                    System.out.println("Intersection: " + closestIntersection);
-                }
-
-                // If it's null, then there is no collision
-                if (closestIntersection == null) {
-                    continue;
-                }
-                // Otherwise, snap the entity to the rectangle and subtract the normal from tempVelocity
-                Vector2 rectangleNormal = new Vector2();
-                System.out.println(tileBounds.x + ", "+ closestIntersection.x + ", ");
-                if (closestIntersection.x == tileBounds.x - halfWidth) {
-                    rectangleNormal.set(-1, 0);
-                } else if (closestIntersection.x == tileBounds.x + tileBounds.width + halfWidth) {
-                    rectangleNormal.set(1, 0);
-                } else if (closestIntersection.y == tileBounds.y - halfHeight) {
-                    rectangleNormal.set(0, -1);
-                } else if (closestIntersection.y == tileBounds.y + tileBounds.height + halfHeight) {
-                    rectangleNormal.set(0, 1);
-                }
-
-                // Subtract the normal from the velocity
-                Vector2 tempVelocityVector = new Vector2(tempVelocityX, tempVelocityY);
-                float dot = tempVelocityVector.dot(rectangleNormal);
-
-                if (dot < 0) {
-                    // TODO: See if this is the correct way to handle this
-                    System.out.println("---");
-                    System.out.println(tempVelocityX + ", " + tempVelocityY);
-                    System.out.println(rectangleNormal.x + ", " + rectangleNormal.y);
-                    tempVelocityX -= dot * rectangleNormal.x;
-                    tempVelocityY -= dot * rectangleNormal.y;
-                    System.out.println(tempVelocityX + ", " + tempVelocityY);
-                }
-
-                // Teleport the center of the entity to the closest intersection
-                position.x = closestIntersection.x - halfWidth;
-                position.y = closestIntersection.y - halfHeight;
-
-                // Continue to check for more collisions
-            }
-        }
-        position.x += tempVelocityX;
-        position.y += tempVelocityY;
-    }
-
-    public Vector2[] segmentRectangleIntersection(Vector2[] line, Rectangle rectangle) {
-        // Find where the segment intersects with the rectangle
-        Vector2[] corners = new Vector2[] {
-            new Vector2(rectangle.x, rectangle.y),
-            new Vector2(rectangle.x + rectangle.width, rectangle.y),
-            new Vector2(rectangle.x + rectangle.width, rectangle.y + rectangle.height),
-            new Vector2(rectangle.x, rectangle.y + rectangle.height)
-        };
-        Vector2[] intersections = new Vector2[4];
-        for (int i = 0; i < 4; i++) {
-            Vector2[] segment = new Vector2[] { corners[i], corners[(i + 1) % 4] };
-            Vector2 intersection = segmentIntersection(line, segment);
-            if (intersection != null) {
-                intersections[i] = intersection;
-            }
-        }
-        return intersections;
-    }
-
-    public Vector2 segmentIntersection(Vector2[] lineOne, Vector2[] lineTwo) {
-        // Find where the two segments intersect
-
-        float dx1 = lineOne[1].x - lineOne[0].x;
-        float dy1 = lineOne[1].y - lineOne[0].y;
-
-        float dx2 = lineTwo[1].x - lineTwo[0].x;
-        float dy2 = lineTwo[1].y - lineTwo[0].y;
-
-        // What is the cross product of the two lines?
-        // Cross product of the two lines is the determinant of the 2x2 matrix
-        float cross = dx1 * dy2 - dy1 * dx2;
-        if (cross == 0) {
-            return null;
-        }
-
-        float t = (lineTwo[0].x - lineOne[0].x) * dy2 - (lineTwo[0].y - lineOne[0].y) * dx2;
-        t /= cross;
-
-        float u = (lineTwo[0].x - lineOne[0].x) * dy1 - (lineTwo[0].y - lineOne[0].y) * dx1;
-        u /= cross;
-
-        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-            return new Vector2(lineOne[0].x + t * dx1, lineOne[0].y + t * dy1);
-        }
-
-        return null;
     }*/
 
     @Override

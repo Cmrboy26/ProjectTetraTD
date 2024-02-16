@@ -4,7 +4,7 @@ A simple, pixel-art styled, endless tower defense game with online multiplayer s
 
 ## Installation and Usage
 
-To install, download this project as a ZIP file and extract its contents. 
+To install, _download this project as a ZIP file and extract its contents. 
 This project requires Java 8 to be run and built.
 
 ### Building and Running

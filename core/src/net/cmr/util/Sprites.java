@@ -24,6 +24,9 @@ public class Sprites implements Disposable {
         CMRBOY26("cmrboy26"),
         FLOOR("wallSprites20"),
         WALL("wallSprites2"),
+        HEART("heart"),
+        CASH("cash"),
+        STRUCTURE_LIFE("structureLife"),
         ;
 
         private String spriteName;

@@ -12,15 +12,5 @@ public class GameManagerTest {
         System.out.println("TESTS");
     }
 
-    @Test
-    public void failTest() {
-        assertEquals(1, 2);
-    }
-
-    @Test
-    public void testSimple() throws Exception {
-        assertTrue(false);
-    }
-
 }
 

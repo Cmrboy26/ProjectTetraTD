@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -48,6 +49,7 @@ import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
     
@@ -62,6 +64,9 @@ public class GameScreen extends AbstractScreenEX {
 
     Window window;
     TextButton wall, floor, clear, path , start, end;
+
+    Label lifeLabel, structureLifeLabel, cashLabel;
+    Image life, structureLife, cash;
 
     // Editor Variables
     boolean entered;
@@ -207,6 +212,43 @@ public class GameScreen extends AbstractScreenEX {
         window.add(teamLabel).size(size).pad(4);
         window.add(add).size(size).pad(4).row();
 
+        float iconSize = 32;
+
+        life = new Image(Sprites.drawable(SpriteType.HEART));
+        life.setSize(iconSize, iconSize);
+        life.setPosition(5, 360-5, Align.topLeft);
+
+        lifeLabel = new Label("100", Sprites.skin(), "small");
+        lifeLabel.setAlignment(Align.center);
+        lifeLabel.setSize(iconSize, iconSize);
+        lifeLabel.setPosition(5 + iconSize, 360-5, Align.topLeft);
+        
+        add(Align.topLeft, life);
+        add(Align.topLeft, lifeLabel);
+
+        cash = new Image(Sprites.drawable(SpriteType.CASH));
+        cash.setSize(iconSize, iconSize);
+        cash.setPosition(5, 360-5-iconSize, Align.topLeft);
+
+        cashLabel = new Label("100", Sprites.skin(), "small");
+        cashLabel.setAlignment(Align.center);
+        cashLabel.setSize(iconSize, iconSize);
+        cashLabel.setPosition(5 + iconSize, 360-5-iconSize, Align.topLeft);
+
+        add(Align.topLeft, cash);
+        add(Align.topLeft, cashLabel);
+
+        structureLife = new Image(Sprites.drawable(SpriteType.STRUCTURE_LIFE));
+        structureLife.setSize(iconSize, iconSize);
+        structureLife.setPosition(5, 360-5-iconSize*2, Align.topLeft);
+
+        structureLifeLabel = new Label("100", Sprites.skin(), "small");
+        structureLifeLabel.setAlignment(Align.center);
+        structureLifeLabel.setSize(iconSize, iconSize);
+        structureLifeLabel.setPosition(5 + iconSize, 360-5-iconSize*2, Align.topLeft);
+
+        add(Align.topLeft, structureLife);
+        add(Align.topLeft, structureLifeLabel);
 
     }
 

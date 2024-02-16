@@ -9,17 +9,23 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
+import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 
 /**
@@ -31,35 +37,51 @@ import net.cmr.util.Log;
  */
 public class World extends GameObject {
 
-    public static final int DEFAULT_WORLD_SIZE = 10;
+    public static final int DEFAULT_WORLD_SIZE = 32;
     public static final int LAYERS = 3;
 
     private int worldSize;
     private HashMap<UUID, Entity> entities; // <Entity ID, Entity>
     private TileType[][][] tiles;
+    private HashMap<Point3D, TileData> tileDataMap;
+
+    public static class Point3D {
+        public int x, y, z;
+        public Point3D(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        public Point3D() {
+            this(0, 0, 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y, z);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) return false;
+            if (obj == this) return true;
+            if (obj.getClass() != getClass()) return false;
+            Point3D other = (Point3D) obj;
+            return other.x == x && other.y == y && other.z == z;
+        }
+
+        @Override
+        public String toString() {
+            return "Point3D{x=" + x + ", y=" + y + ", z=" + z + "}";
+        }
+    }
 
     public World() {
         super(GameType.WORLD);
         this.worldSize = DEFAULT_WORLD_SIZE;
         this.entities = new HashMap<>();
         this.tiles = new TileType[DEFAULT_WORLD_SIZE][DEFAULT_WORLD_SIZE][LAYERS];
-        
-        for (int x = 1; x < worldSize-1; x++) {
-            for (int y = 1; y < worldSize-1; y++) {
-                tiles[x][y][0] = TileType.FLOOR;
-            }
-        }
-        for (int x = 0; x < worldSize; x++) {
-            tiles[x][worldSize-1][1] = TileType.WALL;
-            tiles[x][0][1] = TileType.WALL;
-        }
-        for (int y = 0; y < worldSize; y++) {
-            tiles[0][y][1] = TileType.WALL;
-            tiles[worldSize-1][y][1] = TileType.WALL;
-        }
-        
-        tiles[worldSize/2][worldSize/2][1] = TileType.WALL;
-        tiles[worldSize/2 + 1][worldSize/2 - 1][1] = TileType.WALL;
+        this.tileDataMap = new HashMap<>();
     }
 
     @Override
@@ -107,6 +129,17 @@ public class World extends GameObject {
 
     public void setTile(int x, int y, int z, TileType type) {
         tiles[x][y][z] = type;
+        setTileData(x, y, z, null);
+    }
+    public void setTileData(int x, int y, int z, TileData data) {
+        if (data == null) {
+            tileDataMap.remove(new Point3D(x, y, z));
+            return;
+        }
+        tileDataMap.put(new Point3D(x, y, z), data);
+    }
+    public TileData getTileData(int x, int y, int z) {
+        return tileDataMap.get(new Point3D(x, y, z));
     }
 
     public int getWorldSize() {
@@ -179,6 +212,7 @@ public class World extends GameObject {
             validEntities.add(entity);
         }
 
+        // Serialize entity data.
         int entityCount = validEntities.size();
         buffer.writeInt(entityCount);
         for (Entity entity : validEntities) {
@@ -186,6 +220,20 @@ public class World extends GameObject {
             buffer.writeInt(data.length);
             buffer.write(data);
         }
+
+        // Serialize tile data.
+        int tileDataCount = tileDataMap.size();
+        buffer.writeInt(tileDataCount);
+        Kryo kryo = new Kryo();
+        TileData.registerKryo(kryo);
+        Output output = new Output(buffer);
+        for (Point3D point : tileDataMap.keySet()) {
+            TileData data = tileDataMap.get(point);
+            kryo.writeClassAndObject(output, point);
+            kryo.writeClassAndObject(output, data);
+        }
+        output.flush();
+        output.close();
     }
 
     /**
@@ -216,6 +264,8 @@ public class World extends GameObject {
                 }
             }
         }
+
+        // Deserialize entity data.
         int entityCount = input.readInt();
         for (int i = 0; i < entityCount; i++) {
             int length = input.readInt();
@@ -224,11 +274,25 @@ public class World extends GameObject {
             Entity entity = (Entity) GameObject.deserializeGameObject(data);
             world.addEntity(entity);
         }
+
+        // Deserialize tile data.
+        int tileDataCount = input.readInt();
+        Kryo kryo = new Kryo();
+        TileData.registerKryo(kryo);
+        Input kryoInput = new Input(input);
+        for (int i = 0; i < tileDataCount; i++) {
+            Point3D point = (Point3D) kryo.readClassAndObject(kryoInput);
+            TileData data = (TileData) kryo.readClassAndObject(kryoInput);
+            world.tileDataMap.put(point, data);
+        }
+        kryoInput.close();
     }
 
     @Override
     public void render(Batch batch, float delta) {
+        Color worldColor = Color.valueOf("#6663ff");
         // TODO: Implement smarter tile rendering (with proper entity support)
+        batch.setColor(worldColor);
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
                 for (int z = 0; z < LAYERS; z++) {
@@ -244,9 +308,17 @@ public class World extends GameObject {
                         continue;
                     }
                     tile.render(batch, delta, this, x, y, z);
+
+                    if (CMRGame.isDebug()) {
+                        if (tileDataMap.containsKey(new Point3D(x, y, z))) {
+                            TileData data = tileDataMap.get(new Point3D(x, y, z));
+                            data.render(batch, x, y);
+                        }
+                    }
                 }
             }
         }
+        batch.setColor(Color.WHITE);
         for (Entity entity : entities.values()) {
             entity.render(batch, delta);
         }
@@ -260,204 +332,87 @@ public class World extends GameObject {
      * @param velocity The velocity of the entity.
      */
     public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
+        linearCollisionHandle(entity, velocity.scl(delta));
+    }
 
-        Vector2 temporaryVelocity = new Vector2(velocity.x * delta, velocity.y * delta);
-        Vector2 position = entity.getPosition();
+        
+    final float steps = 3;
+    final int detectionRadius = 3;
 
-        final int playerTileX = Entity.getTileX(entity.getX() + velocity.x * delta);
-        final int playerTileY = Entity.getTileY(entity.getY() + velocity.y * delta);
+    private Vector2 linearCollisionHandle(Entity entity, Vector2 velocity) {
 
-        final int collisionDetectionRange = 3;
-        final float threshold = 1f;
+        for (int i = 0; i < steps; i++) {
+            float velX = velocity.x / steps;
+            Vector2 x = linearCollisionHandleStep(entity, new Vector2(velX, 0));
+            if (x.x == 0) {
+                break;
+            }
+            entity.position.add(x.x, 0);
+        }
 
-        for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
-            for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
-                int tileX = playerTileX + x;
-                int tileY = playerTileY + y;
-                TileType type = getTile(tileX, tileY, 1);
+        for (int i = 0; i < steps; i++) {
+            float velY = velocity.y / steps;
+            Vector2 y = linearCollisionHandleStep(entity, new Vector2(0, velY));
+            if (y.y == 0) {
+                break;
+            }
+            entity.position.add(0, y.y);
+        }
 
+        return null;
+    }
+
+    private Vector2 linearCollisionHandleStep(Entity entity, Vector2 velocity) {
+        int entityTX = Entity.getTileX(entity);
+        int entityTY = Entity.getTileY(entity);
+
+        Vector2 endVelocity = new Vector2(velocity);
+        Rectangle entityBounds = entity.getBounds();
+        entityBounds.x += velocity.x;
+        entityBounds.y += velocity.y;
+
+        for (int tx = -detectionRadius; tx < detectionRadius; tx++) {
+            for (int ty = -detectionRadius; ty < detectionRadius; ty++) {
+                int x = entityTX + tx;
+                int y = entityTY + ty;
+                TileType type = getTile(x, y, 1);
                 if (type == null) {
                     continue;
                 }
                 if (!type.isSolid()) {
                     continue;
                 }
+                Rectangle bounds = new Rectangle(x*Tile.SIZE, y*Tile.SIZE, Tile.SIZE, Tile.SIZE);
+                if (bounds.overlaps(entityBounds)) {
+                    endVelocity.x = 0;
+                    endVelocity.y = 0;
+                    return endVelocity;
+                }
+            }
+        }
 
-                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
+        return endVelocity;
+    }
 
-                TileType above = getTile(tileX, tileY + 1, 1);
-                TileType below = getTile(tileX, tileY - 1, 1);
-                TileType left = getTile(tileX - 1, tileY, 1);
-                TileType right = getTile(tileX + 1, tileY, 1);
-                boolean tileAbove = above != null && above.isSolid();
-                boolean tileBelow = below != null && below.isSolid();
-                boolean tileLeft = left != null && left.isSolid();
-                boolean tileRight = right != null && right.isSolid();
-                if (tileAbove) { tileBounds.merge(new Rectangle(tileX * Tile.SIZE, (tileY + 1) * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
-                if (tileBelow) { tileBounds.merge(new Rectangle(tileX * Tile.SIZE, (tileY - 1) * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
-                if (tileLeft) { tileBounds.merge(new Rectangle((tileX - 1) * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
-                if (tileRight) { tileBounds.merge(new Rectangle((tileX + 1) * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE)); }
+    public void updateWorldSize(int size) {
+        if (size < 1) {
+            throw new IllegalArgumentException("World size must be at least 1.");
+        }
+        this.worldSize = size;
 
-                // Collision detection and response: use minkowski sums of the entity and the tile to ensure that the entity does not intersect with the tile
-                // Allow the entity to "slide" along the tiles
-                Rectangle entityBounds = entity.getBounds();
-                entityBounds.x += velocity.x * delta;
-                entityBounds.y += velocity.y * delta;
-                Rectangle minkowskiTileBounds = new Rectangle(tileBounds.x - entityBounds.width / 2, tileBounds.y - entityBounds.height / 2, tileBounds.width + entityBounds.width, tileBounds.height + entityBounds.height);
-                Vector2 entityCenter = new Vector2(entityBounds.x + entityBounds.width / 2, entityBounds.y + entityBounds.height / 2);
-
-                // Clamp the entity to the outside of the tile
-                if (minkowskiTileBounds.contains(entityCenter)) {
-                    // The entity is inside the tile
-                    float[] distances = new float[] {
-                        Math.abs(minkowskiTileBounds.x - entityBounds.x - entityBounds.width),
-                        Math.abs(minkowskiTileBounds.x + minkowskiTileBounds.width - entityBounds.x),
-                        Math.abs(minkowskiTileBounds.y - entityBounds.y - entityBounds.height),
-                        Math.abs(minkowskiTileBounds.y + minkowskiTileBounds.height - entityBounds.y)
-                    };
-                    
-                    float minDistance = Float.MAX_VALUE;
-                    int minIndex = -1;
-                    for (int i = 0; i < distances.length; i++) {
-                        if (distances[i] < minDistance) {
-                            minDistance = distances[i];
-                            minIndex = i;
-                        }
-                    }
-
-                    System.out.println(minIndex);
-
-                    if (minIndex == 0 && !tileLeft) {
-                        // The entity is colliding with the left face of the tile
-                        temporaryVelocity.x = 0;
-                        position.x = tileBounds.x - entityBounds.width - threshold;
-                    } else if (minIndex == 1 && !tileRight) {
-                        // The entity is colliding with the right face of the tile
-                        temporaryVelocity.x = 0;
-                        position.x = tileBounds.x + tileBounds.width + threshold;
-                    } else if (minIndex == 2 && !tileBelow) {
-                        // The entity is colliding with the bottom face of the tile
-                        temporaryVelocity.y = 0;
-                        position.y = tileBounds.y - entityBounds.height - threshold;
-                    } else if (minIndex == 3 && !tileAbove) {
-                        // The entity is colliding with the top face of the tile
-                        temporaryVelocity.y = 0;
-                        position.y = tileBounds.y + tileBounds.height + threshold;
+        // Copy the old tiles to the new tiles.
+        TileType[][][] newTiles = new TileType[size][size][LAYERS];
+        for (int x = 0; x < worldSize; x++) {
+            for (int y = 0; y < worldSize; y++) {
+                for (int z = 0; z < LAYERS; z++) {
+                    if (x < tiles.length && y < tiles[x].length && z < tiles[x][y].length) {
+                        newTiles[x][y][z] = tiles[x][y][z];
                     }
                 }
             }
         }
-
-        entity.position.x = position.x;
-        entity.position.y = position.y;
-        entity.position.x += temporaryVelocity.x;
-        entity.position.y += temporaryVelocity.y;
-
+        tiles = newTiles;
     }
-
-    /*public void moveHandleCollision(Entity entity, float delta, Vector2 velocity) {
-        Vector2 position = entity.getPosition();
-        float tempVelocityX = velocity.x * delta;
-        float tempVelocityY = velocity.y * delta;
-
-        final int playerTileX = Entity.getTileX(entity.getX());
-        final int playerTileY = Entity.getTileY(entity.getY());
-
-        final int collisionDetectionRange = 3;
-        final float threshold = 0.1f;
-        for (int x = -collisionDetectionRange; x <= collisionDetectionRange; x++) {
-            for (int y = -collisionDetectionRange; y <= collisionDetectionRange; y++) {
-                // TODO: AABB SWEEP a https://www.youtube.com/watch?v=Z9KB28mADfo
-                int tileX = playerTileX + x;
-                int tileY = playerTileY + y;
-                TileType type = getTile(tileX, tileY, 1);
-
-                if (type == null) {
-                    continue;
-                }
-                if (!type.isSolid()) {
-                    continue;
-                }
-
-                // Check to see if the entity will collide with the tile
-                Rectangle entityBounds = new Rectangle(position.x + tempVelocityX, position.y + tempVelocityY, entity.getWidth(), entity.getHeight());
-                Rectangle tileBounds = new Rectangle(tileX * Tile.SIZE - threshold / 2f, tileY * Tile.SIZE - threshold / 2f, Tile.SIZE - threshold, Tile.SIZE - threshold);
-
-                Vector2[] collisionDirection = null;
-                Vector2 endTemp = null;
-
-                // Calculate x direction collision
-                entityBounds = new Rectangle(position.x + tempVelocityX, position.y, entity.getWidth(), entity.getHeight());
-                if (entityBounds.overlaps(tileBounds)) {
-                    collisionDirection = getCollisionDirection(entityBounds, tileBounds);
-                    endTemp = processCollision(tempVelocityX, 0, position, collisionDirection, entityBounds, tileBounds);
-                    tempVelocityX = endTemp.x;
-                }
-
-                // Calculate y direction collision
-                entityBounds = new Rectangle(position.x, position.y + tempVelocityY, entity.getWidth(), entity.getHeight());
-                if (entityBounds.overlaps(tileBounds)) {
-                    collisionDirection = getCollisionDirection(entityBounds, tileBounds);
-                    endTemp = processCollision(0, tempVelocityY, position, collisionDirection, entityBounds, tileBounds);
-                    tempVelocityY = endTemp.y;
-                }
-            }
-        }
-        position.x += tempVelocityX;
-        position.y += tempVelocityY;
-    }
-
-    private Vector2[] getCollisionDirection(Rectangle entityBounds, Rectangle tileBounds) {
-        Vector2 tileCenterToEntityCenter = new Vector2(
-            (entityBounds.x + entityBounds.width / 2) - (tileBounds.x + tileBounds.width / 2),
-            (entityBounds.y + entityBounds.height / 2) - (tileBounds.y + tileBounds.height / 2)
-        );
-        tileCenterToEntityCenter.nor();
-        Vector2[] directions = new Vector2[] {
-            new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, 0)
-        };
-        for (int i = 0; i < directions.length; i++) {
-            float dot = tileCenterToEntityCenter.dot(directions[i]);
-            if (dot >= Math.sqrt(2d) / 2d) {
-                return new Vector2[] { directions[i] };
-            }
-        }
-        return new Vector2[] {};
-    }
-
-    private Vector2 processCollision(float tempX, float tempY, Vector2 position, Vector2[] collisionDirections, Rectangle entityBounds, Rectangle tileBounds) {
-        Vector2 velocity = new Vector2(tempX, tempY);
-        if (collisionDirections == null) {
-            return velocity;
-        }
-        for (int i = 0; i < collisionDirections.length; i++) {
-            Vector2 collisionDirection = collisionDirections[i];
-            if (collisionDirection.x == 0) {
-                // The entity is colliding with the top or bottom face of the tile
-                if (collisionDirection.y > 0) {
-                    // The entity is colliding with the top face of the tile
-                    velocity.y = 0;
-                    position.y = tileBounds.y + tileBounds.height;
-                } else {
-                    // The entity is colliding with the bottom face of the tile
-                    velocity.y = 0;
-                    position.y = tileBounds.y - entityBounds.height;
-                }
-            } else {
-                // The entity is colliding with the left or right face of the tile
-                if (collisionDirection.x > 0) {
-                    // The entity is colliding with the right face of the tile
-                    velocity.x = 0;
-                    position.x = tileBounds.x + tileBounds.width;
-                } else {
-                    // The entity is colliding with the left face of the tile
-                    velocity.x = 0;
-                    position.x = tileBounds.x - entityBounds.width;
-                }
-            }
-        }
-        return velocity;
-    }*/
 
     @Override
     public String toString() {

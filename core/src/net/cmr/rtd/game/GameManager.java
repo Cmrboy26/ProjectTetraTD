@@ -57,6 +57,8 @@ public class GameManager implements Disposable {
     private UpdateData data;
     private World world;
 
+    public static final int MAX_TEAMS = 4;
+
     /**
      * Create a new game manager.
      * After this is called, {@link #initialize(GameSave)} should be called to initialize the game.

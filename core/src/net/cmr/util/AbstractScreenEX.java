@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -215,6 +216,11 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
                 }
             })));
         }
+    }
+
+    public void addListener(EventListener listener) {
+        inputMultiplexer.addProcessor(stages);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     public @Null GameMusic getScreenMusic() {

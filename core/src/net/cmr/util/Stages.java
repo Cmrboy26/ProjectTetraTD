@@ -8,6 +8,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
@@ -290,5 +291,22 @@ public class Stages extends InputMultiplexer implements Disposable {
      * @return The render order of the stages. If null, it means the render order is determined by {@link HashMap#keySet()}.
      */
     public int[] getRenderOrder() { return renderOrder; }
+
+    public boolean isMouseOverUI(int inputX, int inputY) {
+        return mouseOverUI(inputX, inputY) != null;
+    }
+
+    public Actor mouseOverUI(int inputX, int inputY) {
+
+        for (Integer integer : stages.keySet()) {
+            Stage stage = stages.get(integer);
+            Vector2 mouseLocalPosition = stage.screenToStageCoordinates(new Vector2(inputX, inputY));
+            Actor actor = stage.hit(mouseLocalPosition.x, mouseLocalPosition.y, true);
+            if (actor != null) {
+                return actor;
+            }
+        }
+        return null;
+    }
 
 }

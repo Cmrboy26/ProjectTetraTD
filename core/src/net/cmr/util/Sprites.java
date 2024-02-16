@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -21,8 +22,8 @@ public class Sprites implements Disposable {
 
     public enum SpriteType {
         CMRBOY26("cmrboy26"),
-        FLOOR("building6"),
-        WALL("tile1"),
+        FLOOR("wallSprites20"),
+        WALL("wallSprites2"),
         ;
 
         private String spriteName;
@@ -79,6 +80,13 @@ public class Sprites implements Disposable {
     public static TextureRegionDrawable drawable(SpriteType type) {
         return getInstance().getDrawable(type);
     }
+    public BitmapFont smallFont() {
+        return skin.getFont("small-font");
+    }
+    public BitmapFont font() {
+        return skin.getFont("default-font");
+    }
+
 
     public static void disposeManager() {
         getInstance().dispose();

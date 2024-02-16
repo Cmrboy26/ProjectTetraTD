@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import net.cmr.rtd.game.world.Collidable;
 import net.cmr.rtd.game.world.World;
+import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
 
 /**
@@ -28,7 +29,10 @@ public class Tile implements Collidable {
     public enum TileType {
 
         FLOOR(1, "wallSprites20"),
-        WALL(2, true)
+        WALL(2, true),
+        PATH(3, "pathDebug"), // NOTE: have entities prefer to continue on paths that they're facing towards rather than paths that are perpendicular to them
+        START (4, "startDebug"),
+        END (5, "endDebug"),
         ;
 
         private final int id;
@@ -184,147 +188,26 @@ public class Tile implements Collidable {
                 } 
                 
                 batch.draw(Sprites.sprite(drawSprite), x * SIZE, y * SIZE, SIZE, SIZE);
-
-                /*boolean northIsWall = neighbors[1][2] == TileType.WALL;
-                boolean southIsWall = neighbors[1][0] == TileType.WALL;
-                boolean eastIsWall = neighbors[2][1] == TileType.WALL;
-                boolean westIsWall = neighbors[0][1] == TileType.WALL;
-
-                boolean northIsFloor = floorNeighbors[1][2] == TileType.FLOOR;
-                boolean southIsFloor = floorNeighbors[1][0] == TileType.FLOOR;
-                boolean eastIsFloor = floorNeighbors[2][1] == TileType.FLOOR;
-                boolean westIsFloor = floorNeighbors[0][1] == TileType.FLOOR;
-
-                if (!northIsWall && !southIsWall && !eastIsWall && !westIsWall) {
-                    // if there are no walls around us, draw top
-                    batch.draw(Sprites.sprite("tile2"), x * SIZE, y * SIZE, SIZE, SIZE);
-                    return;
+                break;
+            case PATH:
+                if (CMRGame.isDebug()) {
+                    batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
-
-                if (!northIsWall && !southIsWall && (eastIsWall || westIsWall)) {
-                    // if there is floor in front of us, draw top
-                    if (floorNeighbors[1][0] == TileType.FLOOR) {
-                        batch.draw(Sprites.sprite("tile2"), x * SIZE, y * SIZE, SIZE, SIZE);
-                        return;
-                    }
+                break;
+            case END:
+                if (CMRGame.isDebug()) {
+                    batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
-
-                if (southIsFloor) {
-                    if (northIsWall && (eastIsWall ^ westIsWall)) {
-                        // if there is floor in front of us, draw top
-                        Sprite cornerSprite = Sprites.sprite("tile7");
-                        boolean flipX = westIsWall;
-                        batch.draw(cornerSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 0, cornerSprite.getRegionX(), cornerSprite.getRegionY(), cornerSprite.getRegionWidth(), cornerSprite.getRegionHeight(), flipX, false);
-                        return;
-                    }
+                break;
+            case START:
+                if (CMRGame.isDebug()) {
+                    batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
-
-                // if y-1, z-1 is floor, draw top
-
-                boolean drawLines = false;
-                Sprite lineSprite = Sprites.sprite("tile3");
-
-                if (eastIsFloor && !eastIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 90, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
-                }
-                if (westIsFloor && !westIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 270, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
-                }
-                if (southIsFloor && !southIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, true);
-                    drawLines = true;
-                }
-                if (northIsFloor && !northIsWall) {
-                    batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                    drawLines = true;
-                }
-
-                
-
-                boolean drewNubs = false;
-                Sprite nubSprite = Sprites.sprite("tile4");
-                if (northIsWall && eastIsWall && floorNeighbors[2][2] == TileType.FLOOR) {
-                    // rightTop nub
-                    draw(batch, nubSprite, x, y, false, true);
-                    drewNubs = true;
-                }
-                if (northIsWall && westIsWall && floorNeighbors[0][2] == TileType.FLOOR) {
-                    // leftTop nub
-                    draw(batch, nubSprite, x, y, true, true);
-                    drewNubs = true;
-                }
-                if (southIsWall && eastIsWall && floorNeighbors[2][0] == TileType.FLOOR) {
-                    // rightBottom nub
-                    draw(batch, nubSprite, x, y, false, false);
-                    drewNubs = true;
-                }
-                if (southIsWall && westIsWall && floorNeighbors[0][0] == TileType.FLOOR) {
-                    // leftBottom nub
-                    draw(batch, nubSprite, x, y, true, false);
-                    drewNubs = true;
-                }
-                if (drewNubs) {
-                    return;
-                }*/
-
-                /*if (northIsWall && southIsWall && !eastIsWall && !westIsWall) {
-                    // if there are floors on the right, draw right line
-                    if (floorNeighbors[2][1] == TileType.FLOOR) {
-                        batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 90, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                        drawLines = true;
-                    }
-                    // if there are floors on the left, draw left line
-                    if (floorNeighbors[0][1] == TileType.FLOOR) {
-                        batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, -90, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                        drawLines = true;
-                    }
-                    return;
-                }
-                if (eastIsWall && westIsWall && !northIsWall && !southIsWall) {
-                    // if there are floors on the top, draw top line
-                    if (floorNeighbors[1][2] == TileType.FLOOR) {
-                        batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 180, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                        drawLines = true;
-                    }
-                    // if there are floors on the bottom, draw bottom line
-                    if (floorNeighbors[1][0] == TileType.FLOOR) {
-                        batch.draw(lineSprite.getTexture(), x * SIZE, y * SIZE, SIZE/2, SIZE/2, SIZE, SIZE, 1, 1, 0, lineSprite.getRegionX(), lineSprite.getRegionY(), lineSprite.getRegionWidth(), lineSprite.getRegionHeight(), false, false);
-                        drawLines = true;
-                    }
-                    return;
-                }*/
-
-                /*// if y-1, z-1 is null and y-1, z is null, draw bottom
-                if (world.getTile(x, y-1, z-1) == null && world.getTile(x, y-1, z) == null) {
-                    Sprite sprite = Sprites.sprite("tile3");
-                    sprite.flip(false, true);
-                    batch.draw(Sprites.sprite("tile3"), x * SIZE, y * SIZE, SIZE, SIZE);
-                    sprite.flip(false, true);
-                    return;
-                }*/
-
                 break;
             default:
                 break;
         }
     }
-    
-    /*private void draw(Batch batch, Sprite sprite, int x, int y, boolean flipX, boolean flipY) {
-        sprite.flip(flipX, flipY);
-        batch.draw(sprite, x * SIZE, y * SIZE, SIZE, SIZE);
-        sprite.flip(flipX, flipY);
-    }
-    private void draw(Batch batch, Sprite sprite, int x, int y, boolean flipX, boolean flipY, float rotation) {
-        sprite.setSize(SIZE, SIZE);
-        sprite.flip(flipX, flipY);
-        sprite.setOriginCenter();
-        sprite.setRotation(rotation);
-        sprite.draw(batch);
-        sprite.setRotation(0);
-        sprite.flip(flipX, flipY);
-    }*/
 
     @Override
     public boolean isCollidable() {

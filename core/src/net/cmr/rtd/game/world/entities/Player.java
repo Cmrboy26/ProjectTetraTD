@@ -31,7 +31,6 @@ public class Player extends Entity {
         this();
         this.username = username;
         this.setID(UUID.nameUUIDFromBytes(username.getBytes()));
-        // System.out.println(username + " > " + this.getID().toString());
     }
 
     @Override
@@ -59,13 +58,13 @@ public class Player extends Entity {
 
     @Override
     public void render(Batch batch, float delta) {
-        batch.draw(Sprites.sprite(Sprites.SpriteType.CMRBOY26), getX(), getY(), Tile.SIZE, Tile.SIZE);
+        batch.draw(Sprites.sprite(Sprites.SpriteType.CMRBOY26), getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
         super.render(batch, delta);
     }
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(getX(), getY(), Tile.SIZE, Tile.SIZE/2f);
+        return new Rectangle(getX(), getY(), Tile.SIZE * (3f/4f), Tile.SIZE / 2f);
     }
 
     @Override

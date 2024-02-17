@@ -13,6 +13,8 @@ import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
 import net.cmr.rtd.game.packets.PacketEncryption;
+import net.cmr.rtd.game.packets.PasswordPacket;
+import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.util.Log;
@@ -100,6 +102,8 @@ public class OnlineGameStream extends GameStream {
         kryo.register(DisconnectPacket.class);
         kryo.register(GameObjectPacket.class);
         kryo.register(StatsUpdatePacket.class);
+        kryo.register(PasswordPacket.class);
+        kryo.register(PlayerPacket.class);
     }
     
 }

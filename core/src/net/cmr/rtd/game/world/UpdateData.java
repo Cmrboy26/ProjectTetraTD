@@ -38,5 +38,12 @@ public class UpdateData {
             return screen.getWorld();
         }
     }
+
+    public GameManager getManager() {
+        return manager;
+    }
+    public GameScreen getScreen() {
+        return screen;
+    }
     
 }

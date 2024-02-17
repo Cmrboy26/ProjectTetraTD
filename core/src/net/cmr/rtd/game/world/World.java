@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -24,7 +25,6 @@ import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
-import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 
 /**
@@ -43,6 +43,7 @@ public class World extends GameObject {
     private HashMap<UUID, Entity> entities; // <Entity ID, Entity>
     private TileType[][][] tiles;
     private HashMap<Point3D, TileData> tileDataMap;
+    private HashSet<UUID> removalList;
 
     public static class Point3D {
         public int x, y, z;
@@ -81,11 +82,24 @@ public class World extends GameObject {
         this.entities = new HashMap<>();
         this.tiles = new TileType[DEFAULT_WORLD_SIZE][DEFAULT_WORLD_SIZE][LAYERS];
         this.tileDataMap = new HashMap<>();
+        this.removalList = new HashSet<>();
     }
 
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
+        for (UUID id : removalList) {
+            Entity removed = entities.remove(id);
+            if (removed == null) return;
+            removed.setWorld(null);
+            removed.remove();
+        }
+        removalList.clear();
+
+        for (Point3D point : tileDataMap.keySet()) {
+            TileData tileData = tileDataMap.get(point);
+            tileData.update(delta, point.x, point.y, data);
+        }
         for (Entity entity : entities.values()) {
             entity.update(delta, data);
         }
@@ -100,14 +114,12 @@ public class World extends GameObject {
 
     public void removeEntity(Entity entity) {
         Objects.requireNonNull(entity);
-        removeEntity(entity);
+        removeEntity(entity.getID());
     }
 
     public void removeEntity(UUID id) {
-        Entity removed = entities.remove(id);
-        if (removed == null) return;
-        removed.setWorld(null);
-        removed.remove();
+        Objects.requireNonNull(id);
+        this.removalList.add(id);
     }
 
     public HashMap<UUID, Entity> getEntityMap() { return entities; }
@@ -308,11 +320,9 @@ public class World extends GameObject {
                     }
                     tile.render(batch, delta, this, x, y, z);
 
-                    if (CMRGame.isDebug()) {
-                        if (tileDataMap.containsKey(new Point3D(x, y, z))) {
-                            TileData data = tileDataMap.get(new Point3D(x, y, z));
-                            data.render(batch, x, y);
-                        }
+                    if (tileDataMap.containsKey(new Point3D(x, y, z))) {
+                        TileData data = tileDataMap.get(new Point3D(x, y, z));
+                        data.render(batch, x, y);
                     }
                 }
             }

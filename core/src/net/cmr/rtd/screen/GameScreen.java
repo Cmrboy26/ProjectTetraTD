@@ -43,6 +43,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
@@ -63,7 +64,7 @@ public class GameScreen extends AbstractScreenEX {
     final String password;
 
     Window window;
-    TextButton wall, floor, clear, path , start, end;
+    TextButton wall, floor, clear, path, start, end;
 
     Label lifeLabel, structureLifeLabel, cashLabel;
     Image life, structureLife, cash;
@@ -421,9 +422,13 @@ public class GameScreen extends AbstractScreenEX {
                 gameManager.getWorld().setTile(tileX, tileY, 1, type);
             }
 
-            if (selectedTile == 3 || selectedTile == 4 || selectedTile == 5) {
+            if (selectedTile == 3 || selectedTile == 5) {
                 world.setTileData(tileX, tileY, 1, new TeamTileData(teamNumber));
                 gameManager.getWorld().setTileData(tileX, tileY, 1, new TeamTileData(teamNumber));
+            }
+            if (selectedTile == 4) {
+                world.setTileData(tileX, tileY, 1, new StartTileData(0));
+                gameManager.getWorld().setTileData(tileX, tileY, 1, new StartTileData(0));
             }
         }
     }
@@ -482,6 +487,20 @@ public class GameScreen extends AbstractScreenEX {
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
             world.render(batch, delta);
+            batch.end();
+        }
+
+        TileType type = TileType.getType(selectedTile);
+
+        if (type != null) {
+            Tile tile = type.getTile();
+
+            int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
+            int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
+            batch.begin();
+            if (world != null) {
+                tile.render(batch, delta, world, tileX, tileY, 1);
+            }
             batch.end();
         }
 

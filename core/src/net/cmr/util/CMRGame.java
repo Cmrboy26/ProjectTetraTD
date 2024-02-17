@@ -10,7 +10,7 @@ public abstract class CMRGame extends Game {
 
     private static CMRGame instance = null;
     private static Object instanceLock = new Object();
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
     public static boolean SKIP_INTRO = true && DEBUG;
     private SpriteBatch batch;
     private NativeFileChooser fileChooser;

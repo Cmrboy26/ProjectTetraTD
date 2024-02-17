@@ -1,5 +1,10 @@
 package net.cmr.rtd.game.world.tile;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
+
+import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.SpriteType;
+
 public class TeamTileData extends TileData {
     
     public int team;
@@ -12,6 +17,12 @@ public class TeamTileData extends TileData {
     @Override
     public String toString() {
         return "team " + team;
+    }
+
+    @Override
+    public void render(Batch batch, int tileX, int tileY) {
+        batch.draw(Sprites.sprite(SpriteType.DARKENED), tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
+        super.render(batch, tileX, tileY);
     }
 
     

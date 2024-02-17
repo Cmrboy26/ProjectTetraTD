@@ -27,6 +27,8 @@ public class Sprites implements Disposable {
         HEART("heart"),
         CASH("cash"),
         STRUCTURE_LIFE("structureLife"),
+        STRUCTURE("structure"),
+        DARKENED("darkened"),
         ;
 
         private String spriteName;

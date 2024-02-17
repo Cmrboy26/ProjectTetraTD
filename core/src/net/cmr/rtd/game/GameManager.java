@@ -234,14 +234,13 @@ public class GameManager implements Disposable {
             long lastTime = System.nanoTime();
             while (running) {
                 long currentTime = System.nanoTime();
-                float delta = (currentTime - lastTime) / 1000000000.0f;
+                float delta = (currentTime - lastTime) / 1e9f;
                 lastTime = currentTime;
 
                 // To prevent any floating point issues, sleep for a few milliseconds if the delta is less than 0.001f.
                 if (delta < 0.001f) {
                     try {
                         Thread.sleep((long) 5);
-                        delta += 0.05f;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -373,6 +372,12 @@ public class GameManager implements Disposable {
         return true;
     }
 
+    public void sendPacketToAll(Packet packet) {
+        for (GamePlayer player : players.values()) {
+            player.sendPacket(packet);
+        }
+    }
+
     public void initializeNewGame() {
         // Initialize a new game.
         world = new World();
@@ -420,6 +425,7 @@ public class GameManager implements Disposable {
             world.update(delta, data);
         }
     }
+    float time = 0;
 
     public void dispose() {
         // Dispose of the game manager.

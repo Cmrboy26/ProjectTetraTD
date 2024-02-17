@@ -34,6 +34,10 @@ public abstract class Entity extends GameObject {
         super.remove();
     }
 
+    public void removeFromWorld() {
+        world.removeEntity(this);
+    }
+
     public abstract void update(float delta, UpdateData data);
     
     protected abstract void serializeEntity(DataBuffer buffer) throws IOException;
@@ -66,6 +70,11 @@ public abstract class Entity extends GameObject {
     @Override
     public String toString() {
         return "Entity [entityUUID=" + entityUUID + ", world=" + world + "]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Entity && ((Entity) obj).entityUUID.equals(entityUUID);
     }
     
 }

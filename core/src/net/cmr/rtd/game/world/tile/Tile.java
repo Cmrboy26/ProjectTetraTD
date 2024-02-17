@@ -10,6 +10,7 @@ import net.cmr.rtd.game.world.Collidable;
 import net.cmr.rtd.game.world.World;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.SpriteType;
 
 /**
  * A static tile in the game world.
@@ -119,6 +120,7 @@ public class Tile implements Collidable {
     }
 
     public void render(Batch batch, float delta, World world, int x, int y, int z) {
+        final String spriteName = "wallSprites";
         switch (type) {
             case FLOOR:
                 batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
@@ -138,7 +140,6 @@ public class Tile implements Collidable {
                 boolean e = neighbors[2][1] == TileType.WALL;
                 boolean w = neighbors[0][1] == TileType.WALL;
 
-                final String spriteName = "wallSprites";
                 String drawSprite = spriteName;
                 // 16 tile combinations
                 // https://www.google.com/search?q=16+rule+tilemap&tbm=isch#imgrc=LqdrH_1mTnn3pM
@@ -189,19 +190,21 @@ public class Tile implements Collidable {
                 batch.draw(Sprites.sprite(drawSprite), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
             case PATH:
-                if (CMRGame.isDebug()) {
+                /*if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
-                }
+                }*/
                 break;
             case END:
                 if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
+                batch.draw(Sprites.sprite(SpriteType.STRUCTURE), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
             case START:
                 if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
+                batch.draw(Sprites.sprite(spriteName+23), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
             default:
                 break;

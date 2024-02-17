@@ -14,6 +14,7 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.util.Log;
 
 public class OnlineGameStream extends GameStream {
@@ -98,6 +99,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(RSAEncryptionPacket.class);
         kryo.register(DisconnectPacket.class);
         kryo.register(GameObjectPacket.class);
+        kryo.register(StatsUpdatePacket.class);
     }
     
 }

@@ -27,8 +27,13 @@ public class GameManagerTest {
             } catch (IllegalArgumentException e) {
                 registration = null;
             }
-            assertNotNull(registration, "Packet " + clazz.getSimpleName() + " is not registered! (Add it to OnlineGameStream.registerPackets(Kryo kryo)");
+            assertNotNull(registration, clazz.getSimpleName() + " is not registered! (Add it to OnlineGameStream.registerPackets(Kryo kryo))");
         });
+    }
+
+    @Test
+    public void testIfPacketEncryptionFunctions() {
+        // TODO: Implement
     }
 
 }

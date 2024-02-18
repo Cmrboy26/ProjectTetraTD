@@ -2,41 +2,51 @@ package net.cmr.rtd;
 
 import java.util.Scanner;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.backends.headless.HeadlessApplication;
+import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.util.Log;
 
-public class ServerLauncher {
+public class ServerLauncher extends ApplicationAdapter {
     
+    GameManager manager;
+    GameManagerDetails details;
+
     public ServerLauncher() {
-        GameManagerDetails details = new GameManagerDetails();
+        
+    }
+
+    @Override
+    public void create() {
+        details = new GameManagerDetails();
         details.actAsServer(true);
         details.setMaxPlayers(4);
+        details.setUseConsole(true);
 
-        GameManager manager = new GameManager(details);
+        manager = new GameManager(details);
         manager.initialize(new GameSave("host"));
         manager.start();
 
-        Scanner scanner = new Scanner(System.in);
+        //Scanner scanner = new Scanner(System.in);
         while(manager.isRunning()) {
-            String input = scanner.nextLine();
+            /*String input = scanner.nextLine();
             if (input.equals("exit")) {
                 Log.info("Recieved command: exit. Closing server...");
                 manager.stop();
                 break;
-            }
+            }*/
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        scanner.close();
+
+        //scanner.close();
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -45,13 +55,16 @@ public class ServerLauncher {
         System.exit(1);
     }
 
+    @Override
+    public void render() {
+
+    }
+
     public static void main(String[] args) {
         Log.initializeLog();
 
-        Lwjgl3NativesLoader.load();
-        Gdx.files = new Lwjgl3Files();
-
-        new ServerLauncher();
+        HeadlessApplicationConfiguration config = new HeadlessApplicationConfiguration();
+        new HeadlessApplication(new ServerLauncher(), config);
     }
 
 }

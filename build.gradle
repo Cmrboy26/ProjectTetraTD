@@ -60,7 +60,8 @@ project(":core") {
     dependencies {
         implementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
         implementation group: 'kryonet', name: 'kryonet', version: '2.21'
-
+        implementation 'commons-io:commons-io:2.15.1'
+        
         implementation 'com.esotericsoftware:kryo:5.4.0:sources'
         implementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
 
@@ -106,7 +107,7 @@ project(":tests") {
         testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-        
+        testImplementation 'commons-io:commons-io:2.15.1'
         testImplementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
         testImplementation group: 'kryonet', name: 'kryonet', version: '2.21'
         testImplementation 'com.esotericsoftware:kryo:5.4.0:sources'

@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import org.apache.commons.io.input.CloseShieldInputStream;
 
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
@@ -22,6 +25,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.commands.CommandHandler;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
@@ -37,7 +41,6 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.GameObject;
-import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
@@ -246,6 +249,11 @@ public class GameManager implements Disposable {
         }
 
         running = true;
+
+        if (details.useConsole()) {
+            openConsole();
+        }
+
         load(save);
         Thread updateThread = new Thread(() -> {
             long lastTime = System.nanoTime();
@@ -293,6 +301,31 @@ public class GameManager implements Disposable {
             return;
         }
         dispose();
+    }
+
+    private void openConsole() {
+        CommandHandler.register(new CommandHandler() {
+            @Override
+            public void handleCommand(String command, String[] args) {
+                if (command.equals("exit")) {
+                    Log.info("Recieved command: exit. Closing server...");
+                    stop();
+                    return;
+                }
+            }
+        });
+        Thread consoleThread = new Thread(() -> {
+            CloseShieldInputStream shield = CloseShieldInputStream.wrap(System.in);
+            Scanner scanner = new Scanner(shield);
+            
+            while (isRunning()) {
+                String input = scanner.nextLine();
+                CommandHandler.handleCommand(input);
+            }
+
+            scanner.close();
+        });
+        consoleThread.start();
     }
 
     /**
@@ -490,20 +523,25 @@ public class GameManager implements Disposable {
         private int tcpPort = 11265;
         private boolean actAsServer = false;
         private String password = null;
+        private boolean console;
 
         public GameManagerDetails() {
 
         }
 
         public void actAsServer(boolean actAsServer) { this.actAsServer = actAsServer; }
-        public boolean isActingAsServer() { return actAsServer; }
         public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
-        public int getMaxPlayers() { return maxPlayers; }
         public void setTCPPort(int tcpPort) { this.tcpPort = tcpPort; }
-        public int getTCPPort() { return tcpPort; }
         public void setPassword(String password) { this.password = password; }
+        public void setUseConsole(boolean console) { this.console = console; }
+        
+
+        public boolean isActingAsServer() { return actAsServer; }
+        public int getMaxPlayers() { return maxPlayers; }
+        public int getTCPPort() { return tcpPort; }
         public String getPassword() { return password; }
         public boolean usePassword() { return password != null; }
+        public boolean useConsole() { return console; }
     }
 
     public World getWorld() {

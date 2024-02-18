@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -19,12 +21,14 @@ import net.cmr.util.Sprites;
 @WorldSerializationExempt
 public class Player extends Entity {
     
-    String username;
     private Vector2 velocity;
+    private String username;
+    private int health;
 
     public Player() {
         super(GameType.PLAYER);
         this.velocity = new Vector2();
+        this.health = getMaxHealth();
     }
 
     public Player(final String username) {
@@ -46,6 +50,7 @@ public class Player extends Entity {
     @Override
     protected void serializeEntity(DataBuffer buffer) throws IOException {
         buffer.writeUTF(username);
+        buffer.writeInt(health);
     }
 
     @Override
@@ -71,12 +76,30 @@ public class Player extends Entity {
     protected void deserializeEntity(GameObject object, DataInputStream input) throws IOException {
         Player player = (Player) object;
         player.username = input.readUTF();
+        player.health = input.readInt();
         player.setID(UUID.nameUUIDFromBytes(player.username.getBytes()));
     }
 
     public String getName() { return username; }
     public void setVelocity(Vector2 velocity) { this.velocity = velocity; }
     public Vector2 getVelocity() { return velocity; }
+    public int getHealth() { return health; }
+
+    public void damage(int amount, UpdateData data) {
+        health -= amount;
+        if (health < 0) health = 0;
+        if (data.isServer()) {
+            GameManager manager = data.getManager();
+            GamePlayer player = manager.getPlayer(this);
+            if (player != null) {
+                manager.sendStatsUpdatePacket(this);
+            }
+        }
+    }
+
+    public int getMaxHealth() { 
+        return 10;
+    }
 
     
 

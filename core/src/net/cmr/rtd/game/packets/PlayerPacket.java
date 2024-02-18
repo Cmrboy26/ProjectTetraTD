@@ -4,6 +4,7 @@ public class PlayerPacket extends Packet{
     
     public String username;
     public boolean isConnecting, initializingWorld;
+    public float x, y;
 
     public enum PlayerPacketType {
         CONNECTING(true), DISCONNECTING(false), INITIALIZE_WORLD(true);
@@ -17,11 +18,13 @@ public class PlayerPacket extends Packet{
     }
 
     public PlayerPacket() { super(); }
-    public PlayerPacket(String username, PlayerPacketType type) {
+    public PlayerPacket(String username, float x, float y, PlayerPacketType type) {
         super();
         this.username = username;
         this.isConnecting = type.getValue();
         this.initializingWorld = type == PlayerPacketType.INITIALIZE_WORLD;
+        this.x = x;
+        this.y = y;
     }
 
     public boolean isConnecting() {

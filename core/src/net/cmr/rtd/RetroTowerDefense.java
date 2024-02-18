@@ -78,7 +78,7 @@ public class RetroTowerDefense extends CMRGame {
 		GameScreen screen = new GameScreen(stream, null, null);
 		setScreen(screen);
 
-		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME)));
+		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), 0));
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class RetroTowerDefense extends CMRGame {
 		manager.start();
 		manager.onNewConnection(serversideStream);
 		
-		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME)));
+		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), 0));
 	}
 
 	/**

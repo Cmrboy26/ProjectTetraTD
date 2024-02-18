@@ -14,7 +14,7 @@ import net.cmr.rtd.game.GameManager.GameManagerDetails;
  */
 public class GameSave {
     
-    private static final String LOCATION = "saves/"; 
+    private static final String LOCATION = "retrotowerdefense/saves/"; 
     private final String saveName;
 
     public GameSave(String saveName) {

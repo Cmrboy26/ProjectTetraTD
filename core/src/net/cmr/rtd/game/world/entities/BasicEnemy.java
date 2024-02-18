@@ -19,6 +19,7 @@ import net.cmr.util.Sprites;
 
 public class BasicEnemy extends EnemyEntity {
     
+    float speed;
     int maxHealth;
     String displayType;
 
@@ -26,15 +27,18 @@ public class BasicEnemy extends EnemyEntity {
     Point targetTile;
     boolean approachingEnd;
 
+    public static final int DAMAGE = 1;
+
     public BasicEnemy() {
         super(0, GameType.BASIC_ENEMY);
     }
 
-    public BasicEnemy(int team, String displayType, int maxHealth) {
+    public BasicEnemy(int team, String displayType, int maxHealth, float speed) {
         super(team, GameType.BASIC_ENEMY);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.displayType = displayType;
+        this.speed = speed;
     }
 
     @Override
@@ -60,6 +64,9 @@ public class BasicEnemy extends EnemyEntity {
 
             if (approachingEnd) {
                 // TODO: Damage the structure and update the health bar on the client side
+                int tileX = getTileX(this);
+                int tileY = getTileY(this);
+                attackStructure(tileX, tileY, data, DAMAGE);
                 removeFromWorld();
             }
         }
@@ -148,6 +155,7 @@ public class BasicEnemy extends EnemyEntity {
             buffer.writeInt(lastTile.y);
         }
         buffer.writeBoolean(approachingEnd);
+        buffer.writeFloat(speed);
     }
 
     @Override
@@ -167,6 +175,7 @@ public class BasicEnemy extends EnemyEntity {
             enemy.lastTile = new Point(lastTileX, input.readInt());
         }
         enemy.approachingEnd = input.readBoolean();
+        enemy.speed = input.readFloat();
     }
 
     @Override
@@ -176,7 +185,12 @@ public class BasicEnemy extends EnemyEntity {
 
     @Override
     public float getSpeed() {
-        return 1;
+        return speed;
+    }
+
+    @Override
+    public float getRenderOffset() {
+        return -Tile.SIZE / 2;
     }
 
     @Override

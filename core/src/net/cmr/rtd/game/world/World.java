@@ -1,5 +1,6 @@
 package net.cmr.rtd.game.world;
 
+import java.awt.Point;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -20,6 +22,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -40,10 +43,13 @@ public class World extends GameObject {
     public static final int LAYERS = 3;
 
     private int worldSize;
-    private HashMap<UUID, Entity> entities; // <Entity ID, Entity>
+    private ConcurrentHashMap<UUID, Entity> entities; // <Entity ID, Entity>
     private TileType[][][] tiles;
     private HashMap<Point3D, TileData> tileDataMap;
     private HashSet<UUID> removalList;
+    private HashMap<String, Player> storedPlayerData;
+    private ArrayList<TeamData> teams; // TODO: Implement this.
+    public Color worldColor = Color.valueOf("#6663ff");
 
     public static class Point3D {
         public int x, y, z;
@@ -79,15 +85,30 @@ public class World extends GameObject {
     public World() {
         super(GameType.WORLD);
         this.worldSize = DEFAULT_WORLD_SIZE;
-        this.entities = new HashMap<>();
+        this.entities = new ConcurrentHashMap<>();
         this.tiles = new TileType[DEFAULT_WORLD_SIZE][DEFAULT_WORLD_SIZE][LAYERS];
         this.tileDataMap = new HashMap<>();
         this.removalList = new HashSet<>();
+        this.storedPlayerData = new HashMap<>();
+        this.teams = new ArrayList<>();
     }
 
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
+
+        // Segment the delta time into smaller chunks to prevent entities from moving too far.
+        // This is to prevent entities from moving through walls.
+        float segment = 1/60f;
+        float tempDelta = delta;
+        while (tempDelta > 0) {
+            float d = Math.min(tempDelta, segment);
+            updateWorld(d, data);
+            tempDelta -= d;
+        }
+    }
+
+    private void updateWorld(float delta, UpdateData data) {
         for (UUID id : removalList) {
             Entity removed = entities.remove(id);
             if (removed == null) return;
@@ -122,7 +143,7 @@ public class World extends GameObject {
         this.removalList.add(id);
     }
 
-    public HashMap<UUID, Entity> getEntityMap() { return entities; }
+    public ConcurrentHashMap<UUID, Entity> getEntityMap() { return entities; }
     public Set<UUID> getEntityIDs() { return entities.keySet(); }
     public Entity getEntity(UUID id) { return entities.get(id); }
     public Collection<Entity> getEntities() { return entities.values(); }
@@ -157,13 +178,31 @@ public class World extends GameObject {
         return worldSize;
     }
 
+    /**
+     * Should only be called on the server.
+     * Returns the player data for the given name.
+     * @param name The name of the player.
+     * @return The player data.
+     */
+    public Player getPlayer(GamePlayer gamePlayer) {
+        String name = gamePlayer.getUsername();
+        Player player = storedPlayerData.get(name);
+        if (player == null) {
+            player = new Player(name);
+            Point spawn = getTeamStructurePoint(gamePlayer.getTeam());
+            player.setPosition(spawn.x * Tile.SIZE + Tile.SIZE / 2, spawn.y * Tile.SIZE + Tile.SIZE / 2);
+            storedPlayerData.put(name, player);
+        }
+        return player;
+    }
+
     public void serializePlayerData(DataBuffer buffer) throws IOException {
         ArrayList<Entity> players = new ArrayList<>();
-        for (Entity entity : entities.values()) {
-            if (entity instanceof Player) {
-                players.add(entity);
-            }
+        for (String name : storedPlayerData.keySet()) {
+            Player player = storedPlayerData.get(name);
+            players.add(player);
         }
+
         buffer.writeInt(players.size());
         for (Entity player : players) {
             byte[] data = GameObject.serializeGameObject(player);
@@ -182,13 +221,11 @@ public class World extends GameObject {
             Player player = (Player) GameObject.deserializeGameObject(data);
             players.put(player.getName(), player);
         }
-        return players;
-    }
-
-    public void setPlayerData(HashMap<String, Player> players) {
+        this.storedPlayerData = players;
         for (Player player : players.values()) {
             Log.info("Player " + player.getName() + " was saved.");
         }
+        return players;
     }
 
     @Override
@@ -201,6 +238,9 @@ public class World extends GameObject {
             tempWorldSize *= -1;
         }
         buffer.writeInt(tempWorldSize);
+        buffer.writeFloat(worldColor.r);
+        buffer.writeFloat(worldColor.g);
+        buffer.writeFloat(worldColor.b);
 
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
@@ -263,10 +303,14 @@ public class World extends GameObject {
         // (If worldsize is negative, then the world size is the default size.)
         int tempWorldSize = input.readInt();
         if (tempWorldSize < 0) {
-            worldSize = DEFAULT_WORLD_SIZE;
+            world.worldSize = DEFAULT_WORLD_SIZE;
         } else {
-            worldSize = tempWorldSize;
+            world.worldSize = tempWorldSize;
         }
+        float r = input.readFloat();
+        float g = input.readFloat();
+        float b = input.readFloat();
+        world.worldColor = new Color(r, g, b, 1);
 
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
@@ -301,7 +345,6 @@ public class World extends GameObject {
 
     @Override
     public void render(Batch batch, float delta) {
-        Color worldColor = Color.valueOf("#6663ff");
         // TODO: Implement smarter tile rendering (with proper entity support)
         batch.setColor(worldColor);
         for (int x = 0; x < worldSize; x++) {
@@ -328,7 +371,11 @@ public class World extends GameObject {
             }
         }
         batch.setColor(Color.WHITE);
-        for (Entity entity : entities.values()) {
+        ArrayList<Entity> renderEntities = new ArrayList<>(this.entities.values());
+        // Sort by Y position.
+        renderEntities.sort((a, b) -> Float.compare(b.position.y + b.getRenderOffset(), a.position.y + a.getRenderOffset()));
+
+        for (Entity entity : renderEntities) {
             entity.render(batch, delta);
         }
         super.render(batch, delta);
@@ -421,6 +468,11 @@ public class World extends GameObject {
             }
         }
         tiles = newTiles;
+    }
+
+    public Point getTeamStructurePoint(int team) {
+        // TODO: Implement team structure points. (Store TeamData in world and use that to determine the team structure points.)
+        return new Point(2, 2);
     }
 
     @Override

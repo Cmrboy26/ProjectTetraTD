@@ -42,8 +42,8 @@ public class Files {
         return conf;
     }
 
-    public void promptFile(NativeFileChooserConfiguration conf, NativeFileChooserCallback callback) {
-        fileChooser.chooseFile(conf, callback);
+    public static void promptFile(NativeFileChooserConfiguration conf, NativeFileChooserCallback callback) {
+        getInstance().fileChooser.chooseFile(conf, callback);
     }
 
     public void doSomething() {

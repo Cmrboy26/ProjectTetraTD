@@ -31,11 +31,13 @@ import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
@@ -80,7 +82,6 @@ public class GameManager implements Disposable {
                 }
             });
             // Prepare server
-
             return;
         }
         server = null;
@@ -104,6 +105,7 @@ public class GameManager implements Disposable {
             public void packetReceived(Packet packet) {
                 // When a player sends a ConnectPacket, set their username and put them in the players map.
                 if (packet instanceof ConnectPacket) {
+                    ConnectPacket connectPacket = (ConnectPacket) packet;
                     // If it's full, send a disconnect packet.
                     if (players.size() >= details.getMaxPlayers()) {
                         // The game is full.
@@ -111,7 +113,7 @@ public class GameManager implements Disposable {
                         return;
                     }
                     // If the username is too long, send a disconnect packet.
-                    String username = ((ConnectPacket) packet).username;
+                    String username = connectPacket.username;
                     if (username.length() > GamePlayer.USERNAME_LENGTH) {
                         // The username is too long.
                         clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.USERNAME_TOO_LONG));
@@ -126,6 +128,7 @@ public class GameManager implements Disposable {
                     // Add the player to the players map.
                     Log.info("Player joining the game... " + username);
                     GamePlayer player = new GamePlayer(GameManager.this, clientRecieverStream, username);
+                    player.setTeam(connectPacket.team);
                     players.put(username, player);
                     this.player = player;
 
@@ -192,16 +195,30 @@ public class GameManager implements Disposable {
      * the player has sent the correct password.
      */
     public void onPlayerJoin(GamePlayer player) {
-        // Add the player to the world
         Log.info("Player joined game: " + player.getUsername() + " [" + players.size() + "/" + details.getMaxPlayers() + "]");
-        syncrhonizeWorld(player);
+
+        // Add the player to the world
+        Player playerEntity = world.getPlayer(player);
+        player.setPlayer(playerEntity);
+
+        // Send the world data to the player.
+        synchronizeWorld(player);
+
+        world.addEntity(playerEntity);
     }
 
     public void onPlayerDisconnect(GamePlayer player) {
-        // Remove the player from the game.
-        players.remove(player.getUsername());
         Log.info("Player disconnected from game: \"" + player.getUsername() + "\" [" + players.size() + "/" + details.getMaxPlayers() + "]");
-        PlayerPacket packet = new PlayerPacket(player.getUsername(), PlayerPacket.PlayerPacketType.DISCONNECTING);
+        
+        // Remove the player from the world
+        players.remove(player.getUsername());
+        Player playerEntity = player.getPlayer();
+        if (playerEntity != null) {
+            world.removeEntity(playerEntity);
+        }
+
+        // Send a packet to all other players to show that the player has disconnected.
+        PlayerPacket packet = new PlayerPacket(player.getUsername(), 0, 0, PlayerPacket.PlayerPacketType.DISCONNECTING);
         for (GamePlayer p : players.values()) {
             // Send a packet to all other players to show that the player has disconnected.
             p.sendPacket(packet);
@@ -362,7 +379,6 @@ public class GameManager implements Disposable {
             try {
                 DataInputStream stream = new DataInputStream(playersFile.read());
                 HashMap<String, Player> data = world.deserializePlayerData(stream);
-                world.setPlayerData(data);
                 Log.info("Loaded players from " + playersFile.path());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -383,16 +399,40 @@ public class GameManager implements Disposable {
         world = new World();
     }
 
-    public void syncrhonizeWorld(GamePlayer player) {
+    public void synchronizeWorld(GamePlayer player) {
         // Send the world data to the player.
         player.sendPackets(retrieveWorldSnapshot());
+    }
+
+    public GamePlayer getPlayer(Player player) {
+        return players.get(player.getName());
+    }
+
+    public void updateTeamStats(int team) {
+        for (GamePlayer player : players.values()) {
+            if (player.getTeam() == team) {
+                sendStatsUpdatePacket(player);
+            }
+        }
+    }
+
+    public void sendStatsUpdatePacket(GamePlayer player) {
+        if (player.getPlayer() == null) return;
+        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), 1000, 15);
+        player.sendPacket(packet);
+    }
+
+    public void sendStatsUpdatePacket(Player player) {
+        GamePlayer gamePlayer = getPlayer(player);
+        if (gamePlayer == null) return;
+        sendStatsUpdatePacket(gamePlayer);
     }
 
     public List<Packet> retrieveWorldSnapshot() {
         ArrayList<Packet> packets = new ArrayList<Packet>();
         packets.add(new GameObjectPacket(world));
         for (GamePlayer player : players.values()) {
-            packets.add(new PlayerPacket(player.getUsername(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
+            packets.add(new PlayerPacket(player.getUsername(), player.getPlayer().getX(), player.getPlayer().getY(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
         }
         return packets;
     }
@@ -434,6 +474,13 @@ public class GameManager implements Disposable {
 
     public boolean isRunning() { return running; }
     public GameManagerDetails getDetails() { return details; }
+    public FileHandle getSaveFolder() {
+        if (RetroTowerDefense.instanceExists()) {
+            return save.getSaveFolder(FileType.External);
+        } else {
+            return save.getSaveFolder(FileType.Absolute);
+        }
+    }
 
     /**
      * The details of the game manager.

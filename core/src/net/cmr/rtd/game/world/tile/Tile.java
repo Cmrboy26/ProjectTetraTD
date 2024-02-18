@@ -143,7 +143,6 @@ public class Tile implements Collidable {
                 String drawSprite = spriteName;
                 // 16 tile combinations
                 // https://www.google.com/search?q=16+rule+tilemap&tbm=isch#imgrc=LqdrH_1mTnn3pM
-                // TODO: Make sure that the column and row sprites take into account the floor
                 
                 if (!n && !s && !e && !w) { drawSprite = spriteName+1; } 
                 else if (n && !s && !e && !w) { drawSprite = spriteName+2; } 

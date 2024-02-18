@@ -23,6 +23,7 @@ public abstract class TileData {
         kryo.register(TileData.class);
         kryo.register(TeamTileData.class);
         kryo.register(StartTileData.class);
+        kryo.register(EndTileData.class);
     }
 
     public void render(Batch batch, int tileX, int tileY) {
@@ -36,5 +37,9 @@ public abstract class TileData {
 
     public void update(float delta, int tileX, int tileY, UpdateData world) {
         
+    }
+
+    public void reset() {
+
     }
 }

@@ -9,6 +9,7 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
+import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.util.Log;
 
 /**
@@ -30,6 +31,8 @@ public class GamePlayer {
     private final GameManager manager;
     private final GameStream stream;
     private final String username;
+    private Player player;
+    private int team = -1;
     private StateListener stateListener;
 
     private boolean disconnected = false;
@@ -103,6 +106,10 @@ public class GamePlayer {
 
     public GameStream getStream() { return stream; }
     public String getUsername() { return username; }
+    public int getTeam() { return team; }
+    public void setTeam(int team) { this.team = team; }
+    public void setPlayer(Player player) { this.player = player; }
+    public Player getPlayer() { return player; }
 
     public boolean equals(Object obj) {
         if (obj instanceof GamePlayer) {

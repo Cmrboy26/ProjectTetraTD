@@ -41,12 +41,13 @@ public class EnemyFactory {
         }
     }
 
-    private void createBasicEnemy(String displayType, int maxHealth) {
-        BasicEnemy enemy = new BasicEnemy(team, displayType, maxHealth);
+    private BasicEnemy createBasicEnemy(String displayType, int maxHealth, float speed) {
+        BasicEnemy enemy = new BasicEnemy(team, displayType, maxHealth, speed);
         addEnemy(enemy);
+        return enemy;
     }
 
-    public void createBasicEnemyOne() { createBasicEnemy("basic1", 5); }
-    public void createBasicEnemyTwo() { createBasicEnemy("basic2", 10); }
+    public void createBasicEnemyOne() { createBasicEnemy("basic1", 5, .75f); }
+    public void createBasicEnemyTwo() { createBasicEnemy("basic2", 10, .75f); }
 
 }

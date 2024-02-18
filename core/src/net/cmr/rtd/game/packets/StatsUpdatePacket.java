@@ -13,7 +13,6 @@ public class StatsUpdatePacket extends Packet {
         this.health = health;
         this.money = money;
         this.structureHealth = structureHealth;
-        // TODO: Make this display on the client side (and have the server send the information)
     }
 
     public int getHealth() {

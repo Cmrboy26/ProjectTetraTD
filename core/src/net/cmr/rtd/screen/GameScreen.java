@@ -1,6 +1,7 @@
 package net.cmr.rtd.screen;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -9,17 +10,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -36,6 +29,7 @@ import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -43,10 +37,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
-import net.cmr.rtd.game.world.tile.StartTileData;
-import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
@@ -63,16 +54,10 @@ public class GameScreen extends AbstractScreenEX {
     Player localPlayer = null;
     final String password;
 
-    Window window;
-    TextButton wall, floor, clear, path, start, end;
-
     Label lifeLabel, structureLifeLabel, cashLabel;
     Image life, structureLife, cash;
 
-    // Editor Variables
-    boolean entered;
-    int selectedTile = 2;
-    int teamNumber = 0;
+    ArrayList<Entity> entityQueue = new ArrayList<Entity>();
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password) {
         super(INITIALIZE_ALL);
@@ -97,121 +82,6 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
-
-        window = new Window("Creator", Sprites.getInstance().getSkin(), "small");
-        window.getTitleLabel().setAlignment(Align.center);
-        window.setScale(.5f);
-        window.setSize(150, 300);
-        window.setOrigin(Align.center);
-        window.setPosition(5, (360 / 2), Align.left);
-        window.padTop(20);
-        window.setVisible(true);
-        window.setMovable(true);
-        window.setResizable(true);
-        window.setModal(false);
-        
-        add(Align.left, window);
-
-        float size = 40;
-
-        ButtonGroup<Button> group = new ButtonGroup<Button>();
-        wall = new TextButton("Wall", Sprites.skin(), "small");
-        wall.setSize(size, size);
-        wall.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 2;
-            }
-        });
-
-        floor = new TextButton("Floor", Sprites.skin(), "small");
-        floor.setSize(size, size);
-        floor.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 1;
-            }
-        });
-
-        clear = new TextButton("Clear", Sprites.skin(), "small");
-        clear.setSize(size, size);
-        clear.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 0;
-            }
-        });
-
-        path = new TextButton("Path", Sprites.skin(), "small");
-        path.setSize(size, size);
-        path.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 3;
-            }
-        });
-
-        start = new TextButton("Start", Sprites.skin(), "small");
-        start.setSize(size, size);
-        start.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 4;
-            }
-        });
-
-        end = new TextButton("End", Sprites.skin(), "small");
-        end.setSize(size, size);
-        end.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 5;
-            }
-        });
-
-        Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "small");
-        teamLabel.setSize(size, size);
-        teamLabel.setAlignment(Align.center);
-
-        TextButton add = new TextButton("+", Sprites.skin(), "small");
-        add.setSize(size, size);
-        add.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                teamNumber++;
-                if (teamNumber >= GameManager.MAX_TEAMS) teamNumber = GameManager.MAX_TEAMS - 1;
-                teamLabel.setText("#" + teamNumber);
-            }
-        });
-
-        TextButton sub = new TextButton("-", Sprites.skin(), "small");
-        sub.setSize(size, size);
-        sub.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                teamNumber--;
-                if (teamNumber < 0) teamNumber = 0;
-                teamLabel.setText("#" + teamNumber);
-            }
-        });
-
-
-        group.add(wall);
-        group.add(floor);
-        group.add(clear);
-        group.add(path);
-        group.add(start);
-        group.add(end);
-
-        window.add(wall).size(size).pad(4);
-        window.add(floor).size(size).pad(4);
-        window.add(clear).size(size).pad(4).row();
-        window.add(path).size(size).pad(4);
-        window.add(start).size(size).pad(4);
-        window.add(end).size(size).pad(4).row();
-        window.add(sub).size(size).pad(4);
-        window.add(teamLabel).size(size).pad(4);
-        window.add(add).size(size).pad(4).row();
 
         float iconSize = 32;
 
@@ -287,11 +157,14 @@ public class GameScreen extends AbstractScreenEX {
             Log.debug("Object: " + object.getClass().getSimpleName(), object);
             if (object instanceof World) {
                 this.world = (World) object;
+                for (Entity entity : entityQueue) {
+                    world.addEntity(entity);
+                }
             }
             if (object instanceof Entity) {
                 Entity entity = (Entity) object;
                 if (world == null) {
-                    Log.error("World is null", new NullPointerException());
+                    entityQueue.add(entity);
                     return;
                 }
                 if (gameObjectPacket.shouldRemove()) {
@@ -303,17 +176,31 @@ public class GameScreen extends AbstractScreenEX {
             return;
         }
 
+        if (packet instanceof StatsUpdatePacket) {
+            StatsUpdatePacket statsPacket = (StatsUpdatePacket) packet;
+            lifeLabel.setText(String.valueOf(statsPacket.getHealth()));
+            cashLabel.setText(String.valueOf(statsPacket.getMoney()));
+            structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
+        }
+
         if (packet instanceof PlayerPacket) {
             PlayerPacket playerPacket = (PlayerPacket) packet;
             if (playerPacket.isConnecting()) {
                 // Add a player object to the world
                 Player player = new Player(playerPacket.username);
-                player.setPosition(Tile.SIZE*2, Tile.SIZE*2);
+                player.setPosition(playerPacket.x, playerPacket.y);
                 world.addEntity(player);
             } else {
                 // Remove the player object from the world
-                Player player = new Player(playerPacket.username);
-                world.removeEntity(player);
+                for (Entity entity : world.getEntities()) {
+                    if (entity instanceof Player) {
+                        Player player = (Player) entity;
+                        if (player.getName().equals(playerPacket.username)) {
+                            world.removeEntity(player);
+                            break;
+                        }
+                    }
+                }
             }
             if (!playerPacket.isInitializingWorld()) {
                 // If it isn't initializing the world, then notify
@@ -334,6 +221,7 @@ public class GameScreen extends AbstractScreenEX {
     public void update(float delta) {
         ioStream.update();
         if (world != null) {
+            // FIXME: When the window is frozen, new game objects are not added to the world. This causes newly added enemies to be bunched up after the window is unfrozen.
             world.update(delta, data);
         }
         processInput(delta);
@@ -379,58 +267,6 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processMouse(int tileX, int tileY) {
 
-        //int lastMx = Gdx.input.getX() - Gdx.input.getDeltaX();
-        //int lastMy = Gdx.input.getY() - Gdx.input.getDeltaY();
-        int mx = Gdx.input.getX();
-        int my = Gdx.input.getY();
-
-        Vector2 localMouse = window.screenToLocalCoordinates(new Vector2(mx, my));
-
-        if (localMouse.x < window.getX() + window.getWidth() && !entered) {
-            entered = true;
-            window.clearActions();
-            window.addAction(Actions.fadeIn(.15f));
-        } else if (localMouse.x >= window.getX() + window.getWidth() && entered) {
-            entered = false;
-            window.clearActions();
-            window.addAction(Actions.fadeOut(.15f));
-        }
-
-        // If mouse is over window, don't process mouse input.
-        if (window.hit(localMouse.x, localMouse.y, true) != null) {
-            return;
-        }
-
-        Vector2 mousePos = viewport.unproject(new Vector2(mx, my));
-        mousePos.x = (int) Math.floor(mousePos.x/Tile.SIZE) * Tile.SIZE;
-        mousePos.y = (int) Math.floor(mousePos.y/Tile.SIZE) * Tile.SIZE;
-
-        boolean left = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-        boolean right = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
-
-        TileType type = TileType.getType(selectedTile);
-        if (right) {
-            type = null;
-        }
-        if ((left || right) && world != null && !(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
-            if (selectedTile == 1 || selectedTile == 0) {
-                world.setTile(tileX, tileY, 0, type);
-                gameManager.getWorld().setTile(tileX, tileY, 0, type);
-            }
-            if (selectedTile != 1 || selectedTile == 0) {
-                world.setTile(tileX, tileY, 1, type);
-                gameManager.getWorld().setTile(tileX, tileY, 1, type);
-            }
-
-            if (selectedTile == 3 || selectedTile == 5) {
-                world.setTileData(tileX, tileY, 1, new TeamTileData(teamNumber));
-                gameManager.getWorld().setTileData(tileX, tileY, 1, new TeamTileData(teamNumber));
-            }
-            if (selectedTile == 4) {
-                world.setTileData(tileX, tileY, 1, new StartTileData(0));
-                gameManager.getWorld().setTileData(tileX, tileY, 1, new StartTileData(0));
-            }
-        }
     }
 
     private void processPlayerMovement(float delta) {
@@ -450,37 +286,6 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void render(float delta) {
         update(delta);
-        
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
-            selectedTile = 2; // wall
-            wall.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
-            selectedTile = 1; // floor
-            floor.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
-            selectedTile = 3; // path
-            path.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) {
-            selectedTile = 4; // start
-            start.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_5)) {
-            selectedTile = 5; // end
-            end.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.GRAVE)) {
-            selectedTile = 0; // clear
-            clear.setChecked(true);
-        }
-
-        int mx = Gdx.input.getX();
-        int my = Gdx.input.getY();
-        Vector2 mousePos = viewport.unproject(new Vector2(mx, my));
-        mousePos.x = (int) Math.floor(mousePos.x/Tile.SIZE) * Tile.SIZE;
-        mousePos.y = (int) Math.floor(mousePos.y/Tile.SIZE) * Tile.SIZE;
 
         if (world != null) {
             viewport.apply();
@@ -489,26 +294,6 @@ public class GameScreen extends AbstractScreenEX {
             world.render(batch, delta);
             batch.end();
         }
-
-        TileType type = TileType.getType(selectedTile);
-
-        if (type != null) {
-            Tile tile = type.getTile();
-
-            int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
-            int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
-            batch.begin();
-            if (world != null) {
-                tile.render(batch, delta, world, tileX, tileY, 1);
-            }
-            batch.end();
-        }
-
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.setColor(1, 1, 1, 1);
-        shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
-        shapeRenderer.end();
 
         stages.drawAll(batch);
     }

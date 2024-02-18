@@ -62,6 +62,8 @@ public abstract class Entity extends GameObject {
     public World getWorld() { return world; }
     public Rectangle getBounds() { return new Rectangle(getX(), getY(), Tile.SIZE, Tile.SIZE); }
 
+    public float getRenderOffset() { return 0; }
+
     public static int getTileX(float x) { return (int) Math.floor(x/Tile.SIZE); }
     public static int getTileY(float y) { return (int) Math.floor(y/Tile.SIZE); }
     public static int getTileX(Entity entity) { return getTileX(entity.getX()); }

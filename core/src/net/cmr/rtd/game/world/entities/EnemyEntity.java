@@ -9,7 +9,10 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.tile.EndTileData;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.TileData;
 
 public abstract class EnemyEntity extends Entity {
 
@@ -50,6 +53,17 @@ public abstract class EnemyEntity extends Entity {
     }
     public int getTeam() {
         return team;
+    }
+
+    public void attackStructure(int tileX, int tileY, UpdateData data, int damage) {
+        // Get the endTileData from the tile at the given coordinates
+        // Call the damage method on the endTileData
+        World world = data.getWorld();
+        TileData tileData = world.getTileData(tileX, tileY, 1);
+        if (tileData instanceof EndTileData) {
+            EndTileData endTileData = (EndTileData) tileData;
+            endTileData.damage(damage);
+        }
     }
 
     @Override

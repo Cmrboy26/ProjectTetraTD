@@ -1,7 +1,9 @@
 package net.cmr.rtd.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -46,8 +48,19 @@ public class MainMenuScreen extends AbstractScreenEX {
 			}
 		});
 		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
-
 		table.row();
+
+		TextButton editor = new TextButton("Editor", Sprites.skin(), labelType);
+		editor.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				FileHandle handle = Gdx.files.external("editorWorld.dat");
+				fadeToScreen(new EditorScreen(handle), .5f, Interpolation.linear, false);
+			}
+		});
+		table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
+		table.row();
+
 		textButton = new TextButton("Settings", Sprites.skin(), labelType);
 		textButton.addListener(new ClickListener() {
 			@Override
@@ -56,8 +69,8 @@ public class MainMenuScreen extends AbstractScreenEX {
 			}
 		});
 		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
-
 		table.row();
+
 		textButton = new TextButton("Exit", Sprites.skin(), labelType);
 		textButton.addListener(new ClickListener() {
 			@Override

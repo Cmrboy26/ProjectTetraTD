@@ -18,7 +18,7 @@ public class StartTileData extends TeamTileData {
 
     float elapsedTime = 0;
     transient EnemyFactory factory;
-    boolean created = false;
+    transient boolean alternate = false;
 
     @Override
     public void update(float delta, int tileX, int tileY, UpdateData data) {
@@ -35,9 +35,19 @@ public class StartTileData extends TeamTileData {
         if (elapsedTime > 1) {
             elapsedTime = 0;
             Log.info("Creating basic enemy... "+team);
-            factory.createBasicEnemyOne();
-            created = true;
+            if (alternate) {
+                factory.createBasicEnemyTwo();
+            } else {
+                factory.createBasicEnemyOne();
+            }
+            alternate = !alternate;
         }
+    }
+
+    @Override
+    public void reset() {
+        elapsedTime = 0;
+        factory = null;
     }
 
 }

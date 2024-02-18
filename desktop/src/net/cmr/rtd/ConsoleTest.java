@@ -149,7 +149,7 @@ public class ConsoleTest {
 			}
 		});
 		manager.onNewConnection(serversideStream);
-		ioStream.sendPacket(new ConnectPacket("Usernamee"));
+		ioStream.sendPacket(new ConnectPacket("Usernamee", 0));
 		data = new UpdateData((GameScreen) null) {
 			@Override
 			public World getWorld() {

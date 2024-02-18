@@ -15,7 +15,7 @@ import net.cmr.rtd.game.stream.OnlineGameStream;
 public class GameManagerTest {
 
     @Test
-    public void testIfPacketsAreRegistered() {
+    public void testPacketRegistration() {
         Kryo kryo = new Kryo();
         OnlineGameStream.registerPackets(kryo);
 
@@ -32,7 +32,7 @@ public class GameManagerTest {
     }
 
     @Test
-    public void testIfPacketEncryptionFunctions() {
+    public void testPacketEncryptionFunctionality() {
         // TODO: Implement
     }
 

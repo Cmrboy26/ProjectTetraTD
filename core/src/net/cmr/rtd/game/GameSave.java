@@ -8,10 +8,25 @@ import com.badlogic.gdx.files.FileHandle;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
+import net.cmr.rtd.waves.WavesData;
 
 /**
  * A class to handle saving and loading game data
- */
+ * 
+ * Saved Game Structure:
+ * game-name/
+ *    world.dat - stores map, enemy, team, and tower data
+ *    player.dat - stores player data
+ *    wave.json - stores wave data for the game
+ * 
+ * Playable Level Structure:
+ * level-name/
+ *    world.dat - stores map and team data (no enemy or tower data included)
+ *    waves/
+ *       easyWave.json - stores wave data for the easy difficulty (specified in {@link WavesData})
+ *       mediumWave.json - stores wave data for the medium difficulty
+ *       ... - stores wave data for the other difficulties
+ **/
 public class GameSave {
     
     private static final String LOCATION = "retrotowerdefense/saves/"; 
@@ -28,10 +43,6 @@ public class GameSave {
      */
     public GameManager loadGame(GameManagerDetails details) {
         GameManager manager = new GameManager(details);
-        return manager;
-    }
-
-    public GameManager saveGame(GameManager manager) {
         return manager;
     }
 
@@ -70,6 +81,14 @@ public class GameSave {
         } else {
             return getSaveFolder(FileType.Absolute);
         }
+    }
+
+    public FileHandle getWorldFile(FileType type) {
+        return getSaveFolder(type).child("world.dat");
+    }
+
+    public FileHandle getWaveFile(FileType type) {
+        return getSaveFolder(type).child("wave.json");
     }
 
     public static GameSave[] getSaveList() {

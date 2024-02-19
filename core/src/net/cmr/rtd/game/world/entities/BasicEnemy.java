@@ -50,7 +50,7 @@ public class BasicEnemy extends EnemyEntity {
         }
 
         // Move towards the target tile
-        float speed = getSpeed() * Tile.SIZE * 2;
+        float speed = getSpeed() * Tile.SIZE;
         Vector2 direction = Pathfind.directPathfind(this, targetTile.x, targetTile.y);
         float dx = direction.x * speed * delta;
         float dy = direction.y * speed * delta;
@@ -193,10 +193,25 @@ public class BasicEnemy extends EnemyEntity {
         return -Tile.SIZE / 2;
     }
 
+    float alphaDecay = Float.MAX_VALUE;
+
     @Override
     public void render(Batch batch, float delta) {
         // Draw the enemy
+
+        if (approachingEnd) {
+            if (alphaDecay == Float.MAX_VALUE) {
+                alphaDecay = 5f;
+            }
+            alphaDecay -= delta * 8f * speed;
+            if (alphaDecay < 0) {
+                alphaDecay = 0;
+            }
+        }
+
+        batch.setColor(1, 1, 1, Math.min(1, alphaDecay));
         batch.draw(Sprites.sprite(displayType), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
+        batch.setColor(1, 1, 1, 1);
         super.render(batch, delta);
     }
 

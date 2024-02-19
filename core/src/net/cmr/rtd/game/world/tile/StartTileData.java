@@ -2,6 +2,7 @@ package net.cmr.rtd.game.world.tile;
 
 import net.cmr.rtd.game.world.EnemyFactory;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.util.Log;
 
 public class StartTileData extends TeamTileData {
@@ -36,9 +37,9 @@ public class StartTileData extends TeamTileData {
             elapsedTime = 0;
             Log.info("Creating basic enemy... "+team);
             if (alternate) {
-                factory.createBasicEnemyTwo();
+                factory.createEnemy(EnemyType.BASIC_ONE);
             } else {
-                factory.createBasicEnemyOne();
+                factory.createEnemy(EnemyType.BASIC_ONE);
             }
             alternate = !alternate;
         }

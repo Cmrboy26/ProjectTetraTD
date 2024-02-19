@@ -16,6 +16,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
 
 @WorldSerializationExempt
@@ -99,6 +100,43 @@ public class Player extends Entity {
 
     public int getMaxHealth() { 
         return 10;
+    }
+
+    public float getSpeed() {
+        // NOTE: Changing speed in game may cause a client-server desync if the player is moving when it changes
+        // This is because the server receives inputs and updates speed whenever the player changes their input (see updateInput)
+        // but the client continuously updates the player's speed
+        return 4;
+    }
+
+    public float getSprintMultiplier() {
+        return 1.5f;
+    }
+
+    public void updateInput(Vector2 input, boolean sprinting) {
+
+        float deadZone = CMRGame.DEADZONE;
+
+        if (input.len() < deadZone) {
+            input.set(0, 0);
+            velocity.set(0, 0);
+            return;
+        }
+
+        float velocityX = Math.abs(input.x);
+        float velocityY = Math.abs(input.y);
+
+        float angle = (float) Math.atan2(input.y, input.x);
+        velocityX = (float) Math.cos(angle);
+        velocityY = (float) Math.sin(angle);
+
+        input.set(velocityX, velocityY);
+
+        if (sprinting) {
+            input.scl(getSprintMultiplier());
+        }
+
+        velocity.set(input).scl(getSpeed() * Tile.SIZE);
     }
 
     

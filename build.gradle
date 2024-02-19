@@ -50,7 +50,6 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         implementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
-        
     }
 }
 
@@ -61,6 +60,8 @@ project(":core") {
         implementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
         implementation group: 'kryonet', name: 'kryonet', version: '2.21'
         implementation 'commons-io:commons-io:2.15.1'
+        implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+        
         
         implementation 'com.esotericsoftware:kryo:5.4.0:sources'
         implementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"

@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Align;
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
+import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Sprites;
@@ -42,9 +42,13 @@ public class MainMenuScreen extends AbstractScreenEX {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				GameManagerDetails details = new GameManagerDetails();
-				GameSave save = new GameSave("testSave");
-				RetroTowerDefense.getInstance(RetroTowerDefense.class).joinSingleplayerGame(details, save);
-				//RetroTowerDefense.getInstance(RetroTowerDefense.class).joinOnlineGame("localhost", 11265);
+
+				LevelSave levelSave = new LevelSave("level_one");
+				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				game.joinSingleplayerGame(details, levelSave, "default", "quest_one");
+
+				//GameSave save = new GameSave("testSave");
+				//RetroTowerDefense.getInstance(RetroTowerDefense.class).joinSingleplayerGame(details, save);
 			}
 		});
 		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();

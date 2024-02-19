@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -36,11 +35,14 @@ import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
+import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.TeamData;
+import net.cmr.rtd.game.world.TeamData.TeamNonExistentException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
@@ -61,6 +63,11 @@ public class GameManager implements Disposable {
 
     private UpdateData data;
     private World world;
+    private ArrayList<TeamData> teams;
+
+    // TODO: make waves functional on the server side
+    private int wave = 1; // 0 means waiting for host to start the game
+    private float waveCountdown = 10;
 
     public static final int MAX_TEAMS = 4;
 
@@ -71,7 +78,7 @@ public class GameManager implements Disposable {
      */
     public GameManager(GameManagerDetails details) {
         this.details = details;
-        data = new UpdateData(this);
+        this.data = new UpdateData(this);
         if (details.isActingAsServer()) {
             // Create server objects
             server = new Server();
@@ -253,8 +260,7 @@ public class GameManager implements Disposable {
         if (details.useConsole()) {
             openConsole();
         }
-
-        load(save);
+        
         Thread updateThread = new Thread(() -> {
             long lastTime = System.nanoTime();
             while (running) {
@@ -406,12 +412,26 @@ public class GameManager implements Disposable {
         } else {
             initializeNewGame();
         }
+        
+        this.teams = new ArrayList<TeamData>(MAX_TEAMS);
+        for (int i = 0; i < MAX_TEAMS; i++) {
+            try {
+                teams.add(new TeamData(world, i));
+            } catch (TeamNonExistentException e) {
+                // This team does not exist in the world.
+            }
+        }
+        if (teams.size() == 0) {
+            throw new IllegalStateException("No teams were found in the world. (A start and end point is required for each team)");
+        } else {
+            Log.info("Loaded " + teams.size() + " teams from the world.");
+        }
 
         FileHandle playersFile = saveFolder.child("players.dat");
         if (playersFile.exists()) {
             try {
                 DataInputStream stream = new DataInputStream(playersFile.read());
-                HashMap<String, Player> data = world.deserializePlayerData(stream);
+                world.deserializePlayerData(stream);
                 Log.info("Loaded players from " + playersFile.path());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -435,6 +455,10 @@ public class GameManager implements Disposable {
     public void synchronizeWorld(GamePlayer player) {
         // Send the world data to the player.
         player.sendPackets(retrieveWorldSnapshot());
+        sendStatsUpdatePacket(player);
+
+        WavePacket wavePacket = new WavePacket(waveCountdown, wave);
+        player.sendPacket(wavePacket);
     }
 
     public GamePlayer getPlayer(Player player) {
@@ -451,7 +475,8 @@ public class GameManager implements Disposable {
 
     public void sendStatsUpdatePacket(GamePlayer player) {
         if (player.getPlayer() == null) return;
-        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), 1000, 15);
+        TeamData team = teams.get(player.getTeam());
+        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
         player.sendPacket(packet);
     }
 
@@ -468,6 +493,10 @@ public class GameManager implements Disposable {
             packets.add(new PlayerPacket(player.getUsername(), player.getPlayer().getX(), player.getPlayer().getY(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
         }
         return packets;
+    }
+
+    public TeamData getTeam(int team) {
+        return teams.get(team);
     }
     
     public void update(float delta) {

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.esotericsoftware.kryonet.Client;
 
@@ -11,6 +13,7 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
+import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
@@ -35,6 +38,18 @@ public class RetroTowerDefense extends CMRGame {
 		super.create();
 		Settings.applySettings();
 		showIntroScreen(new MainMenuScreen());
+
+		FileHandle gameDataFolder = Gdx.files.external("retrotowerdefense/");
+		gameDataFolder.mkdirs();
+
+		FileHandle savesFolder = gameDataFolder.child("saves/");
+		savesFolder.mkdirs();
+
+		FileHandle levelsFolder = gameDataFolder.child("levels/");
+		levelsFolder.mkdirs();
+
+		FileHandle editorFolder = gameDataFolder.child("editor/");
+		editorFolder.mkdirs();
 	}
 
 	@Override
@@ -83,6 +98,20 @@ public class RetroTowerDefense extends CMRGame {
 
 	/**
 	 * Starts and joins a local/singleplayer game on the client's machine
+	 * Creates a new save folder for the selected level and wave (difficulty).
+	 * This method should be called when creating a new game (NOT loading).
+	 * @param details The details of the game manager
+	 * @param levelSave The save to use for the game
+	 * @param saveName The name of the save folder
+	 * @param waveName The name of the wave to use for the level
+	 */
+	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName) {
+		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName));
+	}
+
+	/**
+	 * Starts and joins a local/singleplayer game on the client's machine
+	 * Should be called when LOADING a game.
 	 */
 	public void joinSingleplayerGame(GameManagerDetails details, GameSave save) {
 		GameManager manager = save.loadGame(details);

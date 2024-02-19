@@ -4,12 +4,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import com.badlogic.gdx.math.Vector2;
+
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.Packet;
+import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
 
 /**
@@ -60,7 +64,12 @@ public class GamePlayer {
         this.stream.addListener(new PacketListener() {
             @Override
             public void packetReceived(Packet packet) {
-                onRecievePacket(packet);
+                try {
+                    onRecievePacket(packet);
+                } catch (Exception e) {
+                    // Handle errors with processing the packet.
+                    Log.error("Error while handling packet " + packet + " with player "+getUsername(), e);
+                }
             }
         });
     }
@@ -104,6 +113,7 @@ public class GamePlayer {
         }
     }
 
+    public GameManager getManager() { return manager; }
     public GameStream getStream() { return stream; }
     public String getUsername() { return username; }
     public int getTeam() { return team; }
@@ -123,6 +133,28 @@ public class GamePlayer {
 
     public void onRecievePacket(Packet packet) {
         Log.debug("Player sent packet: " + packet);
+
+        // Handle the packet.
+        if (packet instanceof PlayerInputPacket) {
+            // Update the player's input.
+            PlayerInputPacket input = (PlayerInputPacket) packet;
+
+            Vector2 playerLastPosition = player.getPosition();
+            Vector2 playerNewPosition = input.getPosition();
+            float difference = playerLastPosition.dst(playerNewPosition);
+
+            // TODO: Make a better system that assumes the player is cheating
+
+            // If the player's position has changed significantly, send an update packet.
+            if (difference > Tile.SIZE / 8f) {
+                // Send the player an update position packet.
+                sendPacket(new PlayerInputPacket(null, playerNewPosition, false));
+            }
+
+            player.setPosition(input.getPosition());
+            player.updateInput(input.getInput(), input.isSprinting());
+        }
+
     }
 
 

@@ -10,7 +10,7 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.tile.EndTileData;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.TileData;
 
@@ -60,8 +60,8 @@ public abstract class EnemyEntity extends Entity {
         // Call the damage method on the endTileData
         World world = data.getWorld();
         TileData tileData = world.getTileData(tileX, tileY, 1);
-        if (tileData instanceof EndTileData) {
-            EndTileData endTileData = (EndTileData) tileData;
+        if (tileData instanceof StructureTileData) {
+            StructureTileData endTileData = (StructureTileData) tileData;
             endTileData.damage(damage);
         }
     }

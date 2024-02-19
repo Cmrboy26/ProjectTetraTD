@@ -48,7 +48,6 @@ public class World extends GameObject {
     private HashMap<Point3D, TileData> tileDataMap;
     private HashSet<UUID> removalList;
     private HashMap<String, Player> storedPlayerData;
-    private ArrayList<TeamData> teams; // TODO: Implement this.
     public Color worldColor = Color.valueOf("#6663ff");
 
     public static class Point3D {
@@ -90,7 +89,6 @@ public class World extends GameObject {
         this.tileDataMap = new HashMap<>();
         this.removalList = new HashSet<>();
         this.storedPlayerData = new HashMap<>();
-        this.teams = new ArrayList<>();
     }
 
     @Override
@@ -189,7 +187,7 @@ public class World extends GameObject {
         Player player = storedPlayerData.get(name);
         if (player == null) {
             player = new Player(name);
-            Point spawn = getTeamStructurePoint(gamePlayer.getTeam());
+            Point spawn = gamePlayer.getManager().getTeam(gamePlayer.getTeam()).getStructurePosition();
             player.setPosition(spawn.x * Tile.SIZE + Tile.SIZE / 2, spawn.y * Tile.SIZE + Tile.SIZE / 2);
             storedPlayerData.put(name, player);
         }
@@ -468,11 +466,6 @@ public class World extends GameObject {
             }
         }
         tiles = newTiles;
-    }
-
-    public Point getTeamStructurePoint(int team) {
-        // TODO: Implement team structure points. (Store TeamData in world and use that to determine the team structure points.)
-        return new Point(2, 2);
     }
 
     @Override

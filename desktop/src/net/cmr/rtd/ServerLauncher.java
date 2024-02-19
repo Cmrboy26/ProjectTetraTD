@@ -1,7 +1,5 @@
 package net.cmr.rtd;
 
-import java.util.Scanner;
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;

@@ -300,6 +300,9 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (gameManager != null) {
+                gameManager.save();
+            }
             game.setScreen(new MainMenuScreen());
             return;
         }

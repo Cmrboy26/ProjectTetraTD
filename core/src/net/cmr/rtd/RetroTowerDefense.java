@@ -106,7 +106,7 @@ public class RetroTowerDefense extends CMRGame {
 	 * @param waveName The name of the wave to use for the level
 	 */
 	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName) {
-		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName));
+		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, false));
 	}
 
 	/**

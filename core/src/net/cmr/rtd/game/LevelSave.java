@@ -54,14 +54,24 @@ public class LevelSave {
         return getWavesFolder(type).list();
     } 
 
+    public boolean gameExistsAtLocation(String folderName, String waveName) {
+        FileHandle folder = getLevelFolder(FileType.External).child(folderName);
+        if (!folder.exists()) {
+            return false;
+        }
+        FileHandle wave = getWavesFolder(FileType.External).child(waveName+".json");
+        return wave.exists();
+    }
+
     /**
      * Creates a new save folder for the level.
      * OVERWRITES any existing save folder with the same name.
      * @param folderName The name of the folder to create
      * @param waveName The name of the wave to use for the level
+     * @param override Whether to override an existing save folder with the same name
      * @return The new save folder
      */
-    public GameSave createSave(String folderName, String waveName) {
+    public GameSave createSave(String folderName, String waveName, boolean override) {
 
         if (folderName == null || folderName.isEmpty()) {
             throw new IllegalArgumentException("Folder name cannot be null or empty");
@@ -80,13 +90,21 @@ public class LevelSave {
             }
         }
 
+        GameSave save = new GameSave(folderName);
+        FileHandle folder = save.getSaveFolder();
+        if (folder.exists()) {
+            if (override) {
+                folder.deleteDirectory();
+            } else {
+                return save;
+            }
+        }
+
         FileHandle desiredWaveFile = getWavesFolder(FileType.External).child(waveName+".json");
         if (!desiredWaveFile.exists()) {
             throw new IllegalArgumentException("Wave file does not exist");
         }
 
-        GameSave save = new GameSave(folderName);
-        FileHandle folder = save.getSaveFolder();
         if (folder.exists()) {
             folder.deleteDirectory();
         }

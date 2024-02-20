@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
@@ -18,6 +20,7 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 
 @WorldSerializationExempt
 public class Player extends Entity {
@@ -62,9 +65,13 @@ public class Player extends Entity {
         world.moveHandleCollision(this, delta, velocity);
     }
 
+    float animationDelta = 0;
+
     @Override
     public void render(Batch batch, float delta) {
-        batch.draw(Sprites.sprite(Sprites.SpriteType.CMRBOY26), getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
+        animationDelta += delta;
+        TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
         super.render(batch, delta);
     }
 

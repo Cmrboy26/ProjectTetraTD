@@ -2,6 +2,7 @@ package net.cmr.rtd.game.world;
 
 import java.awt.Point;
 
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 
@@ -57,6 +58,9 @@ public class TeamData {
     }
     public Point getStartTilePosition() {
         return startTilePosition;
+    }
+    public void spawnEnemy(EnemyType type) {
+        startTile.getFactory().createEnemy(type);
     }
 
 }

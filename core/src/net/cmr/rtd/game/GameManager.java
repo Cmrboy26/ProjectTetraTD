@@ -46,6 +46,7 @@ import net.cmr.rtd.game.world.TeamData.TeamNonExistentException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
 /**
@@ -53,6 +54,8 @@ import net.cmr.util.Log;
  * It will handle the game logic, game state, and updating/sending necesary information to the client.
  */
 public class GameManager implements Disposable {
+
+    public static final int MAX_TEAMS = 4;
 
     private final GameManagerDetails details;
     private final ConcurrentHashMap<String, GamePlayer> players = new ConcurrentHashMap<String, GamePlayer>();
@@ -64,12 +67,7 @@ public class GameManager implements Disposable {
     private UpdateData data;
     private World world;
     private ArrayList<TeamData> teams;
-
-    // TODO: make waves functional on the server side
-    private int wave = 1; // 0 means waiting for host to start the game
-    private float waveCountdown = 10;
-
-    public static final int MAX_TEAMS = 4;
+    private boolean pauseWaves = true;
 
     /**
      * Create a new game manager.
@@ -412,6 +410,14 @@ public class GameManager implements Disposable {
         } else {
             initializeNewGame();
         }
+
+        // Load the wave data from the save
+        FileHandle wavesDataFile = saveFolder.child("wave.json");
+        if (wavesDataFile.exists()) {
+            // Load the waves
+            WavesData wavesData = WavesData.load(wavesDataFile);
+            world.setWavesData(wavesData);
+        }
         
         this.teams = new ArrayList<TeamData>(MAX_TEAMS);
         for (int i = 0; i < MAX_TEAMS; i++) {
@@ -456,9 +462,7 @@ public class GameManager implements Disposable {
         // Send the world data to the player.
         player.sendPackets(retrieveWorldSnapshot());
         sendStatsUpdatePacket(player);
-
-        WavePacket wavePacket = new WavePacket(waveCountdown, wave);
-        player.sendPacket(wavePacket);
+        sendWaveData(player, world);
     }
 
     public GamePlayer getPlayer(Player player) {
@@ -484,6 +488,25 @@ public class GameManager implements Disposable {
         GamePlayer gamePlayer = getPlayer(player);
         if (gamePlayer == null) return;
         sendStatsUpdatePacket(gamePlayer);
+    }
+
+    private WavePacket getCurrentWavePacket() {
+        int wave = world.getWave();
+        float waveCountdown = world.getWaveCountdown();
+        float waveDuration = world.getCurrentWaveDuration();
+
+        return new WavePacket(areWavesPaused(), waveCountdown, waveDuration, wave);
+    }
+
+    public void sendWaveData(GamePlayer player, World world) {
+        player.sendPacket(getCurrentWavePacket());
+    }
+
+    public void sendWaveUpdateToAll() {
+        WavePacket packet = getCurrentWavePacket();
+        for (GamePlayer player : players.values()) {
+            player.sendPacket(packet);
+        }
     }
 
     public List<Packet> retrieveWorldSnapshot() {
@@ -534,6 +557,18 @@ public class GameManager implements Disposable {
 
     }
 
+    public void pauseWaves() {
+        this.pauseWaves = true;
+        sendWaveUpdateToAll();
+    }
+    public void resumeWaves() {
+        this.pauseWaves = false;
+        sendWaveUpdateToAll();
+    }
+    public boolean areWavesPaused() {
+        return pauseWaves;
+    }
+
     public boolean isRunning() { return running; }
     public GameManagerDetails getDetails() { return details; }
     public FileHandle getSaveFolder() {
@@ -575,6 +610,10 @@ public class GameManager implements Disposable {
 
     public World getWorld() {
         return world;
+    }
+
+    public ArrayList<TeamData> getTeams() { 
+        return teams;
     }
 
 }

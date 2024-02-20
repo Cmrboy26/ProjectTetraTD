@@ -11,7 +11,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
@@ -61,7 +60,9 @@ public class GameScreen extends AbstractScreenEX {
     Image life, structureLife, cash;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
-    float waveCountdown = -1;
+    float waveCountdown = -1, waveDuration = 0;
+    int wave = 0;
+    boolean areWavesPaused = false;
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password) {
         super(INITIALIZE_ALL);
@@ -211,14 +212,19 @@ public class GameScreen extends AbstractScreenEX {
 
         if (packet instanceof WavePacket) {
             WavePacket wavePacket = (WavePacket) packet;
-            if (wavePacket.getWaveNumber() == 0) {
+
+            this.waveDuration = wavePacket.getWaveLength();
+            this.waveCountdown = wavePacket.getDuration();
+            this.wave = wavePacket.getWaveNumber();
+            this.areWavesPaused = wavePacket.isPaused();
+
+            /*if (wavePacket.getWaveNumber() == 0) {
                 waveLabel.setText("Waiting to start...");
-                waveCountdown = -1;
                 waveCountdownLabel.setText("");
             } else {
                 waveLabel.setText("Wave " + wavePacket.getWaveNumber());
                 waveCountdown = wavePacket.getDuration();
-            }
+            }*/
         }
 
         if (packet instanceof PlayerPacket) {
@@ -259,20 +265,25 @@ public class GameScreen extends AbstractScreenEX {
     public void update(float delta) {
         ioStream.update();
 
-        if (waveCountdown != -1) {
+        if (areWavesPaused) {
+            waveCountdownLabel.setText("Waves Paused");
+        } else if (waveCountdown != -1) {
+
+            String waveText = "Wave " + wave;
             waveCountdown -= delta;
-            waveCountdownLabel.setText(String.format("%.2f", waveCountdown));
-            if (waveCountdown <= 0) {
-                waveCountdownLabel.setText("Finished!");
-                waveCountdownLabel.addAction(Actions.sequence(
-                    Actions.delay(1.5f),
-                    Actions.fadeOut(1.0f),
-                    Actions.run(() -> {waveCountdownLabel.setText("");}),
-                    Actions.alpha(1)
-                ));
+            if (waveCountdown < 0) {
+                waveCountdown = 0;
             }
-        } else {
-            waveCountdownLabel.setText("");
+
+            float preparationTime = waveCountdown - waveDuration;
+            float displayCountdown = waveCountdown;
+            if (preparationTime > 0) {
+                displayCountdown = preparationTime;
+                waveText = "Prepare for " + waveText;
+            }
+
+            waveCountdownLabel.setText(String.format("%.2f", displayCountdown));
+            waveLabel.setText(waveText);
         }
 
         if (world != null) {

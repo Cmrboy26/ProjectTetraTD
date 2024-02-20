@@ -2,7 +2,6 @@ package net.cmr.rtd.game.world.tile;
 
 import net.cmr.rtd.game.world.EnemyFactory;
 import net.cmr.rtd.game.world.UpdateData;
-import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.util.Log;
 
 public class StartTileData extends TeamTileData {
@@ -17,7 +16,7 @@ public class StartTileData extends TeamTileData {
         return super.toString();
     }
 
-    float elapsedTime = 0;
+    //float elapsedTime = 0;
     transient EnemyFactory factory;
     transient boolean alternate = false;
 
@@ -31,24 +30,15 @@ public class StartTileData extends TeamTileData {
             factory = new EnemyFactory(team, tileX, tileY, data);
             Log.info("Created enemy factory for team "+team);
         }
-
-        elapsedTime += delta;
-        if (elapsedTime > 1) {
-            elapsedTime = 0;
-            Log.info("Creating basic enemy... "+team);
-            if (alternate) {
-                factory.createEnemy(EnemyType.BASIC_ONE);
-            } else {
-                factory.createEnemy(EnemyType.BASIC_ONE);
-            }
-            alternate = !alternate;
-        }
     }
 
     @Override
     public void reset() {
-        elapsedTime = 0;
+        //elapsedTime = 0;
         factory = null;
+    }
+    public EnemyFactory getFactory() {
+        return factory;
     }
 
 }

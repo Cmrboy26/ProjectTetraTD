@@ -165,6 +165,10 @@ public class WavesData {
         }
         return entities.toArray(new EnemyType[entities.size()]);
     }
+
+    public Wave getWave(int waveNumber) {
+        return waves.get(waveNumber);
+    }
     
     public enum DifficultyRating {
         UNDEFINED(0),

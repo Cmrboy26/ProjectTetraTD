@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.world.entities.effects.EntityEffects;
 import net.cmr.rtd.game.world.tile.Tile;
 
 public abstract class Entity extends GameObject {
 
     private UUID entityUUID; // Unique ID for the entity. (WILL NEVER CHANGE, EVEN BETWEEN RELOADS)
     private World world;
+    private EntityEffects effects;
 
     /**
      * Constructs a new entity with the given type.
@@ -22,6 +25,7 @@ public abstract class Entity extends GameObject {
     protected Entity(GameType type) {
         super(type);
         this.entityUUID = UUID.randomUUID();
+        this.effects = new EntityEffects(this);
     }
 
     @Override
@@ -38,7 +42,9 @@ public abstract class Entity extends GameObject {
         world.removeEntity(this);
     }
 
-    public abstract void update(float delta, UpdateData data);
+    public void update(float delta, UpdateData data) {
+        effects.update(delta);
+    }
     
     protected abstract void serializeEntity(DataBuffer buffer) throws IOException;
     protected abstract void deserializeEntity(GameObject object, DataInputStream input) throws IOException;
@@ -46,6 +52,7 @@ public abstract class Entity extends GameObject {
     @Override
     protected final void serialize(DataBuffer buffer) throws IOException {
         buffer.writeUTF(entityUUID.toString());
+        effects.serialize(buffer);
         serializeEntity(buffer);
     }
 
@@ -53,6 +60,7 @@ public abstract class Entity extends GameObject {
     protected final void deserialize(GameObject object, DataInputStream input) throws IOException {
         Entity entity = (Entity) object;
         entity.entityUUID = UUID.fromString(input.readUTF());
+        entity.effects = EntityEffects.deserialize(entity, input);
         deserializeEntity(object, input);
     }
 
@@ -68,6 +76,8 @@ public abstract class Entity extends GameObject {
     public static int getTileY(float y) { return (int) Math.floor(y/Tile.SIZE); }
     public static int getTileX(Entity entity) { return getTileX(entity.getX()); }
     public static int getTileY(Entity entity) { return getTileY(entity.getY()); }
+    public Vector2 getPosition() { return position; }
+    public EntityEffects getEffects() { return effects; }
 
     @Override
     public String toString() {

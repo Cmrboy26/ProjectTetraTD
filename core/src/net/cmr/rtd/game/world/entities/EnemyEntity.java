@@ -37,7 +37,10 @@ public abstract class EnemyEntity extends Entity {
     protected abstract void deserializeEnemy(GameObject object, DataInputStream input) throws IOException;
 
     public abstract int getMaxHealth();
-    public abstract float getSpeed();
+    public final float getSpeed() {
+        return getTargetSpeed();
+    }
+    public abstract float getTargetSpeed();
 
     public int getHealth() {
         return health;

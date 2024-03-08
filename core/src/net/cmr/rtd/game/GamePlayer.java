@@ -38,6 +38,7 @@ public class GamePlayer {
     private Player player;
     private int team = -1;
     private StateListener stateListener;
+    private PlayerInputPacket lastInput;
 
     private boolean disconnected = false;
 
@@ -80,6 +81,11 @@ public class GamePlayer {
             create();
         }
         getStream().update();
+        if (player != null) {
+            if (lastInput != null) {
+                player.updateInput(lastInput.getInput(), lastInput.isSprinting());
+            }
+        }
     }
 
     public void kick(String reason) {
@@ -138,6 +144,7 @@ public class GamePlayer {
         if (packet instanceof PlayerInputPacket) {
             // Update the player's input.
             PlayerInputPacket input = (PlayerInputPacket) packet;
+            lastInput = input;
 
             Vector2 playerLastPosition = player.getPosition();
             Vector2 playerNewPosition = input.getPosition();

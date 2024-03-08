@@ -39,6 +39,9 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
@@ -333,9 +336,24 @@ public class GameScreen extends AbstractScreenEX {
         processMouse(tileX, tileY);
     }
 
-
     private void processMouse(int tileX, int tileY) {
-
+        TowerEntity toPlace = null;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+            // Place down an ice tower
+            toPlace = new FireTower();
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+            // Place down a fire tower
+            toPlace = new IceTower();
+        }
+        if (toPlace == null) {
+            return;
+        }
+        toPlace.setPosition((tileX + .5f) * Tile.SIZE, (tileY + .5f) * Tile.SIZE);
+        world.addEntity(toPlace);
+        if (gameManager != null) {
+            gameManager.getWorld().addEntity(toPlace);
+        }
     }
 
     float lastVelocityX = 0, lastVelocityY = 0;

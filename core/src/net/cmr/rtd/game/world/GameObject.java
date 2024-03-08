@@ -13,6 +13,8 @@ import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.util.Log;
 
 public abstract class GameObject {
@@ -26,6 +28,9 @@ public abstract class GameObject {
         WORLD(World.class),
         PLAYER(Player.class),
         BASIC_ENEMY(BasicEnemy.class),
+        
+        ICE_TOWER(IceTower.class),
+        FIRE_TOWER(FireTower.class),
         ;
 
         private final Class<? extends GameObject> clazz;

@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
@@ -17,6 +16,7 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
@@ -110,10 +110,7 @@ public class Player extends Entity {
     }
 
     public float getSpeed() {
-        // NOTE: Changing speed in game may cause a client-server desync if the player is moving when it changes
-        // This is because the server receives inputs and updates speed whenever the player changes their input (see updateInput)
-        // but the client continuously updates the player's speed
-        return 4;
+        return 4 * getEffects().getStatMultiplier(EntityStat.SPEED);
     }
 
     public float getSprintMultiplier() {

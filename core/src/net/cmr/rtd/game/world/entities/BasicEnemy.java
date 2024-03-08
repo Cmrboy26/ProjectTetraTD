@@ -27,6 +27,7 @@ public class BasicEnemy extends EnemyEntity {
     Point targetTile;
     boolean approachingEnd;
 
+    // How much the enemy will damage the structure when it reaches the end
     public static final int DAMAGE = 1;
 
     public BasicEnemy() {
@@ -63,7 +64,6 @@ public class BasicEnemy extends EnemyEntity {
             targetTile = null;
 
             if (approachingEnd) {
-                // TODO: Damage the structure and update the health bar on the client side
                 int tileX = getTileX(this);
                 int tileY = getTileY(this);
                 attackStructure(tileX, tileY, data, DAMAGE);
@@ -184,7 +184,7 @@ public class BasicEnemy extends EnemyEntity {
     }
 
     @Override
-    public float getSpeed() {
+    public float getTargetSpeed() {
         return speed;
     }
 

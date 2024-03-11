@@ -27,9 +27,11 @@ import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
+import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
+import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -37,6 +39,9 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
@@ -54,10 +59,13 @@ public class GameScreen extends AbstractScreenEX {
     Player localPlayer = null;
     final String password;
 
-    Label lifeLabel, structureLifeLabel, cashLabel;
+    Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
+    float waveCountdown = -1, waveDuration = 0;
+    int wave = 0;
+    boolean areWavesPaused = false;
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password) {
         super(INITIALIZE_ALL);
@@ -121,6 +129,19 @@ public class GameScreen extends AbstractScreenEX {
         add(Align.topLeft, structureLife);
         add(Align.topLeft, structureLifeLabel);
 
+        waveLabel = new Label("Waiting to start...", Sprites.skin(), "small");
+        waveLabel.setAlignment(Align.right);
+        waveLabel.setSize(200, iconSize);
+        waveLabel.setPosition(640-5, 360-5, Align.topRight);
+
+        add(Align.topRight, waveLabel);
+
+        waveCountdownLabel = new Label("", Sprites.skin(), "small");
+        waveCountdownLabel.setAlignment(Align.right);
+        waveCountdownLabel.setSize(200, iconSize);
+        waveCountdownLabel.setPosition(640-5, 360-5-iconSize, Align.topRight);
+
+        add(Align.topRight, waveCountdownLabel);
     }
 
     public void onRecievePacket(Packet packet) {
@@ -176,11 +197,37 @@ public class GameScreen extends AbstractScreenEX {
             return;
         }
 
+        if (packet instanceof PlayerInputPacket) {
+            // The server and client have been desynchronized. Set the local player's position to the server's position.
+            PlayerInputPacket inputPacket = (PlayerInputPacket) packet;
+            Player player = getLocalPlayer();
+            if (player != null) {
+                player.setPosition(inputPacket.getPosition());
+            }
+        }
+
         if (packet instanceof StatsUpdatePacket) {
             StatsUpdatePacket statsPacket = (StatsUpdatePacket) packet;
             lifeLabel.setText(String.valueOf(statsPacket.getHealth()));
             cashLabel.setText(String.valueOf(statsPacket.getMoney()));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
+        }
+
+        if (packet instanceof WavePacket) {
+            WavePacket wavePacket = (WavePacket) packet;
+
+            this.waveDuration = wavePacket.getWaveLength();
+            this.waveCountdown = wavePacket.getDuration();
+            this.wave = wavePacket.getWaveNumber();
+            this.areWavesPaused = wavePacket.isPaused();
+
+            /*if (wavePacket.getWaveNumber() == 0) {
+                waveLabel.setText("Waiting to start...");
+                waveCountdownLabel.setText("");
+            } else {
+                waveLabel.setText("Wave " + wavePacket.getWaveNumber());
+                waveCountdown = wavePacket.getDuration();
+            }*/
         }
 
         if (packet instanceof PlayerPacket) {
@@ -220,6 +267,28 @@ public class GameScreen extends AbstractScreenEX {
 
     public void update(float delta) {
         ioStream.update();
+
+        if (areWavesPaused) {
+            waveCountdownLabel.setText("Waves Paused");
+        } else if (waveCountdown != -1) {
+
+            String waveText = "Wave " + wave;
+            waveCountdown -= delta;
+            if (waveCountdown < 0) {
+                waveCountdown = 0;
+            }
+
+            float preparationTime = waveCountdown - waveDuration;
+            float displayCountdown = waveCountdown;
+            if (preparationTime > 0) {
+                displayCountdown = preparationTime;
+                waveText = "Prepare for " + waveText;
+            }
+
+            waveCountdownLabel.setText(String.format("%.2f", displayCountdown));
+            waveLabel.setText(waveText);
+        }
+
         if (world != null) {
             // FIXME: When the window is frozen, new game objects are not added to the world. This causes newly added enemies to be bunched up after the window is unfrozen.
             world.update(delta, data);
@@ -245,6 +314,9 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (gameManager != null) {
+                gameManager.save();
+            }
             game.setScreen(new MainMenuScreen());
             return;
         }
@@ -264,10 +336,38 @@ public class GameScreen extends AbstractScreenEX {
         processMouse(tileX, tileY);
     }
 
-
     private void processMouse(int tileX, int tileY) {
+        // DEBUG CODE
+        TowerEntity toPlace = null;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+            // Place down an ice tower
+            toPlace = new FireTower(0);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
+            // Place down a fire tower
+            toPlace = new IceTower(0);
+        }
+        if (toPlace == null) {
+            return;
+        }
+        toPlace.setPosition((tileX + .5f) * Tile.SIZE, (tileY + .5f) * Tile.SIZE);
+        world.addEntity(toPlace);
+        if (gameManager != null) {
+            gameManager.getWorld().addEntity(toPlace);
 
+            if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                boolean gamePaused = gameManager.areWavesPaused();
+                if (gamePaused) {
+                    gameManager.resumeWaves();
+                } else {
+                    gameManager.pauseWaves();
+                }
+            }
+        }
     }
+
+    float lastVelocityX = 0, lastVelocityY = 0;
+    boolean lastSprinting = false;
 
     private void processPlayerMovement(float delta) {
         if (getLocalPlayer() == null) {
@@ -275,12 +375,19 @@ public class GameScreen extends AbstractScreenEX {
         }
         float vx = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
         float vy = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
-        float speed = 5;
+        boolean sprinting = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
 
-        vx *= Tile.SIZE * speed;
-        vy *= Tile.SIZE * speed;
+        if (lastVelocityX != vx || lastVelocityY != vy || sprinting != lastSprinting) {
+            // Something changed, send the new input to the server.
+            PlayerInputPacket inputPacket = new PlayerInputPacket(new Vector2(vx, vy), getLocalPlayer().getPosition(), lastSprinting);
+            ioStream.sendPacket(inputPacket);
+        }
 
-        getLocalPlayer().setVelocity(new Vector2(vx, vy));
+        lastVelocityX = vx;
+        lastVelocityY = vy;
+        lastSprinting = sprinting;
+
+        getLocalPlayer().updateInput(new Vector2(vx, vy), lastSprinting);
     }
 
     @Override

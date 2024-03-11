@@ -3,13 +3,14 @@ package net.cmr.rtd.game.world.tile;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.util.Log;
 
-public class EndTileData extends TeamTileData {
+public class StructureTileData extends TeamTileData {
     
     int health = 100;
+    public long money = 50;
     boolean healthChanged = false;
 
-    public EndTileData() { }
-    public EndTileData(int team) {
+    public StructureTileData() { }
+    public StructureTileData(int team) {
         super(team);
     }
 
@@ -45,6 +46,14 @@ public class EndTileData extends TeamTileData {
     public void reset() {
         health = 100;
         healthChanged = true;
+    }
+
+    public long getMoney() {
+        return money;
+    }
+
+    public int getHealth() {
+        return health;
     }
 
 }

@@ -1,5 +1,7 @@
 package net.cmr.rtd.game.world;
 
+import java.util.function.Consumer;
+
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
@@ -31,6 +33,38 @@ public class EnemyFactory {
         this.world = data.getWorld();
     }
 
+    public enum EnemyType {
+        BASIC_ONE((factory) -> factory.createBasicEnemyOne()),
+        BASIC_TWO((factory) -> factory.createBasicEnemyTwo());
+
+        private Consumer<EnemyFactory> factory;
+
+        EnemyType(Consumer<EnemyFactory> factory) {
+            this.factory = factory;
+        }
+
+        public void createEnemy(EnemyFactory factory) {
+            this.factory.accept(factory);
+        }
+
+        public static EnemyType fromString(String type) {
+            for (EnemyType t : values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    return t;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Creates an enemy of the given type and adds it to the world at the position this factory is associated with.
+     * @param type the type of enemy to create
+     */
+    public void createEnemy(EnemyType type) {
+        type.createEnemy(this);
+    }
+
     private void addEnemy(EnemyEntity entity) {
         entity.setHealth(entity.getMaxHealth());
         entity.setPosition(tileX * Tile.SIZE + Tile.SIZE / 2, tileY * Tile.SIZE + Tile.SIZE / 2);
@@ -47,7 +81,8 @@ public class EnemyFactory {
         return enemy;
     }
 
-    public void createBasicEnemyOne() { createBasicEnemy("basic1", 5, .75f); }
-    public void createBasicEnemyTwo() { createBasicEnemy("basic2", 10, .75f); }
+
+    private void createBasicEnemyOne() { createBasicEnemy("basic1", 5, 1.5f); }
+    private void createBasicEnemyTwo() { createBasicEnemy("basic2", 10, 1f); }
 
 }

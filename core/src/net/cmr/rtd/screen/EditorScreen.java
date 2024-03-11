@@ -33,7 +33,7 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.tile.EndTileData;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -79,7 +79,6 @@ public class EditorScreen extends AbstractScreenEX {
             world = new World();
             Log.info("Created new world");
         }
-
     }
 
     @Override
@@ -621,7 +620,7 @@ public class EditorScreen extends AbstractScreenEX {
                 world.setTileData(tileX, tileY, 1, new StartTileData(teamNumber));
             }
             if (selectedTile == 5) {
-                world.setTileData(tileX, tileY, 1, new EndTileData(teamNumber));
+                world.setTileData(tileX, tileY, 1, new StructureTileData(teamNumber));
             }
         }
     }

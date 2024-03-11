@@ -2,6 +2,7 @@ package net.cmr.rtd.game.stream;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -14,7 +15,9 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
+import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
+import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.util.Log;
@@ -95,6 +98,8 @@ public class OnlineGameStream extends GameStream {
         kryo.setRegistrationRequired(true);
         kryo.register(String.class);
         kryo.register(byte[].class);
+        kryo.register(Vector2.class);
+
         kryo.register(Packet.class, new PacketSerializer<>(kryo, Packet.class));
         kryo.register(ConnectPacket.class);
         kryo.register(AESEncryptionPacket.class);
@@ -104,6 +109,8 @@ public class OnlineGameStream extends GameStream {
         kryo.register(StatsUpdatePacket.class);
         kryo.register(PasswordPacket.class);
         kryo.register(PlayerPacket.class);
+        kryo.register(PlayerPositionsPacket.class);
+        kryo.register(PlayerInputPacket.class);
     }
     
 }

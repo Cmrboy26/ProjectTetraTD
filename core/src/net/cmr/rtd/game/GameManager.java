@@ -4,14 +4,16 @@ import java.io.DataInputStream;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import org.apache.commons.io.input.CloseShieldInputStream;
 
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
@@ -22,6 +24,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.commands.CommandHandler;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
@@ -32,15 +35,18 @@ import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
+import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
+import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
 /**
@@ -48,6 +54,8 @@ import net.cmr.util.Log;
  * It will handle the game logic, game state, and updating/sending necesary information to the client.
  */
 public class GameManager implements Disposable {
+
+    public static final int MAX_TEAMS = 4;
 
     private final GameManagerDetails details;
     private final ConcurrentHashMap<String, GamePlayer> players = new ConcurrentHashMap<String, GamePlayer>();
@@ -58,8 +66,8 @@ public class GameManager implements Disposable {
 
     private UpdateData data;
     private World world;
-
-    public static final int MAX_TEAMS = 4;
+    private ArrayList<TeamData> teams;
+    private boolean pauseWaves = true;
 
     /**
      * Create a new game manager.
@@ -68,7 +76,7 @@ public class GameManager implements Disposable {
      */
     public GameManager(GameManagerDetails details) {
         this.details = details;
-        data = new UpdateData(this);
+        this.data = new UpdateData(this);
         if (details.isActingAsServer()) {
             // Create server objects
             server = new Server();
@@ -246,7 +254,11 @@ public class GameManager implements Disposable {
         }
 
         running = true;
-        load(save);
+
+        if (details.useConsole()) {
+            openConsole();
+        }
+        
         Thread updateThread = new Thread(() -> {
             long lastTime = System.nanoTime();
             while (running) {
@@ -293,6 +305,31 @@ public class GameManager implements Disposable {
             return;
         }
         dispose();
+    }
+
+    private void openConsole() {
+        CommandHandler.register(new CommandHandler() {
+            @Override
+            public void handleCommand(String command, String[] args) {
+                if (command.equals("exit")) {
+                    Log.info("Recieved command: exit. Closing server...");
+                    stop();
+                    return;
+                }
+            }
+        });
+        Thread consoleThread = new Thread(() -> {
+            CloseShieldInputStream shield = CloseShieldInputStream.wrap(System.in);
+            Scanner scanner = new Scanner(shield);
+            
+            while (isRunning()) {
+                String input = scanner.nextLine();
+                CommandHandler.handleCommand(input);
+            }
+
+            scanner.close();
+        });
+        consoleThread.start();
     }
 
     /**
@@ -374,11 +411,33 @@ public class GameManager implements Disposable {
             initializeNewGame();
         }
 
+        // Load the wave data from the save
+        FileHandle wavesDataFile = saveFolder.child("wave.json");
+        if (wavesDataFile.exists()) {
+            // Load the waves
+            WavesData wavesData = WavesData.load(wavesDataFile);
+            world.setWavesData(wavesData);
+        }
+        
+        this.teams = new ArrayList<TeamData>(MAX_TEAMS);
+        for (int i = 0; i < MAX_TEAMS; i++) {
+            try {
+                teams.add(new TeamData(world, i));
+            } catch (NullTeamException e) {
+                // This team does not exist in the world.
+            }
+        }
+        if (teams.size() == 0) {
+            throw new IllegalStateException("No teams were found in the world. (A start and end point is required for each team)");
+        } else {
+            Log.info("Loaded " + teams.size() + " teams from the world.");
+        }
+
         FileHandle playersFile = saveFolder.child("players.dat");
         if (playersFile.exists()) {
             try {
                 DataInputStream stream = new DataInputStream(playersFile.read());
-                HashMap<String, Player> data = world.deserializePlayerData(stream);
+                world.deserializePlayerData(stream);
                 Log.info("Loaded players from " + playersFile.path());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -402,6 +461,8 @@ public class GameManager implements Disposable {
     public void synchronizeWorld(GamePlayer player) {
         // Send the world data to the player.
         player.sendPackets(retrieveWorldSnapshot());
+        sendStatsUpdatePacket(player);
+        sendWaveData(player, world);
     }
 
     public GamePlayer getPlayer(Player player) {
@@ -418,7 +479,8 @@ public class GameManager implements Disposable {
 
     public void sendStatsUpdatePacket(GamePlayer player) {
         if (player.getPlayer() == null) return;
-        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), 1000, 15);
+        TeamData team = teams.get(player.getTeam());
+        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
         player.sendPacket(packet);
     }
 
@@ -428,6 +490,25 @@ public class GameManager implements Disposable {
         sendStatsUpdatePacket(gamePlayer);
     }
 
+    private WavePacket getCurrentWavePacket() {
+        int wave = world.getWave();
+        float waveCountdown = world.getWaveCountdown();
+        float waveDuration = world.getCurrentWaveDuration();
+
+        return new WavePacket(areWavesPaused(), waveCountdown, waveDuration, wave);
+    }
+
+    public void sendWaveData(GamePlayer player, World world) {
+        player.sendPacket(getCurrentWavePacket());
+    }
+
+    public void sendWaveUpdateToAll() {
+        WavePacket packet = getCurrentWavePacket();
+        for (GamePlayer player : players.values()) {
+            player.sendPacket(packet);
+        }
+    }
+
     public List<Packet> retrieveWorldSnapshot() {
         ArrayList<Packet> packets = new ArrayList<Packet>();
         packets.add(new GameObjectPacket(world));
@@ -435,6 +516,10 @@ public class GameManager implements Disposable {
             packets.add(new PlayerPacket(player.getUsername(), player.getPlayer().getX(), player.getPlayer().getY(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
         }
         return packets;
+    }
+
+    public TeamData getTeam(int team) {
+        return teams.get(team);
     }
     
     public void update(float delta) {
@@ -472,6 +557,18 @@ public class GameManager implements Disposable {
 
     }
 
+    public void pauseWaves() {
+        this.pauseWaves = true;
+        sendWaveUpdateToAll();
+    }
+    public void resumeWaves() {
+        this.pauseWaves = false;
+        sendWaveUpdateToAll();
+    }
+    public boolean areWavesPaused() {
+        return pauseWaves;
+    }
+
     public boolean isRunning() { return running; }
     public GameManagerDetails getDetails() { return details; }
     public FileHandle getSaveFolder() {
@@ -490,24 +587,33 @@ public class GameManager implements Disposable {
         private int tcpPort = 11265;
         private boolean actAsServer = false;
         private String password = null;
+        private boolean console;
 
         public GameManagerDetails() {
 
         }
 
         public void actAsServer(boolean actAsServer) { this.actAsServer = actAsServer; }
-        public boolean isActingAsServer() { return actAsServer; }
         public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
-        public int getMaxPlayers() { return maxPlayers; }
         public void setTCPPort(int tcpPort) { this.tcpPort = tcpPort; }
-        public int getTCPPort() { return tcpPort; }
         public void setPassword(String password) { this.password = password; }
+        public void setUseConsole(boolean console) { this.console = console; }
+        
+
+        public boolean isActingAsServer() { return actAsServer; }
+        public int getMaxPlayers() { return maxPlayers; }
+        public int getTCPPort() { return tcpPort; }
         public String getPassword() { return password; }
         public boolean usePassword() { return password != null; }
+        public boolean useConsole() { return console; }
     }
 
     public World getWorld() {
         return world;
+    }
+
+    public ArrayList<TeamData> getTeams() { 
+        return teams;
     }
 
 }

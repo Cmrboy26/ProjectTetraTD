@@ -8,6 +8,8 @@ import net.cmr.util.Log.LogLevel;
 
 public abstract class CMRGame extends Game {
 
+    public static final float DEADZONE = 0.2f;
+
     private static CMRGame instance = null;
     private static Object instanceLock = new Object();
     private static boolean DEBUG = true;

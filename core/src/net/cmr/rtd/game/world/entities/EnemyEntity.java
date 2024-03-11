@@ -6,11 +6,12 @@ import java.io.IOException;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.tile.EndTileData;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.TileData;
 
@@ -26,7 +27,10 @@ public abstract class EnemyEntity extends Entity {
 
     @Override
     public void update(float delta, UpdateData data) {
-        
+        if (health <= 0) {
+            onDeath(data);
+            removeFromWorld();
+        }
     }
 
     public Rectangle getBounds() {
@@ -37,7 +41,10 @@ public abstract class EnemyEntity extends Entity {
     protected abstract void deserializeEnemy(GameObject object, DataInputStream input) throws IOException;
 
     public abstract int getMaxHealth();
-    public abstract float getSpeed();
+    public final float getSpeed() {
+        return getTargetSpeed();
+    }
+    public abstract float getTargetSpeed();
 
     public int getHealth() {
         return health;
@@ -60,10 +67,14 @@ public abstract class EnemyEntity extends Entity {
         // Call the damage method on the endTileData
         World world = data.getWorld();
         TileData tileData = world.getTileData(tileX, tileY, 1);
-        if (tileData instanceof EndTileData) {
-            EndTileData endTileData = (EndTileData) tileData;
+        if (tileData instanceof StructureTileData) {
+            StructureTileData endTileData = (StructureTileData) tileData;
             endTileData.damage(damage);
         }
+    }
+
+    public void onDeath(UpdateData data) {
+        
     }
 
     @Override
@@ -79,6 +90,16 @@ public abstract class EnemyEntity extends Entity {
         entity.team = input.readInt();
         entity.health = input.readInt();
         deserializeEnemy(object, input);
+    }
+
+    /**
+     * Helper method: Deposit money into the team's structure when they successfully kill it
+     */
+    public void moneyOnDeath(EnemyEntity entity, UpdateData data, long quantity) {
+        if (data.isServer()) {
+            GameManager manager = data.getManager();
+            manager.getTeam(entity.getTeam()).depositMoney(quantity, data);
+        }
     }
 
 }

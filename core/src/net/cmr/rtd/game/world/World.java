@@ -23,11 +23,17 @@ import com.esotericsoftware.kryo.io.Output;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
+import net.cmr.rtd.game.world.tile.StartTileData;
+import net.cmr.rtd.game.world.tile.StructureTileData;
+import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.rtd.waves.Wave;
+import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
 /**
@@ -41,6 +47,7 @@ public class World extends GameObject {
 
     public static final int DEFAULT_WORLD_SIZE = 32;
     public static final int LAYERS = 3;
+    public static final float PREPARATION_TIME = 10;
 
     private int worldSize;
     private ConcurrentHashMap<UUID, Entity> entities; // <Entity ID, Entity>
@@ -48,8 +55,12 @@ public class World extends GameObject {
     private HashMap<Point3D, TileData> tileDataMap;
     private HashSet<UUID> removalList;
     private HashMap<String, Player> storedPlayerData;
-    private ArrayList<TeamData> teams; // TODO: Implement this.
     public Color worldColor = Color.valueOf("#6663ff");
+
+    // Server only
+    private int wave = 0;
+    private float waveCountdown = PREPARATION_TIME;
+    private WavesData wavesData;
 
     public static class Point3D {
         public int x, y, z;
@@ -90,7 +101,20 @@ public class World extends GameObject {
         this.tileDataMap = new HashMap<>();
         this.removalList = new HashSet<>();
         this.storedPlayerData = new HashMap<>();
-        this.teams = new ArrayList<>();
+
+        for (int i = 0; i < DEFAULT_WORLD_SIZE; i++) {
+            for (int j = 0; j < DEFAULT_WORLD_SIZE; j++) {
+                setTile(i, j, 0, TileType.FLOOR);
+            }
+        }
+        for (int x = 1; x < DEFAULT_WORLD_SIZE - 1; x++) {
+            setTile(x, 1, 1, TileType.PATH);
+            setTileData(x, 1, 1, new TeamTileData(0));
+        }
+        setTile(0, 1, 1, TileType.START);
+        setTileData(0, 1, 1, new StartTileData(0));
+        setTile(DEFAULT_WORLD_SIZE-1, 1, 1, TileType.END);
+        setTileData(DEFAULT_WORLD_SIZE-1, 1, 1, new StructureTileData(0));
     }
 
     @Override
@@ -109,6 +133,38 @@ public class World extends GameObject {
     }
 
     private void updateWorld(float delta, UpdateData data) {
+        if (data.isServer() && !data.getManager().areWavesPaused()) {
+            Wave waveObj = wavesData.getWave(this.wave);
+            // TODO: SPAWN ENTITIES
+
+            if (waveObj != null) {
+                float elapsedTime = waveObj.getWaveTime() - waveCountdown;
+                EnemyType[] entities = wavesData.getEntities(elapsedTime, delta, this.wave);
+                for (EnemyType type : entities) {
+                    for (TeamData teamData : data.getManager().getTeams()) {
+                        teamData.spawnEnemy(type);
+                    }
+                }
+            }
+
+            waveCountdown -= delta;
+            if (waveCountdown <= 0) {
+                wave++;
+                waveObj = wavesData.getWave(this.wave);
+                if (waveObj == null) {
+                    // The game has ended!
+                    // TODO: Add a game win screen.
+                    data.getManager().stop();
+                    return;
+                }
+
+                waveCountdown = PREPARATION_TIME + waveObj.getWaveTime();
+
+                // Notify the clients that the wave has ended
+                data.getManager().sendWaveUpdateToAll();
+            }
+        }
+
         for (UUID id : removalList) {
             Entity removed = entities.remove(id);
             if (removed == null) return;
@@ -189,7 +245,7 @@ public class World extends GameObject {
         Player player = storedPlayerData.get(name);
         if (player == null) {
             player = new Player(name);
-            Point spawn = getTeamStructurePoint(gamePlayer.getTeam());
+            Point spawn = gamePlayer.getManager().getTeam(gamePlayer.getTeam()).getStructurePosition();
             player.setPosition(spawn.x * Tile.SIZE + Tile.SIZE / 2, spawn.y * Tile.SIZE + Tile.SIZE / 2);
             storedPlayerData.put(name, player);
         }
@@ -241,6 +297,9 @@ public class World extends GameObject {
         buffer.writeFloat(worldColor.r);
         buffer.writeFloat(worldColor.g);
         buffer.writeFloat(worldColor.b);
+
+        buffer.writeInt(wave);
+        buffer.writeFloat(waveCountdown);
 
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
@@ -311,6 +370,9 @@ public class World extends GameObject {
         float g = input.readFloat();
         float b = input.readFloat();
         world.worldColor = new Color(r, g, b, 1);
+
+        world.wave = input.readInt();
+        world.waveCountdown = input.readFloat();
 
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
@@ -470,9 +532,25 @@ public class World extends GameObject {
         tiles = newTiles;
     }
 
-    public Point getTeamStructurePoint(int team) {
-        // TODO: Implement team structure points. (Store TeamData in world and use that to determine the team structure points.)
-        return new Point(2, 2);
+    public void setWavesData(WavesData wavesData) {
+        this.wavesData = wavesData;
+    }
+    public WavesData getWavesData() {
+        return wavesData;
+    }
+
+    public float getCurrentWaveDuration() {
+        Wave wave = wavesData.getWave(this.wave);
+        if (wave == null) {
+            return 0;
+        }
+        return wave.getWaveTime();
+    }
+    public int getWave() {
+        return wave;
+    }
+    public float getWaveCountdown() {
+        return waveCountdown;
     }
 
     @Override

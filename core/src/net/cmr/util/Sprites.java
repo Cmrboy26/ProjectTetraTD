@@ -4,11 +4,16 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
@@ -19,6 +24,7 @@ public class Sprites implements Disposable {
     private Skin skin;
     private TextureAtlas skinAtlas, spriteAtlas;
     private HashMap<String, Sprite> sprites;
+    private HashMap<AnimationType, Animation<TextureRegion>> animations;
 
     public enum SpriteType {
         CMRBOY26("cmrboy26"),
@@ -37,6 +43,29 @@ public class Sprites implements Disposable {
         }
         public String getSpriteName() {
             return spriteName;
+        }
+    }
+
+    public enum AnimationType {
+        TESLA_TOWER("teslaTower", PlayMode.LOOP, .5f),
+        ;
+
+        private String animationName;
+        private PlayMode mode;
+        private float speed;
+        AnimationType(String animationName, PlayMode mode, float speed) {
+            this.animationName = animationName;
+            this.mode = mode;
+            this.speed = speed;
+        }
+        public String getAnimationName() {
+            return animationName;
+        }
+        public PlayMode getPlayMode() {
+            return mode;
+        }
+        public float getSpeed() {
+            return speed;
         }
     }
 
@@ -59,6 +88,18 @@ public class Sprites implements Disposable {
             sprites.put(region.name, spriteAtlas.createSprite(region.name));
         }
         Log.info("Sprites initialized and loaded: " + sprites.size());
+        this.animations = new HashMap<AnimationType, Animation<TextureRegion>>();
+        for (AnimationType type : AnimationType.values()) {
+            PlayMode mode = type.getPlayMode();
+            Array<AtlasRegion> regions = spriteAtlas.findRegions(type.getAnimationName());
+            if (regions.size == 0) {
+                throw new NullPointerException("No regions found for animation: " + type.getAnimationName());
+            }
+            Animation<TextureRegion> animation = new Animation<TextureRegion>(type.getSpeed(), regions, mode);
+            Log.info("Loading animation: " + type.getAnimationName());
+            animations.put(type, animation);
+        }
+        Log.info("Animations initialized and loaded: " + animations.size());
     }
 
     public static Skin skin() {
@@ -85,6 +126,19 @@ public class Sprites implements Disposable {
     public static TextureRegionDrawable drawable(SpriteType type) {
         return getInstance().getDrawable(type);
     }
+    public static Animation<TextureRegion> animation(AnimationType type) {
+        return getInstance().getAnimation(type);
+    }
+    public Animation<TextureRegion> getAnimation(AnimationType type) {
+        return animations.get(type);
+    }
+    public static TextureRegion animation(AnimationType type, float stateTime) {
+        return getInstance().getAnimation(type, stateTime);
+    }
+    public TextureRegion getAnimation(AnimationType type, float stateTime) {
+        return animations.get(type).getKeyFrame(stateTime);
+    }
+
     public BitmapFont smallFont() {
         return skin.getFont("small-font");
     }

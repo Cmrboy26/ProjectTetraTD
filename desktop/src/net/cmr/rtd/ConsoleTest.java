@@ -41,7 +41,7 @@ public class ConsoleTest {
 	static UpdateData data;
 
 	public static void main (String[] arg) throws InterruptedException {
-        Log.initializeLog();
+		Log.initializeLog();
 		Log.setLogLevel(LogLevel.DEBUG);
 
         Lwjgl3NativesLoader.load();

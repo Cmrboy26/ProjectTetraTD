@@ -16,7 +16,7 @@ public class StartTileData extends TeamTileData {
         return super.toString();
     }
 
-    float elapsedTime = 0;
+    //float elapsedTime = 0;
     transient EnemyFactory factory;
     transient boolean alternate = false;
 
@@ -30,24 +30,15 @@ public class StartTileData extends TeamTileData {
             factory = new EnemyFactory(team, tileX, tileY, data);
             Log.info("Created enemy factory for team "+team);
         }
-
-        elapsedTime += delta;
-        if (elapsedTime > 1) {
-            elapsedTime = 0;
-            Log.info("Creating basic enemy... "+team);
-            if (alternate) {
-                factory.createBasicEnemyTwo();
-            } else {
-                factory.createBasicEnemyOne();
-            }
-            alternate = !alternate;
-        }
     }
 
     @Override
     public void reset() {
-        elapsedTime = 0;
+        //elapsedTime = 0;
         factory = null;
+    }
+    public EnemyFactory getFactory() {
+        return factory;
     }
 
 }

@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
@@ -27,6 +28,7 @@ public class BasicEnemy extends EnemyEntity {
     Point targetTile;
     boolean approachingEnd;
 
+    // How much the enemy will damage the structure when it reaches the end
     public static final int DAMAGE = 1;
 
     public BasicEnemy() {
@@ -43,14 +45,15 @@ public class BasicEnemy extends EnemyEntity {
 
     @Override
     public void update(float delta, UpdateData data) {
-        
+        super.update(delta, data);
+
         if (targetTile == null) {
             findNextTile(data);
             return;
         }
 
         // Move towards the target tile
-        float speed = getSpeed() * Tile.SIZE * 2;
+        float speed = getSpeed() * Tile.SIZE;
         Vector2 direction = Pathfind.directPathfind(this, targetTile.x, targetTile.y);
         float dx = direction.x * speed * delta;
         float dy = direction.y * speed * delta;
@@ -63,7 +66,6 @@ public class BasicEnemy extends EnemyEntity {
             targetTile = null;
 
             if (approachingEnd) {
-                // TODO: Damage the structure and update the health bar on the client side
                 int tileX = getTileX(this);
                 int tileY = getTileY(this);
                 attackStructure(tileX, tileY, data, DAMAGE);
@@ -184,7 +186,7 @@ public class BasicEnemy extends EnemyEntity {
     }
 
     @Override
-    public float getSpeed() {
+    public float getTargetSpeed() {
         return speed;
     }
 
@@ -193,11 +195,35 @@ public class BasicEnemy extends EnemyEntity {
         return -Tile.SIZE / 2;
     }
 
+    float alphaDecay = Float.MAX_VALUE;
+
     @Override
     public void render(Batch batch, float delta) {
         // Draw the enemy
+
+        if (approachingEnd) {
+            if (alphaDecay == Float.MAX_VALUE) {
+                alphaDecay = 5f;
+            }
+            alphaDecay -= delta * 8f * speed;
+            if (alphaDecay < 0) {
+                alphaDecay = 0;
+            }
+        }
+
+        Color color = getEffects().getDiscoloration();
+        color.a = Math.min(1, alphaDecay);
+        batch.setColor(color);
         batch.draw(Sprites.sprite(displayType), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
+        batch.setColor(1, 1, 1, 1);
         super.render(batch, delta);
+    }
+
+    @Override
+    public void onDeath(UpdateData data) {
+        super.onDeath(data);
+        int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
+        moneyOnDeath(this, data, money);
     }
 
 }

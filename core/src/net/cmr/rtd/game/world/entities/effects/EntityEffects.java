@@ -17,6 +17,7 @@ import net.cmr.rtd.game.world.Entity;
 public class EntityEffects {
     
     private HashSet<Effect> effects;
+    private HashSet<Class<? extends Effect>> immunity;
     private final Entity entity;
 
     public static enum EntityStat {
@@ -26,6 +27,7 @@ public class EntityEffects {
     public EntityEffects(Entity entity) {
         this.entity = entity;
         effects = new HashSet<Effect>();
+        immunity = new HashSet<Class<? extends Effect>>();
     }
 
     public Effect getEffect(Class<? extends Effect> effectClass) {
@@ -37,7 +39,16 @@ public class EntityEffects {
         return null;
     }
 
+    public void addImmunity(Class<? extends Effect> effectClass) {
+        immunity.add(effectClass);
+    }
+
     public void addEffect(Effect effect) {
+        for (Class<? extends Effect> immune : immunity) {
+            if (immune.isInstance(effect)) {
+                return;
+            }
+        }
         effects.add(effect);
     }
 

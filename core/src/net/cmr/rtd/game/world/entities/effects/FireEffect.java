@@ -1,5 +1,7 @@
 package net.cmr.rtd.game.world.entities.effects;
 
+import com.badlogic.gdx.graphics.Color;
+
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
@@ -34,6 +36,11 @@ public class FireEffect extends Effect {
     @Override
     public float getStatModifier(EntityStat stat) {
         return NOTHING;
+    }
+
+    @Override
+    public Color getDiscoloration() {
+        return new Color(255f/255f, 144f/255f, 144f/255f, 1f);
     }
     
 }

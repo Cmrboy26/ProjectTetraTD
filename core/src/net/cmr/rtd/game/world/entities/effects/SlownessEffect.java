@@ -1,5 +1,7 @@
 package net.cmr.rtd.game.world.entities.effects;
 
+import com.badlogic.gdx.graphics.Color;
+
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 
 public class SlownessEffect extends Effect {
@@ -18,6 +20,11 @@ public class SlownessEffect extends Effect {
             return (1.5f/(getLevel()+1f));
         }
         return NOTHING;
+    }
+
+    @Override
+    public Color getDiscoloration() {
+        return new Color(195f/255f, 200f/255f, 255f/255f, 1f);
     }
     
 }

@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashSet;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.Entity;
@@ -80,6 +81,28 @@ public class EntityEffects {
             value *= effect.getStatModifier(stat);
         }
         return value;
+    }
+    
+    public Color getDiscoloration() {
+        // Color must start as black for screen blending to work properly
+        Color color = Color.BLACK;
+        for (Effect effect : effects) {
+            Color discoloration = effect.getDiscoloration();
+            if (discoloration != null) {
+                // Screen blending of multiple effects
+                color = new Color(
+                    1f - (1f - color.r) * (1f - discoloration.r),
+                    1f - (1f - color.g) * (1f - discoloration.g),
+                    1f - (1f - color.b) * (1f - discoloration.b),
+                    1f
+                );
+            }
+        }
+        // If the color is black, no effect was applied, so return no filter
+        if (color.equals(Color.BLACK)) {
+            return Color.WHITE;
+        }
+        return color;
     }
 
     public Entity getEntity() {

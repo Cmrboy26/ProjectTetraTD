@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -26,7 +27,10 @@ public abstract class EnemyEntity extends Entity {
 
     @Override
     public void update(float delta, UpdateData data) {
-        
+        if (health <= 0) {
+            onDeath(data);
+            removeFromWorld();
+        }
     }
 
     public Rectangle getBounds() {
@@ -69,6 +73,10 @@ public abstract class EnemyEntity extends Entity {
         }
     }
 
+    public void onDeath(UpdateData data) {
+        
+    }
+
     @Override
     protected final void serializeEntity(DataBuffer buffer) throws IOException {
         buffer.writeInt(team);
@@ -82,6 +90,16 @@ public abstract class EnemyEntity extends Entity {
         entity.team = input.readInt();
         entity.health = input.readInt();
         deserializeEnemy(object, input);
+    }
+
+    /**
+     * Helper method: Deposit money into the team's structure when they successfully kill it
+     */
+    public void moneyOnDeath(EnemyEntity entity, UpdateData data, long quantity) {
+        if (data.isServer()) {
+            GameManager manager = data.getManager();
+            manager.getTeam(entity.getTeam()).depositMoney(quantity, data);
+        }
     }
 
 }

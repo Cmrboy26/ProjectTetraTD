@@ -14,7 +14,7 @@ public class TeamData {
     public Point structurePosition, startTilePosition;
 
     public TeamData() { }
-    public TeamData(World world, int team) throws TeamNonExistentException {
+    public TeamData(World world, int team) throws NullTeamException {
         this.team = team;
 
         for (int x = 0; x < world.getWorldSize(); x++) {
@@ -37,12 +37,12 @@ public class TeamData {
         }
 
         if (structure == null || startTile == null) {
-            throw new TeamNonExistentException("Team "+team+" does not exist");
+            throw new NullTeamException("Team "+team+" does not exist");
         }
     }
 
-    public class TeamNonExistentException extends Exception {
-        public TeamNonExistentException(String message) {
+    public class NullTeamException extends Exception {
+        public NullTeamException(String message) {
             super(message);
         }
     }
@@ -61,6 +61,14 @@ public class TeamData {
     }
     public void spawnEnemy(EnemyType type) {
         startTile.getFactory().createEnemy(type);
+    }
+
+    public void depositMoney(long amount, UpdateData data) {
+        if (data.isClient()) {
+            return;
+        }
+        structure.money += amount;
+        data.getManager().updateTeamStats(team);
     }
 
 }

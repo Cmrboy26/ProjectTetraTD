@@ -337,14 +337,15 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void processMouse(int tileX, int tileY) {
+        // DEBUG CODE
         TowerEntity toPlace = null;
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             // Place down an ice tower
-            toPlace = new FireTower();
+            toPlace = new FireTower(0);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
             // Place down a fire tower
-            toPlace = new IceTower();
+            toPlace = new IceTower(0);
         }
         if (toPlace == null) {
             return;
@@ -353,6 +354,15 @@ public class GameScreen extends AbstractScreenEX {
         world.addEntity(toPlace);
         if (gameManager != null) {
             gameManager.getWorld().addEntity(toPlace);
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                boolean gamePaused = gameManager.areWavesPaused();
+                if (gamePaused) {
+                    gameManager.resumeWaves();
+                } else {
+                    gameManager.pauseWaves();
+                }
+            }
         }
     }
 

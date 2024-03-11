@@ -6,7 +6,7 @@ import net.cmr.util.Log;
 public class StructureTileData extends TeamTileData {
     
     int health = 100;
-    long money = 50;
+    public long money = 50;
     boolean healthChanged = false;
 
     public StructureTileData() { }

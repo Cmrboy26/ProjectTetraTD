@@ -20,8 +20,11 @@ import net.cmr.util.Sprites.AnimationType;
 
 public class IceTower extends TowerEntity {
 
-    public IceTower() {
-        super(GameType.ICE_TOWER);
+    boolean attacking = false;
+    float animationDelta = 0;
+
+    public IceTower(int team) {
+        super(GameType.ICE_TOWER, team);
     }
 
     @Override
@@ -33,7 +36,9 @@ public class IceTower extends TowerEntity {
     public void attack(UpdateData data) {
         super.attack(data);
         ArrayList<Entity> entitiesInRange = getEntitiesInRange(3, data);
+        attacking = false;
         for (Entity entity : entitiesInRange) {
+            attacking = true;
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 new SlownessEffect(enemy.getEffects(), 2, 1);
@@ -57,11 +62,14 @@ public class IceTower extends TowerEntity {
 
     }
 
-    float animationDelta = 0;
-
     @Override
     public void render(Batch batch, float delta) {
-        animationDelta += delta;
+        if (attacking) {
+            animationDelta += delta;
+        } else {
+            animationDelta = 0;
+        }
+
         batch.setColor(Color.BLUE);
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);

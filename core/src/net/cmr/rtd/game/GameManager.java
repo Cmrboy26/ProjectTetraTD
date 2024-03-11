@@ -42,7 +42,7 @@ import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
-import net.cmr.rtd.game.world.TeamData.TeamNonExistentException;
+import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
@@ -423,7 +423,7 @@ public class GameManager implements Disposable {
         for (int i = 0; i < MAX_TEAMS; i++) {
             try {
                 teams.add(new TeamData(world, i));
-            } catch (TeamNonExistentException e) {
+            } catch (NullTeamException e) {
                 // This team does not exist in the world.
             }
         }

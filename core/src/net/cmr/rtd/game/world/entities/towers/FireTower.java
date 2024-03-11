@@ -21,11 +21,13 @@ import net.cmr.util.Sprites.AnimationType;
 
 public class FireTower extends TowerEntity {
 
+    boolean attacking = false;
+    float animationDelta = 0;
     float targetDPS = 1f;
     float range = 3;
 
-    public FireTower() {
-        super(GameType.FIRE_TOWER);
+    public FireTower(int team) {
+        super(GameType.FIRE_TOWER, team);
     }
 
     @Override
@@ -62,11 +64,14 @@ public class FireTower extends TowerEntity {
         return 1;
     }
 
-    float animationDelta = 0;
-
     @Override
     public void render(Batch batch, float delta) {
-        animationDelta += delta;
+        if (attacking) {
+            animationDelta += delta;
+        } else {
+            animationDelta = 0;
+        }
+
         batch.setColor(Color.RED);
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);

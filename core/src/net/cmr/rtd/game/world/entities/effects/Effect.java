@@ -1,5 +1,8 @@
 package net.cmr.rtd.game.world.entities.effects;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.Null;
+
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 
@@ -64,6 +67,15 @@ public abstract class Effect {
      * @return the multiplier for the stat
      */
     public abstract float getStatModifier(EntityStat stat);
+
+    /**
+     * An optional method to apply a shade of color to the entity while the effect is active.
+     * If null is returned, no color is applied.
+     * @return the color to apply to the entity
+     */
+    public @Null Color getDiscoloration() {
+        return null;
+    }
 
     public String toString() {
         return getClass().getSimpleName() + "[" + duration + "s / " + maxDuration + "s, level=" + level + "]";

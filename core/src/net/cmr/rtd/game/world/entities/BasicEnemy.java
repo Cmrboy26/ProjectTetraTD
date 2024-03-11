@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
@@ -44,7 +45,8 @@ public class BasicEnemy extends EnemyEntity {
 
     @Override
     public void update(float delta, UpdateData data) {
-        
+        super.update(delta, data);
+
         if (targetTile == null) {
             findNextTile(data);
             return;
@@ -209,10 +211,19 @@ public class BasicEnemy extends EnemyEntity {
             }
         }
 
-        batch.setColor(1, 1, 1, Math.min(1, alphaDecay));
+        Color color = getEffects().getDiscoloration();
+        color.a = Math.min(1, alphaDecay);
+        batch.setColor(color);
         batch.draw(Sprites.sprite(displayType), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(1, 1, 1, 1);
         super.render(batch, delta);
+    }
+
+    @Override
+    public void onDeath(UpdateData data) {
+        super.onDeath(data);
+        int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
+        moneyOnDeath(this, data, money);
     }
 
 }

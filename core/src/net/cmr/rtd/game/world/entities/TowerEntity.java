@@ -14,15 +14,17 @@ import net.cmr.rtd.game.world.tile.Tile;
 public abstract class TowerEntity extends Entity {
 
     float attackDelta = 0;
+    int team;
 
-    public TowerEntity(GameType type) {
+    public TowerEntity(GameType type, int team) {
         super(type);
+        this.team = team;
     }
     
     public void update(float delta, UpdateData data) {
         attackDelta += delta;
-        if (attackDelta >= 1) {
-            attackDelta = 0;
+        while (attackDelta >= 1f/getAttackSpeed()) {
+            attackDelta -= 1f/getAttackSpeed();
             attack(data);
         }
     }
@@ -31,6 +33,7 @@ public abstract class TowerEntity extends Entity {
     @Override
     protected void serializeEntity(DataBuffer buffer) throws IOException {
         buffer.writeFloat(attackDelta);
+        buffer.writeInt(team);
         serializeTower(buffer);
     }
 
@@ -38,6 +41,7 @@ public abstract class TowerEntity extends Entity {
     protected void deserializeEntity(GameObject object, DataInputStream input) throws IOException {
         TowerEntity tower = (TowerEntity) object;
         tower.attackDelta = input.readFloat();
+        tower.team = input.readInt();
         deserializeTower(tower, input);
     }
 
@@ -48,7 +52,9 @@ public abstract class TowerEntity extends Entity {
         double worldDistance = tileRadius = Tile.SIZE * tileRadius;
         ArrayList<Entity> entitiesInRange = new ArrayList<Entity>();
         for (Entity entity : data.getWorld().getEntities()) {
-            if (entity instanceof TowerEntity) {
+            if (entity instanceof EnemyEntity) {
+                EnemyEntity enemy = (EnemyEntity) entity;
+                if (enemy.getTeam() != team) continue;
                 double distance = entity.getPosition().dst(getPosition());
                 if (distance <= worldDistance) {
                     entitiesInRange.add(entity);
@@ -58,9 +64,20 @@ public abstract class TowerEntity extends Entity {
         return entitiesInRange;
     }
 
+    /**
+     * @return seconds between each {@link #attack(UpdateData)} call
+     */
     public float getAttackSpeed() {
         return 1;
     }
+
+    /**
+     * @see #getAttackSpeed()
+     * @see #getEntitiesInRange(double, UpdateData)
+     * @param data world data
+     */
     public void attack(UpdateData data) {}
+
+    public int getTeam() { return team; }
 
 }

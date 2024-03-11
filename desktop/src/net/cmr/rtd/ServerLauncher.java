@@ -31,12 +31,6 @@ public class ServerLauncher extends ApplicationAdapter {
 
         //Scanner scanner = new Scanner(System.in);
         while(manager.isRunning()) {
-            /*String input = scanner.nextLine();
-            if (input.equals("exit")) {
-                Log.info("Recieved command: exit. Closing server...");
-                manager.stop();
-                break;
-            }*/
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

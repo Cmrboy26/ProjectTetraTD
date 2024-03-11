@@ -338,11 +338,11 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processMouse(int tileX, int tileY) {
         TowerEntity toPlace = null;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             // Place down an ice tower
             toPlace = new FireTower();
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
             // Place down a fire tower
             toPlace = new IceTower();
         }

@@ -4,6 +4,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.Entity;
@@ -11,6 +14,9 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
+import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 
 public class IceTower extends TowerEntity {
 
@@ -49,6 +55,18 @@ public class IceTower extends TowerEntity {
     @Override
     protected void deserializeTower(TowerEntity entity, DataInputStream input) throws IOException {
 
+    }
+
+    float animationDelta = 0;
+
+    @Override
+    public void render(Batch batch, float delta) {
+        animationDelta += delta;
+        batch.setColor(Color.BLUE);
+        TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
+        batch.setColor(Color.WHITE);
+        super.render(batch, delta);
     }
 
 }

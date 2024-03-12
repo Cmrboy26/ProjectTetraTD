@@ -26,6 +26,10 @@ public class FireTower extends TowerEntity {
     float targetDPS = 1f;
     float range = 3;
 
+    public FireTower() {
+        super(GameType.FIRE_TOWER, 0);
+    }
+
     public FireTower(int team) {
         super(GameType.FIRE_TOWER, team);
     }
@@ -39,12 +43,7 @@ public class FireTower extends TowerEntity {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 enemy.damage(damageIncrement);
-
-                // 1 in 4 chance to apply fire effect
-                int random = new Random().nextInt(4);
-                if (random == 0) {
-                    new FireEffect(enemy.getEffects(), 4, 1);
-                }
+                new FireEffect(enemy.getEffects(), 1, 1);
             }
         }
     }
@@ -61,7 +60,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getAttackSpeed() {
-        return 1;
+        return .25f;
     }
 
     @Override

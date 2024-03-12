@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.Pathfind;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
@@ -187,7 +188,7 @@ public class BasicEnemy extends EnemyEntity {
 
     @Override
     public float getTargetSpeed() {
-        return speed;
+        return speed * getEffects().getStatMultiplier(EntityStat.SPEED);
     }
 
     @Override

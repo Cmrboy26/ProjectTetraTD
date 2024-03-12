@@ -42,7 +42,9 @@ public abstract class Entity extends GameObject {
         world.removeEntity(this);
     }
 
+    @Override
     public void update(float delta, UpdateData data) {
+        super.update(delta, data);
         effects.update(delta);
     }
     

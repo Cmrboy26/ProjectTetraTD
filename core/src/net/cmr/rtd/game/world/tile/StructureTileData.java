@@ -1,17 +1,20 @@
 package net.cmr.rtd.game.world.tile;
 
+import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.util.Log;
 
 public class StructureTileData extends TeamTileData {
     
-    int health = 100;
-    public long money = 50;
+    int health;
+    public long money;
     boolean healthChanged = false;
 
     public StructureTileData() { }
     public StructureTileData(int team) {
         super(team);
+        health = 100;
+        money = 50;
     }
 
     @Override
@@ -27,8 +30,13 @@ public class StructureTileData extends TeamTileData {
 
         if (healthChanged) {
             healthChanged = false;
+            
+            TeamData teamm = data.getManager().getTeam(team);
+            System.out.println(teamm);
+            System.out.println(teamm.getHealth());
+            System.out.println(getHealth());
+
             data.getManager().updateTeamStats(team);
-            System.out.println("HEALTH: "+health);
             if (health <= 0) {
                 // TODO: The team has lost
                 Log.info("Team "+team+" has lost");

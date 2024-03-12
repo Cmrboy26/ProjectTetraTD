@@ -27,6 +27,7 @@ public abstract class EnemyEntity extends Entity {
 
     @Override
     public void update(float delta, UpdateData data) {
+        super.update(delta, data);
         if (health <= 0) {
             onDeath(data);
             removeFromWorld();

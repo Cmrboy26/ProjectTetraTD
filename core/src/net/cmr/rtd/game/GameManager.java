@@ -425,6 +425,7 @@ public class GameManager implements Disposable {
                 teams.add(new TeamData(world, i));
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
+                System.out.println("TEAM DOES NOT EXIST: " + e.getMessage());
             }
         }
         if (teams.size() == 0) {
@@ -481,6 +482,7 @@ public class GameManager implements Disposable {
         if (player.getPlayer() == null) return;
         TeamData team = teams.get(player.getTeam());
         StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
+        System.out.println(packet);
         player.sendPacket(packet);
     }
 

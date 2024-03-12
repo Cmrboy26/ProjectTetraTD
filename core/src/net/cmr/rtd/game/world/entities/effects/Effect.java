@@ -77,6 +77,20 @@ public abstract class Effect {
         return null;
     }
 
+    @Override
+    public int hashCode() {
+        return target.hashCode() + getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Effect)) {
+            return false;
+        }
+        Effect effect = (Effect) obj;
+        return target.equals(effect.target) && getClass().equals(effect.getClass());
+    }
+
     public String toString() {
         return getClass().getSimpleName() + "[" + duration + "s / " + maxDuration + "s, level=" + level + "]";
     }

@@ -6,7 +6,9 @@ public class StatsUpdatePacket extends Packet {
     private long money;
     private int structureHealth;
 
-    public StatsUpdatePacket() { super(); }
+    public StatsUpdatePacket() { 
+        super(); 
+    }
 
     public StatsUpdatePacket(int health, long money, int structureHealth) {
         super();

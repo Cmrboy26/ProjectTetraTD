@@ -22,6 +22,11 @@ public class IceTower extends TowerEntity {
 
     boolean attacking = false;
     float animationDelta = 0;
+    final float persistence = 1;
+
+    public IceTower() {
+        super(GameType.ICE_TOWER, 0);
+    }
 
     public IceTower(int team) {
         super(GameType.ICE_TOWER, team);
@@ -35,13 +40,16 @@ public class IceTower extends TowerEntity {
     @Override
     public void attack(UpdateData data) {
         super.attack(data);
-        ArrayList<Entity> entitiesInRange = getEntitiesInRange(3, data);
+        ArrayList<Entity> entitiesInRange = getEntitiesInRange(4, data);
         attacking = false;
         for (Entity entity : entitiesInRange) {
             attacking = true;
             if (entity instanceof EnemyEntity) {
+                if (data.isClient()) {
+                    System.out.println("Slowing enemy!!");
+                }
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new SlownessEffect(enemy.getEffects(), 2, 1);
+                new SlownessEffect(enemy.getEffects(), getAttackSpeed() + persistence, 2);
                 // TODO: add a visual effect to show the slow effect
             }
         }
@@ -49,7 +57,7 @@ public class IceTower extends TowerEntity {
     
     @Override
     public float getAttackSpeed() {
-        return .5f;
+        return .25f;
     }
 
     @Override

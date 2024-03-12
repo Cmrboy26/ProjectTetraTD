@@ -49,6 +49,7 @@ public class EntityEffects {
                 return;
             }
         }
+        effects.remove(effect);
         effects.add(effect);
     }
 

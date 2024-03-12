@@ -211,6 +211,8 @@ public class GameScreen extends AbstractScreenEX {
             lifeLabel.setText(String.valueOf(statsPacket.getHealth()));
             cashLabel.setText(String.valueOf(statsPacket.getMoney()));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
+            System.out.println(lifeLabel.getText() + " " + cashLabel.getText() + " " + structureLifeLabel.getText());
+            System.out.println(statsPacket.getHealth() + " " + statsPacket.getMoney() + " " + statsPacket.getStructureHealth());
         }
 
         if (packet instanceof WavePacket) {
@@ -334,6 +336,18 @@ public class GameScreen extends AbstractScreenEX {
         
         processPlayerMovement(delta);
         processMouse(tileX, tileY);
+
+        if (gameManager == null) {
+            return;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            boolean gamePaused = gameManager.areWavesPaused();
+            if (gamePaused) {
+                gameManager.resumeWaves();
+            } else {
+                gameManager.pauseWaves();
+            }
+        }
     }
 
     private void processMouse(int tileX, int tileY) {
@@ -354,15 +368,6 @@ public class GameScreen extends AbstractScreenEX {
         world.addEntity(toPlace);
         if (gameManager != null) {
             gameManager.getWorld().addEntity(toPlace);
-
-            if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                boolean gamePaused = gameManager.areWavesPaused();
-                if (gamePaused) {
-                    gameManager.resumeWaves();
-                } else {
-                    gameManager.pauseWaves();
-                }
-            }
         }
     }
 

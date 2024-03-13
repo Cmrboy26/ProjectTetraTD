@@ -47,7 +47,7 @@ public class World extends GameObject {
 
     public static final int DEFAULT_WORLD_SIZE = 32;
     public static final int LAYERS = 3;
-    public static final float PREPARATION_TIME = 10;
+    public static final float PREPARATION_TIME = 5;
 
     private int worldSize;
     private ConcurrentHashMap<UUID, Entity> entities; // <Entity ID, Entity>

@@ -34,7 +34,7 @@ import net.cmr.util.Log.LogLevel;
 
 public class ConsoleTest {
 
-	static final long RUN_TIME = 10000;
+	static final long RUN_TIME = 1000 * 100;
 	static LocalGameStream ioStream;
 	static LocalGameStream serversideStream;
 	static World world;
@@ -53,6 +53,7 @@ public class ConsoleTest {
 		GameManager manager = new GameManager(details);
 		manager.initialize(new GameSave("e"));
 		manager.start();
+		manager.resumeWaves();
 
 		LocalGameStream[] pair = LocalGameStream.createStreamPair();
 		ioStream = pair[0];

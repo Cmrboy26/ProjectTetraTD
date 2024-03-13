@@ -45,7 +45,10 @@ import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.waves.Wave;
+import net.cmr.rtd.waves.WaveUnit;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
@@ -339,6 +342,7 @@ public class GameManager implements Disposable {
     public void initialize(GameSave save) {
         Objects.requireNonNull(save, "The save file cannot be null.");
         this.save = save;
+        System.out.println(save.getSaveFolder().file().getAbsolutePath());
         load(save);
 
         Log.info("Game \"" + save.getName() + "\" initialized.");
@@ -416,6 +420,12 @@ public class GameManager implements Disposable {
         if (wavesDataFile.exists()) {
             // Load the waves
             WavesData wavesData = WavesData.load(wavesDataFile);
+            world.setWavesData(wavesData);
+        } else {
+            WavesData wavesData = new WavesData();
+            Wave wave = new Wave(1000);
+            wave.addWaveUnit(new WaveUnit(wave, EnemyType.BASIC_ONE, 1000));
+            wavesData.waves.put(1, wave);
             world.setWavesData(wavesData);
         }
         

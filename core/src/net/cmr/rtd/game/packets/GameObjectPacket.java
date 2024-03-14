@@ -41,7 +41,7 @@ public class GameObjectPacket extends Packet {
 
     @Override
     public Object[] packetVariables() {
-        return new Object[] { data.length, remove };
+        return new Object[] { "BYTES="+data.length, remove };
     }
 
 }

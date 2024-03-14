@@ -29,7 +29,7 @@ public class StatsUpdatePacket extends Packet {
 
     @Override
     public Object[] packetVariables() {
-        return new Object[] {health, money, structureHealth};
+        return toPacketVariables(health, money, structureHealth);
     }
     
 }

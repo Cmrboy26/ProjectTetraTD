@@ -23,6 +23,7 @@ public class IceTower extends TowerEntity {
     boolean attacking = false;
     float animationDelta = 0;
     final float persistence = 1;
+    float range = 0;
 
     public IceTower() {
         super(GameType.ICE_TOWER, 0);
@@ -40,7 +41,7 @@ public class IceTower extends TowerEntity {
     @Override
     public void attack(UpdateData data) {
         super.attack(data);
-        ArrayList<Entity> entitiesInRange = getEntitiesInRange(4, data);
+        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data);
         attacking = false;
         for (Entity entity : entitiesInRange) {
             attacking = true;
@@ -58,6 +59,11 @@ public class IceTower extends TowerEntity {
     @Override
     public float getAttackSpeed() {
         return .25f;
+    }
+
+    @Override
+    public float getDisplayRange() {
+        return range;
     }
 
     @Override

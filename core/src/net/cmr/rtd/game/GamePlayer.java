@@ -9,10 +9,13 @@ import com.badlogic.gdx.math.Vector2;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
+import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
+import net.cmr.rtd.game.world.ShopManager;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
 
@@ -160,6 +163,12 @@ public class GamePlayer {
 
             player.setPosition(input.getPosition());
             player.updateInput(input.getInput(), input.isSprinting());
+        }
+
+        if (packet instanceof PurchaseItemPacket) {
+            // Purchase an item from the shop.
+            PurchaseItemPacket purchase = (PurchaseItemPacket) packet;
+            ShopManager.processPurchase(manager, this, purchase);
         }
 
     }

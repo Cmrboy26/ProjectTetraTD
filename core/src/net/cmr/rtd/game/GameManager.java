@@ -40,13 +40,17 @@ import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WaveUnit;
 import net.cmr.rtd.waves.WavesData;
@@ -402,6 +406,7 @@ public class GameManager implements Disposable {
         if (!saveFolder.exists()) {
             // Create a default game
             initializeNewGame();
+            save();
             return false;
         }
 
@@ -467,6 +472,10 @@ public class GameManager implements Disposable {
     public void initializeNewGame() {
         // Initialize a new game.
         world = new World();
+        FireTower tower = new FireTower(0);
+        tower.setPosition(4 * Tile.SIZE, 2 * Tile.SIZE);
+
+        world.addEntity(tower);
     }
 
     public void synchronizeWorld(GamePlayer player) {
@@ -492,7 +501,7 @@ public class GameManager implements Disposable {
         if (player.getPlayer() == null) return;
         TeamData team = teams.get(player.getTeam());
         StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
-        System.out.println(packet);
+        System.out.println("Sending stats packet from server: "+packet);
         player.sendPacket(packet);
     }
 
@@ -579,6 +588,31 @@ public class GameManager implements Disposable {
     }
     public boolean areWavesPaused() {
         return pauseWaves;
+    }
+
+    /**
+     * Place a tower at the specified tile.
+     * @param tower The tower to place.
+     * @param tileX The x position of the tile.
+     * @param tileY The y position of the tile.
+     * @return true if the tower was placed, false if the tower was not placed.
+     */
+    public boolean placeTower(TowerEntity tower, int tileX, int tileY) {
+        // If there's a tower there, don't do anything
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof TowerEntity) {
+                TowerEntity other = (TowerEntity) entity;
+                if (other.getX() == tileX * Tile.SIZE && other.getY() == tileY * Tile.SIZE) {
+                    return false;
+                }
+            }
+        }
+        // Place the tower
+        tower.setPosition((tileX + .5f) * Tile.SIZE, (tileY + .5f) * Tile.SIZE);
+        
+        // Place it in the world and, as a result, send the packet to all players
+        world.addEntity(tower);
+        return true;
     }
 
     public boolean isRunning() { return running; }

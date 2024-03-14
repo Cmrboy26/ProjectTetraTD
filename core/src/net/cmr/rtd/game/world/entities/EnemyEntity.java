@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
@@ -102,5 +103,22 @@ public abstract class EnemyEntity extends Entity {
             manager.getTeam(entity.getTeam()).depositMoney(quantity, data);
         }
     }
+
+    /**
+     * A helper method to launch a projectile at this entity.
+     * Uses the given target and speed to calculate the velocity of the projectile.
+     * @param projectile the projectile to launch
+     * @param timeToReach the time it should take for the projectile to reach the target
+     * @return the calculated velocity of the projectile
+     */
+    public Vector2 launchProjectileAt(Entity projectile, float timeToReach) {
+        Vector2 targetPositionAtTime = new Vector2(getX(), getY()).add(getVelocity().scl(timeToReach));
+        float distance = new Vector2(targetPositionAtTime).sub(projectile.getPosition()).len();
+        float targetSpeed = distance / timeToReach;
+        Vector2 velocity = new Vector2(targetPositionAtTime).sub(projectile.getPosition()).nor().scl(targetSpeed);
+        return velocity;
+    }
+
+    public abstract Vector2 getVelocity();
 
 }

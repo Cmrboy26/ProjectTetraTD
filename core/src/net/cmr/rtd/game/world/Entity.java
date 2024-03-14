@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.entities.effects.EntityEffects;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.UUIDUtils;
 
 public abstract class Entity extends GameObject {
 
@@ -53,7 +54,8 @@ public abstract class Entity extends GameObject {
 
     @Override
     protected final void serialize(DataBuffer buffer) throws IOException {
-        buffer.writeUTF(entityUUID.toString());
+        //buffer.writeUTF(entityUUID.toString());
+        UUIDUtils.serializeUUID(buffer, entityUUID);
         effects.serialize(buffer);
         serializeEntity(buffer);
     }
@@ -61,7 +63,8 @@ public abstract class Entity extends GameObject {
     @Override
     protected final void deserialize(GameObject object, DataInputStream input) throws IOException {
         Entity entity = (Entity) object;
-        entity.entityUUID = UUID.fromString(input.readUTF());
+        //entity.entityUUID = UUID.fromString(input.readUTF());
+        entity.entityUUID = UUIDUtils.deserializeUUID(input);
         entity.effects = EntityEffects.deserialize(entity, input);
         deserializeEntity(object, input);
     }
@@ -80,6 +83,9 @@ public abstract class Entity extends GameObject {
     public static int getTileY(Entity entity) { return getTileY(entity.getY()); }
     public Vector2 getPosition() { return position; }
     public EntityEffects getEffects() { return effects; }
+
+    public void move(float dx, float dy) { position.add(dx, dy); }
+    public void move(float x, float y, float delta) { position.add(x * delta, y * delta); }
 
     @Override
     public String toString() {

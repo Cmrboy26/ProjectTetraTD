@@ -24,6 +24,7 @@ public class BasicEnemy extends EnemyEntity {
     float speed;
     int maxHealth;
     String displayType;
+    Vector2 velocity;
 
     Point lastTile;
     Point targetTile;
@@ -55,9 +56,9 @@ public class BasicEnemy extends EnemyEntity {
 
         // Move towards the target tile
         float speed = getSpeed() * Tile.SIZE;
-        Vector2 direction = Pathfind.directPathfind(this, targetTile.x, targetTile.y);
-        float dx = direction.x * speed * delta;
-        float dy = direction.y * speed * delta;
+        velocity = Pathfind.directPathfind(this, targetTile.x, targetTile.y);
+        float dx = velocity.x * speed * delta;
+        float dy = velocity.y * speed * delta;
         translate(dx, dy);
 
         // If the distance to the center of the target tile is less than the speed, set targetTile to null and set lastTile to the targetTile
@@ -225,6 +226,11 @@ public class BasicEnemy extends EnemyEntity {
         super.onDeath(data);
         int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
         moneyOnDeath(this, data, money);
+    }
+
+    @Override
+    public Vector2 getVelocity() {
+        return new Vector2(velocity).scl(getSpeed());
     }
 
 }

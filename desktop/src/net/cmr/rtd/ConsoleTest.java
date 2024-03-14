@@ -21,6 +21,7 @@ import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.world.Entity;
@@ -73,7 +74,7 @@ public class ConsoleTest {
 		ioStream.addListener(new PacketListener() {
 			@Override
 			public void packetReceived(Packet packet) {
-				Log.debug("Server received packet: " + packet);
+				Log.debug("Client received packet: " + packet);
 				if (packet instanceof RSAEncryptionPacket) {
 					// Set the RSA public key and send our RSA public key.
 					RSAEncryptionPacket rsaPacket = (RSAEncryptionPacket) packet;
@@ -146,6 +147,10 @@ public class ConsoleTest {
 					// The player was disconnected, set the screen to the main menu.
 					DisconnectPacket disconnectPacket = (DisconnectPacket) packet;
 					Log.info("Client disconnected: " + disconnectPacket.reason);
+				}
+
+				if (packet instanceof StatsUpdatePacket) {
+					StatsUpdatePacket statsPacket = (StatsUpdatePacket) packet;
 				}
 			}
 		});

@@ -169,6 +169,8 @@ public class GameScreen extends AbstractScreenEX {
             if (password != null) {
                 ioStream.sendPacket(new PasswordPacket(password));
             }
+
+            return;
         }
 
         if (packet instanceof GameObjectPacket) {
@@ -204,6 +206,7 @@ public class GameScreen extends AbstractScreenEX {
             if (player != null) {
                 player.setPosition(inputPacket.getPosition());
             }
+            return;
         }
 
         if (packet instanceof StatsUpdatePacket) {
@@ -213,6 +216,7 @@ public class GameScreen extends AbstractScreenEX {
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
             System.out.println(lifeLabel.getText() + " " + cashLabel.getText() + " " + structureLifeLabel.getText());
             System.out.println(statsPacket.getHealth() + " " + statsPacket.getMoney() + " " + statsPacket.getStructureHealth());
+            return;
         }
 
         if (packet instanceof WavePacket) {
@@ -223,6 +227,7 @@ public class GameScreen extends AbstractScreenEX {
             this.wave = wavePacket.getWaveNumber();
             this.areWavesPaused = wavePacket.isPaused();
 
+            return;
             /*if (wavePacket.getWaveNumber() == 0) {
                 waveLabel.setText("Waiting to start...");
                 waveCountdownLabel.setText("");
@@ -264,6 +269,7 @@ public class GameScreen extends AbstractScreenEX {
             DisconnectPacket disconnectPacket = (DisconnectPacket) packet;
             Log.info("Client disconnected: " + disconnectPacket.reason);
             game.setScreen(new MainMenuScreen());
+            return;
         }
     }
 

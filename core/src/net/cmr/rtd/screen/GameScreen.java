@@ -29,9 +29,11 @@ import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
+import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
+import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseOption;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -343,6 +345,10 @@ public class GameScreen extends AbstractScreenEX {
         processPlayerMovement(delta);
         processMouse(tileX, tileY);
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            TowerEntity.displayRange = !TowerEntity.displayRange;
+        }
+
         if (gameManager == null) {
             return;
         }
@@ -358,7 +364,7 @@ public class GameScreen extends AbstractScreenEX {
 
     private void processMouse(int tileX, int tileY) {
         // DEBUG CODE
-        TowerEntity toPlace = null;
+        /*TowerEntity toPlace = null;
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             // Place down an ice tower
             toPlace = new FireTower(0);
@@ -366,15 +372,19 @@ public class GameScreen extends AbstractScreenEX {
         if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
             // Place down a fire tower
             toPlace = new IceTower(0);
+        }*/
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
+            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseOption.TOWER, tileX, tileY);
+            ioStream.sendPacket(packet);
         }
-        if (toPlace == null) {
+        /*if (toPlace == null) {
             return;
         }
         toPlace.setPosition((tileX + .5f) * Tile.SIZE, (tileY + .5f) * Tile.SIZE);
         world.addEntity(toPlace);
         if (gameManager != null) {
             gameManager.getWorld().addEntity(toPlace);
-        }
+        }*/
     }
 
     float lastVelocityX = 0, lastVelocityY = 0;

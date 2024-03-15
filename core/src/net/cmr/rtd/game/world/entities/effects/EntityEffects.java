@@ -97,7 +97,7 @@ public class EntityEffects {
     
     public Color getDiscoloration() {
         // Color must start as black for screen blending to work properly
-        Color color = Color.BLACK;
+        Color color = new Color(Color.BLACK);
         for (Effect effect : effects) {
             Color discoloration = effect.getDiscoloration();
             if (discoloration != null) {
@@ -112,7 +112,7 @@ public class EntityEffects {
         }
         // If the color is black, no effect was applied, so return no filter
         if (color.equals(Color.BLACK)) {
-            return Color.WHITE;
+            return new Color(Color.WHITE);
         }
         return color;
     }

@@ -154,7 +154,11 @@ public class World extends GameObject {
                 if (waveObj == null) {
                     // The game has ended!
                     // TODO: Add a game win screen.
-                    data.getManager().stop();
+                    //data.getManager().stop();
+                    if (wave > wavesData.size()) {
+                        wave = 0;
+                        waveObj = wavesData.getWave(wave);
+                    }
                     return;
                 }
 

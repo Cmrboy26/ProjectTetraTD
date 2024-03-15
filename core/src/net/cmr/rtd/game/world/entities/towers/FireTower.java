@@ -3,11 +3,11 @@ package net.cmr.rtd.game.world.entities.towers;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.Entity;
@@ -22,10 +22,13 @@ import net.cmr.util.Sprites.AnimationType;
 
 public class FireTower extends TowerEntity {
 
+    float fireballDamage = 3;
+    float range = 2;
+    float targetDPS = 3;
+
     boolean attacking = false;
     float animationDelta = 0;
-    float targetDPS = 1f;
-    float range = 2;
+    float fireballDelta = 0;
 
     public FireTower() {
         super(GameType.FIRE_TOWER, 0);
@@ -38,21 +41,28 @@ public class FireTower extends TowerEntity {
     @Override
     public void attack(UpdateData data) {
         super.attack(data);
-        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data);
-        int damageIncrement = (int) Math.ceil(targetDPS * getAttackSpeed());
+        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data, getPreferedSortType());
+        fireballDelta += getAttackSpeed();
         boolean launchedFireball = false;
+        if (fireballDelta < 5) {
+            launchedFireball = true;
+        } 
+
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 //System.out.println("ATTACKING ENTITY "+data.isServer());
                 EnemyEntity enemy = (EnemyEntity) entity;
-                enemy.damage(damageIncrement);
-                new FireEffect(enemy.getEffects(), 1, 10);
+                new FireEffect(enemy.getEffects(), 1, (int) Math.round(targetDPS));
                 if (!launchedFireball) {
-                    Projectile fireball = new Projectile(enemy, 3, 1, 1);
-                    fireball.setPosition(getPosition());
+                    Projectile fireball = new Projectile(enemy, new Vector2(getPosition()), 3, 1, 1, 1);
+                    if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
+                        // dont launch it
+                        continue;
+                    }
                     //System.out.println("LAUNCHED FIREBALL");
-                    //data.getWorld().addEntity(fireball);
+                    data.getWorld().addEntity(fireball);
                     launchedFireball = true;
+                    fireballDelta = 0;
                 }
             }
         }
@@ -60,17 +70,18 @@ public class FireTower extends TowerEntity {
 
     @Override
     protected void serializeTower(DataBuffer buffer) throws IOException {
-
+        buffer.writeFloat(fireballDelta);
     }
 
     @Override
     protected void deserializeTower(TowerEntity entity, DataInputStream input) throws IOException {
-
+        FireTower tower = (FireTower) entity;
+        tower.fireballDelta = input.readFloat();
     }
 
     @Override
     public float getAttackSpeed() {
-        return 3f;
+        return .25f;
     }
 
     @Override

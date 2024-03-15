@@ -31,8 +31,8 @@ public abstract class TowerEntity extends Entity {
     
     public void update(float delta, UpdateData data) {
         attackDelta += delta;
-        while (attackDelta >= 1f/getAttackSpeed()) {
-            attackDelta -= 1f/getAttackSpeed();
+        while (attackDelta >= getAttackSpeed()) {
+            attackDelta -= getAttackSpeed();
             attack(data);
         }
     }
@@ -57,9 +57,9 @@ public abstract class TowerEntity extends Entity {
     public void render(Batch batch, float delta) {
         // draw a circle of radius getDisplayRange() centered at getPosition()
         if (displayRange && (displayRangeTower == null || displayRangeTower == this)) {
-            SpriteType type = SpriteType.PROJECTILE;
+            SpriteType type = SpriteType.AREA;
             // set the color to a transparent yellow
-            batch.setColor(new Color(Color.YELLOW).sub(0,0,0,.5f));
+            batch.setColor(new Color(Color.YELLOW).sub(0,0,0,.8f));
             batch.draw(Sprites.sprite(type), getPosition().x - getDisplayRange() * Tile.SIZE, getPosition().y - getDisplayRange() * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE);
             batch.setColor(Color.WHITE);
         }
@@ -169,6 +169,10 @@ public abstract class TowerEntity extends Entity {
      */
     public float getAttackSpeed() {
         return 1;
+    }
+
+    public SortType getPreferedSortType() {
+        return SortType.HEALTH;
     }
 
     /**

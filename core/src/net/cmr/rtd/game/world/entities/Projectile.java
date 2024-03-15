@@ -31,26 +31,37 @@ public class Projectile extends Entity {
      */
     float AOE = 0;
     Vector2 velocity = new Vector2();
+    float precision;
 
-    public Projectile(EnemyEntity entity, int damage, float timeToReachTarget, float AOE) {
+    public Projectile() {
+        super(GameType.PROJECTILE);
+    }
+
+    public Projectile(EnemyEntity entity, Vector2 position, int damage, float timeToReachTarget, float AOE, float precision) {
         super(GameType.PROJECTILE);
         this.target = entity.getID();
+        this.setPosition(position);
         this.damage = damage;
         this.timeToReachTarget = timeToReachTarget;
-        this.velocity.set(entity.launchProjectileAt(this, timeToReachTarget));
+        this.velocity.set(entity.launchProjectileAt(this, timeToReachTarget, precision));
         this.AOE = AOE;
+        this.precision = precision;
+    }
+
+    @Override
+    public float getRenderOffset() {
+        return -Tile.SIZE;
     }
 
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
         elapsedTime += delta;
-        System.out.println(elapsedTime+" "+timeToReachTarget+" "+getPosition());
+        //System.out.println(elapsedTime+" "+timeToReachTarget+" "+getPosition());
 
         if (elapsedTime >= timeToReachTarget) {
             World world = data.getWorld();
             Entity entity = world.getEntity(target);
-            System.out.println("PROJECTILE HIT! "+entity+System.currentTimeMillis());
             if (entity != null && entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 enemy.damage(damage);
@@ -61,7 +72,6 @@ public class Projectile extends Entity {
                             EnemyEntity enemyEntity = (EnemyEntity) e;
                             if (enemyEntity.getPosition().dst(getPosition()) < AOE) {
                                 enemyEntity.damage(damage);
-                                Log.debug("PROJECTILE HIT AOE "+enemy);
                             }
                         }
                     }
@@ -81,7 +91,7 @@ public class Projectile extends Entity {
             Entity entity = world.getEntity(target);
             if (entity != null && entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                velocity.set(enemy.launchProjectileAt(this, timeToReachTarget-elapsedTime));
+                velocity.set(enemy.launchProjectileAt(this, timeToReachTarget-elapsedTime, precision));
             } else {
                 // No target, remove the projectile
                 removeFromWorld();
@@ -101,6 +111,7 @@ public class Projectile extends Entity {
         buffer.writeFloat(velocity.x);
         buffer.writeFloat(velocity.y);
         buffer.writeFloat(AOE);
+        buffer.writeFloat(precision);
     }
 
     @Override
@@ -112,6 +123,7 @@ public class Projectile extends Entity {
         projectile.elapsedTime = input.readFloat();
         projectile.velocity.set(input.readFloat(), input.readFloat());
         projectile.AOE = input.readFloat();
+        projectile.precision = input.readFloat();
     }
     
     @Override
@@ -119,6 +131,10 @@ public class Projectile extends Entity {
         float size = .20f;
         batch.draw(Sprites.sprite(SpriteType.PROJECTILE), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
         super.render(batch, delta);
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
     }
 
 }

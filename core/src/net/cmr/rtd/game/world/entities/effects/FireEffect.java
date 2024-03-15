@@ -40,7 +40,7 @@ public class FireEffect extends Effect {
 
     @Override
     public Color getDiscoloration() {
-        return new Color(255f/255f, 144f/255f, 144f/255f, 1f);
+        return new Color(255f/255f, 80/255f, 80/255f, 1f);
     }
     
 }

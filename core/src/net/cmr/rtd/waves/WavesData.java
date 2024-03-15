@@ -199,4 +199,8 @@ public class WavesData {
             return DifficultyRating.UNDEFINED;
         }
     }
+
+    public int size() {
+        return waves.size();
+    }
 }

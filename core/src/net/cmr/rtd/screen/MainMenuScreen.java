@@ -88,7 +88,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 
     @Override
     public void render(float delta) {
-        game.batch().setColor(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, 1);
+        game.batch().setColor(Color.WHITE);
         super.render(delta);
     }
     

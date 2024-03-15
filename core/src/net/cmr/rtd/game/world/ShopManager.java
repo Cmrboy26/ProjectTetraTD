@@ -6,6 +6,8 @@ import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.rtd.screen.GameScreen;
 
 /**
@@ -22,11 +24,29 @@ public class ShopManager {
 
         // Temporary code:
         // Purchase a fire tower.
-        TowerEntity towerAt = towerAt(manager, packet.x, packet.y);
-        if (towerAt == null) {
-            FireTower tower = new FireTower(player.getTeam());
-            tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
-            manager.getWorld().addEntity(tower);
+        if (packet.option == PurchaseItemPacket.PurchaseOption.TOWER) {  
+            TowerEntity towerAt = towerAt(manager, packet.x, packet.y);
+            if (towerAt == null) {
+                int cost = 10;
+                TeamData data = manager.getTeam(player.getTeam());
+                if (data.getMoney() < cost) {
+                    System.out.println("NOT ENOUGH MONEY");
+                    return;
+                }
+                if (areTilesBlocking(manager, packet.x, packet.y)) {
+                    System.out.println("TILES BLOCKING");
+                    return;
+                }
+                FireTower tower = new FireTower(player.getTeam());
+                tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
+                manager.getWorld().addEntity(tower);
+                tower.updatePresenceOnClients(manager);
+                // Update the team's money.
+                data.payMoney(cost);
+                manager.updateTeamStats(player.getTeam());
+            } else {
+                System.out.println("TOWER AT THE POSITION ARLEADY");
+            }
         }
     }
 
@@ -47,6 +67,13 @@ public class ShopManager {
             }
         }
         return null;
+    }
+
+    public static boolean areTilesBlocking(GameManager manager, int x, int y) {
+        World world = manager.getWorld();
+        TileType at = world.getTile(x, y, 1);
+        TileData data = world.getTileData(x, y, 1);
+        return at == TileType.WALL || data != null;
     }
 
 }

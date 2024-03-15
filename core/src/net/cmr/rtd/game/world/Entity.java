@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.UUIDUtils;
@@ -17,6 +19,7 @@ public abstract class Entity extends GameObject {
     private UUID entityUUID; // Unique ID for the entity. (WILL NEVER CHANGE, EVEN BETWEEN RELOADS)
     private World world;
     private EntityEffects effects;
+    private boolean toBeRemoved = false;
 
     /**
      * Constructs a new entity with the given type.
@@ -40,6 +43,7 @@ public abstract class Entity extends GameObject {
     }
 
     public void removeFromWorld() {
+        toBeRemoved = true;
         world.removeEntity(this);
     }
 
@@ -86,6 +90,11 @@ public abstract class Entity extends GameObject {
 
     public void move(float dx, float dy) { position.add(dx, dy); }
     public void move(float x, float y, float delta) { position.add(x * delta, y * delta); }
+
+    public void updatePresenceOnClients(GameManager manager) {
+        GameObjectPacket packet = new GameObjectPacket(this, toBeRemoved);
+        manager.sendPacketToAll(packet);
+    }
 
     @Override
     public String toString() {

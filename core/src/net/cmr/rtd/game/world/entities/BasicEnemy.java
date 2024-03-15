@@ -213,11 +213,11 @@ public class BasicEnemy extends EnemyEntity {
             }
         }
 
-        Color color = getEffects().getDiscoloration();
+        Color color = new Color(getEffects().getDiscoloration());
         color.a = Math.min(1, alphaDecay);
         batch.setColor(color);
         batch.draw(Sprites.sprite(displayType), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
-        batch.setColor(1, 1, 1, 1);
+        batch.setColor(Color.WHITE);
         super.render(batch, delta);
     }
 

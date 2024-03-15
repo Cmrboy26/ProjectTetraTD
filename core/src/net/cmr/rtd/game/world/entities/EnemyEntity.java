@@ -111,11 +111,14 @@ public abstract class EnemyEntity extends Entity {
      * @param timeToReach the time it should take for the projectile to reach the target
      * @return the calculated velocity of the projectile
      */
-    public Vector2 launchProjectileAt(Entity projectile, float timeToReach) {
-        Vector2 targetPositionAtTime = new Vector2(getX(), getY()).add(getVelocity().scl(timeToReach));
-        float distance = new Vector2(targetPositionAtTime).sub(projectile.getPosition()).len();
-        float targetSpeed = distance / timeToReach;
-        Vector2 velocity = new Vector2(targetPositionAtTime).sub(projectile.getPosition()).nor().scl(targetSpeed);
+    public Vector2 launchProjectileAt(Entity projectile, float timeToReach, float precision) {
+        if (timeToReach <= 0) {
+            throw new IllegalArgumentException("Time to reach must be greater than 0");
+        }
+        precision = Math.min(1, Math.max(0, precision));
+        float velX = ((getX() + getVelocity().x * timeToReach * Tile.SIZE * precision) - projectile.getX()) / timeToReach;
+        float velY = ((getY() + getVelocity().y * timeToReach * Tile.SIZE * precision) - projectile.getY()) / timeToReach;
+        Vector2 velocity = new Vector2(velX, velY);
         return velocity;
     }
 

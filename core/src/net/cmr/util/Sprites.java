@@ -35,7 +35,8 @@ public class Sprites implements Disposable {
         STRUCTURE_LIFE("structureLife"),
         STRUCTURE("structure"),
         DARKENED("darkened"),
-        PROJECTILE("cash"),
+        PROJECTILE("area"),
+        AREA("area"),
         ;
 
         private String spriteName;

@@ -484,6 +484,7 @@ public class EditorScreen extends AbstractScreenEX {
         shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
         shapeRenderer.setColor(.5f, .5f, .5f, .5f);
         shapeRenderer.rect(0, 0, Tile.SIZE * world.getWorldSize(), Tile.SIZE * world.getWorldSize());
+        shapeRenderer.setColor(1, 1, 1, 1);
         shapeRenderer.end();
 
         stages.actAll(delta);

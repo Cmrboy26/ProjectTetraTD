@@ -63,6 +63,9 @@ public class TeamData {
     public int getHealth() {
         return structure.getHealth();
     }
+    public void payMoney(long amount) {
+        structure.money -= amount;
+    }
     public Point getStructurePosition() {
         return structurePosition;
     }

@@ -64,6 +64,7 @@ project(":core") {
         
         implementation 'com.esotericsoftware:kryo:5.4.0:sources'
         implementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
+        implementation "com.github.tommyettinger:textratypist:0.10.0"
 
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"

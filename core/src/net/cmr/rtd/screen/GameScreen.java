@@ -11,8 +11,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -30,10 +35,10 @@ import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
+import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseOption;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
-import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseOption;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -42,8 +47,6 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
-import net.cmr.rtd.game.world.entities.towers.FireTower;
-import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
@@ -63,6 +66,7 @@ public class GameScreen extends AbstractScreenEX {
 
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
+    ImageButton shopButton, inventoryButton, skipWaveButton;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
@@ -144,6 +148,53 @@ public class GameScreen extends AbstractScreenEX {
         waveCountdownLabel.setPosition(640-5, 360-5-iconSize, Align.topRight);
 
         add(Align.topRight, waveCountdownLabel);
+
+        ButtonGroup<ImageButton> buttonGroup = new ButtonGroup<ImageButton>();
+        buttonGroup.setMaxCheckCount(1);
+        buttonGroup.setMinCheckCount(0);
+
+        ImageButtonStyle style = new ImageButtonStyle();
+        style.down = Sprites.drawable(SpriteType.BORDER_DOWN);
+        style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
+        style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
+        style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
+        style.imageUp = Sprites.drawable(SpriteType.SHOP_ICON);
+
+        shopButton = new ImageButton(style);
+        shopButton.setSize(iconSize, iconSize);
+        shopButton.setPosition(320 - (5), 5, Align.bottomRight);
+        shopButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Shop button clicked "+shopButton.isChecked());
+                // NOTE: when switching to shop screen, deselect any other screens that are open (i.e. inventory screen)
+            }
+        });
+        buttonGroup.add(shopButton);
+        
+        add(Align.bottom, shopButton);
+
+        style = new ImageButtonStyle();
+        style.down = Sprites.drawable(SpriteType.BORDER_DOWN);
+        style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
+        style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
+        style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
+        style.imageUp = Sprites.drawable(SpriteType.INVENTORY_ICON);
+
+        inventoryButton = new ImageButton(style);
+        inventoryButton.setSize(iconSize, iconSize);
+        inventoryButton.setPosition(320 + (5), 5, Align.bottomLeft);
+        inventoryButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Inventory button clicked "+inventoryButton.isChecked());
+                // NOTE: when switching to inventory screen, deselect any other screens that are open
+            }
+        });
+        buttonGroup.add(inventoryButton);
+
+        add(Align.bottom, inventoryButton);
+
     }
 
     public void onRecievePacket(Packet packet) {

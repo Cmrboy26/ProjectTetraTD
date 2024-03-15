@@ -37,6 +37,12 @@ public class Sprites implements Disposable {
         DARKENED("darkened"),
         PROJECTILE("area"),
         AREA("area"),
+        BORDER_DEFAULT("borderDefault"),
+        BORDER_SELECTED("borderSelected"),
+        BORDER_HOVER("borderHover"),
+        BORDER_DOWN("borderDown"),
+        SHOP_ICON("shopIcon"),
+        INVENTORY_ICON("inventoryIcon"),
         ;
 
         private String spriteName;

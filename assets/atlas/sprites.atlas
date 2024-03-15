@@ -6,336 +6,378 @@ filter: MipMapNearestNearest, MipMapNearestNearest
 repeat: xy
 area
   rotate: false
-  xy: 330, 460
+  xy: 71, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 badlogic
   rotate: false
-  xy: 1, 236
+  xy: 1, 252
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 basic1
   rotate: false
-  xy: 1, 96
+  xy: 106, 217
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 basic2
   rotate: false
-  xy: 260, 425
+  xy: 295, 476
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+borderDefault
+  rotate: false
+  xy: 330, 476
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+borderDown
+  rotate: false
+  xy: 71, 147
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+borderHover
+  rotate: false
+  xy: 1, 182
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+borderSelected
+  rotate: false
+  xy: 1, 77
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 cash
   rotate: false
-  xy: 260, 460
+  xy: 260, 476
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 cmrboy26
   rotate: false
-  xy: 314, 415
+  xy: 125, 207
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: -1
 darkened
   rotate: false
-  xy: 330, 436
+  xy: 141, 228
   size: 2, 2
   orig: 2, 2
   offset: 0, 0
   index: -1
 endDebug
   rotate: false
-  xy: 295, 368
+  xy: 1, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 heart
   rotate: false
-  xy: 36, 201
+  xy: 260, 441
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+inventoryIcon
+  rotate: false
+  xy: 295, 406
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 pathDebug
   rotate: false
-  xy: 295, 387
+  xy: 71, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+shopIcon
+  rotate: false
+  xy: 36, 147
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 startDebug
   rotate: false
-  xy: 403, 476
+  xy: 106, 160
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 structure
   rotate: false
-  xy: 1, 131
+  xy: 36, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 structureLife2
   rotate: false
-  xy: 1, 131
+  xy: 36, 182
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 structureLife
   rotate: false
-  xy: 71, 166
+  xy: 330, 441
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 teslaTower
   rotate: false
-  xy: 1, 201
+  xy: 1, 217
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 teslaTower
   rotate: false
-  xy: 1, 166
+  xy: 36, 217
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 2
 teslaTower
   rotate: false
-  xy: 295, 460
+  xy: 1, 147
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 7
 teslaTower
   rotate: false
-  xy: 71, 201
+  xy: 260, 406
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 teslaTower
   rotate: false
-  xy: 71, 201
+  xy: 260, 406
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 0
 teslaTower
   rotate: false
-  xy: 260, 390
+  xy: 295, 441
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 4
 teslaTower
   rotate: false
-  xy: 295, 425
+  xy: 1, 112
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
 teslaTower
   rotate: false
-  xy: 36, 131
+  xy: 260, 371
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 6
 teslaTower
   rotate: false
-  xy: 106, 201
+  xy: 365, 476
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
 teslaTower
   rotate: false
-  xy: 260, 355
+  xy: 36, 112
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 8
 tower
   rotate: false
-  xy: 36, 166
+  xy: 71, 217
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 wallSprites1
   rotate: false
-  xy: 71, 147
+  xy: 365, 457
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites17
   rotate: false
-  xy: 71, 147
+  xy: 365, 457
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites10
   rotate: false
-  xy: 295, 406
+  xy: 141, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites11
   rotate: false
-  xy: 179, 217
+  xy: 438, 492
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites12
   rotate: false
-  xy: 141, 217
+  xy: 36, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites13
   rotate: false
-  xy: 260, 279
+  xy: 1, 1
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites14
   rotate: false
-  xy: 260, 317
+  xy: 419, 492
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites15
   rotate: false
-  xy: 1, 77
+  xy: 330, 422
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites16
   rotate: false
-  xy: 422, 476
+  xy: 1, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites18
   rotate: false
-  xy: 1, 1
+  xy: 217, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites19
   rotate: false
-  xy: 1, 39
+  xy: 179, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites2
   rotate: false
-  xy: 1, 20
+  xy: 198, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites20
   rotate: false
-  xy: 106, 182
+  xy: 400, 492
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites21
   rotate: false
-  xy: 198, 217
+  xy: 260, 295
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites22
   rotate: false
-  xy: 384, 476
+  xy: 160, 233
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites23
   rotate: false
-  xy: 330, 441
+  xy: 260, 352
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites3
   rotate: false
-  xy: 1, 58
+  xy: 106, 179
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites4
   rotate: false
-  xy: 365, 476
+  xy: 106, 198
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites5
   rotate: false
-  xy: 260, 298
+  xy: 260, 314
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites6
   rotate: false
-  xy: 260, 336
+  xy: 1, 58
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites7
   rotate: false
-  xy: 441, 476
+  xy: 457, 492
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites8
   rotate: false
-  xy: 160, 217
+  xy: 260, 333
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 wallSprites9
   rotate: false
-  xy: 36, 112
+  xy: 295, 387
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

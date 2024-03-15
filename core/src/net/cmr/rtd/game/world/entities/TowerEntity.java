@@ -23,6 +23,7 @@ public abstract class TowerEntity extends Entity {
 
     float attackDelta = 0;
     int team;
+    // TODO: Add tower upgrades (MAKE THEM PLACEABLE IN THE WORLD)
 
     public TowerEntity(GameType type, int team) {
         super(type);

@@ -195,6 +195,8 @@ public class GameScreen extends AbstractScreenEX {
 
         add(Align.bottom, inventoryButton);
 
+        // TODO: Add inventory menus and functionality
+
     }
 
     public void onRecievePacket(Packet packet) {

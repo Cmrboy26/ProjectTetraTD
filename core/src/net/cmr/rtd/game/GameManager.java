@@ -472,10 +472,6 @@ public class GameManager implements Disposable {
     public void initializeNewGame() {
         // Initialize a new game.
         world = new World();
-        FireTower tower = new FireTower(0);
-        tower.setPosition(4 * Tile.SIZE, 2 * Tile.SIZE);
-
-        world.addEntity(tower);
     }
 
     public void synchronizeWorld(GamePlayer player) {

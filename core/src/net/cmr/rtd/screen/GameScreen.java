@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -67,6 +68,7 @@ public class GameScreen extends AbstractScreenEX {
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
     ImageButton shopButton, inventoryButton, skipWaveButton;
+    Window shopWindow, inventoryWindow;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
@@ -168,6 +170,8 @@ public class GameScreen extends AbstractScreenEX {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Shop button clicked "+shopButton.isChecked());
                 // NOTE: when switching to shop screen, deselect any other screens that are open (i.e. inventory screen)
+                shopWindow.setVisible(shopButton.isChecked());
+                inventoryWindow.setVisible(false);
             }
         });
         buttonGroup.add(shopButton);
@@ -189,6 +193,8 @@ public class GameScreen extends AbstractScreenEX {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Inventory button clicked "+inventoryButton.isChecked());
                 // NOTE: when switching to inventory screen, deselect any other screens that are open
+                inventoryWindow.setVisible(inventoryButton.isChecked());
+                shopWindow.setVisible(false);
             }
         });
         buttonGroup.add(inventoryButton);
@@ -196,6 +202,23 @@ public class GameScreen extends AbstractScreenEX {
         add(Align.bottom, inventoryButton);
 
         // TODO: Add inventory menus and functionality
+        shopWindow = new Window("Shop", Sprites.skin(), "small");
+        shopWindow.getTitleLabel().setAlignment(Align.center);
+        shopWindow.padTop(30);
+        shopWindow.setSize(200, 200);
+        shopWindow.setPosition(320, 180, Align.center);
+        shopWindow.setMovable(false);
+        shopWindow.setVisible(false);
+        add(Align.center, shopWindow);
+        
+        inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
+        inventoryWindow.getTitleLabel().setAlignment(Align.center);
+        inventoryWindow.padTop(30);
+        inventoryWindow.setSize(200, 200);
+        inventoryWindow.setPosition(320, 180, Align.center);
+        inventoryWindow.setMovable(false);
+        inventoryWindow.setVisible(false);
+        add(Align.center, inventoryWindow);
 
     }
 

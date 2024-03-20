@@ -24,9 +24,9 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class FireTower extends TowerEntity {
 
-    float fireballDamage = 3;
+    float fireballDamage = 2;
     float range = 2;
-    float targetDPS = 3;
+    float targetDPS = 1;
 
     boolean attacking = false;
     float animationDelta = 0;
@@ -46,15 +46,14 @@ public class FireTower extends TowerEntity {
         ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data, getPreferedSortType());
         fireballDelta += getAttackSpeed();
         boolean launchedFireball = false;
-        if (fireballDelta < 5) {
+        if (fireballDelta < Math.max(2f, (6f - ((getLevel() - 1) * .5f)))) {
             launchedFireball = true;
         } 
 
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
-                //System.out.println("ATTACKING ENTITY "+data.isServer());
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new FireEffect(enemy.getEffects(), 1, (int) Math.round(targetDPS));
+                new FireEffect(enemy.getEffects(), 1, (int) Math.round(targetDPS + (getLevel() - 1) * .5f));
                 if (!launchedFireball) {
                     Projectile fireball = new Projectile(enemy, new Vector2(getPosition()), 3, 1, 1, 1);
                     fireball.setParticleOnHit(SpreadEmitterEffect.factory()
@@ -70,7 +69,6 @@ public class FireTower extends TowerEntity {
                         // dont launch it
                         continue;
                     }
-                    //System.out.println("LAUNCHED FIREBALL");
                     data.getWorld().addEntity(fireball);
                     launchedFireball = true;
                     fireballDelta = 0;
@@ -109,12 +107,23 @@ public class FireTower extends TowerEntity {
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
+
         super.render(batch, delta);
     }
 
     @Override
     public float getDisplayRange() {
         return range;
+    }
+
+    @Override
+    public float getDisplayDamage() {
+        return targetDPS + (getLevel() - 1) * .5f;
+    }
+
+    @Override
+    public String getDescription() {
+        return "This tower sets enemies ablaze, dealing\ndamage over time. It also has a chance to launch\na fireball at enemies in range.";
     }
     
     

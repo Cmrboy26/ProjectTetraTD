@@ -157,7 +157,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "toggle-small");
+        Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "small");
         teamLabel.setSize(size, size);
         teamLabel.setAlignment(Align.center);
 
@@ -204,7 +204,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextField color = new TextField("6663ff", Sprites.skin(), "mall") {
+        TextField color = new TextField("6663ff", Sprites.skin(), "small") {
             @Override
             public void act(float delta) {
                 super.act(delta);

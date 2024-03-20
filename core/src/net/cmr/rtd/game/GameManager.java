@@ -63,6 +63,8 @@ import net.cmr.util.Log;
 public class GameManager implements Disposable {
 
     public static final int MAX_TEAMS = 4;
+    public static final int STARTING_MONEY = 50;
+    public static final int STARTING_HEALTH = 100;
 
     private final GameManagerDetails details;
     private final ConcurrentHashMap<String, GamePlayer> players = new ConcurrentHashMap<String, GamePlayer>();
@@ -346,7 +348,6 @@ public class GameManager implements Disposable {
     public void initialize(GameSave save) {
         Objects.requireNonNull(save, "The save file cannot be null.");
         this.save = save;
-        System.out.println(save.getSaveFolder().file().getAbsolutePath());
         load(save);
 
         Log.info("Game \"" + save.getName() + "\" initialized.");
@@ -440,7 +441,7 @@ public class GameManager implements Disposable {
                 teams.add(new TeamData(world, i));
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
-                System.out.println("TEAM DOES NOT EXIST: " + e.getMessage());
+                System.out.println(e.getMessage());
             }
         }
         if (teams.size() == 0) {
@@ -497,7 +498,6 @@ public class GameManager implements Disposable {
         if (player.getPlayer() == null) return;
         TeamData team = teams.get(player.getTeam());
         StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
-        System.out.println("Sending stats packet from server: "+packet);
         player.sendPacket(packet);
     }
 

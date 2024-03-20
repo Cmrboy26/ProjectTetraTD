@@ -38,8 +38,12 @@ public class SlownessEffect extends Effect {
 
     @Override
     public float getStatModifier(EntityStat stat) {
+        //float m = .9f;
+        //float b = .4f;
+
         if (stat == EntityStat.SPEED) {
-            return (1.5f/(getLevel()+1f));
+            //return (1.5f/(getLevel()+1f));
+            return (float) (1f - .45f * Math.log10(getLevel() + 1));
         }
         return NOTHING;
     }

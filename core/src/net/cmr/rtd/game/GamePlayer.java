@@ -13,9 +13,9 @@ import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
-import net.cmr.rtd.game.world.ShopManager;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
 

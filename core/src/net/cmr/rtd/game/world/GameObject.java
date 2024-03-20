@@ -20,7 +20,7 @@ import net.cmr.util.Log;
 
 public abstract class GameObject {
 
-    final GameType type;
+    public final GameType type;
     Vector2 position;
     private static HashMap<Integer, GameType> types = new HashMap<>();
 

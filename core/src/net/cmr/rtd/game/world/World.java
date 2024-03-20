@@ -26,9 +26,6 @@ import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
-import net.cmr.rtd.game.world.tile.StartTileData;
-import net.cmr.rtd.game.world.tile.StructureTileData;
-import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
@@ -102,7 +99,7 @@ public class World extends GameObject {
         this.removalList = new HashSet<>();
         this.storedPlayerData = new HashMap<>();
 
-        for (int i = 0; i < DEFAULT_WORLD_SIZE; i++) {
+        /*for (int i = 0; i < DEFAULT_WORLD_SIZE; i++) {
             for (int j = 0; j < DEFAULT_WORLD_SIZE; j++) {
                 setTile(i, j, 0, TileType.FLOOR);
             }
@@ -114,7 +111,7 @@ public class World extends GameObject {
         setTile(0, 1, 1, TileType.START);
         setTileData(0, 1, 1, new StartTileData(0));
         setTile(DEFAULT_WORLD_SIZE-1, 1, 1, TileType.END);
-        setTileData(DEFAULT_WORLD_SIZE-1, 1, 1, new StructureTileData(0));
+        setTileData(DEFAULT_WORLD_SIZE-1, 1, 1, new StructureTileData(0));*/
     }
 
     @Override
@@ -168,10 +165,9 @@ public class World extends GameObject {
                 data.getManager().sendWaveUpdateToAll();
             }
         }
-
         for (UUID id : removalList) {
             Entity removed = entities.remove(id);
-            if (removed == null) return;
+            if (removed == null) continue;
             removed.setWorld(null);
             removed.remove();
         }

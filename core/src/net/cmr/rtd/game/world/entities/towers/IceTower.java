@@ -46,12 +46,8 @@ public class IceTower extends TowerEntity {
         for (Entity entity : entitiesInRange) {
             attacking = true;
             if (entity instanceof EnemyEntity) {
-                if (data.isClient()) {
-
-                }
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new SlownessEffect(enemy.getEffects(), getAttackSpeed() + persistence, 1);
-                // TODO: add a visual effect to show the slow effect
+                new SlownessEffect(enemy.getEffects(), getAttackSpeed() + persistence, getLevel());
             }
         }
     }
@@ -84,7 +80,7 @@ public class IceTower extends TowerEntity {
             animationDelta = 0;
         }
 
-        Color color = new Color(Color.BLUE);
+        Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
@@ -93,4 +89,10 @@ public class IceTower extends TowerEntity {
         super.render(batch, delta);
     }
 
+    @Override
+    public float getDisplayDamage() { return 0; }
+    @Override
+    public String getDescription() { return "Slows down enemies within range.\nSlowness increases as level increases."; }
+
+    
 }

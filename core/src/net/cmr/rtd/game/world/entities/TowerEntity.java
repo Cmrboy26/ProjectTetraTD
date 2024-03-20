@@ -25,18 +25,35 @@ public abstract class TowerEntity extends Entity {
 
     float attackDelta = 0;
     int team;
-    // TODO: Add tower upgrades (MAKE THEM PLACEABLE IN THE WORLD)
+
+    float levelUpDelta = -1; // -1 means not currently upgrading, 0 and lower means done upgrading, positive means time left 
+    float upgradeTime = 1;
+    int level = 1;
+    // TODO: Add other tower upgrades
 
     public TowerEntity(GameType type, int team) {
         super(type);
         this.team = team;
+        this.level = 1;
+        this.levelUpDelta = -1;
+        this.upgradeTime = 1;
     }
     
     public void update(float delta, UpdateData data) {
-        attackDelta += delta;
-        while (attackDelta >= getAttackSpeed()) {
-            attackDelta -= getAttackSpeed();
-            attack(data);
+        if (levelUpDelta != -1) {
+            levelUpDelta -= delta;
+            if (levelUpDelta <= 0) {
+                levelUpDelta = -1;
+                upgradeTime = 1;
+                level++;
+            }
+        } else {
+            // CANNOT attack while upgrading
+            attackDelta += delta;
+            while (attackDelta >= getAttackSpeed()) {
+                attackDelta -= getAttackSpeed();
+                attack(data);
+            }
         }
     }
 
@@ -45,6 +62,9 @@ public abstract class TowerEntity extends Entity {
     protected void serializeEntity(DataBuffer buffer) throws IOException {
         buffer.writeFloat(attackDelta);
         buffer.writeInt(team);
+        buffer.writeInt(level);
+        buffer.writeFloat(levelUpDelta);
+        buffer.writeFloat(upgradeTime);
         serializeTower(buffer);
     }
 
@@ -53,11 +73,22 @@ public abstract class TowerEntity extends Entity {
         TowerEntity tower = (TowerEntity) object;
         tower.attackDelta = input.readFloat();
         tower.team = input.readInt();
+        tower.level = input.readInt();
+        tower.levelUpDelta = input.readFloat();
+        tower.upgradeTime = input.readFloat();
         deserializeTower(tower, input);
     }
 
     @Override
     public void render(Batch batch, float delta) {
+
+        if (getRemainingUpgradeTime() != -1f) {
+            float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
+            batch.setColor(Color.GREEN);
+            batch.draw(Sprites.sprite(SpriteType.CMRBOY26), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * progress);
+            batch.setColor(Color.WHITE);
+        }
+
         // draw a circle of radius getDisplayRange() centered at getPosition()
         if (displayRange && (displayRangeTower == null || displayRangeTower == this)) {
             SpriteType type = SpriteType.AREA;
@@ -174,8 +205,37 @@ public abstract class TowerEntity extends Entity {
         return 1;
     }
 
+    public abstract float getDisplayDamage();
+    public abstract float getDisplayRange();
+    public abstract String getDescription();
+
     public SortType getPreferedSortType() {
         return SortType.HEALTH;
+    }
+
+    public float getUpgradeTime() {
+        return upgradeTime;
+    }
+
+    public float getRemainingUpgradeTime() {
+        return levelUpDelta;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    /**
+     * @param upgradeTime time in seconds to upgrade the tower
+     * @return if the action was successful
+     */
+    public boolean levelUp(float upgradeTime) {
+        if (levelUpDelta != -1) {
+            return false;
+        }
+        this.upgradeTime = upgradeTime;
+        levelUpDelta = upgradeTime;
+        return true;
     }
 
     /**
@@ -186,7 +246,6 @@ public abstract class TowerEntity extends Entity {
     public void attack(UpdateData data) {}
 
     public int getTeam() { return team; }
-    public abstract float getDisplayRange();
 
     public static void displayRangeAll() {
         displayRange = true;

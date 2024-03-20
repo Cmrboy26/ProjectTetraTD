@@ -113,6 +113,7 @@ public class LevelSave {
         // Copy the world file to the new save folder
         FileHandle levelWorldFile = getWorldFile(FileType.External);
         FileHandle saveWorldFile = save.getWorldFile(FileType.External);
+        System.out.println("Copying world file from "+levelWorldFile.path()+" to "+saveWorldFile.path());
         levelWorldFile.copyTo(saveWorldFile);
 
         // Copy the selected wave file to the new save folder

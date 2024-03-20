@@ -63,7 +63,6 @@ public class Projectile extends Entity {
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
         elapsedTime += delta;
-        //System.out.println(elapsedTime+" "+timeToReachTarget+" "+getPosition());
 
         if (elapsedTime >= timeToReachTarget) {
             World world = data.getWorld();

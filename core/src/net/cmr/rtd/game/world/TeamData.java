@@ -2,6 +2,7 @@ package net.cmr.rtd.game.world;
 
 import java.awt.Point;
 
+import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.StructureTileData;
@@ -26,8 +27,13 @@ public class TeamData {
                 if (data instanceof StructureTileData) {
                     StructureTileData tile = (StructureTileData) data;
                     if (tile.team == team) {
+                        System.out.println("Team "+team+" has a structure at "+x+", "+y);
                         if (structurePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple end structures");
+                        }
+                        if (tile.money == -1 && tile.getHealth() == -1) {
+                            tile.money = GameManager.STARTING_MONEY;
+                            tile.health = GameManager.STARTING_HEALTH;
                         }
                         structure = tile;
                         structurePosition = new Point(x, y);
@@ -36,6 +42,7 @@ public class TeamData {
                 if (data instanceof StartTileData) {
                     StartTileData tile = (StartTileData) data;
                     if (tile.team == team) {
+                        System.out.println("Team "+team+" has a start tile at "+x+", "+y);
                         if (startTilePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple start tiles");
                         }
@@ -65,6 +72,9 @@ public class TeamData {
     }
     public void payMoney(long amount) {
         structure.money -= amount;
+    }
+    public void addMoney(long amount) {
+        structure.money += amount;
     }
     public Point getStructurePosition() {
         return structurePosition;

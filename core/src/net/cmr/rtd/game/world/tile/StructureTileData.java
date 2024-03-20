@@ -1,20 +1,21 @@
 package net.cmr.rtd.game.world.tile;
 
+import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.util.Log;
 
 public class StructureTileData extends TeamTileData {
     
-    int health;
+    public int health;
     public long money;
     boolean healthChanged = false;
 
     public StructureTileData() { }
     public StructureTileData(int team) {
         super(team);
-        health = 100;
-        money = 50;
+        health = -1;
+        money = -1;
     }
 
     @Override
@@ -32,9 +33,6 @@ public class StructureTileData extends TeamTileData {
             healthChanged = false;
             
             TeamData teamm = data.getManager().getTeam(team);
-            System.out.println(teamm);
-            System.out.println(teamm.getHealth());
-            System.out.println(getHealth());
 
             data.getManager().updateTeamStats(team);
             if (health <= 0) {
@@ -52,7 +50,8 @@ public class StructureTileData extends TeamTileData {
 
     @Override
     public void reset() {
-        health = 100;
+        health = GameManager.STARTING_HEALTH;
+        money = GameManager.STARTING_MONEY;
         healthChanged = true;
     }
 

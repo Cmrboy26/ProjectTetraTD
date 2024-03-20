@@ -32,6 +32,9 @@ public abstract class EnemyEntity extends Entity {
         if (health <= 0) {
             onDeath(data);
             removeFromWorld();
+            if (data.isServer()) {
+                updatePresenceOnClients(data.getManager());
+            }
         }
     }
 

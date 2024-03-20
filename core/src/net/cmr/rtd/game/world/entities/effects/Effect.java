@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.world.Entity;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 
 /**
@@ -36,7 +37,14 @@ public abstract class Effect {
         this.target.addEffect(this);
     }
 
-    public void update(float delta) {
+    public void onInflict(UpdateData data) {
+
+    }
+
+    public void update(float delta, UpdateData data) {
+        if (duration == getMaxDuration()) {
+            onInflict(data);
+        }
         duration -= delta;
     }
 

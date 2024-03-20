@@ -50,7 +50,7 @@ public abstract class Entity extends GameObject {
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
-        effects.update(delta);
+        effects.update(delta, data);
     }
     
     protected abstract void serializeEntity(DataBuffer buffer) throws IOException;

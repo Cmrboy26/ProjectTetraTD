@@ -41,8 +41,10 @@ public class Sprites implements Disposable {
         BORDER_SELECTED("borderSelected"),
         BORDER_HOVER("borderHover"),
         BORDER_DOWN("borderDown"),
+        BORDER_DISABLED("borderDisabled"),
         SHOP_ICON("shopIcon"),
         INVENTORY_ICON("inventoryIcon"),
+        FROZEN("frozen"),
         ;
 
         private String spriteName;
@@ -56,6 +58,7 @@ public class Sprites implements Disposable {
 
     public enum AnimationType {
         TESLA_TOWER("teslaTower", PlayMode.LOOP, .5f),
+        FIRE("fire", PlayMode.LOOP, .5f),
         ;
 
         private String animationName;
@@ -133,6 +136,12 @@ public class Sprites implements Disposable {
     }
     public static TextureRegionDrawable drawable(SpriteType type) {
         return getInstance().getDrawable(type);
+    }
+    public static TextureRegionDrawable drawable(AnimationType type) {
+        return new TextureRegionDrawable(getInstance().getAnimation(type, 0));
+    }
+    public static TextureRegionDrawable drawable(AnimationType type, float delta) {
+        return new TextureRegionDrawable(getInstance().getAnimation(type, delta));
     }
     public static Animation<TextureRegion> animation(AnimationType type) {
         return getInstance().getAnimation(type);

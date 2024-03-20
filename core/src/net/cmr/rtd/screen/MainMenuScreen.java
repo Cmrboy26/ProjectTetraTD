@@ -34,7 +34,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		label.setAlignment(Align.center);
 		table.add(label).padTop(20.0f).padBottom(20.0f);
 
-		String labelType = "toggle-small";
+		String labelType = "small";
 
 		table.row();
 		TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);

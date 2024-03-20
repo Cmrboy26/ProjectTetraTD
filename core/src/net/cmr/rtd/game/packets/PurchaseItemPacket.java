@@ -2,6 +2,7 @@ package net.cmr.rtd.game.packets;
 
 import java.util.HashMap;
 
+import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.util.SerializableEnum;
 
 /**
@@ -10,10 +11,14 @@ import net.cmr.util.SerializableEnum;
 public class PurchaseItemPacket extends Packet {
 
     public int x, y;
-    public PurchaseOption option;
+    public GameType type;
+    public int[] arguments;
+    public PurchaseOption action;
 
     public enum PurchaseOption implements SerializableEnum {
-        TOWER(0), UPGRADE(1), SELL(2);
+        TOWER(0), 
+        UPGRADE(1), 
+        SELL(2);
 
         private final int id;
         private static final HashMap<Integer, SerializableEnum> map = new HashMap<Integer, SerializableEnum>();
@@ -40,15 +45,52 @@ public class PurchaseItemPacket extends Packet {
     }
 
     public PurchaseItemPacket() { super(); }
-    public PurchaseItemPacket(PurchaseOption option, int x, int y) {
+
+    /**
+     * 
+     * <ul>
+     * <li>
+     * PURCHASE A TOWER:
+     * <ul>
+     *   <li>option should be PurchaseOption.TOWER</li>
+     *   <li>type should be the type of tower to purchase</li>
+     *   <li>arguments should not be used (null)</li>
+     * </ul>
+     * </li>
+     * <li>
+     * UPGRADE A TOWER:
+     * <ul>
+     *   <li>option should be PurchaseOption.UPGRADE</li>
+     *   <li>type should not be used (null)</li>
+     *   <li>as of now, arguments should be an array of length 1, with the first element being "1" (more specific conditions will be added later)</li>
+     * </ul>
+     * </li>
+     * <li>
+     * SELL A TOWER:
+     * <ul>
+     *   <li>option should be PurchaseOption.SELL</li>
+     *   <li>type should not be used (null)</li>
+     *   <li>arguments should not be used (null)</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * 
+     * @param option what action to perform
+     * @param type the type of tower (or enemy) to purchase
+     * @param x coordinates of the purchase
+     * @param y coordinates of the purchase
+     */
+    public PurchaseItemPacket(PurchaseOption action, GameType type, int[] arguments, int x, int y) {
         super();
         this.x = x;
         this.y = y;
-        this.option = option;
+        this.action = action;
+        this.type = type;
+        this.arguments = arguments;
     }
 
     @Override
     public Object[] packetVariables() {
-        return toPacketVariables(x, y);
+        return toPacketVariables(x, y, action, type, arguments);
     }
 }

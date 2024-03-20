@@ -3,8 +3,13 @@ package net.cmr.rtd.game.world.entities.effects;
 import com.badlogic.gdx.graphics.Color;
 
 import net.cmr.rtd.game.world.Entity;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
+import net.cmr.util.Sprites.AnimationType;
+import net.cmr.util.Sprites.SpriteType;
 
 public class FireEffect extends Effect {
 
@@ -19,18 +24,46 @@ public class FireEffect extends Effect {
     transient float damageDelta = 0;
 
     @Override
-    public void update(float delta) {
-        super.update(delta);
+    public void onInflict(UpdateData data) {
+        if (data.isClient()) {
+            ParticleEffect effect = getEffect();
+            data.getScreen().addEffect(effect);
+        }
+    }
+
+    @Override
+    public void update(float delta, UpdateData data) {
+        super.update(delta, data);
 
         damageDelta += delta;
+
         if (damageDelta >= 1) {
             damageDelta -= 1;
             Entity entity = getEntity();
+
+            if (data.isClient()) {
+                ParticleEffect effect = getEffect();
+                data.getScreen().addEffect(effect);
+            }
+
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 enemy.damage(getLevel() * getLevel());
             }
         }
+    }
+
+    private ParticleEffect getEffect() {
+        return SpreadEmitterEffect.factory()
+                .setEntity(getEntity())
+                .setParticle(AnimationType.FIRE)
+                .setDuration(1)
+                .setEmissionRate(getLevel())
+                .setScale(.25f)
+                .setParticleLife(.5f)
+                .setFollowEntity(true)
+                .setAnimationSpeed(2f)
+                .create();
     }
 
     @Override

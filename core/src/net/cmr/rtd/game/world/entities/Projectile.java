@@ -12,6 +12,7 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
@@ -32,6 +33,7 @@ public class Projectile extends Entity {
     float AOE = 0;
     Vector2 velocity = new Vector2();
     float precision;
+    ParticleEffect particleOnHit;
 
     public Projectile() {
         super(GameType.PROJECTILE);
@@ -46,6 +48,10 @@ public class Projectile extends Entity {
         this.velocity.set(entity.launchProjectileAt(this, timeToReachTarget, precision));
         this.AOE = AOE;
         this.precision = precision;
+    }
+
+    public void setParticleOnHit(ParticleEffect effect) {
+        this.particleOnHit = effect;
     }
 
     @Override
@@ -82,6 +88,12 @@ public class Projectile extends Entity {
                 }
             }
             removeFromWorld();
+            if (particleOnHit != null) {
+                particleOnHit.setPosition(getPosition());
+                if (data.isClient()) {
+                    data.getScreen().addEffect(particleOnHit);
+                }
+            }
             // Display a particle?
             return;
         }

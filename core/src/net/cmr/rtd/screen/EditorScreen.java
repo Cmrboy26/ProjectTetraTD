@@ -103,7 +103,7 @@ public class EditorScreen extends AbstractScreenEX {
         float size = 40;
 
         ButtonGroup<Button> group = new ButtonGroup<Button>();
-        wall = new TextButton("Wall", Sprites.skin(), "small");
+        wall = new TextButton("Wall", Sprites.skin(), "toggle-small");
         wall.setSize(size, size);
         wall.addListener(new ClickListener() {
             @Override
@@ -112,7 +112,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        floor = new TextButton("Floor", Sprites.skin(), "small");
+        floor = new TextButton("Floor", Sprites.skin(), "toggle-small");
         floor.setSize(size, size);
         floor.addListener(new ClickListener() {
             @Override
@@ -121,7 +121,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        clear = new TextButton("Clear", Sprites.skin(), "small");
+        clear = new TextButton("Clear", Sprites.skin(), "toggle-small");
         clear.setSize(size, size);
         clear.addListener(new ClickListener() {
             @Override
@@ -130,7 +130,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        path = new TextButton("Path", Sprites.skin(), "small");
+        path = new TextButton("Path", Sprites.skin(), "toggle-small");
         path.setSize(size, size);
         path.addListener(new ClickListener() {
             @Override
@@ -139,7 +139,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        start = new TextButton("Start", Sprites.skin(), "small");
+        start = new TextButton("Start", Sprites.skin(), "toggle-small");
         start.setSize(size, size);
         start.addListener(new ClickListener() {
             @Override
@@ -148,7 +148,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        end = new TextButton("End", Sprites.skin(), "small");
+        end = new TextButton("End", Sprites.skin(), "toggle-small");
         end.setSize(size, size);
         end.addListener(new ClickListener() {
             @Override
@@ -157,11 +157,11 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "small");
+        Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "toggle-small");
         teamLabel.setSize(size, size);
         teamLabel.setAlignment(Align.center);
 
-        TextButton add = new TextButton("+", Sprites.skin(), "small");
+        TextButton add = new TextButton("+", Sprites.skin(), "toggle-small");
         add.setSize(size, size);
         add.addListener(new ClickListener() {
             @Override
@@ -173,7 +173,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextButton sub = new TextButton("-", Sprites.skin(), "small");
+        TextButton sub = new TextButton("-", Sprites.skin(), "toggle-small");
         sub.setSize(size, size);
         sub.addListener(new ClickListener() {
             @Override
@@ -186,7 +186,7 @@ public class EditorScreen extends AbstractScreenEX {
         });
         
         TextButton importButton;
-        importButton = new TextButton("Import", Sprites.skin(), "toggle-small");
+        importButton = new TextButton("Import", Sprites.skin(), "small");
         importButton.setSize(size * 3, size);
         importButton.addListener(new ClickListener() {
             @Override
@@ -195,7 +195,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextButton export = new TextButton("Export", Sprites.skin(), "toggle-small");
+        TextButton export = new TextButton("Export", Sprites.skin(), "small");
         export.setSize(size * 3, size);
         export.addListener(new ClickListener() {
             @Override
@@ -204,7 +204,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextField color = new TextField("6663ff", Sprites.skin(), "small") {
+        TextField color = new TextField("6663ff", Sprites.skin(), "mall") {
             @Override
             public void act(float delta) {
                 super.act(delta);

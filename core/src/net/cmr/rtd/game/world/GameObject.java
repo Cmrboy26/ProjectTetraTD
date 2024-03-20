@@ -45,6 +45,19 @@ public abstract class GameObject {
         public Class<? extends GameObject> getGameObjectClass() {
             return clazz;
         }
+
+        /**
+         * Creates a shell of an entity. This should primarily be used to render holograms of the entity.
+         * @return The entity.
+         */
+        public Entity createEntity() {
+            try {
+                return (Entity) clazz.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                Log.error("Failed to create entity", e);
+            }
+            return null;
+        }
         public int getID() {
             return name().hashCode();
         }

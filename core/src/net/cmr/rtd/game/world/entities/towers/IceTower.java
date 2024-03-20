@@ -84,7 +84,9 @@ public class IceTower extends TowerEntity {
             animationDelta = 0;
         }
 
-        batch.setColor(Color.BLUE);
+        Color color = new Color(Color.BLUE);
+        color.a = batch.getColor().a;
+        batch.setColor(color);
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);

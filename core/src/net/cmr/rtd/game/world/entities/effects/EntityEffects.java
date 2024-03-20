@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.Entity;
+import net.cmr.rtd.game.world.UpdateData;
 
 /**
  * Handles the buffs and debuffs of a specific entity.
@@ -49,13 +50,18 @@ public class EntityEffects {
                 return;
             }
         }
-        effects.remove(effect);
+        Effect existing = getEffect(effect.getClass());
+        if (existing != null) {
+            existing.duration = Math.max(existing.duration, effect.duration);
+            existing.level = Math.max(existing.level, effect.level);
+            return;
+        }
         effects.add(effect);
     }
 
-    public void update(float delta) {
+    public void update(float delta, UpdateData data) {
         for (Effect effect : effects) {
-            effect.update(delta);
+            effect.update(delta, data);
         }
         effects.removeIf(Effect::effectFinished);
     }

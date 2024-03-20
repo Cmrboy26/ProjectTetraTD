@@ -16,9 +16,11 @@ import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
+import net.cmr.util.Sprites.SpriteType;
 
 public class FireTower extends TowerEntity {
 
@@ -55,6 +57,15 @@ public class FireTower extends TowerEntity {
                 new FireEffect(enemy.getEffects(), 1, (int) Math.round(targetDPS));
                 if (!launchedFireball) {
                     Projectile fireball = new Projectile(enemy, new Vector2(getPosition()), 3, 1, 1, 1);
+                    fireball.setParticleOnHit(SpreadEmitterEffect.factory()
+                        .setParticle(AnimationType.FIRE)
+                        .setDuration(1)
+                        .setEmissionRate(20)
+                        .setScale(.45f)
+                        .setParticleLife(.5f)
+                        .setFollowEntity(true)
+                        .setAnimationSpeed(2f)
+                        .create());
                     if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
                         // dont launch it
                         continue;
@@ -92,7 +103,9 @@ public class FireTower extends TowerEntity {
             animationDelta = 0;
         }
 
-        batch.setColor(Color.RED);
+        Color color = new Color(Color.RED);
+        color.a = batch.getColor().a;
+        batch.setColor(color);
         TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);

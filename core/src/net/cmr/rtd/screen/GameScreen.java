@@ -1,7 +1,10 @@
 package net.cmr.rtd.screen;
 
+import java.awt.Point;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -10,15 +13,25 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -44,14 +57,17 @@ import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
@@ -69,6 +85,12 @@ public class GameScreen extends AbstractScreenEX {
     Image life, structureLife, cash;
     ImageButton shopButton, inventoryButton, skipWaveButton;
     Window shopWindow, inventoryWindow;
+
+    GameType typeToPurchase;
+    Entity entityToPlace;
+    ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
+
+    Dialog quitDialog;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
@@ -160,6 +182,7 @@ public class GameScreen extends AbstractScreenEX {
         style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
         style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
         style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
+        style.disabled = Sprites.drawable(SpriteType.BORDER_DISABLED);
         style.imageUp = Sprites.drawable(SpriteType.SHOP_ICON);
 
         shopButton = new ImageButton(style);
@@ -168,6 +191,7 @@ public class GameScreen extends AbstractScreenEX {
         shopButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (shopButton.isDisabled()) { return; }
                 System.out.println("Shop button clicked "+shopButton.isChecked());
                 // NOTE: when switching to shop screen, deselect any other screens that are open (i.e. inventory screen)
                 shopWindow.setVisible(shopButton.isChecked());
@@ -183,6 +207,7 @@ public class GameScreen extends AbstractScreenEX {
         style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
         style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
         style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
+        style.disabled = Sprites.drawable(SpriteType.BORDER_DISABLED);
         style.imageUp = Sprites.drawable(SpriteType.INVENTORY_ICON);
 
         inventoryButton = new ImageButton(style);
@@ -191,6 +216,7 @@ public class GameScreen extends AbstractScreenEX {
         inventoryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (inventoryButton.isDisabled()) { return; }
                 System.out.println("Inventory button clicked "+inventoryButton.isChecked());
                 // NOTE: when switching to inventory screen, deselect any other screens that are open
                 inventoryWindow.setVisible(inventoryButton.isChecked());
@@ -210,7 +236,15 @@ public class GameScreen extends AbstractScreenEX {
         shopWindow.setMovable(false);
         shopWindow.setVisible(false);
         add(Align.center, shopWindow);
-        
+
+        // TODO: Add all the shop items
+        Table iceTower = getTowerSection(Sprites.drawable(AnimationType.TESLA_TOWER), GameType.ICE_TOWER, "Ice Tower", "100", "Slows down enemies in range.");
+        Table fireTower = getTowerSection(Sprites.drawable(AnimationType.TESLA_TOWER), GameType.FIRE_TOWER,  "Fire Tower", "100", "Sets enemies ablaze and deals damage over time.");
+        shopWindow.add(iceTower).pad(5);
+        shopWindow.row();
+        shopWindow.add(fireTower).pad(5);
+        shopWindow.row();
+
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
         inventoryWindow.getTitleLabel().setAlignment(Align.center);
         inventoryWindow.padTop(30);
@@ -380,6 +414,19 @@ public class GameScreen extends AbstractScreenEX {
             world.update(delta, data);
         }
         processInput(delta);
+
+        ArrayList<ParticleEffect> toRemove = new ArrayList<ParticleEffect>();
+        for (int i = 0; i < particleEffects.size(); i++) {
+            ParticleEffect effect = particleEffects.get(i);
+            effect.update(this, delta);
+            if (effect.isParticleFinished()) {
+                toRemove.add(effect);
+            }
+        }
+        for (ParticleEffect effect : toRemove) {
+            particleEffects.remove(effect);
+        }
+        
         updateCamera();
     }
 
@@ -398,16 +445,65 @@ public class GameScreen extends AbstractScreenEX {
         }
     }
 
+    private Point getMouseTileCoordinate() {
+        int mx = Gdx.input.getX();
+        int my = Gdx.input.getY();
+        Vector2 mousePos = viewport.unproject(new Vector2(mx, my));
+        mousePos.x = (int) Math.floor(mousePos.x/Tile.SIZE) * Tile.SIZE;
+        mousePos.y = (int) Math.floor(mousePos.y/Tile.SIZE) * Tile.SIZE;
+        return new Point((int) Math.floor(mousePos.x/Tile.SIZE), (int) Math.floor(mousePos.y/Tile.SIZE));
+    }
+
     private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            if (gameManager != null) {
-                gameManager.save();
+            if (inPlacementMode()) {
+                exitPlacementMode();
+            } else if (inMenu()) {
+                closeMenu();
+            } else {
+                if (quitDialog != null) {
+                    quitDialog.remove();
+                    quitDialog = null;
+                } else {
+                    Dialog dialog = new Dialog("", Sprites.skin(), "small") {
+                        @Override
+                        protected void result(Object object) {
+                            if (object.equals(false)) {
+                                return;
+                            }
+                            if (gameManager != null) {
+                                gameManager.save();
+                            }
+                            game.setScreen(new MainMenuScreen());
+                        }
+                    };
+                    dialog.text("Are you sure you want to quit?", Sprites.skin().get("small", LabelStyle.class));
+                    dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    dialog.key(Input.Keys.ESCAPE, false);
+                    dialog.pad(5);
+                    dialog.show(stages.get(Align.center));
+                    quitDialog = dialog;
+                }
             }
-            game.setScreen(new MainMenuScreen());
-            return;
         }
 
         stages.actAll(delta);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            if (!inventoryButton.isDisabled()) {
+                inventoryButton.toggle();
+                shopWindow.setVisible(false);
+                inventoryWindow.setVisible(inventoryButton.isChecked());
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            if (!shopButton.isDisabled()) {
+                shopButton.toggle();
+                shopWindow.setVisible(shopButton.isChecked());
+                inventoryWindow.setVisible(false);
+            }
+        }
 
         int mx = Gdx.input.getX();
         int my = Gdx.input.getY();
@@ -418,6 +514,18 @@ public class GameScreen extends AbstractScreenEX {
         int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
         int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
         
+        if (inPlacementMode()) {
+            updatePlacementMode(tileX, tileY);
+        } else {
+            if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+                // Sell the tower at the mouse position if it's on the same team
+                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                    PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseOption.SELL, null, null, tileX, tileY);
+                    ioStream.sendPacket(packet);
+                }
+            }
+        }
+
         processPlayerMovement(delta);
         processMouse(tileX, tileY);
 
@@ -439,28 +547,10 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void processMouse(int tileX, int tileY) {
-        // DEBUG CODE
-        /*TowerEntity toPlace = null;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            // Place down an ice tower
-            toPlace = new FireTower(0);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
-            // Place down a fire tower
-            toPlace = new IceTower(0);
-        }*/
         if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
-            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseOption.TOWER, tileX, tileY);
+            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseOption.TOWER, GameType.FIRE_TOWER, null, tileX, tileY);
             ioStream.sendPacket(packet);
         }
-        /*if (toPlace == null) {
-            return;
-        }
-        toPlace.setPosition((tileX + .5f) * Tile.SIZE, (tileY + .5f) * Tile.SIZE);
-        world.addEntity(toPlace);
-        if (gameManager != null) {
-            gameManager.getWorld().addEntity(toPlace);
-        }*/
     }
 
     float lastVelocityX = 0, lastVelocityY = 0;
@@ -496,6 +586,18 @@ public class GameScreen extends AbstractScreenEX {
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
             world.render(batch, delta);
+
+            if (inPlacementMode()) {
+                Point mouseTile = getMouseTileCoordinate();
+                batch.setColor(1, 1, 1, .5f);
+                entityToPlace.setPosition((mouseTile.x + .5f) * Tile.SIZE, (mouseTile.y + .5f) * Tile.SIZE);
+                entityToPlace.render(batch, delta);
+                batch.setColor(1, 1, 1, 1);
+            }
+
+            for (ParticleEffect effect : particleEffects) {
+                effect.render(batch);
+            }
             batch.end();
         }
 
@@ -535,8 +637,139 @@ public class GameScreen extends AbstractScreenEX {
         return null;
     }
 
+    public Entity getEntity(UUID id) {
+        if (world == null) { return null; }
+        return world.getEntity(id);
+    }
+
+    public void addEffect(ParticleEffect effect) {
+        particleEffects.add(effect);
+    }
+
+    public void removeEffect(ParticleEffect effect) {
+        particleEffects.remove(effect);
+    }
+
     public World getWorld() {
         return world;
+    }
+
+    public boolean inMenu() {
+        return shopButton.isChecked() || inventoryButton.isChecked();
+    }
+    public void closeMenu() {
+        shopButton.setChecked(false);
+        inventoryButton.setChecked(false);
+        shopWindow.setVisible(false);
+        inventoryWindow.setVisible(false);
+    }
+
+    HashSet<Integer> notificationsActive = new HashSet<Integer>();
+
+    private void notification(SpriteType icon, String message) {
+        // display a message at the bottom right corner
+        HorizontalGroup group = new HorizontalGroup();
+
+        int notificationPosition = 0;
+        while (notificationsActive.contains(notificationPosition)) {
+            notificationPosition++;
+        }
+        final int result = notificationPosition;
+        notificationsActive.add(result);
+
+        float targetY = 5 + 5 + 32 * result;
+
+        group.space(5);
+        group.setPosition(640+5, targetY, Align.bottomLeft);
+        group.pad(5);
+        Image iconImage = new Image(Sprites.drawable(icon));
+        iconImage.setSize(32, 32);
+        group.addActor(iconImage);
+        Label label = new Label(message, Sprites.skin(), "small");
+        label.setAlignment(Align.left);
+        label.setFontScale(.4f);
+        group.addActor(label);
+        group.pack();
+
+        add(Align.bottomRight, group);
+        float fadeInSpeed = .5f;
+        float fadeOutSpeed = .5f;
+        group.addAction(Actions.sequence(
+            Actions.parallel(Actions.fadeIn(fadeInSpeed), Actions.moveToAligned(640-5, targetY, Align.bottomRight, fadeInSpeed, Interpolation.swing)),
+            Actions.delay(3),
+            Actions.run(() -> {
+                notificationsActive.remove(result);
+            }),
+            Actions.parallel(Actions.fadeOut(fadeOutSpeed), Actions.moveToAligned(640+5, targetY, Align.bottomLeft, fadeOutSpeed, Interpolation.swing)),
+            Actions.removeActor()
+        ));
+    }
+
+    private Table getTowerSection(TextureRegionDrawable drawable, GameType type, String name, String cost, String tooltipDescription) {
+        Table table = new Table();
+        Image towerImage = new Image(drawable);
+        float fontScale = .5f;
+        Label towerName = new Label(name, Sprites.skin(), "small");
+        Label towerCost = new Label("Cost: $"+cost, Sprites.skin(), "small");
+        towerName.setFontScale(fontScale);
+        towerCost.setFontScale(fontScale);
+        table.add(towerImage).expandX().size(32).pad(5);
+        VerticalGroup group = new VerticalGroup();
+        group.addActor(towerName);
+        group.addActor(towerCost);
+        table.add(group).expandX().pad(5);
+        TextButton buyButton = new TextButton("Buy", Sprites.skin(), "small");
+        buyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                typeToPurchase = type;
+                // transition to the place tower mode
+                enterPlacementMode(type);
+            }
+        });
+        table.add(buyButton).size(32).expandX().pad(5);
+
+        TextTooltip tooltip = new TextTooltip(tooltipDescription, Sprites.skin(), "small");
+        tooltip.getContainer().pad(5);
+        tooltip.getContainer().setScale(.25f);
+        tooltip.getActor().setFontScale(.25f);
+        tooltip.setInstant(true);
+        towerImage.addListener(tooltip);
+
+        return table;
+    }
+
+    public void enterPlacementMode(GameType type) {
+        typeToPurchase = type;
+        entityToPlace = type.createEntity();
+        shopButton.setDisabled(true);
+        inventoryButton.setDisabled(true);
+        shopWindow.setVisible(false);
+        inventoryWindow.setVisible(false);
+    }
+
+    public void exitPlacementMode() {
+        typeToPurchase = null;
+        entityToPlace = null;
+        shopButton.setDisabled(false);
+        inventoryButton.setDisabled(false);
+        shopWindow.setVisible(shopButton.isChecked());
+        inventoryWindow.setVisible(inventoryButton.isChecked());
+    }
+
+    public boolean inPlacementMode() {
+        return typeToPurchase != null;
+    }
+
+    public void updatePlacementMode(int tileX, int tileY) {
+        boolean multiPlace = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseOption.TOWER, typeToPurchase, null, tileX, tileY);
+            ioStream.sendPacket(packet);
+            if (!multiPlace) {
+                exitPlacementMode();
+            }
+        }
     }
 
 }

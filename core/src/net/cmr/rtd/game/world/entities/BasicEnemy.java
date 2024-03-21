@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.Pathfind;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -198,6 +199,7 @@ public class BasicEnemy extends EnemyEntity {
     }
 
     float alphaDecay = Float.MAX_VALUE;
+    float animationDelta = 0;
 
     @Override
     public void render(Batch batch, float delta) {
@@ -212,11 +214,29 @@ public class BasicEnemy extends EnemyEntity {
                 alphaDecay = 0;
             }
         }
+        animationDelta += delta * getSpeed();
 
         Color color = new Color(getEffects().getDiscoloration());
         color.a = Math.min(1, alphaDecay);
         batch.setColor(color);
-        batch.draw(Sprites.sprite(displayType), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
+        String directionString = "/";
+        // Add "up", "down", "left", or "right" to the displayType to get the correct sprite
+        float threshold = .05f;
+        if (velocity == null) {
+            velocity = new Vector2();
+        }
+        if (velocity.x > threshold) {
+            directionString = "/right";
+        } else if (velocity.x < -threshold) {
+            directionString = "/left";
+        } else if (velocity.y > threshold) {
+            directionString = "/up";
+        } else if (velocity.y < -threshold) {
+            directionString = "/down";
+        } else {
+            directionString = "/down";
+        }
+        batch.draw(Sprites.animation(displayType+directionString, animationDelta), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
         super.render(batch, delta);
     }

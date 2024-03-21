@@ -16,12 +16,16 @@ import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 import net.cmr.util.UUIDUtils;
 
 public class Projectile extends Entity {
 
     public static final float NO_AOE = 0;
+
+    SpriteType sprite;
+    AnimationType animation;
 
     UUID target;
     int damage;
@@ -31,6 +35,7 @@ public class Projectile extends Entity {
      * In tiles
      */
     float AOE = 0;
+    float scale = 1;
     Vector2 velocity = new Vector2();
     float precision;
     ParticleEffect particleOnHit;
@@ -39,13 +44,24 @@ public class Projectile extends Entity {
         super(GameType.PROJECTILE);
     }
 
-    public Projectile(EnemyEntity entity, Vector2 position, int damage, float timeToReachTarget, float AOE, float precision) {
+    public Projectile(EnemyEntity entity, SpriteType type, Vector2 position, float scale, int damage, float timeToReachTarget, float AOE, float precision) {
+        this(entity, type, null, scale, position, damage, timeToReachTarget, AOE, precision);
+    }
+
+    public Projectile(EnemyEntity entity, AnimationType type, Vector2 position, float scale, int damage, float timeToReachTarget, float AOE, float precision) {
+        this(entity, null, type, scale, position, damage, timeToReachTarget, AOE, precision);
+    }
+
+    public Projectile(EnemyEntity entity, SpriteType sprite, AnimationType animation, float scale, Vector2 position, int damage, float timeToReachTarget, float AOE, float precision) {
         super(GameType.PROJECTILE);
+        this.animation = animation;
+        this.sprite = sprite;
         this.target = entity.getID();
         this.setPosition(position);
         this.damage = damage;
         this.timeToReachTarget = timeToReachTarget;
         this.velocity.set(entity.launchProjectileAt(this, timeToReachTarget, precision));
+        this.scale = scale;
         this.AOE = AOE;
         this.precision = precision;
     }
@@ -69,7 +85,6 @@ public class Projectile extends Entity {
             Entity entity = world.getEntity(target);
             if (entity != null && entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                enemy.damage(damage);
 
                 if (AOE > 0) {
                     for (Entity e : world.getEntities()) {
@@ -123,6 +138,7 @@ public class Projectile extends Entity {
         buffer.writeFloat(velocity.y);
         buffer.writeFloat(AOE);
         buffer.writeFloat(precision);
+        buffer.writeFloat(scale);
     }
 
     @Override
@@ -135,12 +151,22 @@ public class Projectile extends Entity {
         projectile.velocity.set(input.readFloat(), input.readFloat());
         projectile.AOE = input.readFloat();
         projectile.precision = input.readFloat();
+        projectile.scale = input.readFloat();
     }
     
+    float renderDelta = 0;
+
     @Override
     public void render(Batch batch, float delta) {
-        float size = .20f;
-        batch.draw(Sprites.sprite(SpriteType.PROJECTILE), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
+        float size = .20f * scale;
+        renderDelta += delta;
+        if (animation != null) {
+            batch.draw(Sprites.animation(animation, renderDelta), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
+        } else if (sprite != null) {
+            batch.draw(Sprites.sprite(sprite), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
+        } else {
+            batch.draw(Sprites.sprite(SpriteType.PROJECTILE), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
+        }
         super.render(batch, delta);
     }
 

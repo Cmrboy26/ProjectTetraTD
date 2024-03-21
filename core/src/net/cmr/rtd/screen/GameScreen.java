@@ -263,7 +263,7 @@ public class GameScreen extends AbstractScreenEX {
         shopWindow = new Window("Shop", Sprites.skin(), "small");
         shopWindow.getTitleLabel().setAlignment(Align.center);
         shopWindow.padTop(30);
-        shopWindow.setSize(200, 200);
+        shopWindow.setSize(300, 200);
         shopWindow.setPosition(320, 180, Align.center);
         shopWindow.setMovable(false);
         shopWindow.setVisible(false);
@@ -594,20 +594,26 @@ public class GameScreen extends AbstractScreenEX {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
             if (tower != null) {
                 // Display the tower's stats
+                if (upgradeDialog != null) {
+                    upgradeDialog.remove();
+                    upgradeDialog = null;
+                }
+                TowerEntity.displayRange(tower);
                 upgradeDialog = new Dialog(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
                     @Override
                     protected void result(Object object) {
                         if (object.equals(true)) {
                             upgradeDialog(tower);
                         }
+                        TowerEntity.displayRange = false;
+                        TowerEntity.displayRangeTower = null;
                     }
                 };
                 upgradeDialog.getTitleLabel().setAlignment(Align.center);
                 upgradeDialog.pad(10);
                 upgradeDialog.padTop(30);
                 upgradeDialog.setSize(200, 200);
-                upgradeDialog.setPosition(320, 180, Align.center);
-                upgradeDialog.setMovable(false);
+                upgradeDialog.setMovable(true);
                 upgradeDialog.setVisible(true);
                 String text = "Level: " + tower.getLevel();
                 text += "\nDamage: " + tower.getDisplayDamage();
@@ -621,6 +627,7 @@ public class GameScreen extends AbstractScreenEX {
                 upgradeDialog.button("Close", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
                 upgradeDialog.key(Input.Keys.ESCAPE, false);
                 upgradeDialog.show(stages.get(Align.center));
+                upgradeDialog.setPosition(640 - 10, 180, Align.right);
             }
         }
     }
@@ -899,6 +906,8 @@ public class GameScreen extends AbstractScreenEX {
         int tileX = Entity.getTileX(towerAt.getX());
         int tileY = Entity.getTileY(towerAt.getY());
         long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel());
+        TowerEntity.displayRange = false;
+        TowerEntity.displayRangeTower = null;
         Dialog dialog = new Dialog("Upgrade?", Sprites.skin(), "small") {
             @Override
             protected void result(Object object) {

@@ -37,6 +37,8 @@ public class MainMenuScreen extends AbstractScreenEX {
 		String labelType = "small";
 
 		table.row();
+
+		// TODO: Create level creation AND selection screen
 		TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);
 		textButton.addListener(new ClickListener() {
 			@Override

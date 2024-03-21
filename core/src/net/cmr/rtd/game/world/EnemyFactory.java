@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.effects.FireEffect;
+import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 
 /**
@@ -35,7 +37,9 @@ public class EnemyFactory {
 
     public enum EnemyType {
         BASIC_ONE((factory) -> factory.createBasicEnemyOne()),
-        BASIC_TWO((factory) -> factory.createBasicEnemyTwo());
+        BASIC_TWO((factory) -> factory.createBasicEnemyTwo()),
+        BASIC_THREE((factory) -> factory.createBasicEnemyThree()),
+        ;
 
         private Consumer<EnemyFactory> factory;
 
@@ -65,7 +69,7 @@ public class EnemyFactory {
         type.createEnemy(this);
     }
 
-    private void addEnemy(EnemyEntity entity) {
+    private void send(EnemyEntity entity) {
         entity.setHealth(entity.getMaxHealth());
         entity.setPosition(tileX * Tile.SIZE + Tile.SIZE / 2, tileY * Tile.SIZE + Tile.SIZE / 2);
         world.addEntity(entity);
@@ -77,12 +81,22 @@ public class EnemyFactory {
 
     private BasicEnemy createBasicEnemy(String displayType, int maxHealth, float speed) {
         BasicEnemy enemy = new BasicEnemy(team, displayType, maxHealth, speed);
-        addEnemy(enemy);
         return enemy;
     }
 
 
-    private void createBasicEnemyOne() { createBasicEnemy("basic1", 5, 1.5f); }
-    private void createBasicEnemyTwo() { createBasicEnemy("basic2", 10, 1f); }
-
+    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", 5, 1.5f)
+                                            .immuneTo(FireEffect.class)); }
+    private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", 10, 1f)); }
+    private void createBasicEnemyThree() { send(createBasicEnemy("basic3", 25, 1f) 
+                                            .immuneTo(FireEffect.class)
+                                            .immuneTo(SlownessEffect.class)); }
+    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", 125, .9f)
+                                            .immuneTo(SlownessEffect.class)); }
+    private void createHealerEnemyOne() { 
+        /* 
+        TODO: Implement
+        ALSO, healer should not be immune to anything. Slowness could be a downside for the player, so they must consider it when using the slowness tower.
+        */
+    }
 }

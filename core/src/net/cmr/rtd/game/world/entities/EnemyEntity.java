@@ -12,6 +12,7 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.TileData;
@@ -126,5 +127,10 @@ public abstract class EnemyEntity extends Entity {
     }
 
     public abstract Vector2 getVelocity();
+
+    public EnemyEntity immuneTo(Class<? extends Effect> effect) {
+        getEffects().addImmunity(effect);
+        return this;
+    }
 
 }

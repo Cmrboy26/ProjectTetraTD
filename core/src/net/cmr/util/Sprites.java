@@ -24,7 +24,7 @@ public class Sprites implements Disposable {
     private Skin skin;
     private TextureAtlas skinAtlas, spriteAtlas;
     private HashMap<String, Sprite> sprites;
-    private HashMap<AnimationType, Animation<TextureRegion>> animations;
+    private HashMap<String, Animation<TextureRegion>> animations;
 
     public enum SpriteType {
         CMRBOY26("cmrboy26"),
@@ -45,6 +45,7 @@ public class Sprites implements Disposable {
         SHOP_ICON("shopIcon"),
         INVENTORY_ICON("inventoryIcon"),
         FROZEN("frozen"),
+        ICE_TOWER("iceTower")
         ;
 
         private String spriteName;
@@ -56,8 +57,31 @@ public class Sprites implements Disposable {
         }
     }
 
+    static final float enemySpeed = .125f;
+
     public enum AnimationType {
-        TESLA_TOWER("teslaTower", PlayMode.LOOP, .5f),
+        BASIC_ONE_DOWN("basic1/down", PlayMode.LOOP, enemySpeed),
+        BASIC_ONE_UP("basic1/up", PlayMode.LOOP, enemySpeed),
+        BASIC_ONE_LEFT("basic1/left", PlayMode.LOOP, enemySpeed),
+        BASIC_ONE_RIGHT("basic1/right", PlayMode.LOOP, enemySpeed),
+
+        BASIC_TWO_DOWN("basic2/down", PlayMode.LOOP, enemySpeed),
+        BASIC_TWO_UP("basic2/up", PlayMode.LOOP, enemySpeed),
+        BASIC_TWO_LEFT("basic2/left", PlayMode.LOOP, enemySpeed),
+        BASIC_TWO_RIGHT("basic2/right", PlayMode.LOOP, enemySpeed),
+
+        BASIC_THREE_DOWN("basic3/down", PlayMode.LOOP, enemySpeed),
+        BASIC_THREE_UP("basic3/up", PlayMode.LOOP, enemySpeed),
+        BASIC_THREE_LEFT("basic3/left", PlayMode.LOOP, enemySpeed),
+        BASIC_THREE_RIGHT("basic3/right", PlayMode.LOOP, enemySpeed),
+
+        BASIC_FOUR_DOWN("basic4/down", PlayMode.LOOP, enemySpeed),
+        BASIC_FOUR_UP("basic4/up", PlayMode.LOOP, enemySpeed),
+        BASIC_FOUR_LEFT("basic4/left", PlayMode.LOOP, enemySpeed),
+        BASIC_FOUR_RIGHT("basic4/right", PlayMode.LOOP, enemySpeed),
+
+        TESLA_TOWER("teslaTower", PlayMode.LOOP, .25f),
+        SHOOTER_TOWER("shooterTower", PlayMode.NORMAL, .1f),
         FIRE("fire", PlayMode.LOOP, .5f),
         ;
 
@@ -99,7 +123,7 @@ public class Sprites implements Disposable {
             sprites.put(region.name, spriteAtlas.createSprite(region.name));
         }
         Log.info("Sprites initialized and loaded: " + sprites.size());
-        this.animations = new HashMap<AnimationType, Animation<TextureRegion>>();
+        this.animations = new HashMap<String, Animation<TextureRegion>>();
         for (AnimationType type : AnimationType.values()) {
             PlayMode mode = type.getPlayMode();
             Array<AtlasRegion> regions = spriteAtlas.findRegions(type.getAnimationName());
@@ -108,7 +132,7 @@ public class Sprites implements Disposable {
             }
             Animation<TextureRegion> animation = new Animation<TextureRegion>(type.getSpeed(), regions, mode);
             Log.info("Loading animation: " + type.getAnimationName());
-            animations.put(type, animation);
+            animations.put(type.getAnimationName(), animation);
         }
         Log.info("Animations initialized and loaded: " + animations.size());
     }
@@ -143,17 +167,30 @@ public class Sprites implements Disposable {
     public static TextureRegionDrawable drawable(AnimationType type, float delta) {
         return new TextureRegionDrawable(getInstance().getAnimation(type, delta));
     }
+
+    public static Animation<TextureRegion> animation(String type) {
+        return getInstance().getAnimation(type);
+    }
+    public Animation<TextureRegion> getAnimation(String type) {
+        return animations.get(type);
+    }
     public static Animation<TextureRegion> animation(AnimationType type) {
         return getInstance().getAnimation(type);
     }
     public Animation<TextureRegion> getAnimation(AnimationType type) {
-        return animations.get(type);
+        return animations.get(type.getAnimationName());
+    }
+    public static TextureRegion animation(String type, float stateTime) {
+        return getInstance().getAnimation(type, stateTime);
+    }
+    public TextureRegion getAnimation(String type, float stateTime) {
+        return animations.get(type).getKeyFrame(stateTime);
     }
     public static TextureRegion animation(AnimationType type, float stateTime) {
         return getInstance().getAnimation(type, stateTime);
     }
     public TextureRegion getAnimation(AnimationType type, float stateTime) {
-        return animations.get(type).getKeyFrame(stateTime);
+        return animations.get(type.getAnimationName()).getKeyFrame(stateTime);
     }
 
     public BitmapFont smallFont() {

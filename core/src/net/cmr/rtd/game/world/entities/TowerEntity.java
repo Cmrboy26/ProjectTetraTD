@@ -260,4 +260,20 @@ public abstract class TowerEntity extends Entity {
         displayRangeTower = null;
     }
 
+    // Upgrade Helper Methods
+
+    /**
+     * Every x levels, increase by y
+     */
+    public float calculateIncrementedValue(int levelsPerIncrement, float incrementAmount) {
+        return calculateIncrementedValue(levelsPerIncrement, incrementAmount, 0);
+    }
+
+    /**
+     * Every x levels, increase by y
+     */
+    public float calculateIncrementedValue(int levelsPerIncrement, float incrementAmount, float initial) {
+        return (float) (initial + Math.floor(getLevel() / levelsPerIncrement) * incrementAmount);
+    }
+
 }

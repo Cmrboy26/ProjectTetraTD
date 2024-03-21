@@ -58,7 +58,7 @@ public class FireEffect extends Effect {
                 .setEntity(getEntity())
                 .setParticle(AnimationType.FIRE)
                 .setDuration(1)
-                .setEmissionRate(getLevel())
+                .setEmissionRate(getLevel() + 1)
                 .setScale(.25f)
                 .setParticleLife(.5f)
                 .setFollowEntity(true)

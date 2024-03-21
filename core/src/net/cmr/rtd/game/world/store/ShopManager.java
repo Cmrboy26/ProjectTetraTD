@@ -15,6 +15,7 @@ import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.Sprites.AnimationType;
+import net.cmr.util.Sprites.SpriteType;
 import net.cmr.rtd.game.world.tile.TileData;
 
 /**
@@ -27,12 +28,14 @@ public class ShopManager {
 
     static {
         // Register the purchase of towers
-        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 50, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
-        registerTower(new TowerOption(GameType.ICE_TOWER, AnimationType.TESLA_TOWER, 30, "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 30, "Shooter Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 70, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
+        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 20, "Ice Tower", "Slows enemies."));
 
         // Register the purchase of upgrades
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 20L + level * level * 10L,  level -> 5f + level / 3f));
-        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> 20L + level * level * 8L,         level -> 5f + level / 3f));
+        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 10L + level * level * 15L,         level -> 5f + (level * level) / 3f));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 20L + level * level * 25L,  level -> 5f + level * 1.5f));
+        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
     }
 
     private static void registerTower(TowerOption item) {

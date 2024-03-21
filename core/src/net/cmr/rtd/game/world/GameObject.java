@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.Projectile;
+import net.cmr.rtd.game.world.entities.towers.ShooterTower;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.util.Log;
@@ -32,6 +33,7 @@ public abstract class GameObject {
         
         ICE_TOWER(IceTower.class),
         FIRE_TOWER(FireTower.class),
+        SHOOTER_TOWER(ShooterTower.class),
 
         PROJECTILE(Projectile.class)
         ;

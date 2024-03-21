@@ -14,9 +14,11 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.AnimationType;
+import net.cmr.util.Sprites.SpriteType;
 
 public class IceTower extends TowerEntity {
 
@@ -36,12 +38,30 @@ public class IceTower extends TowerEntity {
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
+        
+        if (animationDelta > .5f && attacking) {
+            animationDelta = 0;
+            // Ice particle around the tower
+            ParticleEffect effect = SpreadEmitterEffect.factory()
+                .setEntity(this)
+                .setParticle(SpriteType.FROZEN)
+                .setDuration(2f)
+                .setEmissionRate(2 + getLevel())
+                .setScale(.15f)
+                .setParticleLife(2f)
+                .setFollowEntity(true)
+                .setAnimationSpeed(2f)
+                .create();
+            if (data.isClient()) {
+                data.getScreen().addEffect(effect);
+            }
+        }
     }
 
     @Override
     public void attack(UpdateData data) {
         super.attack(data);
-        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data);
+        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(getRange(), data);
         attacking = false;
         for (Entity entity : entitiesInRange) {
             attacking = true;
@@ -59,7 +79,12 @@ public class IceTower extends TowerEntity {
 
     @Override
     public float getDisplayRange() {
-        return range;
+        return getRange();
+    }
+
+    private float getRange() {
+        // Every 3 levels, the range increases by .25 tiles
+        return calculateIncrementedValue(3, .25f, range);
     }
 
     @Override
@@ -74,16 +99,12 @@ public class IceTower extends TowerEntity {
 
     @Override
     public void render(Batch batch, float delta) {
-        if (attacking) {
-            animationDelta += delta;
-        } else {
-            animationDelta = 0;
-        }
+        animationDelta += delta;
 
         Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        TextureRegion sprite = Sprites.sprite(SpriteType.ICE_TOWER); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
         super.render(batch, delta);

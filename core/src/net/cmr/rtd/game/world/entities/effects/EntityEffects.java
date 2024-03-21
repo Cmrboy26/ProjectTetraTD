@@ -44,6 +44,14 @@ public class EntityEffects {
         immunity.add(effectClass);
     }
 
+    public HashSet<Class<? extends Effect>> getImmunities() {
+        return immunity;
+    }
+
+    public HashSet<Effect> get() {
+        return effects;
+    }
+
     public void addEffect(Effect effect) {
         for (Class<? extends Effect> immune : immunity) {
             if (immune.isInstance(effect)) {
@@ -67,6 +75,10 @@ public class EntityEffects {
     }
 
     public void serialize(DataBuffer buffer) throws IOException {
+        buffer.writeInt(immunity.size());
+        for (Class<? extends Effect> effect : immunity) {
+            buffer.writeUTF(effect.getName());
+        }
         buffer.writeInt(effects.size());
         for (Effect effect : effects) {
             buffer.writeUTF(effect.getClass().getName());
@@ -76,8 +88,18 @@ public class EntityEffects {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static EntityEffects deserialize(Entity entity, DataInputStream input) throws IOException {
         EntityEffects effects = new EntityEffects(entity);
+        int immunitySize = input.readInt();
+        for (int i = 0; i < immunitySize; i++) {
+            try {
+                Class<?> effectClass = Class.forName(input.readUTF());
+                effects.addImmunity((Class<? extends Effect>) effectClass);
+            } catch (Exception e) {
+                throw new IOException("Failed to deserialize immunity", e);
+            }
+        }
         int size = input.readInt();
         for (int i = 0; i < size; i++) {
             try {

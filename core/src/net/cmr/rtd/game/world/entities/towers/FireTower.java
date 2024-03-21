@@ -53,9 +53,9 @@ public class FireTower extends TowerEntity {
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new FireEffect(enemy.getEffects(), 1, (int) Math.round(targetDPS + (getLevel() - 1) * .5f));
+                new FireEffect(enemy.getEffects(), 1, (int) Math.floor(targetDPS + (getLevel() - 1) * .5f));
                 if (!launchedFireball) {
-                    Projectile fireball = new Projectile(enemy, new Vector2(getPosition()), 3, 1, 1, 1);
+                    Projectile fireball = new Projectile(enemy, AnimationType.FIRE, new Vector2(getPosition()), 3f, 3, 1, 1, 1);
                     fireball.setParticleOnHit(SpreadEmitterEffect.factory()
                         .setParticle(AnimationType.FIRE)
                         .setDuration(1)
@@ -90,7 +90,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getAttackSpeed() {
-        return .25f;
+        return .1f;
     }
 
     @Override

@@ -9,16 +9,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
+import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.TeamData;
+import net.cmr.rtd.game.world.TeamData.NullTeamException;
+import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Sprites;
@@ -113,6 +116,31 @@ public class SelectionScreen extends AbstractScreenEX {
         details.add(title).fillX().expandX().colspan(2).row();
 
         // TODO: ADD A LABEL THAT SHOWS HOW MANY PLAYERS THE LEVEL SUPPORTS
+        FileHandle worldFile = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/world.dat");
+        World world = (World) GameObject.deserializeGameObject(worldFile.readBytes());
+        int teamCount = 0;
+        for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
+            try {
+                TeamData team = new TeamData(world, i);
+                // If this succeeded, then this team exists in the world.
+                teamCount++;
+            } catch (NullTeamException e) {
+                // This team does not exist in the world.
+            }
+        }
+        if (teamCount == 0) {
+            Label noTeams = new Label("No teams found in this level!", Sprites.skin(), "small");
+            noTeams.setAlignment(Align.center);
+            details.add(noTeams).fillX().expandX().colspan(2).row();
+        } else if (teamCount == 1) {
+            Label oneTeam = new Label("Singleplayer", Sprites.skin(), "small");
+            oneTeam.setAlignment(Align.center);
+            details.add(oneTeam).fillX().expandX().colspan(2).row();
+        } else {
+            Label multipleTeams = new Label("Multiplayer: "+teamCount+" Players", Sprites.skin(), "small");
+            multipleTeams.setAlignment(Align.center);
+            details.add(multipleTeams).fillX().expandX().colspan(2).row();
+        }
 
         ButtonGroup<TextButton> group = new ButtonGroup<TextButton>();
         group.setMaxCheckCount(1);

@@ -22,7 +22,6 @@ import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites.AnimationType;
-import net.cmr.util.Sprites.SpriteType;
 
 public class FireTower extends TowerEntity {
 

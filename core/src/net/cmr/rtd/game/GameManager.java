@@ -49,7 +49,6 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
-import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WaveUnit;

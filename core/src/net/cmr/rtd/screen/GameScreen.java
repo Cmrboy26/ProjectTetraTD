@@ -13,6 +13,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -61,7 +62,6 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
@@ -72,6 +72,7 @@ import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Log;
+import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -687,6 +688,23 @@ public class GameScreen extends AbstractScreenEX {
 
                 }
                 batch.setColor(1, 1, 1, 1);
+                batch.end();
+
+                if (Settings.getPreferences().getBoolean(Settings.SHOW_PLACEMENT_GRID)) {
+                    int mx = Gdx.input.getX();
+                    int my = Gdx.input.getY();
+                    Vector2 mousePos = viewport.unproject(new Vector2(mx, my));
+                    mousePos.x = (int) Math.floor(mousePos.x/Tile.SIZE) * Tile.SIZE;
+                    mousePos.y = (int) Math.floor(mousePos.y/Tile.SIZE) * Tile.SIZE;
+                    
+                    shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+                    shapeRenderer.begin(ShapeType.Line);
+                    shapeRenderer.setColor(1, 1, 1, 1);
+                    shapeRenderer.rect(mousePos.x, mousePos.y, Tile.SIZE, Tile.SIZE);
+                    shapeRenderer.setColor(1, 1, 1, 1);
+                    shapeRenderer.end();
+                }
+                batch.begin();
             }
 
             for (ParticleEffect effect : particleEffects) {

@@ -79,7 +79,8 @@ public class MainMenuScreen extends AbstractScreenEX {
 		textButton.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				
+				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				game.setScreen(new SettingsScreen());	
 			}
 		});
 		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();

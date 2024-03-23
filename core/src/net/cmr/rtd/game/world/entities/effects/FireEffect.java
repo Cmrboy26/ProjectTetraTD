@@ -10,7 +10,6 @@ import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.util.Sprites.AnimationType;
-import net.cmr.util.Sprites.SpriteType;
 
 public class FireEffect extends Effect {
 

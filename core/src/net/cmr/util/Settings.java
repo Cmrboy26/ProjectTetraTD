@@ -7,9 +7,12 @@ import com.badlogic.gdx.Preferences;
 public class Settings {
     
     public static final String PREFERENCES_LOCATION = "RTD-Settings.xml";
+    public static final String MASTER_VOLUME = "masterVolume";
     public static final String MUSIC_VOLUME = "musicVolume";
     public static final String SFX_VOLUME = "sfxVolume";
     public static final String USERNAME = "username";
+    public static final String SHOW_FPS = "showFPS";
+    public static final String SHOW_PLACEMENT_GRID = "showPlacementGrid";
     private static Preferences preferences;
 
     public static void initializeSettings() {
@@ -24,13 +27,21 @@ public class Settings {
     public static void setDefaults(boolean force) {
         Preferences preferences = getPreferences();
         
+        defaultFloat(MASTER_VOLUME, 0.5f, force, preferences);
         defaultFloat(MUSIC_VOLUME, 0.5f, force, preferences);
         defaultFloat(SFX_VOLUME, 0.5f, force, preferences);
         defaultString(USERNAME, System.getProperty("user.name"), force, preferences);
+        defaultBoolean(SHOW_FPS, false, force, preferences);
+        defaultBoolean(SHOW_PLACEMENT_GRID, false, force, preferences);
 
         preferences.flush();
     }
 
+    private static void defaultBoolean(String key, boolean value, boolean force, Preferences preferences) {
+        if(force || !preferences.contains(key)) {
+            preferences.putBoolean(key, value);
+        }
+    }
     private static void defaultFloat(String key, float value, boolean force, Preferences preferences) {
         if(force || !preferences.contains(key)) {
             preferences.putFloat(key, value);
@@ -62,8 +73,8 @@ public class Settings {
         setDefaults(false);
         Preferences preferences = getPreferences();
         // Apply the settings to the game
-        Audio.getInstance().setMusicVolume(preferences.getFloat(MUSIC_VOLUME));
-        Audio.getInstance().setSFXVolume(preferences.getFloat(SFX_VOLUME));
+        Audio.getInstance().setMusicVolume(preferences.getFloat(MUSIC_VOLUME) * preferences.getFloat(MASTER_VOLUME));
+        Audio.getInstance().setSFXVolume(preferences.getFloat(SFX_VOLUME) * preferences.getFloat(MASTER_VOLUME));
 
         Log.info("Applied settings.");
     }

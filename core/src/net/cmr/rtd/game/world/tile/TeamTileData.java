@@ -2,9 +2,6 @@ package net.cmr.rtd.game.world.tile;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.SpriteType;
-
 public class TeamTileData extends TileData {
     
     public int team;

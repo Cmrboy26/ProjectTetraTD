@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
@@ -48,7 +49,7 @@ public class FireEffect extends Effect {
 
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                enemy.damage(getLevel() * getLevel());
+                enemy.damage(getLevel() * getLevel(), data, DamageType.FIRE);
             }
         }
     }

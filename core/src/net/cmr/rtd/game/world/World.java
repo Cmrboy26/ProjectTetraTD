@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
+import com.badlogic.gdx.utils.Null;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -44,7 +45,7 @@ public class World extends GameObject {
 
     public static final int DEFAULT_WORLD_SIZE = 32;
     public static final int LAYERS = 3;
-    public static final float PREPARATION_TIME = 5;
+    public float PREPARATION_TIME = 5;
 
     private int worldSize;
     private ConcurrentHashMap<UUID, Entity> entities; // <Entity ID, Entity>
@@ -159,7 +160,7 @@ public class World extends GameObject {
                     return;
                 }
 
-                waveCountdown = PREPARATION_TIME + waveObj.getWaveTime();
+                waveCountdown = PREPARATION_TIME + waveObj.getWaveTime() + waveObj.getAdditionalPrepTime();
 
                 // Notify the clients that the wave has ended
                 data.getManager().sendWaveUpdateToAll();
@@ -412,6 +413,11 @@ public class World extends GameObject {
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
                 for (int z = 0; z < LAYERS; z++) {
+                    if (tileDataMap.containsKey(new Point3D(x, y, z))) {
+                        TileData data = tileDataMap.get(new Point3D(x, y, z));
+                        data.render(batch, x, y);
+                    }
+
                     if (tiles[x][y][z] == null) {
                         continue;
                     }
@@ -424,11 +430,6 @@ public class World extends GameObject {
                         continue;
                     }
                     tile.render(batch, delta, this, x, y, z);
-
-                    if (tileDataMap.containsKey(new Point3D(x, y, z))) {
-                        TileData data = tileDataMap.get(new Point3D(x, y, z));
-                        data.render(batch, x, y);
-                    }
                 }
             }
         }
@@ -534,11 +535,15 @@ public class World extends GameObject {
 
     public void setWavesData(WavesData wavesData) {
         this.wavesData = wavesData;
+        this.PREPARATION_TIME = wavesData.getPreparationTime();
     }
     public WavesData getWavesData() {
         return wavesData;
     }
 
+    public @Null Wave getCurrentWave() {
+        return wavesData.getWave(this.wave);
+    }
     public float getCurrentWaveDuration() {
         Wave wave = wavesData.getWave(this.wave);
         if (wave == null) {

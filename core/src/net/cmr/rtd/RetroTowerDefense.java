@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.esotericsoftware.kryonet.Client;
@@ -54,6 +55,10 @@ public class RetroTowerDefense extends CMRGame {
 
 	@Override
 	public void render () {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+			CMRGame.setDebug(!CMRGame.isDebug());
+		}
+
 		ScreenUtils.clear(0, 0, 0, 1);
 		super.render();
 	}
@@ -110,6 +115,14 @@ public class RetroTowerDefense extends CMRGame {
 	}
 
 	/**
+	 * @see #joinSingleplayerGame(GameManagerDetails, LevelSave, String, String)
+	 * @param override Whether to override an existing save folder with the same name
+	 */
+	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override) {
+		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, true));
+	}
+
+	/**
 	 * Starts and joins a local/singleplayer game on the client's machine
 	 * Should be called when LOADING a game.
 	 */
@@ -133,7 +146,8 @@ public class RetroTowerDefense extends CMRGame {
 		});
 
 		GameScreen screen = new GameScreen(clientsideStream, manager, null);
-		manager.initialize(new GameSave("default")); 
+		//manager.initialize(new GameSave("default")); 
+		manager.initialize(save);
 		setScreen(screen);
 		manager.start();
 		manager.onNewConnection(serversideStream);

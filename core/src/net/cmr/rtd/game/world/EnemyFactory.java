@@ -39,6 +39,7 @@ public class EnemyFactory {
         BASIC_ONE((factory) -> factory.createBasicEnemyOne()),
         BASIC_TWO((factory) -> factory.createBasicEnemyTwo()),
         BASIC_THREE((factory) -> factory.createBasicEnemyThree()),
+        BASIC_FOUR((factory) -> factory.createBasicEnemyFour()),
         ;
 
         private Consumer<EnemyFactory> factory;

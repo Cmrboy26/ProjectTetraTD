@@ -26,6 +26,13 @@ public class Audio implements Disposable {
         BUTTON_PRESS("button_press.wav"),
         BUTTON_RELEASE("button_release.wav"),
         BUTTON_UNHOVER("button_unhover.wav"),
+        HIT1("hit1.wav"),
+        HIT2("hit2.wav"),
+        HIT3("hit3.wav"),
+        FIREBALL_LAUNCH("fireball_launch.wav"),
+        FIREBALL_HIT("fireball_hit.wav"),
+        LAUNCH("launch.wav"),
+        FIRE_DAMAGE("fire_damage.wav"),
         ;
 
         private final String fileName;

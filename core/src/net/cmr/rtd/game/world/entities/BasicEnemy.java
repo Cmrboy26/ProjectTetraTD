@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.Pathfind;
 import net.cmr.rtd.game.world.UpdateData;
-import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -80,6 +79,9 @@ public class BasicEnemy extends EnemyEntity {
     private void findNextTile(UpdateData data) {
         int tileX = getTileX(this);
         int tileY = getTileY(this);
+        if (tileX == 10 && tileY == 5) {
+            System.out.println("10, 5");
+        }
         int lastTileX = lastTile == null ? tileX : lastTile.x;
         int lastTileY = lastTile == null ? tileY : lastTile.y;
         int dX = tileX - lastTileX;
@@ -242,14 +244,25 @@ public class BasicEnemy extends EnemyEntity {
     }
 
     @Override
+    public void onDamage(int damage, UpdateData data, DamageType type) {
+        playHitSound(data, type);
+    }
+
+
+    @Override
     public void onDeath(UpdateData data) {
         super.onDeath(data);
-        int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
+        //playHitSound(data, DamageType.PHYSICAL);
+        //int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
+        int money = (int) Math.floor(maxHealth * .4f - 1f);
         moneyOnDeath(this, data, money);
     }
 
     @Override
     public Vector2 getVelocity() {
+        if (velocity == null) {
+            velocity = new Vector2();
+        }
         return new Vector2(velocity).scl(getSpeed());
     }
 

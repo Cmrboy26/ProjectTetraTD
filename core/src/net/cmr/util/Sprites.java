@@ -45,7 +45,10 @@ public class Sprites implements Disposable {
         SHOP_ICON("shopIcon"),
         INVENTORY_ICON("inventoryIcon"),
         FROZEN("frozen"),
-        ICE_TOWER("iceTower")
+        ICE_TOWER("iceTower"),
+        UPGRADE_FRONT("upgradeFront"),
+        UPGRADE_BACK("upgradeBack"),
+        WARNING("warning"),
         ;
 
         private String spriteName;

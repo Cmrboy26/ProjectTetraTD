@@ -16,6 +16,8 @@ import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 
 public abstract class EnemyEntity extends Entity {
 
@@ -58,14 +60,49 @@ public abstract class EnemyEntity extends Entity {
     public void setHealth(int health) {
         this.health = health;
     }
-    public void damage(int damage) {
-        health -= damage;
+
+    public enum DamageType {
+        PHYSICAL,
+        FIRE,
     }
-    public void heal(int heal) {
+
+    public final void damage(int damage, UpdateData data, DamageType type) {
+        health -= damage;
+        onDamage(damage, data, type);
+    }
+    public final void heal(int heal, UpdateData data, DamageType type) {
         health += heal;
+        onHeal(heal, data, type);
     }
     public int getTeam() {
         return team;
+    }
+
+    public void onDamage(int damage, UpdateData data, DamageType type) {
+        // Override this method to add custom behavior when the entity is damaged
+    }
+
+    public void onHeal(int heal, UpdateData data, DamageType type) {
+        // Override this method to add custom behavior when the entity is healed
+    }
+
+    public void playHitSound(UpdateData data, DamageType type) {
+        int randomNumber = (int) Math.floor(Math.random() * 3);
+        randomNumber++;
+        // play the sound effect
+        if (data.isClient()) {
+            if (type == DamageType.FIRE) {
+                Audio.getInstance().playSFX(GameSFX.FIRE_DAMAGE, 1, 1f);
+            } else {
+                if (randomNumber == 1) {
+                    Audio.getInstance().playSFX(GameSFX.HIT1, 1, .8f);
+                } else if (randomNumber == 2) {
+                    Audio.getInstance().playSFX(GameSFX.HIT2, 1, .8f);
+                } else {
+                    Audio.getInstance().playSFX(GameSFX.HIT3, 1, .8f);
+                }
+            }
+        }
     }
 
     public void attackStructure(int tileX, int tileY, UpdateData data, int damage) {

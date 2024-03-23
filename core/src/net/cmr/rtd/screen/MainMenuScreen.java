@@ -21,9 +21,6 @@ import net.cmr.util.Sprites;
 
 public class MainMenuScreen extends AbstractScreenEX {
     
-    LocalGameStream clientsideStream, serversideStream;
-    GameManager manager;
-
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
 
@@ -38,8 +35,19 @@ public class MainMenuScreen extends AbstractScreenEX {
 
 		table.row();
 
+		TextButton creation = new TextButton("Play", Sprites.skin(), labelType);
+		creation.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                game.setScreen(new SelectionScreen());
+			}
+		});
+		table.add(creation).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
+		table.row();
+
 		// TODO: Create level creation AND selection screen
-		TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);
+		/*TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);
 		textButton.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -54,7 +62,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 			}
 		});
 		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
-		table.row();
+		table.row();*/
 
 		TextButton editor = new TextButton("Editor", Sprites.skin(), labelType);
 		editor.addListener(new ClickListener() {
@@ -67,7 +75,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
 		table.row();
 
-		textButton = new TextButton("Settings", Sprites.skin(), labelType);
+		TextButton textButton = new TextButton("Settings", Sprites.skin(), labelType);
 		textButton.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {

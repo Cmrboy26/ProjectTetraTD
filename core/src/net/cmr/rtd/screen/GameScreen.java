@@ -61,8 +61,11 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.BasicEnemy;
+import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
@@ -140,9 +143,9 @@ public class GameScreen extends AbstractScreenEX {
         life.setPosition(5, 360-5, Align.topLeft);
 
         lifeLabel = new Label("100", Sprites.skin(), "small");
-        lifeLabel.setAlignment(Align.center);
+        lifeLabel.setAlignment(Align.left);
         lifeLabel.setSize(iconSize, iconSize);
-        lifeLabel.setPosition(5 + iconSize, 360-5, Align.topLeft);
+        lifeLabel.setPosition(15 + iconSize, 360-5, Align.topLeft);
         
         add(Align.topLeft, life);
         add(Align.topLeft, lifeLabel);
@@ -152,9 +155,9 @@ public class GameScreen extends AbstractScreenEX {
         cash.setPosition(5, 360-5-iconSize, Align.topLeft);
 
         cashLabel = new Label("100", Sprites.skin(), "small");
-        cashLabel.setAlignment(Align.center);
+        cashLabel.setAlignment(Align.left);
         cashLabel.setSize(iconSize, iconSize);
-        cashLabel.setPosition(5 + iconSize, 360-5-iconSize, Align.topLeft);
+        cashLabel.setPosition(15 + iconSize, 360-5-iconSize, Align.topLeft);
 
         add(Align.topLeft, cash);
         add(Align.topLeft, cashLabel);
@@ -164,9 +167,9 @@ public class GameScreen extends AbstractScreenEX {
         structureLife.setPosition(5, 360-5-iconSize*2, Align.topLeft);
 
         structureLifeLabel = new Label("100", Sprites.skin(), "small");
-        structureLifeLabel.setAlignment(Align.center);
+        structureLifeLabel.setAlignment(Align.left);
         structureLifeLabel.setSize(iconSize, iconSize);
-        structureLifeLabel.setPosition(5 + iconSize, 360-5-iconSize*2, Align.topLeft);
+        structureLifeLabel.setPosition(15 + iconSize, 360-5-iconSize*2, Align.topLeft);
 
         add(Align.topLeft, structureLife);
         add(Align.topLeft, structureLifeLabel);
@@ -344,7 +347,13 @@ public class GameScreen extends AbstractScreenEX {
                     return;
                 }
                 if (gameObjectPacket.shouldRemove()) {
-                    world.removeEntity(entity);
+                    if (world.getEntity(entity.getID()) != null) {
+                        world.removeEntity(entity);
+                        if (entity instanceof EnemyEntity) {
+                            EnemyEntity enemy = (EnemyEntity) entity;
+                            enemy.playHitSound(data, DamageType.PHYSICAL);
+                        }
+                    }
                 } else {
                     world.addEntity(entity);
                 }
@@ -365,7 +374,7 @@ public class GameScreen extends AbstractScreenEX {
         if (packet instanceof StatsUpdatePacket) {
             StatsUpdatePacket statsPacket = (StatsUpdatePacket) packet;
             lifeLabel.setText(String.valueOf(statsPacket.getHealth()));
-            cashLabel.setText(ShopManager.costToString(statsPacket.getMoney()));
+            cashLabel.setText(ShopManager.costToString(statsPacket.getMoney()).substring(1));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
             localMoney = statsPacket.getMoney();
             return;
@@ -378,6 +387,9 @@ public class GameScreen extends AbstractScreenEX {
             this.waveCountdown = wavePacket.getDuration();
             this.wave = wavePacket.getWaveNumber();
             this.areWavesPaused = wavePacket.isPaused();
+            if (wavePacket.shouldWarn()) {
+                notification(SpriteType.WARNING, "Special wave incoming! Be careful!");
+            }
 
             return;
         }
@@ -659,7 +671,6 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void render(float delta) {
         update(delta);
-
         if (world != null) {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);

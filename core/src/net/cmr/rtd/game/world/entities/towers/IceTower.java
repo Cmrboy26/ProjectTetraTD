@@ -59,7 +59,7 @@ public class IceTower extends TowerEntity {
     }
 
     @Override
-    public void attack(UpdateData data) {
+    public boolean attack(UpdateData data) {
         super.attack(data);
         ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(getRange(), data);
         attacking = false;
@@ -70,6 +70,7 @@ public class IceTower extends TowerEntity {
                 new SlownessEffect(enemy.getEffects(), getAttackSpeed() + persistence, getLevel());
             }
         }
+        return attacking;
     }
     
     @Override
@@ -99,6 +100,8 @@ public class IceTower extends TowerEntity {
 
     @Override
     public void render(Batch batch, float delta) {
+        preRender(batch, delta);
+
         animationDelta += delta;
 
         Color color = new Color(Color.WHITE);
@@ -107,6 +110,8 @@ public class IceTower extends TowerEntity {
         TextureRegion sprite = Sprites.sprite(SpriteType.ICE_TOWER); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
+        
+        postRender(batch, delta);
         super.render(batch, delta);
     }
 

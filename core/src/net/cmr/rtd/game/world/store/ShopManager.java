@@ -1,5 +1,6 @@
 package net.cmr.rtd.game.world.store;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import net.cmr.rtd.game.GameManager;
@@ -14,9 +15,10 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.util.Log;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
-import net.cmr.rtd.game.world.tile.TileData;
 
 /**
  * A static class that manages the shop.
@@ -29,12 +31,12 @@ public class ShopManager {
     static {
         // Register the purchase of towers
         registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 30, "Shooter Tower", "Slows enemies."));
-        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 70, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
-        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 20, "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 100, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
+        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 50, "Ice Tower", "Slows enemies."));
 
         // Register the purchase of upgrades
-        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 10L + level * level * 15L,         level -> 5f + (level * level) / 3f));
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 20L + level * level * 25L,  level -> 5f + level * 1.5f));
+        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 10L + level * level * level * 10L,         level -> 5f + (level)));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + level * level * level * 30L,  level -> 5f + level * 1.5f));
         registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
     }
 
@@ -70,6 +72,7 @@ public class ShopManager {
             case TOWER: {
                 if (towerAt != null) {
                     // Tower exists at the position
+                    System.out.println("Tower exists at the position");
                     return;
                 }
                 TowerOption option = towerCatalog.get(type);
@@ -77,15 +80,19 @@ public class ShopManager {
                 TeamData data = manager.getTeam(player.getTeam());
                 if (data.getMoney() < cost) {
                     // Not enough money
+                    Log.debug("Not enough money");
                     return;
                 }
                 if (areTilesBlocking(manager, packet.x, packet.y)) {
                     // Tiles are blocking
+                    System.out.println(packet.x + ", "+packet.y);
+                    Log.debug("Tiles are blocking");
                     return;
                 }
                 TowerEntity tower = newTower(packet.type, player.getTeam());
                 if (tower == null) {
                     // Not a tower
+                    Log.debug("Not a tower");
                     return; 
                 }
                 tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
@@ -174,26 +181,29 @@ public class ShopManager {
                 continue;
             }
             TowerEntity tower = (TowerEntity) entity;
-            float positionX = (x + .5f) * Tile.SIZE;
-            float positionY = (y + .5f) * Tile.SIZE;
-            if (tower.getX() == positionX && tower.getY() == positionY) {
+            int towerX = Entity.getTileX(tower);
+            int towerY = Entity.getTileY(tower);
+            if (towerX == x && towerY == y) {
                 return tower;
             }
         }
         return null;
     }
 
-    public static String costToString(long cost) {
-        String suffix = "";
-        if (cost >= 1000000) {
-            cost /= 1000000;
-            suffix = "M";
-        } else if (cost >= 1000) {
-            cost /= 1000;
-            suffix = "K";
-        }
+    private static final DecimalFormat df = new DecimalFormat("#.#");
 
-        return "$" + cost + suffix;
+    public static String costToString(long cost) {
+        // Format the cost
+        // > 1000 -> 1.0k
+        // > 1000000 -> 1.0m
+
+        if (cost < 1000) {
+            return "$" + cost + "";
+        }
+        if (cost < 1000000) {
+            return "$" + df.format(cost / 1000.0) + "k";
+        }
+        return "$" + df.format(cost / 1000000.0) + "m";
     }
 
     private static long towerSellValue(TowerEntity tower) {
@@ -211,6 +221,7 @@ public class ShopManager {
         World world = manager.getWorld();
         TileType at = world.getTile(x, y, 1);
         TileData data = world.getTileData(x, y, 1);
+        System.out.println("TileType: " + at + ", TileData: " + data);
         return at == TileType.WALL || data != null;
     }
 

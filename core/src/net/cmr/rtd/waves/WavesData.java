@@ -26,6 +26,7 @@ public class WavesData {
     public String name;
     public DifficultyRating difficulty;
     public boolean endlessMode;
+    public float preparationTime;
     public HashMap<Integer, Wave> waves;
 
     public WavesData() {
@@ -70,11 +71,20 @@ public class WavesData {
         data.name = (String) main.get("name");
         data.difficulty = DifficultyRating.deserialize(((Number) main.get("difficulty")).intValue());
         data.endlessMode = (boolean) main.get("endlessMode");
+        data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
         
         JSONArray waves = (JSONArray) main.get("waves");
         for (Object wave : waves) {
             JSONObject waveObject = (JSONObject) wave;
             Wave newWave = new Wave(((Number) waveObject.get("waveTime")).floatValue());
+            if (waveObject.containsKey("warnPlayer")) {
+                boolean warnPlayer = (Boolean) waveObject.get("warnPlayer");
+                newWave.setWarnPlayer(warnPlayer);
+            }
+            if (waveObject.containsKey("additionalPrep")) {
+                int additionalPreparationTime = ((Number) waveObject.get("additionalPrep")).intValue();
+                newWave.setAdditionalPrepTime(additionalPreparationTime);
+            }
             JSONArray waveUnits = (JSONArray) waveObject.get("waveUnits");
             for (Object waveUnit : waveUnits) {
                 JSONObject waveUnitObject = (JSONObject) waveUnit;
@@ -106,6 +116,7 @@ public class WavesData {
         main.put("name", name);
         main.put("difficulty", DifficultyRating.serialize(difficulty));
         main.put("endlessMode", endlessMode);
+        main.put("preparationTime", preparationTime);
         
         JSONArray waves = new JSONArray();
         for (int waveNumber : this.waves.keySet()) {
@@ -113,6 +124,12 @@ public class WavesData {
 
             Wave waveObject = this.waves.get(waveNumber);
             wave.put("waveTime", waveObject.getWaveTime());
+            if (waveObject.shouldWarnPlayer()) {
+                wave.put("warnPlayer", true);
+            }
+            if (waveObject.getAdditionalPrepTime() != 0) {
+                wave.put("additionalPrep", waveObject.getAdditionalPrepTime());
+            }
             JSONArray waveUnitArray = new JSONArray();
             for (WaveUnit unit : waveObject.getWaveUnits()) {
                 JSONObject waveUnit = new JSONObject();
@@ -202,5 +219,8 @@ public class WavesData {
 
     public int size() {
         return waves.size();
+    }
+    public float getPreparationTime() {
+        return preparationTime;
     }
 }

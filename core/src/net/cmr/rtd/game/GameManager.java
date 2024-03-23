@@ -508,11 +508,16 @@ public class GameManager implements Disposable {
     }
 
     private WavePacket getCurrentWavePacket() {
+        Wave currentWave = world.getCurrentWave();
         int wave = world.getWave();
         float waveCountdown = world.getWaveCountdown();
         float waveDuration = world.getCurrentWaveDuration();
-
-        return new WavePacket(areWavesPaused(), waveCountdown, waveDuration, wave);
+        boolean warn = false;
+        if (currentWave != null) {
+            warn = currentWave.shouldWarnPlayer();
+        }
+        
+        return new WavePacket(areWavesPaused(), waveCountdown, waveDuration, wave, warn);
     }
 
     public void sendWaveData(GamePlayer player, World world) {

@@ -8,6 +8,8 @@ import org.json.simple.JSONObject;
 public class Wave {
 
     final float waveTime;
+    boolean warnPlayer = false;
+    int additionalPrepTime = 0;
     ArrayList<WaveUnit> waveUnits;
 
     public Wave(float waveLength) {
@@ -27,9 +29,31 @@ public class Wave {
         return waveUnits;
     }
 
+    public boolean shouldWarnPlayer() {
+        return warnPlayer;
+    }
+
+    public int getAdditionalPrepTime() {
+        return additionalPrepTime;
+    }
+
+    public void setWarnPlayer(boolean warnPlayer) {
+        this.warnPlayer = warnPlayer;
+    }
+
+    public void setAdditionalPrepTime(int additionalPrepTime) {
+        this.additionalPrepTime = additionalPrepTime;
+    }
+
     @SuppressWarnings("unchecked")
     public void serialize(JSONObject wave) {
         wave.put("waveTime", waveTime);
+        if (warnPlayer) {
+            wave.put("warnPlayer", true);
+        }
+        if (additionalPrepTime != 0) {
+            wave.put("additionalPrep", additionalPrepTime);
+        }
         JSONArray waveUnitArray = new JSONArray();
         for (WaveUnit unit : waveUnits) {
             JSONObject waveUnit = new JSONObject();

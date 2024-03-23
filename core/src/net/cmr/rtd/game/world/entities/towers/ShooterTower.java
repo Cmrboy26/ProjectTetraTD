@@ -15,8 +15,10 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -31,7 +33,7 @@ public class ShooterTower extends TowerEntity {
     }
 
     @Override
-    public void attack(UpdateData data) {
+    public boolean attack(UpdateData data) {
         super.attack(data);
         float damage = getDisplayDamage();
         float range = getDisplayRange();
@@ -40,13 +42,25 @@ public class ShooterTower extends TowerEntity {
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                Projectile arrow = new Projectile(enemy, SpriteType.PROJECTILE, new Vector2(getPosition()), .5f, (int) damage, getArrowAirTime(), 0, 1);
+                ProjectileBuilder builder = new ProjectileBuilder()
+                        .setEntity(enemy)
+                        .setSprite(SpriteType.PROJECTILE)
+                        .setPosition(new Vector2(getPosition()))
+                        .setScale(.5f)
+                        .setDamage((int) damage)
+                        .setTimeToReachTarget(getArrowAirTime())
+                        .setPrecision(1)
+                        .setAOE(0)
+                        .setOnLaunchSound(GameSFX.LAUNCH);
+                //Projectile arrow = new Projectile(enemy, SpriteType.PROJECTILE, new Vector2(getPosition()), .5f, (int) damage, getArrowAirTime(), 0, 1);
+                Projectile arrow = builder.build();
                 data.getWorld().addEntity(arrow);
                 animationDelta = 0;
                 attacking = true;
-                return;
+                return attacking;
             }
         }
+        return attacking;
     }
 
     public float getArrowAirTime() {
@@ -90,6 +104,8 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public void render(Batch batch, float delta) {
+        preRender(batch, delta);
+        
         if (attacking) {
             animationDelta += delta;
         } else {
@@ -103,6 +119,7 @@ public class ShooterTower extends TowerEntity {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
 
+        postRender(batch, delta);
         super.render(batch, delta);
     }
     

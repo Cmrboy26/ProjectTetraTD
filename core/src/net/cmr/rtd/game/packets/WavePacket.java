@@ -8,16 +8,17 @@ public class WavePacket extends Packet {
     
     public float duration, waveLength;
     public int waveNumber;
-    public boolean paused;
+    public boolean paused, warn;
     
     public WavePacket() { super(); }
     
-    public WavePacket(boolean paused, float duration, float waveLength, int waveNumber) {
+    public WavePacket(boolean paused, float duration, float waveLength, int waveNumber, boolean warn) {
         this();
         this.duration = duration;
         this.waveLength = waveLength;
         this.waveNumber = waveNumber;
         this.paused = paused;
+        this.warn = warn;
     }
 
     @Override
@@ -53,6 +54,13 @@ public class WavePacket extends Packet {
      */
     public boolean isPaused() {
         return paused;
+    }
+
+    /**
+     * Returns whether the player should be warned about the wave
+     */
+    public boolean shouldWarn() {
+        return warn;
     }
 
 }

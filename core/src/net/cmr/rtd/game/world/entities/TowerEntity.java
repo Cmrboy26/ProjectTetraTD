@@ -50,13 +50,19 @@ public abstract class TowerEntity extends Entity {
         } else {
             // CANNOT attack while upgrading
             attackDelta += delta;
-            while (attackDelta >= getAttackSpeed()) {
-                attackDelta -= getAttackSpeed();
-                attack(data);
+            if (attackDelta >= getAttackSpeed()) {
+                boolean attacked = attack(data);
+                if (attacked) {
+                    attackDelta = 0;
+                }
             }
         }
     }
 
+    @Override
+    public float getRenderOffset() {
+        return - Tile.SIZE / 2;
+    }
 
     @Override
     protected void serializeEntity(DataBuffer buffer) throws IOException {
@@ -79,16 +85,17 @@ public abstract class TowerEntity extends Entity {
         deserializeTower(tower, input);
     }
 
-    @Override
-    public void render(Batch batch, float delta) {
+    public void preRender(Batch batch, float delta) {
+        if (getRemainingUpgradeTime() != -1f) {
+            batch.draw(Sprites.sprite(SpriteType.UPGRADE_BACK), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
+        }
+    }
 
+    public void postRender(Batch batch, float delta) {
         if (getRemainingUpgradeTime() != -1f) {
             float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
-            batch.setColor(Color.GREEN);
-            batch.draw(Sprites.sprite(SpriteType.CMRBOY26), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * progress);
-            batch.setColor(Color.WHITE);
+            batch.draw(Sprites.sprite(SpriteType.UPGRADE_FRONT), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
         }
-
         // draw a circle of radius getDisplayRange() centered at getPosition()
         if (displayRange && (displayRangeTower == null || displayRangeTower == this)) {
             SpriteType type = SpriteType.AREA;
@@ -97,7 +104,6 @@ public abstract class TowerEntity extends Entity {
             batch.draw(Sprites.sprite(type), getPosition().x - getDisplayRange() * Tile.SIZE, getPosition().y - getDisplayRange() * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE);
             batch.setColor(Color.WHITE);
         }
-        super.render(batch, delta);
     }
 
     protected abstract void serializeTower(DataBuffer buffer) throws IOException;
@@ -242,8 +248,9 @@ public abstract class TowerEntity extends Entity {
      * @see #getAttackSpeed()
      * @see #getEnemiesInRange(double, UpdateData)
      * @param data world data
+     * @return if any action occured (this will reset the attack delta)
      */
-    public void attack(UpdateData data) {}
+    public boolean attack(UpdateData data) { return false; }
 
     public int getTeam() { return team; }
 

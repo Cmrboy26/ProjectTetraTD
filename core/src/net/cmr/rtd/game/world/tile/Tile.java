@@ -192,14 +192,17 @@ public class Tile implements Collidable {
                 /*if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }*/
+                batch.draw(Sprites.sprite(SpriteType.DARKENED), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
             case END:
+                batch.draw(Sprites.sprite(SpriteType.DARKENED), x * SIZE, y * SIZE, SIZE, SIZE);
                 if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
                 batch.draw(Sprites.sprite(SpriteType.STRUCTURE), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
-            case START:
+            case START:   
+                batch.draw(Sprites.sprite(SpriteType.DARKENED), x * SIZE, y * SIZE, SIZE, SIZE);
                 if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }

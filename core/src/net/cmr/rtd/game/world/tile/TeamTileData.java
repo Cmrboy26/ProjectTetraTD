@@ -21,7 +21,7 @@ public class TeamTileData extends TileData {
 
     @Override
     public void render(Batch batch, int tileX, int tileY) {
-        batch.draw(Sprites.sprite(SpriteType.DARKENED), tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
+        //batch.draw(Sprites.sprite(SpriteType.DARKENED), tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
         super.render(batch, tileX, tileY);
     }
 

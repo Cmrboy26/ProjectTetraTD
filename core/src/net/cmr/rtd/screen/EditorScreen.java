@@ -623,6 +623,10 @@ public class EditorScreen extends AbstractScreenEX {
             if (selectedTile == 5) {
                 world.setTileData(tileX, tileY, 1, new StructureTileData(teamNumber));
             }
+            if (right && selectedTile >= 3 && selectedTile <= 5) {
+                world.setTileData(tileX, tileY, 1, null);
+                world.setTile(tileX, tileY, 1, null);
+            }
         }
     }
 

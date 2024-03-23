@@ -12,8 +12,8 @@ public abstract class CMRGame extends Game {
 
     private static CMRGame instance = null;
     private static Object instanceLock = new Object();
-    private static boolean DEBUG = true;
-    public static boolean SKIP_INTRO = true && DEBUG;
+    private static boolean DEBUG = false;
+    public static boolean SKIP_INTRO = true || DEBUG;
     private SpriteBatch batch;
     private NativeFileChooser fileChooser;
 
@@ -60,6 +60,11 @@ public abstract class CMRGame extends Game {
 
     public static boolean isDebug() {
         return DEBUG;
+    }
+
+    public static void setDebug(boolean debug) {
+        DEBUG = debug;
+        Log.setLogLevel(DEBUG ? LogLevel.DEBUG : LogLevel.INFO);
     }
     
     public static boolean instanceExists() {

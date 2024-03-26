@@ -21,7 +21,7 @@ public class ServerLauncher extends ApplicationAdapter {
     @Override
     public void create() {
         details = new GameManagerDetails();
-        details.actAsServer(true);
+        details.setHostedOnline(true);
         details.setMaxPlayers(4);
         details.setUseConsole(true);
 

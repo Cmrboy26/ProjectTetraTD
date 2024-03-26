@@ -3,7 +3,6 @@ package net.cmr.rtd.game.world.entities;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 import com.badlogic.gdx.graphics.Color;
@@ -14,7 +13,6 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.util.SerializableEnum;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 

@@ -1,5 +1,8 @@
 package net.cmr.rtd.screen;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -39,7 +42,6 @@ public class SelectionScreen extends AbstractScreenEX {
 
         // right of the screen
         details = new Table();
-
 
         // left of the screen
         Table selection = new Table(Sprites.skin());
@@ -115,29 +117,29 @@ public class SelectionScreen extends AbstractScreenEX {
         title.setAlignment(Align.center);
         details.add(title).fillX().expandX().colspan(2).row();
 
-        // TODO: ADD A LABEL THAT SHOWS HOW MANY PLAYERS THE LEVEL SUPPORTS
         FileHandle worldFile = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/world.dat");
         World world = (World) GameObject.deserializeGameObject(worldFile.readBytes());
-        int teamCount = 0;
+        int teamCounter = 0;
         for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
             try {
                 TeamData team = new TeamData(world, i);
                 // If this succeeded, then this team exists in the world.
-                teamCount++;
+                teamCounter++;
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
             }
         }
+        final int teamCount = teamCounter;
         if (teamCount == 0) {
-            Label noTeams = new Label("No teams found in this level!", Sprites.skin(), "small");
+            Label noTeams = new Label("Invalid Level: No Teams Found", Sprites.skin(), "small");
             noTeams.setAlignment(Align.center);
             details.add(noTeams).fillX().expandX().colspan(2).row();
         } else if (teamCount == 1) {
-            Label oneTeam = new Label("Singleplayer", Sprites.skin(), "small");
+            Label oneTeam = new Label("Co-op/Solo", Sprites.skin(), "small");
             oneTeam.setAlignment(Align.center);
             details.add(oneTeam).fillX().expandX().colspan(2).row();
         } else {
-            Label multipleTeams = new Label("Multiplayer: "+teamCount+" Players", Sprites.skin(), "small");
+            Label multipleTeams = new Label("Competitive: "+teamCount+" Teams", Sprites.skin(), "small");
             multipleTeams.setAlignment(Align.center);
             details.add(multipleTeams).fillX().expandX().colspan(2).row();
         }
@@ -146,6 +148,7 @@ public class SelectionScreen extends AbstractScreenEX {
         group.setMaxCheckCount(1);
         group.setMinCheckCount(0);
         for (final FileHandle difficulty : difficulties) {
+            // Create buttons for each type of difficulty/wave types
             try {
                 final WavesData data = WavesData.load(difficulty);
                 String name = data.name;
@@ -153,7 +156,7 @@ public class SelectionScreen extends AbstractScreenEX {
                 button.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
-                        setPlayOptions(folderName, difficulty, data, button.isChecked());
+                        setPlayOptions(folderName, difficulty, data, button.isChecked(), teamCount);
                     }
                 });
                 group.add(button);
@@ -167,7 +170,7 @@ public class SelectionScreen extends AbstractScreenEX {
         details.add(playOptions).fillX().expandX().colspan(2).row();
     }
 
-    public void setPlayOptions(String folderName, FileHandle difficultyFile, WavesData data, boolean show) {
+    public void setPlayOptions(String folderName, FileHandle difficultyFile, WavesData data, boolean show, final int teams) {
 
         String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
 
@@ -194,29 +197,34 @@ public class SelectionScreen extends AbstractScreenEX {
         resume.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
-                // TODO: PROMPT THE PLAYER TO SEE IF THEY WANT ONLINE OR SINGLEPLAYER
-
-                try {
-				    GameManagerDetails details = new GameManagerDetails();
-                    GameSave save = new GameSave(fn);
-				    RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-				    game.joinSingleplayerGame(details, save);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Dialog dialog = new Dialog("Error", Sprites.skin());
-                    dialog.getTitleLabel().setAlignment(Align.center);
-                    dialog.pad(20f);
-                    dialog.padTop(50f);
-                    Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
-                    text.setFontScale(.4f);
-                    text.setWidth(400);
-                    text.setWrap(true);
-                    dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-                    dialog.button("OK");
-
-                    dialog.show(stages.get(Align.center));
-                }
+                showPlayTypeDialog((Boolean online) -> {
+                    Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
+                        @Override
+                        public Void apply(Integer team) {
+                            try {
+                                GameManagerDetails details = new GameManagerDetails();
+                                GameSave save = new GameSave(fn);
+                                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                //game.joinSingleplayerGame(details, save);
+                                if (online) {
+                                    game.hostOnlineGame(details, save, team);
+                                } else {
+                                    game.joinSingleplayerGame(details, save, team);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // Set screen to this screen
+                                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                game.setScreen(SelectionScreen.this);
+                                
+                                displayErrorDialog(e);
+                            }
+                            
+                            return null;
+                        }
+                    };
+                    game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                });
             }
         });
         playOptions.add(resume).pad(5f).fillX().expandX();
@@ -236,27 +244,29 @@ public class SelectionScreen extends AbstractScreenEX {
                 Runnable startGame = new Runnable() {
                     @Override
                     public void run() {
-                        // TODO: PROMPT THE PLAYER TO SEE IF THEY WANT ONLINE OR SINGLEPLAYER
-                        try {
-                            GameManagerDetails details = new GameManagerDetails();
-                            LevelSave levelSave = new LevelSave(folderName);
-                            RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                            game.joinSingleplayerGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Dialog dialog = new Dialog("Error", Sprites.skin());
-                            dialog.getTitleLabel().setAlignment(Align.center);
-                            dialog.pad(20f);
-                            dialog.padTop(50f);
-                            Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
-                            text.setFontScale(.4f);
-                            text.setWidth(400);
-                            text.setWrap(true);
-                            dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-                            dialog.button("OK");
-
-                            dialog.show(stages.get(Align.center));
-                        }
+                        showPlayTypeDialog((Boolean online) -> {
+                            Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
+                                @Override
+                                public Void apply(Integer team) {
+                                    try {
+                                        GameManagerDetails details = new GameManagerDetails();
+                                        LevelSave levelSave = new LevelSave(folderName);
+                                        RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                        if (online) {
+                                            game.hostOnlineGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, team);
+                                        } else {
+                                            game.joinSingleplayerGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, team);
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        displayErrorDialog(e);
+                                    }
+                            
+                                    return null;
+                                }
+                            };
+                            game.setScreen(new TeamSelectionScreen(joinGameFunction, GameManager.MAX_TEAMS));
+                        });
                     }
                 };
 
@@ -300,5 +310,50 @@ public class SelectionScreen extends AbstractScreenEX {
     public String minimizeString(String folderName) {
         // Remove all whitespace, keep only alphanumeric characters, and make it lowercase
         return folderName.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+    }
+
+    // Consumer will return true if online, false if singleplayer/local
+    public void showPlayTypeDialog(Consumer<Boolean> chooseOnlineCallback) {
+        Dialog dialog = new Dialog("Choose Game Type", Sprites.skin()) {
+            @Override
+            protected void result(Object object) {
+                if (object == null) {
+                    return;
+                }
+                chooseOnlineCallback.accept((Boolean) object);
+            }
+        };
+
+        dialog.getTitleLabel().setAlignment(Align.center);
+        dialog.pad(20f);
+        dialog.padTop(50f);
+        Label text = new Label("Select Play Type:", Sprites.skin(), "small");
+        text.setFontScale(.4f);
+        text.setWidth(400);
+        text.setWrap(true);
+        dialog.getContentTable().add(text).width(400).fillX().expandX().row();
+        dialog.button("Cancel", null, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        dialog.button("Online", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        dialog.button("Singleplayer", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
+        dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, null);
+        dialog.key(com.badlogic.gdx.Input.Keys.O, true);
+        dialog.key(com.badlogic.gdx.Input.Keys.S, false);
+        dialog.show(stages.get(Align.center));
+    }
+
+    private void displayErrorDialog(Exception e) {
+        Dialog dialog = new Dialog("Error", Sprites.skin());
+        dialog.getTitleLabel().setAlignment(Align.center);
+        dialog.pad(20f);
+        dialog.padTop(50f);
+        Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
+        text.setFontScale(.4f);
+        text.setWidth(400);
+        text.setWrap(true);
+        dialog.getContentTable().add(text).width(400).fillX().expandX().row();
+        dialog.button("OK");
+
+        dialog.show(stages.get(Align.center));
     }
 }

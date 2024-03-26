@@ -85,7 +85,7 @@ public class GameManager implements Disposable {
     public GameManager(GameManagerDetails details) {
         this.details = details;
         this.data = new UpdateData(this);
-        if (details.isActingAsServer()) {
+        if (details.isHostedOnline()) {
             // Create server objects
             server = new Server();
             // Register packets
@@ -249,7 +249,7 @@ public class GameManager implements Disposable {
         if (save == null) {
             throw new IllegalStateException("The game manager has not been initialized.");
         }
-        if (details.isActingAsServer()) {
+        if (details.isHostedOnline()) {
             // Start the server
             server.start();
             try {
@@ -289,7 +289,7 @@ public class GameManager implements Disposable {
         updateThread.start();
         Log.info("Game started.");
 
-        if (details.isActingAsServer()) {
+        if (details.isHostedOnline()) {
             // Start the server
             return;
         }
@@ -308,7 +308,7 @@ public class GameManager implements Disposable {
         }
 
         running = false;
-        if (details.isActingAsServer()) {
+        if (details.isHostedOnline()) {
             // Stop the server
             return;
         }
@@ -631,7 +631,7 @@ public class GameManager implements Disposable {
     public static class GameManagerDetails {
         private int maxPlayers = 4;
         private int tcpPort = 11265;
-        private boolean actAsServer = false;
+        private boolean hostedOnline = false;
         private String password = null;
         private boolean console;
 
@@ -639,14 +639,14 @@ public class GameManager implements Disposable {
 
         }
 
-        public void actAsServer(boolean actAsServer) { this.actAsServer = actAsServer; }
+        public void setHostedOnline(boolean hostedOnline) { this.hostedOnline = hostedOnline; }
         public void setMaxPlayers(int maxPlayers) { this.maxPlayers = maxPlayers; }
         public void setTCPPort(int tcpPort) { this.tcpPort = tcpPort; }
         public void setPassword(String password) { this.password = password; }
         public void setUseConsole(boolean console) { this.console = console; }
         
 
-        public boolean isActingAsServer() { return actAsServer; }
+        public boolean isHostedOnline() { return hostedOnline; }
         public int getMaxPlayers() { return maxPlayers; }
         public int getTCPPort() { return tcpPort; }
         public String getPassword() { return password; }

@@ -48,7 +48,7 @@ public class ConsoleTest {
         Lwjgl3NativesLoader.load();
         Gdx.files = new Lwjgl3Files();
 		GameManagerDetails details = new GameManagerDetails();
-		details.actAsServer(false);
+		details.setHostedOnline(false);
 		details.setMaxPlayers(4);
 		details.setPassword("passward");
 		GameManager manager = new GameManager(details);

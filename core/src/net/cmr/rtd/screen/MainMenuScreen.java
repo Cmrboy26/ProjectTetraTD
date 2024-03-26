@@ -12,10 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.game.GameManager;
-import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.LevelSave;
-import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Sprites;
 

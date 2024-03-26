@@ -101,6 +101,30 @@ public class RetroTowerDefense extends CMRGame {
 		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), 0));
 	}
 
+	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
+		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), team);
+	}
+
+	public void hostOnlineGame(GameManagerDetails details, GameSave save, int team) {
+		GameManager manager = save.loadGame(details);
+		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), new Client());
+
+		GameScreen screen = new GameScreen(stream, manager, null);
+		//manager.initialize(new GameSave("default")); 
+		manager.initialize(save);
+		setScreen(screen);
+		manager.start();
+
+		stream.addListener(new PacketListener() {
+			@Override
+			public void packetReceived(Packet packet) {
+				Log.debug("Server received packet: " + packet);
+			}
+		});
+		manager.onNewConnection(stream);
+		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+	}
+
 	/**
 	 * Starts and joins a local/singleplayer game on the client's machine
 	 * Creates a new save folder for the selected level and wave (difficulty).
@@ -110,23 +134,23 @@ public class RetroTowerDefense extends CMRGame {
 	 * @param saveName The name of the save folder
 	 * @param waveName The name of the wave to use for the level
 	 */
-	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName) {
-		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, false));
+	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, int team) {
+		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, false), team);
 	}
 
 	/**
 	 * @see #joinSingleplayerGame(GameManagerDetails, LevelSave, String, String)
 	 * @param override Whether to override an existing save folder with the same name
 	 */
-	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override) {
-		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, true));
+	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
+		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, true), team);
 	}
 
 	/**
 	 * Starts and joins a local/singleplayer game on the client's machine
 	 * Should be called when LOADING a game.
 	 */
-	public void joinSingleplayerGame(GameManagerDetails details, GameSave save) {
+	public void joinSingleplayerGame(GameManagerDetails details, GameSave save, int team) {
 		GameManager manager = save.loadGame(details);
 		LocalGameStream[] streams = LocalGameStream.createStreamPair();
 		GameStream clientsideStream = streams[0];
@@ -152,7 +176,7 @@ public class RetroTowerDefense extends CMRGame {
 		manager.start();
 		manager.onNewConnection(serversideStream);
 		
-		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), 0));
+		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 	}
 
 	/**

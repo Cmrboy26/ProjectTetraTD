@@ -1,13 +1,40 @@
 # RetroTowerDefense
 
-A simple, pixel-art styled, endless tower defense game with online multiplayer support.
+A simple, pixel-art-styled, endless tower defense game with online multiplayer support.
+
+## Learning Goals
+
+In developing this game, I want to learn more about
+- encryption
+- networking protocols
+- unit testing
+
+So far, this project has unexpectedly taught me about
+- separating axis theorem
+- swept AABB
+- Minkowski sums
+- dot products and normals
+
+## Minimal Viable Product
+
+An MVP of this game contains:
+- simple player movement
+- collision handling
+- enemies (with "path following")
+- towers
+    - attacking
+    - player placing
+    - player breaking
+- tower shop
+- waves
+- lose condition
 
 ## Installation and Usage
 
-To install, _download this project as a ZIP file and extract its contents. 
+To install, download this project as a ZIP file and extract its contents. 
 This project requires Java 8 to be run and built.
 
-### Building and Running
+<hr>
 
 (Note: if running on Linux, prepend ``./`` to the beginning)
 
@@ -21,31 +48,3 @@ Run dedicated server: ``gradlew desktop:run-server`` <br>
 
 Run JUnit tests on Windows: ``gradlew tests:test`` <br>
 
-## Goals
-
-### Minimal Viable Product
-
-A MVP of this game contains:
-- simple player movement
-- collision handling
-- enemies (with "pathfollowing")
-- towers
-    - attacking
-    - player placing
-    - player breaking
-- tower shop
-- waves
-- lose condition
-
-### Learning Goals
-
-In developing this game, I want to learn more about
-- encryption
-- networking protocols
-- unit testing
-
-So far, this project has unexpectedly taught me about
-- separating axis theorem
-- swept AABB
-- minkowski sums
-- dot products and normals

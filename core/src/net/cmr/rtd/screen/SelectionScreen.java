@@ -74,6 +74,7 @@ public class SelectionScreen extends AbstractScreenEX {
 
 
         ScrollPane scrollPane = new ScrollPane(selection);
+        scrollPane.setScrollbarsVisible(true);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollbarsOnTop(false);

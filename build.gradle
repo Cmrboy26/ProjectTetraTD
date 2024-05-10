@@ -56,28 +56,29 @@ project(":core") {
     apply plugin: "java-library"
 
     dependencies {
-        implementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
-        implementation group: 'kryonet', name: 'kryonet', version: '2.21'
-        implementation 'commons-io:commons-io:2.15.1'
-        implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+        api group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
+        api group: 'kryonet', name: 'kryonet', version: '2.21'
+        api 'commons-io:commons-io:2.15.1'
+        api 'com.googlecode.json-simple:json-simple:1.1.1'
         
-        
-        implementation 'com.esotericsoftware:kryo:5.4.0:sources'
-        implementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
-        implementation "com.github.tommyettinger:textratypist:0.10.0"
+        api 'com.esotericsoftware:kryo:5.4.0:sources'
+        api "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
+        api "com.github.tommyettinger:textratypist:0.10.0"
 
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        
     }
 }
 
 project(":android") {
     apply plugin: "com.android.application"
 
-    configurations { natives }
+    configurations {
+        natives 
+        compile.exclude group: "junit", module: "junit:4.10"
+    }
 
     dependencies {
         implementation project(":core")
@@ -92,7 +93,6 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        
     }
 }
 

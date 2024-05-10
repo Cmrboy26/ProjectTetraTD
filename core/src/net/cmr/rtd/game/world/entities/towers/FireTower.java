@@ -64,7 +64,7 @@ public class FireTower extends TowerEntity {
                         .setScale(3f)
                         .setDamage(getLevel() * 3)
                         .setTimeToReachTarget(1)
-                        .setAOE(1)
+                        .setAOE(2)
                         .setPrecision(1)
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);

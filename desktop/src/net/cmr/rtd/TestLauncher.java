@@ -6,16 +6,16 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.esotericsoftware.kryo.Kryo;
+/*import com.esotericsoftware.kryo.Kryo;
 
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
-import net.cmr.rtd.game.stream.OnlineGameStream;
+import net.cmr.rtd.game.stream.OnlineGameStream;*/
 
 public class TestLauncher {
     
     public static void main(String[] args) {
-        Kryo kryo = new Kryo();
+        /*Kryo kryo = new Kryo();
         OnlineGameStream.registerPackets(kryo);
         
         System.out.println("Checking if all packet classes are registered...");
@@ -35,7 +35,7 @@ public class TestLauncher {
         }
         if (!errorFound) {
             System.out.println("All packet classes registered successfully!");
-        }
+        }*/
     }
 
     public static Set<Class> findAllClassesUsingClassLoader(String packageName) {

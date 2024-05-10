@@ -32,6 +32,7 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.StartTileData;
@@ -54,6 +55,7 @@ public class EditorScreen extends AbstractScreenEX {
     float cameraX = 0, cameraY = 0;
     ExtendViewport viewport;
     ShapeRenderer shapeRenderer;
+    UpdateData updatedata;
 
     String saveName = "";
 
@@ -70,6 +72,7 @@ public class EditorScreen extends AbstractScreenEX {
         super(INITIALIZE_ALL);
         Objects.requireNonNull(worldFile);
         this.viewport = new ExtendViewport(640, 360);
+        this.updatedata = new UpdateData((GameScreen) null);
 
         if (worldFile.exists()) {
             byte[] data = worldFile.readBytes();
@@ -463,7 +466,7 @@ public class EditorScreen extends AbstractScreenEX {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
-            world.render(batch, delta);
+            world.render(updatedata, batch, delta);
             batch.end();
         }
 

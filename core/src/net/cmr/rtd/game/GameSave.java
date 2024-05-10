@@ -104,4 +104,15 @@ public class GameSave {
         return saveName;
     }
 
+    public GameSave copySave(LevelSave levelSave) {
+        byte[] wavedata = getWaveFile(FileType.External).readBytes();
+        GameSave save = levelSave.createSave(saveName, null, true, wavedata);
+        save.getWaveFile(FileType.External).writeBytes(wavedata, false);
+        return save;
+    }
+
+    public void delete() {
+        getSaveFolder().deleteDirectory();
+    }
+
 }

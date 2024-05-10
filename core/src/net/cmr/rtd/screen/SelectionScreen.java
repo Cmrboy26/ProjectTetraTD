@@ -28,6 +28,7 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Sprites;
+import net.cmr.util.Stages;
 
 public class SelectionScreen extends AbstractScreenEX {
     
@@ -81,6 +82,15 @@ public class SelectionScreen extends AbstractScreenEX {
         table.add(scrollPane).fillX().expand();
         table.add(details).fillX().expand().row();
         
+        TextButton online = new TextButton("Join Online", Sprites.skin(), "small");
+        online.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                game.setScreen(new MultiplayerJoinScreen());
+            }
+        });
+        table.add(online).left().bottom().pad(10f).width(100).expandX().colspan(1);
         TextButton back = new TextButton("Back", Sprites.skin(), "small");
         back.addListener(new ClickListener() {
             @Override
@@ -89,7 +99,7 @@ public class SelectionScreen extends AbstractScreenEX {
                 game.setScreen(new MainMenuScreen());
             }
         });
-        table.add(back).right().bottom().pad(5f).width(100).expandX().colspan(2);
+        table.add(back).right().bottom().pad(5f).width(100).expandX().colspan(1);
 
 		add(Align.center, table);
     }
@@ -173,6 +183,7 @@ public class SelectionScreen extends AbstractScreenEX {
     public void setPlayOptions(String folderName, FileHandle difficultyFile, WavesData data, boolean show, final int teams) {
 
         String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
+        LevelSave lsave = new LevelSave(folderName);
 
         playOptions.clear();
         if (!show) {
@@ -205,11 +216,10 @@ public class SelectionScreen extends AbstractScreenEX {
                                 GameManagerDetails details = new GameManagerDetails();
                                 GameSave save = new GameSave(fn);
                                 RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                                //game.joinSingleplayerGame(details, save);
                                 if (online) {
-                                    game.hostOnlineGame(details, save, team);
+                                    game.hostOnlineGame(details, save, lsave, team);
                                 } else {
-                                    game.joinSingleplayerGame(details, save, team);
+                                    game.joinSingleplayerGame(details, save, lsave, team);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -217,9 +227,8 @@ public class SelectionScreen extends AbstractScreenEX {
                                 RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
                                 game.setScreen(SelectionScreen.this);
                                 
-                                displayErrorDialog(e);
+                                displayErrorDialog(e, stages);
                             }
-                            
                             return null;
                         }
                     };
@@ -259,13 +268,13 @@ public class SelectionScreen extends AbstractScreenEX {
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
-                                        displayErrorDialog(e);
+                                        displayErrorDialog(e, stages);
                                     }
                             
                                     return null;
                                 }
                             };
-                            game.setScreen(new TeamSelectionScreen(joinGameFunction, GameManager.MAX_TEAMS));
+                            game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
                         });
                     }
                 };
@@ -342,12 +351,13 @@ public class SelectionScreen extends AbstractScreenEX {
         dialog.show(stages.get(Align.center));
     }
 
-    private void displayErrorDialog(Exception e) {
+    public static void displayErrorDialog(Exception e, Stages stages) {
         Dialog dialog = new Dialog("Error", Sprites.skin());
         dialog.getTitleLabel().setAlignment(Align.center);
         dialog.pad(20f);
         dialog.padTop(50f);
-        Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
+        //Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
+        Label text = new Label("An error occured performing that action:\n"+e.getMessage(), Sprites.skin(), "small");
         text.setFontScale(.4f);
         text.setWidth(400);
         text.setWrap(true);

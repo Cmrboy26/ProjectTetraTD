@@ -99,7 +99,7 @@ public class IceTower extends TowerEntity {
     }
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         preRender(batch, delta);
 
         animationDelta += delta;
@@ -112,7 +112,7 @@ public class IceTower extends TowerEntity {
         batch.setColor(Color.WHITE);
         
         postRender(batch, delta);
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
 
     @Override

@@ -204,7 +204,7 @@ public class BasicEnemy extends EnemyEntity {
     float animationDelta = 0;
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         // Draw the enemy
 
         if (approachingEnd) {
@@ -240,7 +240,7 @@ public class BasicEnemy extends EnemyEntity {
         }
         batch.draw(Sprites.animation(displayType+directionString, animationDelta), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
 
     @Override

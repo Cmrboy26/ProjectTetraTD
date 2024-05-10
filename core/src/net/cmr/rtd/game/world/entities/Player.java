@@ -4,7 +4,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -18,9 +21,9 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.AnimationType;
 
 @WorldSerializationExempt
 public class Player extends Entity {
@@ -66,13 +69,29 @@ public class Player extends Entity {
     }
 
     float animationDelta = 0;
+    GlyphLayout layout;
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
+        GameScreen screen = data.getScreen();
+        if (screen.getLocalPlayer() != null && !screen.getLocalPlayer().getName().equals(username)) {
+            // DRAW THE NAME
+            batch.setColor(Color.WHITE);
+            BitmapFont font = Sprites.skin().getFont("small-font");
+            font.setColor(Color.WHITE);
+            float scaleBefore = font.getData().scaleX;
+            font.getData().setScale(scaleBefore / 2f);
+            if(layout == null) {
+                layout = new GlyphLayout(font, username);
+
+            }
+            font.draw(batch, username, getX() - Tile.SIZE * 1f/8f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f);
+            font.getData().setScale(scaleBefore);
+        }
         animationDelta += delta;
-        TextureRegion sprite = Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        TextureRegion sprite = /*Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //*/Sprites.sprite(Sprites.SpriteType.CMRBOY26);
         batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
 
     @Override
@@ -118,7 +137,6 @@ public class Player extends Entity {
     }
 
     public void updateInput(Vector2 input, boolean sprinting) {
-
         float deadZone = CMRGame.DEADZONE;
 
         if (input.len() < deadZone) {

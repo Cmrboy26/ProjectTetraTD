@@ -153,9 +153,10 @@ public class World extends GameObject {
                     // The game has ended!
                     // TODO: Add a game win screen.
                     //data.getManager().stop();
+                    data.getManager().gameOver();
                     if (wave > wavesData.size()) {
-                        wave = 0;
-                        waveObj = wavesData.getWave(wave);
+                        //wave = 0;
+                        //waveObj = wavesData.getWave(wave);
                     }
                     return;
                 }
@@ -181,6 +182,13 @@ public class World extends GameObject {
         for (Entity entity : entities.values()) {
             entity.update(delta, data);
         }
+    }
+
+    public void resetWaveCounter() {
+        this.wave = 0;
+    }
+    public boolean passedAllWaves() {
+        return wave > wavesData.size();
     }
 
     public void addEntity(Entity entity) {
@@ -407,7 +415,7 @@ public class World extends GameObject {
     }
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData udata, Batch batch, float delta) {
         // TODO: Implement smarter tile rendering (with proper entity support)
         batch.setColor(worldColor);
         for (int x = 0; x < worldSize; x++) {
@@ -439,9 +447,9 @@ public class World extends GameObject {
         renderEntities.sort((a, b) -> Float.compare(b.position.y + b.getRenderOffset(), a.position.y + a.getRenderOffset()));
 
         for (Entity entity : renderEntities) {
-            entity.render(batch, delta);
+            entity.render(udata, batch, delta);
         }
-        super.render(batch, delta);
+        super.render(udata, batch, delta);
     }
 
     /**

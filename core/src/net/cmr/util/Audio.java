@@ -29,10 +29,19 @@ public class Audio implements Disposable {
         HIT1("hit1.wav"),
         HIT2("hit2.wav"),
         HIT3("hit3.wav"),
-        FIREBALL_LAUNCH("fireball_launch.wav"),
+        FIREBALL_LAUNCH("gunshot.wav"),
         FIREBALL_HIT("fireball_hit.wav"),
-        LAUNCH("launch.wav"),
+        SHOOT("shoot.wav"),
         FIRE_DAMAGE("fire_damage.wav"),
+
+        PLACE1("place1.wav"),
+        PLACE2("place2.wav"),
+        CLICK("select.wav"),
+        SELECT("trueSelect.wav"),
+        DESELECT("falseSelect.wav"),
+        WARNING("warning.wav"),
+        SCARY_WARNING("scary_warning.wav"),
+        UPGRADE_COMPLETE("upgrade_complete.wav"),
         ;
 
         private final String fileName;
@@ -67,16 +76,16 @@ public class Audio implements Disposable {
         public FileHandle getFileHandle() {
             return Gdx.files.internal(SFX_PATH + getFileName());
         }
+        public static GameSFX random(GameSFX... sfx) {
+            return sfx[(int) (Math.random() * sfx.length)];
+        }
     }
 
     /**
      * Represents the music tracks used in the game.
      */
     public enum GameMusic {
-        MAIN_MENU("main_menu.mp3"),
-        LOBBY("mus_lobby.mp3"),
-        SELL_IT("mus_sellit.mp3"),
-        DRAWING("mus_drawing.mp3"),
+        GAME_1("game1.mp3")
         ;
 
         private final String fileName;

@@ -19,8 +19,8 @@ import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.util.Sprites;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 
 public class FireTower extends TowerEntity {
@@ -113,7 +113,7 @@ public class FireTower extends TowerEntity {
     }
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         preRender(batch, delta);
 
         if (attacking) {
@@ -130,7 +130,7 @@ public class FireTower extends TowerEntity {
         batch.setColor(Color.WHITE);
 
         postRender(batch, delta);
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
 
     @Override

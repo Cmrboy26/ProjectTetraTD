@@ -11,6 +11,7 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.TeamData;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -30,7 +31,7 @@ public class ShopManager {
 
     static {
         // Register the purchase of towers
-        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 30, "Shooter Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 30, "Shooter Tower", "Shoots pellets at enemies."));
         registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 100, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
         registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 50, "Ice Tower", "Slows enemies."));
 
@@ -83,7 +84,7 @@ public class ShopManager {
                     Log.debug("Not enough money");
                     return;
                 }
-                if (areTilesBlocking(manager, packet.x, packet.y)) {
+                if (areTilesBlocking(manager.getUpdateData(), packet.x, packet.y)) {
                     // Tiles are blocking
                     System.out.println(packet.x + ", "+packet.y);
                     Log.debug("Tiles are blocking");
@@ -217,12 +218,12 @@ public class ShopManager {
         return purchaseCost + upgradesCost;
     }
 
-    public static boolean areTilesBlocking(GameManager manager, int x, int y) {
-        World world = manager.getWorld();
+    public static boolean areTilesBlocking(UpdateData data, int x, int y) {
+        World world = data.getWorld();
         TileType at = world.getTile(x, y, 1);
-        TileData data = world.getTileData(x, y, 1);
-        System.out.println("TileType: " + at + ", TileData: " + data);
-        return at == TileType.WALL || data != null;
+        TileData tdata = world.getTileData(x, y, 1);
+        System.out.println("TileType: " + at + ", TileData: " + tdata);
+        return at == TileType.WALL || tdata != null;
     }
 
 }

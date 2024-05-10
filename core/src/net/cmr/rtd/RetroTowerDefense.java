@@ -3,6 +3,7 @@ package net.cmr.rtd;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.function.Consumer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -16,6 +17,7 @@ import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.ConnectPacket;
+import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.stream.GameStream;
@@ -75,7 +77,33 @@ public class RetroTowerDefense extends CMRGame {
 	/**
 	 * Joins an online game with the given IP and port
 	 */
-	public void joinOnlineGame(String ip, int port) {
+	public void joinOnlineGame(String ip, int port, int team) throws Exception {
+		Client client = new Client(30000, 30000);
+		OnlineGameStream.registerPackets(client.getKryo());
+		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
+
+		Log.info("Connecting to " + ip + ":" + port + "...");
+		client.start();
+		try {
+			client.connect(5000, ip, port);
+		} catch (Exception e) {
+			Log.error("Failed to connect to server.", e);
+			throw e;
+		}
+		stream.addListener(new PacketListener() {
+			@Override
+			public void packetReceived(Packet packet) {
+				Log.debug("Client received packet: " + packet);
+			}
+		});
+		Log.info("Connected.");
+		GameScreen screen = new GameScreen(stream, null, null, null);
+		setScreen(screen);
+
+		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+	}
+
+	public void getOnlineGameData(String ip, int port, Consumer<GameInfoPacket> callback) throws Exception {
 		Client client = new Client();
 		OnlineGameStream.registerPackets(client.getKryo());
 		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
@@ -86,43 +114,55 @@ public class RetroTowerDefense extends CMRGame {
 			client.connect(5000, ip, port);
 		} catch (Exception e) {
 			Log.error("Failed to connect to server.", e);
-			return;
+			throw e;
 		}
+		Log.info("Connected.");
+		stream.sendPacket(new GameInfoPacket());
 		stream.addListener(new PacketListener() {
 			@Override
 			public void packetReceived(Packet packet) {
-				Log.debug("Client received packet: " + packet);
+				if (packet instanceof GameInfoPacket) {
+					GameInfoPacket info = (GameInfoPacket) packet;
+					Log.info("Received game info: " + info.teams + " teams, " + info.players + " players, " + info.maxPlayers + " max players.");
+					callback.accept(info);
+					stream.onClose();
+				}
 			}
 		});
-		Log.info("Connected.");
-		GameScreen screen = new GameScreen(stream, null, null);
-		setScreen(screen);
-
-		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), 0));
+		while (stream.isOpen()) {
+			stream.update();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
-		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), team);
+		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), levelSave, team);
 	}
 
-	public void hostOnlineGame(GameManagerDetails details, GameSave save, int team) {
+	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int team) {
+		details.setHostedOnline(true);
 		GameManager manager = save.loadGame(details);
-		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), new Client());
+		//OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), new Client());
+		LocalGameStream[] pair = LocalGameStream.createStreamPair();
+		LocalGameStream clientsidestream = pair[0];
 
-		GameScreen screen = new GameScreen(stream, manager, null);
-		//manager.initialize(new GameSave("default")); 
 		manager.initialize(save);
-		setScreen(screen);
 		manager.start();
+		GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave);
+		setScreen(screen);
 
-		stream.addListener(new PacketListener() {
+		clientsidestream.addListener(new PacketListener() {
 			@Override
 			public void packetReceived(Packet packet) {
 				Log.debug("Server received packet: " + packet);
 			}
 		});
-		manager.onNewConnection(stream);
-		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+		manager.onNewConnection(pair[1]);
+		clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 	}
 
 	/**
@@ -135,7 +175,8 @@ public class RetroTowerDefense extends CMRGame {
 	 * @param waveName The name of the wave to use for the level
 	 */
 	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, int team) {
-		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, false), team);
+		GameSave save = levelSave.createSave(saveName, waveName, false);
+		joinSingleplayerGame(details, save, levelSave, team);
 	}
 
 	/**
@@ -143,19 +184,19 @@ public class RetroTowerDefense extends CMRGame {
 	 * @param override Whether to override an existing save folder with the same name
 	 */
 	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
-		joinSingleplayerGame(details, levelSave.createSave(saveName, waveName, true), team);
+		GameSave save = levelSave.createSave(saveName, waveName, override);
+		joinSingleplayerGame(details, save, levelSave, team);
 	}
 
 	/**
 	 * Starts and joins a local/singleplayer game on the client's machine
 	 * Should be called when LOADING a game.
 	 */
-	public void joinSingleplayerGame(GameManagerDetails details, GameSave save, int team) {
+	public void joinSingleplayerGame(GameManagerDetails details, GameSave save, LevelSave lsave, int team) {
 		GameManager manager = save.loadGame(details);
 		LocalGameStream[] streams = LocalGameStream.createStreamPair();
 		GameStream clientsideStream = streams[0];
 		GameStream serversideStream = streams[1];
-
 		serversideStream.addListener(new PacketListener() {
 			@Override
 			public void packetReceived(Packet packet) {
@@ -169,7 +210,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 
-		GameScreen screen = new GameScreen(clientsideStream, manager, null);
+		GameScreen screen = new GameScreen(clientsideStream, manager, null, lsave);
 		//manager.initialize(new GameSave("default")); 
 		manager.initialize(save);
 		setScreen(screen);

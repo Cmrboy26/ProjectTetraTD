@@ -42,6 +42,7 @@ import com.esotericsoftware.kryo.util.Null;
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
@@ -50,10 +51,12 @@ import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
+import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
+import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
@@ -71,6 +74,9 @@ import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameMusic;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
@@ -87,6 +93,7 @@ public class GameScreen extends AbstractScreenEX {
     UpdateData data;
     Player localPlayer = null;
     final String password;
+    Label title;
 
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
@@ -105,16 +112,20 @@ public class GameScreen extends AbstractScreenEX {
 
     Dialog quitDialog;
     Dialog upgradeDialog;
+    Dialog resetGameDialog;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
     int wave = 0;
     boolean areWavesPaused = false;
 
-    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password) {
+    LevelSave save;
+
+    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, @Null LevelSave save) {
         super(INITIALIZE_ALL);
         this.ioStream = ioStream;
         this.gameManager = gameManager;
+        this.save = save;
         this.ioStream.addListener(new PacketListener() {
             @Override
             public void packetReceived(Packet packet) {
@@ -136,6 +147,7 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
+        Audio.getInstance().playMusic(GameMusic.GAME_1);
 
         float iconSize = 32;
 
@@ -211,6 +223,7 @@ public class GameScreen extends AbstractScreenEX {
                 // NOTE: when switching to shop screen, deselect any other screens that are open (i.e. inventory screen)
                 shopWindow.setVisible(shopButton.isChecked());
                 inventoryWindow.setVisible(false);
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         });
         buttonGroup.add(shopButton);
@@ -235,6 +248,7 @@ public class GameScreen extends AbstractScreenEX {
                 // NOTE: when switching to inventory screen, deselect any other screens that are open
                 inventoryWindow.setVisible(inventoryButton.isChecked());
                 shopWindow.setVisible(false);
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         });
         buttonGroup.add(inventoryButton);
@@ -257,6 +271,7 @@ public class GameScreen extends AbstractScreenEX {
             public void clicked(InputEvent event, float x, float y) {
                 if (upgradeButton.isDisabled()) { return; }
                 enterUpgradeMode();
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         });
         buttonGroup.add(upgradeButton);
@@ -282,13 +297,6 @@ public class GameScreen extends AbstractScreenEX {
             shopWindow.add(towerSection).pad(5);
             shopWindow.row();
         }
-        
-        /*Table iceTower = getTowerSection(Sprites.drawable(AnimationType.TESLA_TOWER), GameType.ICE_TOWER, "Ice Tower", "100", "Slows down enemies in range.");
-        Table fireTower = getTowerSection(Sprites.drawable(AnimationType.TESLA_TOWER), GameType.FIRE_TOWER,  "Fire Tower", "100", "Sets enemies ablaze and deals damage over time.");
-        shopWindow.add(iceTower).pad(5);
-        shopWindow.row();
-        shopWindow.add(fireTower).pad(5);
-        shopWindow.row();*/
 
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
         inventoryWindow.getTitleLabel().setAlignment(Align.center);
@@ -299,6 +307,23 @@ public class GameScreen extends AbstractScreenEX {
         inventoryWindow.setVisible(false);
         add(Align.center, inventoryWindow);
 
+        title = new Label("", Sprites.skin(), "small");
+        title.setAlignment(Align.center);
+        title.setPosition(640/2, 50, Align.bottom);
+        add(Align.bottom, title);
+
+        resetGameDialog = new Dialog("", Sprites.skin(), "small") {
+            @Override
+            protected void result(Object object) {
+                if (object.equals(true)) {
+                    gameManager.resetWorld(save);
+                }
+            }
+        };
+        resetGameDialog.text("Are you sure you want to reset the game?", Sprites.skin().get("small", LabelStyle.class));
+        resetGameDialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        resetGameDialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        resetGameDialog.key(Input.Keys.ESCAPE, false);
     }
 
     public void onRecievePacket(Packet packet) {
@@ -330,6 +355,22 @@ public class GameScreen extends AbstractScreenEX {
             return;
         }
 
+        if (packet instanceof PlayerPositionsPacket) {
+            PlayerPositionsPacket positionsPacket = (PlayerPositionsPacket) packet;
+            Player localplayer = getLocalPlayer();
+            String localUUID = localplayer != null ? localplayer.getID().toString() : "";
+            for (int i = 0; i < positionsPacket.uuids.length; i++) {
+                if (positionsPacket.uuids[i].equals(localUUID)) {
+                    continue;
+                }
+                Player player = (Player) getEntity(UUID.fromString(positionsPacket.uuids[i]));
+                if (player != null) {
+                    player.setPosition(positionsPacket.positions[i]);
+                    player.setVelocity(positionsPacket.velocities[i]);
+                }
+            }
+        }
+
         if (packet instanceof GameObjectPacket) {
             GameObjectPacket gameObjectPacket = (GameObjectPacket) packet;
             Log.debug("Received GameObject");
@@ -337,6 +378,7 @@ public class GameScreen extends AbstractScreenEX {
             Log.debug("Object: " + object.getClass().getSimpleName(), object);
             if (object instanceof World) {
                 this.world = (World) object;
+                localPlayer = null;
                 for (Entity entity : entityQueue) {
                     world.addEntity(entity);
                 }
@@ -390,6 +432,7 @@ public class GameScreen extends AbstractScreenEX {
             this.areWavesPaused = wavePacket.isPaused();
             if (wavePacket.shouldWarn()) {
                 notification(SpriteType.WARNING, "Special wave incoming! Be careful!");
+                Audio.getInstance().playSFX(GameSFX.SCARY_WARNING, 1f);
             }
 
             return;
@@ -429,6 +472,19 @@ public class GameScreen extends AbstractScreenEX {
             game.setScreen(new MainMenuScreen());
             return;
         }
+
+        if (packet instanceof TeamUpdatePacket) {
+            TeamUpdatePacket teamPacket = (TeamUpdatePacket) packet;
+            if (teamPacket.teamLost) {
+                notification(SpriteType.STRUCTURE, "Team " + (teamPacket.getTeamIndex()+1) + " has lost their structure!", 10);
+            } else {
+                notification(SpriteType.STRUCTURE, "Team " + (teamPacket.getTeamIndex()+1) + " won the game!", 10);
+                if (gameManager != null) {
+                    notification(SpriteType.STRUCTURE, "Game Over! Press ';' to restart the game.", 30);
+                }
+            }
+        }
+
     }
 
     public void update(float delta) {
@@ -436,7 +492,7 @@ public class GameScreen extends AbstractScreenEX {
         ioStream.update();
 
         if (areWavesPaused) {
-            waveCountdownLabel.setText("Waves Paused");
+            waveCountdownLabel.setText("Waves Paused" + (gameManager != null ? " (Press \"P\" to resume)" : ""));
         } else if (waveCountdown != -1) {
 
             String waveText = "Wave " + wave;
@@ -486,8 +542,27 @@ public class GameScreen extends AbstractScreenEX {
             Player player = getLocalPlayer();
             if (player != null) {
                 OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-                camera.position.x = player.getX() + player.getBounds().getWidth() / 2;
-                camera.position.y = player.getY() + player.getBounds().getHeight() / 2;
+                float x = player.getX() + player.getBounds().getWidth() / 2;
+                float y = player.getY() + player.getBounds().getHeight() / 2;
+                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                    int sw = Gdx.graphics.getWidth();
+                    int sh = Gdx.graphics.getHeight();
+                    int mx = Gdx.input.getX();
+                    int my = Gdx.input.getY();
+                    int tempX = sw/2 - mx;
+                    int tempY = sh/2 - my;
+                    float scale = (1f/Tile.SIZE)*10;
+                    tempX *= scale;
+                    tempY *= scale;
+                    x -= tempX;
+                    y += tempY;
+                }
+                float lerpFactor = 1/10000f;
+                float lerp = 1f - (float) Math.pow(lerpFactor, Gdx.graphics.getDeltaTime());
+                x = Interpolation.linear.apply(camera.position.x, x, lerp);
+                y = Interpolation.linear.apply(camera.position.y, y, lerp);
+                camera.position.x = x;
+                camera.position.y = y;
             }
         }
     }
@@ -502,6 +577,9 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void processInput(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON) && gameManager != null) {
+            resetGameDialog.show(stages.get(Align.center));
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {
                 exitPlacementMode();
@@ -537,26 +615,29 @@ public class GameScreen extends AbstractScreenEX {
 
         stages.actAll(delta);
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
             if (!inventoryButton.isDisabled()) {
                 inventoryButton.toggle();
                 shopWindow.setVisible(false);
                 inventoryWindow.setVisible(inventoryButton.isChecked());
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
             if (!shopButton.isDisabled()) {
                 shopButton.toggle();
                 shopWindow.setVisible(shopButton.isChecked());
                 inventoryWindow.setVisible(false);
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.U) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
             if (!upgradeButton.isDisabled()) {
                 upgradeButton.toggle();
                 inventoryWindow.setVisible(false);
                 shopWindow.setVisible(false);
                 enterUpgradeMode();
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         }
 
@@ -571,12 +652,20 @@ public class GameScreen extends AbstractScreenEX {
         
         if (inPlacementMode()) {
             updatePlacementMode(tileX, tileY);
+            setTitleText("Click to " + (placementMode == PlacementMode.UPGRADE ? "upgrade" : "place") +" tower (Press ESC to cancel)");
         } else {
+            setTitleText("");
             if (Gdx.input.isKeyPressed(Input.Keys.R)) {
                 // Sell the tower at the mouse position if it's on the same team
+                setTitleText("Click to sell tower (Release R to cancel)");
                 if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
+                    Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
                     ioStream.sendPacket(packet);
+                }
+            } else {
+                if (title.getText().toString().equals("Click to sell tower (Release R to cancel)")) {
+                    setTitleText("");
                 }
             }
         }
@@ -602,8 +691,7 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void processMouse(int tileX, int tileY) {
-        // TODO: if the player middle clicks, display the tower's stats
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE)) {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE) || Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
             if (tower != null) {
                 // Display the tower's stats
@@ -658,15 +746,14 @@ public class GameScreen extends AbstractScreenEX {
 
         if (lastVelocityX != vx || lastVelocityY != vy || sprinting != lastSprinting) {
             // Something changed, send the new input to the server.
-            PlayerInputPacket inputPacket = new PlayerInputPacket(new Vector2(vx, vy), getLocalPlayer().getPosition(), lastSprinting);
+            PlayerInputPacket inputPacket = new PlayerInputPacket(new Vector2(vx, vy), getLocalPlayer().getPosition().cpy(), lastSprinting);
             ioStream.sendPacket(inputPacket);
         }
 
         lastVelocityX = vx;
         lastVelocityY = vy;
-        lastSprinting = sprinting;
 
-        getLocalPlayer().updateInput(new Vector2(vx, vy), lastSprinting);
+        getLocalPlayer().updateInput(new Vector2(vx, vy), sprinting);
     }
 
     @Override
@@ -676,14 +763,14 @@ public class GameScreen extends AbstractScreenEX {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
-            world.render(batch, delta);
+            world.render(data, batch, delta);
 
             if (inPlacementMode()) {
                 Point mouseTile = getMouseTileCoordinate();
                 batch.setColor(1, 1, 1, .5f);
                 if (placementMode == PlacementMode.PLACE) {
                     entityToPlace.setPosition((mouseTile.x + .5f) * Tile.SIZE, (mouseTile.y + .5f) * Tile.SIZE);
-                    entityToPlace.render(batch, delta);
+                    entityToPlace.render(data, batch, delta);
                 } else if (placementMode == PlacementMode.UPGRADE) {
 
                 }
@@ -735,6 +822,7 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void hide() {
         super.hide();
+        Audio.getInstance().stopMusic();
         ioStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
         ioStream.onClose();
         if (gameManager != null) {
@@ -793,6 +881,10 @@ public class GameScreen extends AbstractScreenEX {
     HashSet<Integer> notificationsActive = new HashSet<Integer>();
 
     private void notification(SpriteType icon, String message) {
+        notification(icon, message, 3);
+    }
+
+    private void notification(SpriteType icon, String message, int duration) {
         // display a message at the bottom right corner
         HorizontalGroup group = new HorizontalGroup();
 
@@ -822,7 +914,7 @@ public class GameScreen extends AbstractScreenEX {
         float fadeOutSpeed = .5f;
         group.addAction(Actions.sequence(
             Actions.parallel(Actions.fadeIn(fadeInSpeed), Actions.moveToAligned(640-5, targetY, Align.bottomRight, fadeInSpeed, Interpolation.swing)),
-            Actions.delay(3),
+            Actions.delay(duration),
             Actions.run(() -> {
                 notificationsActive.remove(result);
             }),
@@ -850,6 +942,7 @@ public class GameScreen extends AbstractScreenEX {
             public void clicked(InputEvent event, float x, float y) {
                 // transition to the place tower mode
                 enterPlacementMode(type);
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1);
             }
         });
         table.add(buyButton).size(32).expandX().pad(5);
@@ -907,7 +1000,24 @@ public class GameScreen extends AbstractScreenEX {
             PurchaseItemPacket packet = null;
             if (placementMode == PlacementMode.PLACE) {
                 packet = new PurchaseItemPacket(PurchaseAction.TOWER, typeToPurchase, tileX, tileY);
-                ioStream.sendPacket(packet);
+                boolean canPlace = true;
+                TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
+                if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
+                    notification(SpriteType.STRUCTURE, "Cannot place here!");
+                    canPlace = false;
+                }
+                else if (option != null) {
+                    if (localMoney < option.cost) {
+                        notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost).substring(1)+")");
+                        canPlace = false;
+                    }
+                }
+                if (canPlace) {
+                    ioStream.sendPacket(packet);
+                    Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1f);
+                } else {
+                    Audio.getInstance().playSFX(GameSFX.WARNING, 1);
+                }
             } else if (placementMode == PlacementMode.UPGRADE) {
                 TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
                 if (towerAt == null) {
@@ -915,6 +1025,7 @@ public class GameScreen extends AbstractScreenEX {
                 }
                 if (towerAt.getRemainingUpgradeTime() >= 0) {
                     notification(SpriteType.STRUCTURE, "Tower is actively upgrading..." + (int) towerAt.getRemainingUpgradeTime() + "s");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
                 if (upgradeDialog != null) {
@@ -926,7 +1037,7 @@ public class GameScreen extends AbstractScreenEX {
                 upgradeDialog(towerAt);
             }
             if (!multiPlace) {
-                //exitPlacementMode();
+                exitPlacementMode();
             }
         }
     }
@@ -941,14 +1052,18 @@ public class GameScreen extends AbstractScreenEX {
             @Override
             protected void result(Object object) {
                 if (object.equals(false)) {
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
                 if (cost > localMoney) {
-                    notification(SpriteType.CASH, "Not enough money to upgrade!");
+                    notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(cost).substring(1)+")");
+                    Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                     return;
                 }
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1);
                 PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.UPGRADE, null, tileX, tileY);
                 ioStream.sendPacket(packet);
+                Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1);
                 upgradeDialog = null;
             }
         };
@@ -970,6 +1085,10 @@ public class GameScreen extends AbstractScreenEX {
         dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         worldStage.addActor(dialog);
         dialog = upgradeDialog;
+    }
+
+    public void setTitleText(String string) {
+        title.setText(string);
     }
 
 }

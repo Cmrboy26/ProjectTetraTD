@@ -14,9 +14,10 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.Projectile;
-import net.cmr.rtd.game.world.entities.towers.ShooterTower;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.entities.towers.IceTower;
+import net.cmr.rtd.game.world.entities.towers.ShooterTower;
+import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.util.Log;
 
 public abstract class GameObject {
@@ -106,7 +107,7 @@ public abstract class GameObject {
      * This will render the game object.
      * @param delta The time since the last render.
      */
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         
     }
     

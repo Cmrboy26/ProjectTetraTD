@@ -14,11 +14,11 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
-import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
+import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.util.Sprites;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -51,7 +51,7 @@ public class ShooterTower extends TowerEntity {
                         .setTimeToReachTarget(getArrowAirTime())
                         .setPrecision(1)
                         .setAOE(0)
-                        .setOnLaunchSound(GameSFX.LAUNCH);
+                        .setOnLaunchSound(GameSFX.SHOOT);
                 //Projectile arrow = new Projectile(enemy, SpriteType.PROJECTILE, new Vector2(getPosition()), .5f, (int) damage, getArrowAirTime(), 0, 1);
                 Projectile arrow = builder.build();
                 data.getWorld().addEntity(arrow);
@@ -96,14 +96,14 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public String getDescription() {
-        return "Shoots arrows at enemies.";
+        return "Shoots pellets at enemies.";
     }
 
     float animationDelta = 0;
     boolean attacking = false;
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         preRender(batch, delta);
         
         if (attacking) {
@@ -120,7 +120,7 @@ public class ShooterTower extends TowerEntity {
         batch.setColor(Color.WHITE);
 
         postRender(batch, delta);
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
     
 }

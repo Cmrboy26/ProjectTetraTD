@@ -15,8 +15,8 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
@@ -234,6 +234,7 @@ public class Projectile extends Entity {
         buffer.writeFloat(AOE);
         buffer.writeFloat(precision);
         buffer.writeFloat(scale);
+        buffer.writeUTF(sprite == null ? "" : sprite.name());
     }
 
     @Override
@@ -247,12 +248,13 @@ public class Projectile extends Entity {
         projectile.AOE = input.readFloat();
         projectile.precision = input.readFloat();
         projectile.scale = input.readFloat();
+        projectile.sprite = SpriteType.valueOf(input.readUTF());
     }
     
     float renderDelta = 0;
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void render(UpdateData data, Batch batch, float delta) {
         float size = .20f * scale;
         renderDelta += delta;
         if (animation != null) {
@@ -262,7 +264,7 @@ public class Projectile extends Entity {
         } else {
             batch.draw(Sprites.sprite(SpriteType.PROJECTILE), getX() - Tile.SIZE * size / 2, getY() - Tile.SIZE * size / 2, Tile.SIZE * size, Tile.SIZE * size);
         }
-        super.render(batch, delta);
+        super.render(data, batch, delta);
     }
 
     public Vector2 getVelocity() {

@@ -36,8 +36,7 @@ public class StructureTileData extends TeamTileData {
 
             data.getManager().updateTeamStats(team);
             if (health <= 0) {
-                // TODO: The team has lost
-                Log.info("Team "+team+" has lost");
+                data.getManager().teamLost(team);
             }
         }
 

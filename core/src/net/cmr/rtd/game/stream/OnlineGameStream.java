@@ -10,6 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
+import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
@@ -18,9 +19,12 @@ import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.PlayerPositionsPacket;
+import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
-import net.cmr.util.Log;
+import net.cmr.rtd.game.packets.TeamUpdatePacket;
+import net.cmr.rtd.game.packets.WavePacket;
+import net.cmr.rtd.game.world.GameObject.GameType;
 
 public class OnlineGameStream extends GameStream {
 
@@ -59,7 +63,7 @@ public class OnlineGameStream extends GameStream {
         receivePackets();
         if (!connection.isConnected()) {
             onClose();
-            Log.info("Connection closed: " + this);
+            //Log.info("Connection closed: " + this);
         }
     }
 
@@ -99,6 +103,10 @@ public class OnlineGameStream extends GameStream {
         kryo.register(String.class);
         kryo.register(byte[].class);
         kryo.register(Vector2.class);
+        kryo.register(Vector2[].class);
+        kryo.register(String[].class);
+
+        kryo.register(GameType.class);
 
         kryo.register(Packet.class, new PacketSerializer<>(kryo, Packet.class));
         kryo.register(ConnectPacket.class);
@@ -111,6 +119,13 @@ public class OnlineGameStream extends GameStream {
         kryo.register(PlayerPacket.class);
         kryo.register(PlayerPositionsPacket.class);
         kryo.register(PlayerInputPacket.class);
+        kryo.register(GameInfoPacket.class);
+        kryo.register(WavePacket.class);
+        kryo.register(PurchaseItemPacket.class);
+        kryo.register(PurchaseItemPacket.PurchaseAction.class);
+        kryo.register(PlayerPacket.PlayerPacketType.class);
+        kryo.register(Packet.EncryptionType.class);
+        kryo.register(TeamUpdatePacket.class);
     }
     
 }

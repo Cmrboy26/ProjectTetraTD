@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
 public class LevelSave {
-    
+
     private static final String LOCATION = "retrotowerdefense/levels/"; 
     private final String levelName;
 
@@ -63,6 +63,10 @@ public class LevelSave {
         return wave.exists();
     }
 
+    public GameSave createSave(String folderName, String waveName, boolean override) {
+        return createSave(folderName, waveName, override, null);
+    }
+
     /**
      * Creates a new save folder for the level.
      * OVERWRITES any existing save folder with the same name.
@@ -71,12 +75,12 @@ public class LevelSave {
      * @param override Whether to override an existing save folder with the same name
      * @return The new save folder
      */
-    public GameSave createSave(String folderName, String waveName, boolean override) {
+    public GameSave createSave(String folderName, String waveName, boolean override, byte[] wavedata) {
 
         if (folderName == null || folderName.isEmpty()) {
             throw new IllegalArgumentException("Folder name cannot be null or empty");
         }
-        if (waveName == null || waveName.isEmpty()) {
+        if ((waveName == null || waveName.isEmpty()) && wavedata == null) {
             throw new IllegalArgumentException("Wave name cannot be null or empty");
         }
         for (char c : folderName.toCharArray()) {
@@ -84,9 +88,11 @@ public class LevelSave {
                 throw new IllegalArgumentException("Folder name cannot contain any of the following characters: / \\ : * ? \" < > |");
             }
         }
-        for (char c : waveName.toCharArray()) {
-            if (c == '/' || c == '\\' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|') {
-                throw new IllegalArgumentException("Wave name cannot contain any of the following characters: / \\ : * ? \" < > |");
+        if (wavedata == null) {
+            for (char c : waveName.toCharArray()) {
+                if (c == '/' || c == '\\' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|') {
+                    throw new IllegalArgumentException("Wave name cannot contain any of the following characters: / \\ : * ? \" < > |");
+                }
             }
         }
 
@@ -102,7 +108,9 @@ public class LevelSave {
 
         FileHandle desiredWaveFile = getWavesFolder(FileType.External).child(waveName+".json");
         if (!desiredWaveFile.exists()) {
-            throw new IllegalArgumentException("Wave file does not exist");
+            if (wavedata == null) {
+                throw new IllegalArgumentException("Wave file does not exist "+desiredWaveFile.path());
+            }
         }
 
         if (folder.exists()) {
@@ -117,9 +125,13 @@ public class LevelSave {
         levelWorldFile.copyTo(saveWorldFile);
 
         // Copy the selected wave file to the new save folder
-        FileHandle levelWave = getWavesFolder(FileType.External).child(waveName+".json");
-        FileHandle saveWave = save.getWaveFile(FileType.External);
-        levelWave.copyTo(saveWave);
+        if (wavedata == null) {
+            wavedata = getWavesFolder(FileType.External).child(waveName+".json").readBytes();
+        }
+        FileHandle saveWaveFile = save.getWaveFile(FileType.External);
+        if (wavedata != null) {
+            saveWaveFile.writeBytes(wavedata, false);
+        }
 
         return save;
     }

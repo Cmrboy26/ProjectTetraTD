@@ -139,7 +139,7 @@ public class Sprites implements Disposable {
         }
         Log.info("Animations initialized and loaded: " + animations.size());
     }
-
+    
     public static Skin skin() {
         return getInstance().getSkin();
     }

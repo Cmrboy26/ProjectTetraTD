@@ -94,4 +94,12 @@ public class TeamData {
         data.getManager().updateTeamStats(team);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TeamData) {
+            return ((TeamData) obj).team == team;
+        }
+        return false;
+    }
+
 }

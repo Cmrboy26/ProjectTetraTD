@@ -13,6 +13,8 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -89,11 +91,17 @@ public abstract class TowerEntity extends Entity {
         }
     }
 
+    float lastProgress = -1;
     public void postRender(Batch batch, float delta) {
+        float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
         if (getRemainingUpgradeTime() != -1f) {
-            float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
             batch.draw(Sprites.sprite(SpriteType.UPGRADE_FRONT), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
         }
+        if (lastProgress != -1 && getRemainingUpgradeTime() == -1) {
+            // Play sound
+            Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1);
+        }
+        lastProgress = getRemainingUpgradeTime() ;
         // draw a circle of radius getDisplayRange() centered at getPosition()
         if (displayRange && (displayRangeTower == null || displayRangeTower == this)) {
             SpriteType type = SpriteType.AREA;

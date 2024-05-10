@@ -1,6 +1,7 @@
 package net.cmr.rtd.game;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -28,13 +29,16 @@ import net.cmr.rtd.game.commands.CommandHandler;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
+import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
+import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
+import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
@@ -75,6 +79,7 @@ public class GameManager implements Disposable {
     private UpdateData data;
     private World world;
     private ArrayList<TeamData> teams;
+    private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
     private boolean pauseWaves = true;
 
     /**
@@ -119,6 +124,15 @@ public class GameManager implements Disposable {
 
             @Override
             public void packetReceived(Packet packet) {
+                if (packet instanceof GameInfoPacket) {
+                    // Send the game info to the player.
+                    GameInfoPacket gameInfo = new GameInfoPacket(teams.size(), players.size(), details.getMaxPlayers());
+                    clientRecieverStream.sendPacket(gameInfo);
+                    clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
+                    remove = true;
+                    return;
+                }
+
                 // When a player sends a ConnectPacket, set their username and put them in the players map.
                 if (packet instanceof ConnectPacket) {
                     ConnectPacket connectPacket = (ConnectPacket) packet;
@@ -126,6 +140,7 @@ public class GameManager implements Disposable {
                     if (players.size() >= details.getMaxPlayers()) {
                         // The game is full.
                         clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.GAME_FULL));
+                        remove = true;
                         return;
                     }
                     // If the username is too long, send a disconnect packet.
@@ -133,12 +148,14 @@ public class GameManager implements Disposable {
                     if (username.length() > GamePlayer.USERNAME_LENGTH) {
                         // The username is too long.
                         clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.USERNAME_TOO_LONG));
+                        remove = true;
                         return;
                     }
                     // If the username is already taken, send a disconnect packet.
                     if (players.containsKey(username)) {
                         // The username is already taken.
                         clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.USERNAME_TAKEN));
+                        remove = true;
                         return;
                     }
                     // Add the player to the players map.
@@ -221,6 +238,7 @@ public class GameManager implements Disposable {
         synchronizeWorld(player);
 
         world.addEntity(playerEntity);
+        sendPacketToAll(new PlayerPacket(player.getUsername(), player.getPlayer().getX(), player.getPlayer().getY(), PlayerPacket.PlayerPacketType.CONNECTING));
     }
 
     public void onPlayerDisconnect(GamePlayer player) {
@@ -286,6 +304,7 @@ public class GameManager implements Disposable {
                 update(delta);
             }
         });
+        updateThread.setDaemon(true);
         updateThread.start();
         Log.info("Game started.");
 
@@ -310,8 +329,9 @@ public class GameManager implements Disposable {
         running = false;
         if (details.isHostedOnline()) {
             // Stop the server
-            return;
+            server.stop();
         }
+
         dispose();
     }
 
@@ -342,7 +362,7 @@ public class GameManager implements Disposable {
 
     /**
      * Initialize the game manager.
-     * @param save The save file to load from. (A game save with nothing saved can still be passed).
+     * @param save The save file to load from
      */
     public void initialize(GameSave save) {
         Objects.requireNonNull(save, "The save file cannot be null.");
@@ -437,7 +457,11 @@ public class GameManager implements Disposable {
         this.teams = new ArrayList<TeamData>(MAX_TEAMS);
         for (int i = 0; i < MAX_TEAMS; i++) {
             try {
-                teams.add(new TeamData(world, i));
+                TeamData data = new TeamData(world, i);
+                teams.add(data);
+                if (data.getHealth() > 0) {
+                    winningTeams.add(data);
+                }
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
                 System.out.println(e.getMessage());
@@ -458,6 +482,18 @@ public class GameManager implements Disposable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        for (GamePlayer player : players.values()) {
+            //world.addEntity(player.getPlayer());
+        }
+        /*for (GamePlayer player : players.values()) {
+            player.sendPacket(new GameObjectPacket(world));
+            sendPacketToAll(new PlayerPacket(player.getUsername(), player.getPlayer().getX(), player.getPlayer().getY(), PlayerPacket.PlayerPacketType.INITIALIZE_WORLD));
+            sendWaveData(player, world);
+        }*/
+        for (GamePlayer player : players.values()) {
+            onPlayerJoin(player);
         }
 
         return true;
@@ -557,14 +593,19 @@ public class GameManager implements Disposable {
             }
         }
 
+        ArrayList<GamePlayer> playerpositions = new ArrayList<>();
         Iterator<GamePlayer> it2 = players.values().iterator();
         while (it2.hasNext()) {
             GamePlayer player = it2.next();
             player.update(delta);
             if (player.getStream().isClosed()) {
                 it2.remove();
+            } else {
+                playerpositions.add(player);
             }
         }
+        PlayerPositionsPacket packet = new PlayerPositionsPacket(playerpositions);
+        sendPacketToAll(packet);
 
         // Update the world
         if (world != null) {
@@ -584,10 +625,36 @@ public class GameManager implements Disposable {
     }
     public void resumeWaves() {
         this.pauseWaves = false;
+        if (world != null && world.passedAllWaves()) {
+            world.resetWaveCounter();   
+        }
         sendWaveUpdateToAll();
     }
     public boolean areWavesPaused() {
         return pauseWaves;
+    }
+
+    public void teamLost(int team) {
+        if (winningTeams.size() == 0) {
+            // Allow the players to continue playing if they decide to resume the game
+            return;
+        }
+        TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
+        sendPacketToAll(packet);
+        winningTeams.remove(teams.get(team));
+        if (winningTeams.size() == 1) {
+            TeamData winner = winningTeams.get(0);
+            sendPacketToAll(new TeamUpdatePacket(winner.team, false));
+            pauseWaves();
+            winningTeams.clear();
+        }
+    }
+    public void gameOver() {
+        // The game is over.
+        // Send a packet to all players to show that the game is over.
+        TeamUpdatePacket packet = new TeamUpdatePacket(-1, true);
+        sendPacketToAll(packet);
+        pauseWaves();
     }
 
     /**
@@ -625,6 +692,12 @@ public class GameManager implements Disposable {
         }
     }
 
+    public void resetWorld(LevelSave level) {
+        GameSave save = this.save.copySave(level);
+        pauseWaves();
+        load(save);
+    }
+
     /**
      * The details of the game manager.
      */
@@ -660,6 +733,10 @@ public class GameManager implements Disposable {
 
     public ArrayList<TeamData> getTeams() { 
         return teams;
+    }
+
+    public UpdateData getUpdateData() {
+        return data;
     }
 
 }

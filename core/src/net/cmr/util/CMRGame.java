@@ -44,6 +44,9 @@ public abstract class CMRGame extends Game {
 
     @Override
     public void dispose() {
+        if (getScreen() != null) {
+            getScreen().dispose();
+        }
         super.dispose();
         batch.dispose();
         Audio.disposeAudio();

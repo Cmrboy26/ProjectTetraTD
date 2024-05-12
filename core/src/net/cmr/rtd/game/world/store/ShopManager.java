@@ -31,13 +31,13 @@ public class ShopManager {
 
     static {
         // Register the purchase of towers
-        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 30, "Shooter Tower", "Shoots pellets at enemies."));
-        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 100, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
+        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 35, "Shooter Tower", "Shoots pellets at enemies."));
+        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 80, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
         registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 50, "Ice Tower", "Slows enemies."));
 
         // Register the purchase of upgrades
-        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 10L + level * level * level * 10L,         level -> 5f + (level)));
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + level * level * level * 30L,  level -> 5f + level * 1.5f));
+        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 30L + (level - 1) * level * 20L,         level -> 5f + (level)));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + level * level * 30L,  level -> 5f + level * 1.5f));
         registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
     }
 
@@ -96,6 +96,7 @@ public class ShopManager {
                     Log.debug("Not a tower");
                     return; 
                 }
+                tower.setBuildDelta(3); // 3 seconds to construct tower
                 tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
                 manager.getWorld().addEntity(tower);
                 tower.updatePresenceOnClients(manager);
@@ -124,6 +125,11 @@ public class ShopManager {
                 if (!success) {
                     // Tower is already upgrading
                     System.out.println("Tower is already upgrading");
+                    return;
+                }
+                if (towerAt.isBeingBuilt()) {
+                    // Tower is still being built
+                    System.out.println("Tower is still being built");
                     return;
                 }
                 towerAt.updatePresenceOnClients(manager);

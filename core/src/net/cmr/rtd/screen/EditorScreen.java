@@ -38,6 +38,7 @@ import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Files;
@@ -262,7 +263,7 @@ public class EditorScreen extends AbstractScreenEX {
         byte[] data = GameObject.serializeGameObject(world);
         worldFile.writeBytes(data, false);
 
-        Label label = new Label("Saved as " + saveName + ".game", Sprites.skin().get("small", Label.LabelStyle.class));
+        Label label = new Label("Saved as " + saveName, Sprites.skin().get("small", Label.LabelStyle.class));
         label.setAlignment(Align.right);
         label.setSize(100, 40);
         label.setPosition(640 - 10, 10, Align.bottomRight);
@@ -279,7 +280,7 @@ public class EditorScreen extends AbstractScreenEX {
     public void exportFile(String name) {
         FileHandle editorFolder = Gdx.files.external("retrotowerdefense/editor/");
         editorFolder.mkdirs();
-        exportFile(editorFolder.child(name + ".game"));
+        exportFile(editorFolder.child(name));
     }
     private void openExportDialog() {
         TextField name = new TextField(saveName, Sprites.skin(), "small");
@@ -316,7 +317,7 @@ public class EditorScreen extends AbstractScreenEX {
                         Files.promptFile(conf, new NativeFileChooserCallback() {
                             @Override
                             public void onFileChosen(FileHandle file) {
-                                saveName = file.nameWithoutExtension();
+                                saveName = file.name();
                                 exportFile(file);
                             }
 
@@ -354,7 +355,7 @@ public class EditorScreen extends AbstractScreenEX {
     public void importFile(String name) {
         FileHandle editorFolder = Gdx.files.external("retrotowerdefense/editor/");
         editorFolder.mkdirs();
-        importFile(editorFolder.child(name + ".game"));
+        importFile(editorFolder.child(name));
     }
     public void importFile(FileHandle worldFile) {
         if (worldFile.exists()) {
@@ -362,7 +363,7 @@ public class EditorScreen extends AbstractScreenEX {
             world = (World) GameObject.deserializeGameObject(data);
         }
 
-        Label label = new Label("Opened " + saveName + ".game", Sprites.skin().get("small", Label.LabelStyle.class));
+        Label label = new Label("Opened " + saveName, Sprites.skin().get("small", Label.LabelStyle.class));
         label.setAlignment(Align.right);
         label.setSize(100, 40);
         label.setPosition(640 - 10, 10, Align.bottomRight);
@@ -411,7 +412,7 @@ public class EditorScreen extends AbstractScreenEX {
                         Files.promptFile(conf, new NativeFileChooserCallback() {
                             @Override
                             public void onFileChosen(FileHandle file) {
-                                saveName = file.nameWithoutExtension();
+                                saveName = file.name();
                                 importFile(file);
                             }
 
@@ -618,19 +619,44 @@ public class EditorScreen extends AbstractScreenEX {
             }
 
             if (selectedTile == 3) {
-                world.setTileData(tileX, tileY, 1, new TeamTileData(teamNumber));
+                TileData teamTileData = new TeamTileData(teamNumber);
+                world.setTileData(tileX, tileY, 1, teamTileData);
             }
             if (selectedTile == 4) {
-                world.setTileData(tileX, tileY, 1, new StartTileData(teamNumber));
+                TileData startTileData = new StartTileData(teamNumber);
+                if (!dataExistsInWorld(startTileData)) {
+                    world.setTileData(tileX, tileY, 1, startTileData);
+                } else {
+                    world.setTile(tileX, tileY, 1, null);
+                    System.out.println("Team " + teamNumber + " already has a start tile");
+                }
             }
             if (selectedTile == 5) {
-                world.setTileData(tileX, tileY, 1, new StructureTileData(teamNumber));
+                TileData endTileData = new StructureTileData(teamNumber);
+                if (!dataExistsInWorld(endTileData)) {
+                    world.setTileData(tileX, tileY, 1, endTileData);
+                } else {
+                    world.setTile(tileX, tileY, 1, null);
+                    System.out.println("Team " + teamNumber + " already has an end tile");
+                }
             }
             if (right && selectedTile >= 3 && selectedTile <= 5) {
                 world.setTileData(tileX, tileY, 1, null);
                 world.setTile(tileX, tileY, 1, null);
             }
         }
+    }
+
+    public boolean dataExistsInWorld(TileData data) {
+        for (int x = 0; x < world.getWorldSize(); x++) {
+            for (int y = 0; y < world.getWorldSize(); y++) {
+                TileData tileData = world.getTileData(x, y, 1);
+                if (tileData != null && tileData.equals(data)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void updateCamera() {

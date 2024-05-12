@@ -66,8 +66,8 @@ import net.cmr.util.Log;
 public class GameManager implements Disposable {
 
     public static final int MAX_TEAMS = 4;
-    public static final int STARTING_MONEY = 50;
-    public static final int STARTING_HEALTH = 100;
+    public static final int STARTING_MONEY = 49;
+    public static final int STARTING_HEALTH = 50;
 
     private final GameManagerDetails details;
     private final ConcurrentHashMap<String, GamePlayer> players = new ConcurrentHashMap<String, GamePlayer>();
@@ -652,8 +652,10 @@ public class GameManager implements Disposable {
     public void gameOver() {
         // The game is over.
         // Send a packet to all players to show that the game is over.
-        TeamUpdatePacket packet = new TeamUpdatePacket(-1, true);
-        sendPacketToAll(packet);
+        for (TeamData data : winningTeams) {
+            sendPacketToAll(new TeamUpdatePacket(data.team, false));
+        }
+        winningTeams.clear();
         pauseWaves();
     }
 

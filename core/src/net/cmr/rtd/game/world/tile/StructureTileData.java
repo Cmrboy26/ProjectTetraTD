@@ -49,6 +49,7 @@ public class StructureTileData extends TeamTileData {
 
     @Override
     public void reset() {
+        // TODO: Implement custom starting health and money in the WavesData class
         health = GameManager.STARTING_HEALTH;
         money = GameManager.STARTING_MONEY;
         healthChanged = true;
@@ -60,6 +61,14 @@ public class StructureTileData extends TeamTileData {
 
     public int getHealth() {
         return health;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof StructureTileData) {
+            return ((StructureTileData) obj).team == team;
+        }
+        return false;
     }
 
 }

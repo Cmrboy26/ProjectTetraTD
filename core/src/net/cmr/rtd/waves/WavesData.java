@@ -27,6 +27,8 @@ public class WavesData {
     public DifficultyRating difficulty;
     public boolean endlessMode;
     public float preparationTime;
+    public int startingMoney; // TODO: Implement
+    public int startingHealth; // TODO: Implement
     public HashMap<Integer, Wave> waves;
 
     public WavesData() {

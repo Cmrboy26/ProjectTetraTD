@@ -21,7 +21,6 @@ public class TeamTileData extends TileData {
         //batch.draw(Sprites.sprite(SpriteType.DARKENED), tileX * Tile.SIZE, tileY * Tile.SIZE, Tile.SIZE, Tile.SIZE);
         super.render(batch, tileX, tileY);
     }
-
     
 
 }

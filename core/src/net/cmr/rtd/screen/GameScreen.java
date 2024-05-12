@@ -719,7 +719,7 @@ public class GameScreen extends AbstractScreenEX {
                 String text = "Level: " + tower.getLevel();
                 text += "\nDamage: " + tower.getDisplayDamage();
                 text += "\nRange: " + tower.getDisplayRange();
-                text += "\nAttack Speed: " + tower.getAttackSpeed();
+                text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
                 text += "\nDescription: "+tower.getDescription();
                 Label label = new Label(text, Sprites.skin(), "small");
                 label.setFontScale(.25f);
@@ -1025,6 +1025,11 @@ public class GameScreen extends AbstractScreenEX {
                 }
                 if (towerAt.getRemainingUpgradeTime() >= 0) {
                     notification(SpriteType.STRUCTURE, "Tower is actively upgrading..." + (int) towerAt.getRemainingUpgradeTime() + "s");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                if (towerAt.isBeingBuilt()) {
+                    notification(SpriteType.STRUCTURE, "Tower is being built..." + ((int) towerAt.getRemainingBuildTime()) + "s");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }

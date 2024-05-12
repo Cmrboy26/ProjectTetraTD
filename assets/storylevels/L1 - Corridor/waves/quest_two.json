@@ -1,0 +1,92 @@
+{
+    "difficulty": 3,
+    "name": "Level Two",
+    "endlessMode": false,
+    "preparationTime": 5,
+    "waves": [
+        {
+            "waveTime": 45,
+            "waveUnits": [
+                {
+                    "type": "BASIC_ONE",
+                    "quantity": 10,
+                    "startTime": 0,
+                    "endTime": 30
+                },
+                {
+                    "type": "BASIC_TWO",
+                    "quantity": 2,
+                    "startTime": 30,
+                    "endTime": 45
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 15]},
+                {"distributedSpawn": ["BASIC_TWO", 4]}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 18]},
+                {"distributedSpawn": ["BASIC_TWO", 6]}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 24]},
+                {"distributedSpawn": ["BASIC_TWO", 8]}
+            ]
+        },{
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 24]},
+                {"distributedSpawn": ["BASIC_TWO", 8]},
+                {"distributedSpawn": ["BASIC_THREE", 4]}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 24]},
+                {"distributedSpawn": ["BASIC_THREE", 10]}
+            ]
+        },
+        {
+            "waveTime": 30,
+			"warnPlayer": true,
+			"additionalPrep": 10,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 24]},
+                {"distributedSpawn": ["BASIC_TWO", 12]},
+                {"distributedSpawn": ["BASIC_THREE", 15]}
+            ]
+        },
+        {
+            "waveTime": 30,
+			"additionalPrep": 3,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 18]}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 18]},
+                {"distributedSpawn": ["BASIC_THREE", 21]}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 45]},
+                {"distributedSpawn": ["BASIC_THREE", 18]}
+            ]
+        }
+    ]
+}

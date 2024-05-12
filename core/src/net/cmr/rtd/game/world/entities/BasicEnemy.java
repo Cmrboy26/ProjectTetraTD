@@ -254,7 +254,8 @@ public class BasicEnemy extends EnemyEntity {
         super.onDeath(data);
         //playHitSound(data, DamageType.PHYSICAL);
         //int money = (int) Math.floor(Math.pow(maxHealth, 1.5d) / 10d);
-        int money = (int) Math.floor(maxHealth * .4f - 1f);
+        //int money = (int) Math.max(1, Math.floor(maxHealth * .4f - 1f));
+        int money = (int) Math.max(1, Math.floor(2*Math.sqrt(Math.max(5, maxHealth) - 5)));
         moneyOnDeath(this, data, money);
     }
 

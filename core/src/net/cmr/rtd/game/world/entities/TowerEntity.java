@@ -28,6 +28,7 @@ public abstract class TowerEntity extends Entity {
 
     float levelUpDelta = -1; // -1 means not currently upgrading, 0 and lower means done upgrading, positive means time left 
     float upgradeTime = 1;
+    float placementDelta = 0;
     int level = 1;
     // TODO: Add other tower upgrades
 
@@ -46,6 +47,11 @@ public abstract class TowerEntity extends Entity {
                 levelUpDelta = -1;
                 upgradeTime = 1;
                 level++;
+            }
+        } else if (placementDelta != -1) {
+            placementDelta -= delta;
+            if (placementDelta <= 0) {
+                placementDelta = -1;
             }
         } else {
             // CANNOT attack while upgrading
@@ -71,6 +77,7 @@ public abstract class TowerEntity extends Entity {
         buffer.writeInt(level);
         buffer.writeFloat(levelUpDelta);
         buffer.writeFloat(upgradeTime);
+        buffer.writeFloat(placementDelta);
         serializeTower(buffer);
     }
 
@@ -82,6 +89,7 @@ public abstract class TowerEntity extends Entity {
         tower.level = input.readInt();
         tower.levelUpDelta = input.readFloat();
         tower.upgradeTime = input.readFloat();
+        tower.placementDelta = input.readFloat();
         deserializeTower(tower, input);
     }
 
@@ -94,7 +102,7 @@ public abstract class TowerEntity extends Entity {
     float lastProgress = -1;
     public void postRender(Batch batch, float delta) {
         float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
-        if (getRemainingUpgradeTime() != -1f) {
+        if (getRemainingUpgradeTime() != -1f || placementDelta != -1f) {
             batch.draw(Sprites.sprite(SpriteType.UPGRADE_FRONT), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
         }
         if (lastProgress != -1 && getRemainingUpgradeTime() == -1) {
@@ -248,6 +256,25 @@ public abstract class TowerEntity extends Entity {
         this.upgradeTime = upgradeTime;
         levelUpDelta = upgradeTime;
         return true;
+    }
+
+    /**
+     * Sets the time to initially build the tower (when placed down on the map).
+     * @param delta
+     */
+    public void setBuildDelta(float delta) {
+        placementDelta = delta;
+    }
+
+    public float getRemainingBuildTime() {
+        return placementDelta;
+    }
+
+    /**
+     * @return whether the tower has finished the initial build (when placed down on the map)
+     */
+    public boolean isBeingBuilt() {
+        return placementDelta > 0;
     }
 
     /**

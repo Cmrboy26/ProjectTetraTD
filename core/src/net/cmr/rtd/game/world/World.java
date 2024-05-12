@@ -421,11 +421,6 @@ public class World extends GameObject {
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
                 for (int z = 0; z < LAYERS; z++) {
-                    if (tileDataMap.containsKey(new Point3D(x, y, z))) {
-                        TileData data = tileDataMap.get(new Point3D(x, y, z));
-                        data.render(batch, x, y);
-                    }
-
                     if (tiles[x][y][z] == null) {
                         continue;
                     }
@@ -438,6 +433,10 @@ public class World extends GameObject {
                         continue;
                     }
                     tile.render(batch, delta, this, x, y, z);
+                    if (tileDataMap.containsKey(new Point3D(x, y, z))) {
+                        TileData data = tileDataMap.get(new Point3D(x, y, z));
+                        data.render(batch, x, y);
+                    }
                 }
             }
         }

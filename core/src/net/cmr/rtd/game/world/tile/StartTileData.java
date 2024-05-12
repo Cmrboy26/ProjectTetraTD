@@ -41,4 +41,12 @@ public class StartTileData extends TeamTileData {
         return factory;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof StartTileData) {
+            return ((StartTileData) obj).team == team;
+        }
+        return false;
+    }
+
 }

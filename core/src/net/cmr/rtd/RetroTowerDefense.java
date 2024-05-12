@@ -1,6 +1,7 @@
 package net.cmr.rtd;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.function.Consumer;
@@ -50,6 +51,14 @@ public class RetroTowerDefense extends CMRGame {
 
 		FileHandle levelsFolder = gameDataFolder.child("levels/");
 		levelsFolder.mkdirs();
+		
+		// Create story level folders from the assets
+		FileHandle storyLevelsHandle = Gdx.files.internal("assets/storylevels/");
+		for (FileHandle level : storyLevelsHandle.list()) {
+			FileHandle internal = storyLevelsHandle.child(level.name());
+			FileHandle external = levelsFolder;
+			internal.copyTo(external);
+		}
 
 		FileHandle editorFolder = gameDataFolder.child("editor/");
 		editorFolder.mkdirs();
@@ -57,7 +66,7 @@ public class RetroTowerDefense extends CMRGame {
 
 	@Override
 	public void render () {
-		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F12) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) {
 			CMRGame.setDebug(!CMRGame.isDebug());
 		}
 

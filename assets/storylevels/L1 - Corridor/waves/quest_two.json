@@ -3,6 +3,8 @@
     "name": "Level Two",
     "endlessMode": false,
     "preparationTime": 5,
+	"startingHealth": 10,
+	"startingMoney": 45,
     "waves": [
         {
             "waveTime": 45,

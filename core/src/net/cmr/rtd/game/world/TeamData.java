@@ -31,7 +31,7 @@ public class TeamData {
                         if (structurePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple end structures");
                         }
-                        if (tile.money == -1 && tile.getHealth() == -1) {
+                        if (tile.money == -1 && tile.getHealth() == -1 && world.getWavesData() != null) {
                             tile.money = world.getWavesData().startingMoney;
                             tile.health = world.getWavesData().startingHealth;
                         }

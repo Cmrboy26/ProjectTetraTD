@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.esotericsoftware.kryo.Kryo;
 
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.World.Point3D;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
@@ -38,7 +39,7 @@ public abstract class TileData {
         
     }
 
-    public void reset() {
+    public void reset(World world) {
 
     }
 }

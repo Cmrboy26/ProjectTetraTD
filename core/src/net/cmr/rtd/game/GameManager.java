@@ -66,8 +66,6 @@ import net.cmr.util.Log;
 public class GameManager implements Disposable {
 
     public static final int MAX_TEAMS = 4;
-    public static final int STARTING_MONEY = 49;
-    public static final int STARTING_HEALTH = 50;
 
     private final GameManagerDetails details;
     private final ConcurrentHashMap<String, GamePlayer> players = new ConcurrentHashMap<String, GamePlayer>();

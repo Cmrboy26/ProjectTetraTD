@@ -31,6 +31,9 @@ public class WavesData {
     public int startingHealth; // TODO: Implement
     public HashMap<Integer, Wave> waves;
 
+    public static int DEFAULT_STARTING_MONEY = 100;
+    public static int DEFAULT_STARTING_HEALTH = 50;
+
     public WavesData() {
         this.waves = new HashMap<Integer, Wave>();
     }
@@ -74,6 +77,17 @@ public class WavesData {
         data.difficulty = DifficultyRating.deserialize(((Number) main.get("difficulty")).intValue());
         data.endlessMode = (boolean) main.get("endlessMode");
         data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
+
+        if (main.containsKey("startingMoney")) {
+            data.startingMoney = ((Number) main.get("startingMoney")).intValue();
+        } else {
+            data.startingMoney = DEFAULT_STARTING_MONEY;
+        }
+        if (main.containsKey("startingHealth")) {
+            data.startingHealth = ((Number) main.get("startingHealth")).intValue();
+        } else {
+            data.startingHealth = DEFAULT_STARTING_HEALTH;
+        }
         
         JSONArray waves = (JSONArray) main.get("waves");
         for (Object wave : waves) {
@@ -119,6 +133,8 @@ public class WavesData {
         main.put("difficulty", DifficultyRating.serialize(difficulty));
         main.put("endlessMode", endlessMode);
         main.put("preparationTime", preparationTime);
+        main.put("startingMoney", startingMoney);
+        main.put("startingHealth", startingHealth);
         
         JSONArray waves = new JSONArray();
         for (int waveNumber : this.waves.keySet()) {

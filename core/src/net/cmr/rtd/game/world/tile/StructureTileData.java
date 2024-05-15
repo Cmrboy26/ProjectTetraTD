@@ -1,9 +1,8 @@
 package net.cmr.rtd.game.world.tile;
 
-import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
-import net.cmr.util.Log;
+import net.cmr.rtd.game.world.World;
 
 public class StructureTileData extends TeamTileData {
     
@@ -48,10 +47,10 @@ public class StructureTileData extends TeamTileData {
     }
 
     @Override
-    public void reset() {
-        // TODO: Implement custom starting health and money in the WavesData class
-        health = GameManager.STARTING_HEALTH;
-        money = GameManager.STARTING_MONEY;
+    public void reset(World world) {
+        health = world.getWavesData().startingHealth;
+        money = world.getWavesData().startingMoney;
+
         healthChanged = true;
     }
 

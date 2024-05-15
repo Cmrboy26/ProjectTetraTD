@@ -2,6 +2,7 @@ package net.cmr.rtd.game.world.tile;
 
 import net.cmr.rtd.game.world.EnemyFactory;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.World;
 import net.cmr.util.Log;
 
 public class StartTileData extends TeamTileData {
@@ -33,7 +34,7 @@ public class StartTileData extends TeamTileData {
     }
 
     @Override
-    public void reset() {
+    public void reset(World world) {
         //elapsedTime = 0;
         factory = null;
     }

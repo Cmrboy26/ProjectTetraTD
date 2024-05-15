@@ -85,7 +85,8 @@ public class Audio implements Disposable {
      * Represents the music tracks used in the game.
      */
     public enum GameMusic {
-        GAME_1("game1.mp3")
+        GAME_1("game1.mp3"),
+        GAME_2("game2.mp3")
         ;
 
         private final String fileName;
@@ -119,6 +120,10 @@ public class Audio implements Disposable {
          */
         public FileHandle getFileHandle() {
             return Gdx.files.internal(MUSIC_PATH + getFileName());
+        }
+
+        public static GameMusic random(GameMusic... music) {
+            return music[(int) (Math.random() * music.length)];
         }
     }
 

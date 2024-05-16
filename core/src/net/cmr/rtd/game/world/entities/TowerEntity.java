@@ -204,12 +204,14 @@ public abstract class TowerEntity extends Entity {
         
         double worldDistance = tileRadius = Tile.SIZE * tileRadius;
         ArrayList<EnemyEntity> entitiesInRange = new ArrayList<EnemyEntity>();
+        double threshold = Tile.SIZE / 16;
         for (Entity entity : data.getWorld().getEntities()) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 if (enemy.getTeam() != team) continue;
+                //double distance = Math.abs(Math.max(entity.getX() - enemy.getX(), entity.getY() - enemy.getY()));
                 double distance = entity.getPosition().dst(getPosition());
-                if (distance <= worldDistance) {
+                if (distance <= worldDistance + threshold) {
                     entitiesInRange.add(enemy);
                 }
             }

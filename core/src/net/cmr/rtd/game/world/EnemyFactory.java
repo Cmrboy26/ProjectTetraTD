@@ -86,7 +86,7 @@ public class EnemyFactory {
     }
 
 
-    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", 5, 1.5f)
+    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", 4, 1.5f)
                                             .immuneTo(FireEffect.class)); }
     private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", 10, 1f)); }
     private void createBasicEnemyThree() { send(createBasicEnemy("basic3", 25, 1f) 

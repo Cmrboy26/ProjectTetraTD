@@ -126,7 +126,16 @@ public class SelectionScreen extends AbstractScreenEX {
         details.add(title).fillX().expandX().colspan(2).row();
 
         FileHandle worldFile = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/world.dat");
-        World world = (World) GameObject.deserializeGameObject(worldFile.readBytes());
+        World world;
+        try {
+            world = (World) GameObject.deserializeGameObject(worldFile.readBytes());
+        } catch(Exception e ) {
+            Label label = new Label("Invalid Level: Failed to load world", Sprites.skin(), "small");
+            label.setAlignment(Align.center);
+            details.add(label).fillX().expandX().colspan(2).row();
+            e.printStackTrace();
+            return;
+        }
         int teamCounter = 0;
         for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
             try {
@@ -143,7 +152,7 @@ public class SelectionScreen extends AbstractScreenEX {
             noTeams.setAlignment(Align.center);
             details.add(noTeams).fillX().expandX().colspan(2).row();
         } else if (teamCount == 1) {
-            Label oneTeam = new Label("Co-op/Solo", Sprites.skin(), "small");
+            Label oneTeam = new Label("Solo/Co-op", Sprites.skin(), "small");
             oneTeam.setAlignment(Align.center);
             details.add(oneTeam).fillX().expandX().colspan(2).row();
         } else {

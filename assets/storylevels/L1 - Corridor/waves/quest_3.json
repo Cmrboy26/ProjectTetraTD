@@ -1,9 +1,9 @@
 {
     "difficulty": 3,
-    "name": "Level One",
+    "name": "Quest 3",
     "endlessMode": false,
     "preparationTime": 5,
-	"startingHealth": 30,
+	"startingHealth": 10,
 	"startingMoney": 49,
     "waves": [
         {

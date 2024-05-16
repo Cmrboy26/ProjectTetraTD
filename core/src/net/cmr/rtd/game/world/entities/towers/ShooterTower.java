@@ -91,7 +91,7 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public float getDisplayRange() {
-        return calculateIncrementedValue(3, .25f, 2);
+        return calculateIncrementedValue(3, .25f, 2f);
     }
 
     @Override

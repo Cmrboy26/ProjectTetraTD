@@ -12,6 +12,8 @@ import javax.crypto.spec.IvParameterSpec;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
@@ -29,10 +31,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -97,7 +102,8 @@ public class GameScreen extends AbstractScreenEX {
 
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
-    ImageButton upgradeButton, shopButton, inventoryButton, skipWaveButton;
+    ImageButton upgradeButton, shopButton, inventoryButton;
+    TextButton skipWaveButton;
     Window shopWindow, inventoryWindow;
     long localMoney;
 
@@ -279,6 +285,60 @@ public class GameScreen extends AbstractScreenEX {
 
         add(Align.bottom, upgradeButton);
 
+        /*style = new ImageButtonStyle();
+        style.down = Sprites.drawable(SpriteType.BORDER_DOWN);
+        style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
+        style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
+        style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
+        style.disabled = Sprites.drawable(SpriteType.BORDER_DISABLED);
+        style.imageUp = Sprites.drawable(SpriteType.SHOP_ICON);*/
+        TextButtonStyle style2 = new TextButtonStyle();
+        int patch = 5;
+        style2.down = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DOWN), patch, patch, patch, patch));
+        style2.up = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
+        style2.over = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_HOVER), patch, patch, patch, patch));
+        style2.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
+        style2.disabled = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DISABLED), patch, patch, patch, patch));
+        style2.font = Sprites.skin().get("small", LabelStyle.class).font;
+
+        GlyphLayout layout = new GlyphLayout();
+        layout.setText(style2.font, "Skip Prep");
+        skipWaveButton = new TextButton("Skip Prep", style2) {
+            boolean preping = false;
+            boolean initialized = false;
+            @Override
+            public void act(float delta) {
+                float preptime = waveCountdown - waveDuration;
+                boolean lastPrep = preping;
+                preping = preptime > 0 && !areWavesPaused && wave != 0;
+                if (lastPrep != preping || !initialized) {
+                    initialized = true;
+                    skipWaveButton.setDisabled(false);
+                    if (preping && !areWavesPaused) {
+                        skipWaveButton.setText("Skip Prep");
+                        skipWaveButton.setVisible(true);
+                    } else {
+                        skipWaveButton.setVisible(false);
+                    }
+                }
+                super.act(delta);
+            }
+        };
+        skipWaveButton.setSize(layout.width + 20, iconSize);
+        skipWaveButton.setPosition(5, 5, Align.bottomLeft);
+        skipWaveButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (skipWaveButton.isDisabled()) { return; }
+                skipWaveButton.setDisabled(true);
+                //ioStream.sendPacket(new WavePacket(0, 0, 0, true));
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                skipWaveButton.setText("Skipping...");
+            }
+        });
+
+        add(Align.bottomLeft, skipWaveButton);
+
         // TODO: Add inventory menus and functionality
         shopWindow = new Window("Shop", Sprites.skin(), "small");
         shopWindow.getTitleLabel().setAlignment(Align.center);
@@ -293,7 +353,7 @@ public class GameScreen extends AbstractScreenEX {
         
         for (TowerOption option : ShopManager.getTowerCatalog().values()) {
             GameType type = option.type;
-            TextureRegionDrawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+            Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
             Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
             shopWindow.add(towerSection).pad(5);
             shopWindow.row();
@@ -506,7 +566,11 @@ public class GameScreen extends AbstractScreenEX {
             float displayCountdown = waveCountdown;
             if (preparationTime > 0) {
                 displayCountdown = preparationTime;
-                waveText = "Prepare for " + waveText;
+                if (wave == 0) {
+                    waveText = "Prepare to begin!";
+                } else {
+                    waveText = "Prepare for " + waveText;
+                }
             }
 
             waveCountdownLabel.setText(String.format("%.2f", displayCountdown));
@@ -924,7 +988,7 @@ public class GameScreen extends AbstractScreenEX {
         ));
     }
 
-    private Table getTowerSection(TextureRegionDrawable drawable, GameType type, String name, String cost, String tooltipDescription) {
+    private Table getTowerSection(Drawable drawable, GameType type, String name, String cost, String tooltipDescription) {
         Table table = new Table();
         Image towerImage = new Image(drawable);
         float fontScale = .5f;

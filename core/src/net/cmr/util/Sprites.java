@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -158,16 +159,16 @@ public class Sprites implements Disposable {
     public Sprite getSprite(SpriteType type) {
         return sprites.get(type.getSpriteName());
     }
-    public TextureRegionDrawable getDrawable(SpriteType type) {
+    public Drawable getDrawable(SpriteType type) {
         return new TextureRegionDrawable(getSprite(type));
     }
-    public static TextureRegionDrawable drawable(SpriteType type) {
+    public static Drawable drawable(SpriteType type) {
         return getInstance().getDrawable(type);
     }
-    public static TextureRegionDrawable drawable(AnimationType type) {
+    public static Drawable drawable(AnimationType type) {
         return new TextureRegionDrawable(getInstance().getAnimation(type, 0));
     }
-    public static TextureRegionDrawable drawable(AnimationType type, float delta) {
+    public static Drawable drawable(AnimationType type, float delta) {
         return new TextureRegionDrawable(getInstance().getAnimation(type, delta));
     }
 

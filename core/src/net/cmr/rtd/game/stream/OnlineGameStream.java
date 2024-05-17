@@ -21,6 +21,7 @@ import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
@@ -126,6 +127,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(PlayerPacket.PlayerPacketType.class);
         kryo.register(Packet.EncryptionType.class);
         kryo.register(TeamUpdatePacket.class);
+        kryo.register(SkipRequestPacket.class);
     }
     
 }

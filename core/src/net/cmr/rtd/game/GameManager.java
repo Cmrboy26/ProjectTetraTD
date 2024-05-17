@@ -1,10 +1,10 @@
 package net.cmr.rtd.game;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -737,6 +737,10 @@ public class GameManager implements Disposable {
 
     public UpdateData getUpdateData() {
         return data;
+    }
+
+    public Collection<GamePlayer> getPlayers() {
+        return players.values();
     }
 
 }

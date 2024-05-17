@@ -183,12 +183,35 @@ public class World extends GameObject {
             entity.update(delta, data);
         }
     }
-
+    HashSet<GamePlayer> skipRequests = null;
     public void resetWaveCounter() {
         this.wave = 0;
     }
     public boolean passedAllWaves() {
         return wave > wavesData.size();
+    }
+    public void requestSkip(GamePlayer player) {
+        Objects.requireNonNull(player);
+        Wave waveObj = wavesData.getWave(this.wave);
+        float waveCountdown = PREPARATION_TIME + waveObj.getWaveTime() + waveObj.getAdditionalPrepTime();
+        float elapsedTime = waveCountdown - this.waveCountdown;
+        if (elapsedTime < waveObj.getAdditionalPrepTime() + PREPARATION_TIME) {
+            // Process the skip request.
+            if (skipRequests == null) {
+                skipRequests = new HashSet<>();
+                for (GamePlayer p : player.getManager().getPlayers()) {
+                    skipRequests.add(p);
+                }
+            }
+            skipRequests.remove(player);
+            if (skipRequests.size() == 0) {
+                // Skip the wave.
+                this.waveCountdown = waveObj.getWaveTime();
+                // Notify the clients that the wave has ended
+                skipRequests = null;
+                player.getManager().sendWaveUpdateToAll();
+            }
+        }
     }
 
     public void addEntity(Entity entity) {

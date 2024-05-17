@@ -10,6 +10,7 @@ import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
+import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
@@ -168,6 +169,11 @@ public class GamePlayer {
             // Purchase an item from the shop.
             PurchaseItemPacket purchase = (PurchaseItemPacket) packet;
             ShopManager.processPurchase(manager, this, purchase);
+        }
+
+        if (packet instanceof SkipRequestPacket) {
+            SkipRequestPacket request = (SkipRequestPacket) packet;
+            getManager().getWorld().requestSkip(this);
         }
 
     }

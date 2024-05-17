@@ -60,6 +60,7 @@ import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
@@ -313,12 +314,13 @@ public class GameScreen extends AbstractScreenEX {
                 preping = preptime > 0 && !areWavesPaused && wave != 0;
                 if (lastPrep != preping || !initialized) {
                     initialized = true;
+                    skipWaveButton.setVisible(true);
                     skipWaveButton.setDisabled(false);
                     if (preping && !areWavesPaused) {
                         skipWaveButton.setText("Skip Prep");
-                        skipWaveButton.setVisible(true);
+                        skipWaveButton.addAction(Actions.fadeIn(0.5f, Interpolation.linear));
                     } else {
-                        skipWaveButton.setVisible(false);
+                        skipWaveButton.addAction(Actions.fadeOut(0.5f, Interpolation.linear));
                     }
                 }
                 super.act(delta);
@@ -331,9 +333,9 @@ public class GameScreen extends AbstractScreenEX {
             public void clicked(InputEvent event, float x, float y) {
                 if (skipWaveButton.isDisabled()) { return; }
                 skipWaveButton.setDisabled(true);
-                //ioStream.sendPacket(new WavePacket(0, 0, 0, true));
                 Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                 skipWaveButton.setText("Skipping...");
+                ioStream.sendPacket(new SkipRequestPacket());
             }
         });
 

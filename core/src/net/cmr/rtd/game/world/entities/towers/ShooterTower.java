@@ -107,7 +107,7 @@ public class ShooterTower extends TowerEntity {
         preRender(batch, delta);
         
         if (attacking) {
-            animationDelta += delta;
+            animationDelta += delta*getAttackSpeed();
         } else {
             animationDelta = 0;
         }
@@ -115,7 +115,17 @@ public class ShooterTower extends TowerEntity {
         Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.animation(AnimationType.SHOOTER_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        AnimationType animation = getTowerAnimationLevelDependent(
+            new AnimationType[] {
+                AnimationType.SHOOTER_TOWER_1, 
+                AnimationType.SHOOTER_TOWER_2, 
+                AnimationType.SHOOTER_TOWER_3
+            }, 
+            new int[] {
+                1, 3, 5
+            }
+        );
+        TextureRegion sprite = Sprites.animation(animation, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
 

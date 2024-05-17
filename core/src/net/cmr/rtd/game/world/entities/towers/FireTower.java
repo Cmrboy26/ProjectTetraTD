@@ -116,11 +116,12 @@ public class FireTower extends TowerEntity {
     public void render(UpdateData data, Batch batch, float delta) {
         preRender(batch, delta);
 
-        if (attacking) {
+        animationDelta += delta;
+        /*if (attacking) {
             animationDelta += delta;
         } else {
             animationDelta = 0;
-        }
+        }*/
 
         Color color = new Color(Color.RED);
         color.a = batch.getColor().a;
@@ -147,6 +148,5 @@ public class FireTower extends TowerEntity {
     public String getDescription() {
         return "This tower sets enemies ablaze, dealing\ndamage over time. It also has a chance to launch\na fireball at enemies in range.";
     }
-    
     
 }

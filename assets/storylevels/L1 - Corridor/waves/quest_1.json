@@ -104,20 +104,20 @@
 			"waveTime": 30,
 			"waveUnits": [
                 {"distributedSpawn": ["BASIC_TWO", 9]},
+                {"distributedSpawn": ["BASIC_THREE", 7]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 12]},
                 {"distributedSpawn": ["BASIC_THREE", 10]}
 			]
 		},
 		{
 			"waveTime": 30,
 			"waveUnits": [
-                {"distributedSpawn": ["BASIC_TWO", 14]},
-                {"distributedSpawn": ["BASIC_THREE", 12]}
-			]
-		},
-		{
-			"waveTime": 30,
-			"waveUnits": [
-                {"distributedSpawn": ["BASIC_TWO", 14]},
+                {"distributedSpawn": ["BASIC_TWO", 15]},
                 {"distributedSpawn": ["BASIC_THREE", 12]}
 			]
 		},

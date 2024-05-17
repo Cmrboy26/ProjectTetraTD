@@ -16,6 +16,7 @@ import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public abstract class TowerEntity extends Entity {
@@ -316,6 +317,15 @@ public abstract class TowerEntity extends Entity {
      */
     public float calculateIncrementedValue(int levelsPerIncrement, float incrementAmount, float initial) {
         return (float) (initial + Math.floor(getLevel() / levelsPerIncrement) * incrementAmount);
+    }
+
+    public AnimationType getTowerAnimationLevelDependent(AnimationType[] levels, int[] levelThresholds) {
+        for (int i = 0; i < levelThresholds.length; i++) {
+            if (getLevel() <= levelThresholds[i]) {
+                return levels[i];
+            }
+        }
+        return levels[levels.length - 1];
     }
 
 }

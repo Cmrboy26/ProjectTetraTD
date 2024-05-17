@@ -31,7 +31,7 @@ public class ShopManager {
 
     static {
         // Register the purchase of towers
-        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER, 35, "Shooter Tower", "Shoots pellets at enemies."));
+        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, 35, "Shooter Tower", "Shoots pellets at enemies."));
         registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE, 80, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
         registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.FROZEN, 50, "Ice Tower", "Slows enemies."));
 

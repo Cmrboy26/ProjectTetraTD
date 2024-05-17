@@ -85,6 +85,7 @@ public class Sprites implements Disposable {
         BASIC_FOUR_RIGHT("basic4/right", PlayMode.LOOP, enemySpeed),
 
         TESLA_TOWER("teslaTower", PlayMode.LOOP, .25f),
+        FIRE_TOWER("fireTower", PlayMode.LOOP, .25f),
         SHOOTER_TOWER("shooterTower", PlayMode.NORMAL, .1f),
         FIRE("fire", PlayMode.LOOP, .5f),
         ;

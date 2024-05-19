@@ -1,0 +1,4 @@
+- Bestiary
+- More (better) levels
+- Better synchronization between client and server (especially with fire tower fireball)
+- Autosaving

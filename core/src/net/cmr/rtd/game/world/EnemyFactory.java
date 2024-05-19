@@ -28,11 +28,15 @@ public class EnemyFactory {
      * @param world the world to spawn the enemies in
      */
     public EnemyFactory(int team, int tileX, int tileY, UpdateData data) {
+        this(team, tileX, tileY, data.getWorld());
+        this.data = data;
+    }
+
+    public EnemyFactory(int team, int tileX, int tileY, World world) {
         this.team = team;
         this.tileX = tileX;
         this.tileY = tileY;
-        this.data = data;
-        this.world = data.getWorld();
+        this.world = world;
     }
 
     public enum EnemyType {
@@ -74,7 +78,7 @@ public class EnemyFactory {
         entity.setHealth(entity.getMaxHealth());
         entity.setPosition(tileX * Tile.SIZE + Tile.SIZE / 2, tileY * Tile.SIZE + Tile.SIZE / 2);
         world.addEntity(entity);
-        if (data.isServer()) {
+        if (data != null && data.isServer()) {
             GameObjectPacket packet = new GameObjectPacket(entity, false);
             data.getManager().sendPacketToAll(packet);
         }

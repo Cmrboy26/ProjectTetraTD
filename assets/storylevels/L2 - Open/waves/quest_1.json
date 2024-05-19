@@ -1,11 +1,10 @@
 {
-	"difficulty": 1,
-	"name": "Quest 1 (Intro)",
+	"difficulty": 2,
+	"name": "Quest 1",
 	"endlessMode": false,
 	"preparationTime": 10,
 	"startingHealth": 50,
 	"startingMoney": 35,
-	"comment": "this level was organized well. the rest did not have as much effort put into them",
 	"waves": [
 		{
 			"waveTime": 30,

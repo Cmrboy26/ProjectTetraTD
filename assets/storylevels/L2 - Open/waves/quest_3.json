@@ -1,0 +1,178 @@
+{
+  "difficulty": 4,
+  "name": "Quest 3",
+  "endlessMode": false,
+  "preparationTime": 5,
+  "waves": [
+    {
+      "waveTime": 45,
+      "waveUnits": [
+		{
+          "type": "BASIC_ONE"
+          "quantity": 10,
+          "startTime": 0,
+          "endTime": 30,
+        },
+        {
+          "type": "BASIC_TWO"
+          "quantity": 2,
+          "startTime": 30,
+          "endTime": 45,
+        }
+      ]
+    },
+    {
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 15]},
+		{"distributedSpawn": ["BASIC_TWO", 3]}
+      ]
+    },
+    {
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 15]},
+        {"distributedSpawn": ["BASIC_TWO", 6]}
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 20]},
+        {"distributedSpawn": ["BASIC_TWO", 6]}
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 20]},
+        {"distributedSpawn": ["BASIC_TWO", 9]}
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 15]},
+        {"distributedSpawn": ["BASIC_TWO", 12]},
+		{
+          "type": "BASIC_TWO"
+          "quantity": 7,
+          "startTime": 20,
+          "endTime": 30,
+        }
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 25]},
+        {"distributedSpawn": ["BASIC_TWO", 9]},
+		{
+          "type": "BASIC_ONE"
+          "quantity": 5,
+          "startTime": 0,
+          "endTime": 5,
+        }
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_TWO", 12]},
+        {"distributedSpawn": ["BASIC_THREE", 5]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 15]},
+        {"distributedSpawn": ["BASIC_THREE", 8]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 15]},
+        {"distributedSpawn": ["BASIC_THREE", 11]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 40]},
+		{"distributedSpawn": ["BASIC_TWO", 20]},
+        {"distributedSpawn": ["BASIC_THREE", 14]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_TWO", 20]},
+		{"distributedSpawn": ["BASIC_THREE", 9]},
+        {"distributedSpawn": ["BASIC_FOUR", 4]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_THREE", 15]},
+        {"distributedSpawn": ["BASIC_FOUR", 6]},
+      ]
+    },
+	{
+      "waveTime": 30,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_TWO", 25]},
+		{"distributedSpawn": ["BASIC_THREE", 18]},
+        {"distributedSpawn": ["BASIC_FOUR", 8]},
+      ]
+    },
+	{
+      "waveTime": 30,
+	  "warnPlayer": true,
+	  "additionalPrep": 10,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 30]},
+		{"distributedSpawn": ["BASIC_THREE", 23]},
+        {"distributedSpawn": ["BASIC_FOUR", 14]},
+      ]
+    },
+	{
+      "waveTime": 30,
+	  "warnPlayer": true,
+	  "additionalPrep": 10,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 30]},
+		{"distributedSpawn": ["BASIC_THREE", 23]},
+        {"distributedSpawn": ["BASIC_FOUR", 14]},
+      ]
+    },
+	{
+      "waveTime": 30,
+	  "warnPlayer": true,
+	  "additionalPrep": 10,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 30]},
+		{"distributedSpawn": ["BASIC_THREE", 23]},
+        {"distributedSpawn": ["BASIC_FOUR", 14]},
+      ]
+    },
+	{
+      "waveTime": 30,
+	  "warnPlayer": true,
+	  "additionalPrep": 10,
+      "waveUnits": [
+		{"distributedSpawn": ["BASIC_ONE", 30]},
+		{"distributedSpawn": ["BASIC_TWO", 30]},
+		{"distributedSpawn": ["BASIC_THREE", 23]},
+        {"distributedSpawn": ["BASIC_FOUR", 14]},
+      ]
+    }
+  ]
+}

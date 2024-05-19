@@ -107,7 +107,7 @@ public class ShooterTower extends TowerEntity {
         preRender(batch, delta);
         
         if (attacking) {
-            animationDelta += delta*getAttackSpeed();
+            animationDelta += delta/getAttackSpeed();
         } else {
             animationDelta = 0;
         }

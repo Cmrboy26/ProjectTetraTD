@@ -19,11 +19,11 @@ public abstract class Effect {
 
     protected final float NOTHING = 1;
 
-    public Effect(EntityEffects target, float duration, int level) {
-        this(target, duration, duration, level);
+    public Effect(UpdateData data, EntityEffects target, float duration, int level) {
+        this(data, target, duration, duration, level);
     }
 
-    public Effect(EntityEffects target, float duration, float maxDuration, int level) {
+    public Effect(UpdateData data, EntityEffects target, float duration, float maxDuration, int level) {
         if (duration <= 0) {
             throw new IllegalArgumentException("Duration must be greater than 0");
         }
@@ -34,7 +34,7 @@ public abstract class Effect {
         this.duration = duration;
         this.maxDuration = maxDuration;
         this.level = level;
-        this.target.addEffect(this);
+        this.target.addEffect(data, this);
     }
 
     public void onInflict(UpdateData data) {

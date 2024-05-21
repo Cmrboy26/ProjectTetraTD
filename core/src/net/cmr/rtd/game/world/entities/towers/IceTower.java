@@ -67,7 +67,7 @@ public class IceTower extends TowerEntity {
             attacking = true;
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new SlownessEffect(enemy.getEffects(), getAttackSpeed() + persistence, getLevel());
+                new SlownessEffect(data, enemy.getEffects(), getAttackSpeed() + persistence, getLevel());
             }
         }
         return attacking;
@@ -100,7 +100,7 @@ public class IceTower extends TowerEntity {
 
     @Override
     public void render(UpdateData data, Batch batch, float delta) {
-        preRender(batch, delta);
+        preRender(data, batch, delta);
 
         animationDelta += delta;
 
@@ -111,7 +111,7 @@ public class IceTower extends TowerEntity {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
         
-        postRender(batch, delta);
+        postRender(data, batch, delta);
         super.render(data, batch, delta);
     }
 

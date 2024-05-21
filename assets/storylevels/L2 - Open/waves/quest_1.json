@@ -84,19 +84,19 @@
 			]
 		},
 		{
-			"waveTime": 30,
+			"waveTime": 40,
 			"waveUnits": [
                 {
                     "type": "BASIC_TWO",
                     "quantity": 9,
                     "startTime": 0,
-                    "endTime": 15
+                    "endTime": 40
                 },
 				{
 					"type": "BASIC_THREE",
                     "quantity": 4,
                     "startTime": 0,
-                    "endTime": 15
+                    "endTime": 40
 				}
 			]
 		},

@@ -50,6 +50,8 @@ public class Sprites implements Disposable {
         UPGRADE_FRONT("upgradeFront"),
         UPGRADE_BACK("upgradeBack"),
         WARNING("warning"),
+        UPGRADE_PROGRESS("upgradeProgress"),
+        UPGRADE_PROGRESS_BACKGROUND("upgradeProgressBackground"),
         ;
 
         private String spriteName;
@@ -84,6 +86,16 @@ public class Sprites implements Disposable {
         BASIC_FOUR_LEFT("basic4/left", PlayMode.LOOP, enemySpeed),
         BASIC_FOUR_RIGHT("basic4/right", PlayMode.LOOP, enemySpeed),
 
+        HEALER_ONE_DOWN("healer1/down", PlayMode.LOOP, enemySpeed),
+        HEALER_ONE_UP("healer1/up", PlayMode.LOOP, enemySpeed),
+        HEALER_ONE_LEFT("healer1/left", PlayMode.LOOP, enemySpeed),
+        HEALER_ONE_RIGHT("healer1/right", PlayMode.LOOP, enemySpeed),
+
+        PLAYER_DOWN("player/down", PlayMode.LOOP, enemySpeed),
+        PLAYER_UP("player/up", PlayMode.LOOP, enemySpeed),
+        PLAYER_LEFT("player/left", PlayMode.LOOP, enemySpeed),
+        PLAYER_RIGHT("player/right", PlayMode.LOOP, enemySpeed),
+
         TESLA_TOWER("teslaTower", PlayMode.LOOP, .1f),
         FIRE_TOWER("fireTower", PlayMode.LOOP, .25f),
         SHOOTER_TOWER_1("shooterTower1", PlayMode.NORMAL, .1f),
@@ -91,6 +103,7 @@ public class Sprites implements Disposable {
         SHOOTER_TOWER_3("shooterTower3", PlayMode.NORMAL, .1f),
 
         FIRE("fire", PlayMode.LOOP, .5f),
+        SPARKLE("effects/sparkle", PlayMode.NORMAL, .075f),
         ;
 
         private String animationName;

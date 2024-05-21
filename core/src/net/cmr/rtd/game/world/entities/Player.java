@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
@@ -24,6 +25,7 @@ import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 
 @WorldSerializationExempt
 public class Player extends Entity {
@@ -83,15 +85,57 @@ public class Player extends Entity {
             font.getData().setScale(scaleBefore / 2f);
             if(layout == null) {
                 layout = new GlyphLayout(font, username);
-
             }
             font.draw(batch, username, getX() - Tile.SIZE * 1f/8f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f);
             font.getData().setScale(scaleBefore);
         }
         animationDelta += delta;
-        TextureRegion sprite = /*Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //*/Sprites.sprite(Sprites.SpriteType.CMRBOY26);
+        updateMovementRendering(delta);
+        TextureRegion sprite = Sprites.animation(getAnimationFromMovement(), movementCountdown);
+        //TextureRegion sprite = /*Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //*/Sprites.sprite(Sprites.SpriteType.CMRBOY26);
         batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
         super.render(data, batch, delta);
+    }
+
+    int direction = 0; // up = 0, down = 1, left = 2, right = 3
+    boolean moving = false;
+    float movementCountdown;
+    static final float renderSlowdownFactor = 3;
+
+    private void updateMovementRendering(float delta) {
+        if (moving) {
+            movementCountdown += delta * (velocity.len() / Tile.SIZE) / renderSlowdownFactor;
+        }
+        int lastDirection = direction;
+        boolean lastMoving = moving;
+        if (velocity.len() > 0) {
+            if (Math.abs(velocity.x) > Math.abs(velocity.y)) {
+                if (velocity.x > 0) {
+                    direction = 3;
+                } else {
+                    direction = 2;
+                }
+            } else {
+                if (velocity.y > 0) {
+                    direction = 0;
+                } else {
+                    direction = 1;
+                }
+            }
+        }
+        moving = velocity.len() > 0;
+
+        if (lastDirection != direction || lastMoving != moving) {
+            movementCountdown = 0;
+        }
+    }
+
+    private AnimationType getAnimationFromMovement() {
+        if (direction == 0) return AnimationType.PLAYER_UP;
+        if (direction == 1) return AnimationType.PLAYER_DOWN;
+        if (direction == 2) return AnimationType.PLAYER_LEFT;
+        if (direction == 3) return AnimationType.PLAYER_RIGHT;
+        return AnimationType.PLAYER_DOWN;
     }
 
     @Override

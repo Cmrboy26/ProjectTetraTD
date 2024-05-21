@@ -123,14 +123,6 @@ public class Projectile extends Entity {
         super(GameType.PROJECTILE);
     }
 
-    /*public Projectile(EnemyEntity entity, SpriteType type, Vector2 position, float scale, int damage, float timeToReachTarget, float AOE, float precision) {
-        this(entity, type, null, scale, position, damage, timeToReachTarget, AOE, precision);
-    }
-
-    public Projectile(EnemyEntity entity, AnimationType type, Vector2 position, float scale, int damage, float timeToReachTarget, float AOE, float precision) {
-        this(entity, null, type, scale, position, damage, timeToReachTarget, AOE, precision);
-    }*/
-
     public Projectile(EnemyEntity entity, SpriteType sprite, AnimationType animation, float scale, Vector2 position, int damage, float timeToReachTarget, float AOE, float precision, GameSFX onHitSound, GameSFX onLaunchSound) {
         super(GameType.PROJECTILE);
         this.animation = animation;
@@ -157,11 +149,15 @@ public class Projectile extends Entity {
     }
 
     boolean playedLaunchSound = false;
+    Entity storedTarget = null;
 
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
         elapsedTime += delta;
+        if (storedTarget == null) {
+            storedTarget = data.getWorld().getEntity(target);
+        }
         
         if (!playedLaunchSound) {
             if (data.isClient() && onLaunchSound != null) {
@@ -173,6 +169,9 @@ public class Projectile extends Entity {
         if (elapsedTime >= timeToReachTarget) {
             World world = data.getWorld();
             Entity entity = world.getEntity(target);
+            if (entity == null) {
+                entity = storedTarget;
+            }
             if (entity != null && entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
 
@@ -180,7 +179,7 @@ public class Projectile extends Entity {
                     for (Entity e : world.getEntities()) {
                         if (e instanceof EnemyEntity) {
                             EnemyEntity enemyEntity = (EnemyEntity) e;
-                            if (enemyEntity.getPosition().dst(getPosition()) < AOE) {
+                            if (enemyEntity.getPosition().dst(getPosition()) < (AOE * Tile.SIZE)) {
                                 enemyEntity.damage(damage, data, DamageType.PHYSICAL);
                             }
                         }
@@ -191,6 +190,7 @@ public class Projectile extends Entity {
                     Log.debug("PROJECTILE HIT "+enemy);
                 }
             }
+            
             removeFromWorld();
             if (particleOnHit != null) {
                 particleOnHit.setPosition(getPosition());
@@ -223,6 +223,13 @@ public class Projectile extends Entity {
         move(velocity.x, velocity.y, delta);
     }
 
+    public static void launchProjectile(UpdateData data, Projectile projectile) {
+        if (data.isServer()) {
+            data.getWorld().addEntity(projectile);
+            projectile.updatePresenceOnClients(data.getManager());
+        }
+    }
+
     @Override
     protected void serializeEntity(DataBuffer buffer) throws IOException {
         UUIDUtils.serializeUUID(buffer, target);
@@ -235,6 +242,15 @@ public class Projectile extends Entity {
         buffer.writeFloat(precision);
         buffer.writeFloat(scale);
         buffer.writeUTF(sprite == null ? "" : sprite.name());
+        buffer.writeUTF(animation == null ? "" : animation.name());
+        buffer.writeUTF(onHitSound == null ? "" : onHitSound.name());
+        buffer.writeUTF(onLaunchSound == null ? "" : onLaunchSound.name());
+        if (particleOnHit != null) {
+            buffer.writeBoolean(true);
+            particleOnHit.serialize(buffer);
+        } else {
+            buffer.writeBoolean(false);
+        }
     }
 
     @Override
@@ -248,7 +264,31 @@ public class Projectile extends Entity {
         projectile.AOE = input.readFloat();
         projectile.precision = input.readFloat();
         projectile.scale = input.readFloat();
-        projectile.sprite = SpriteType.valueOf(input.readUTF());
+        
+        String sprite = input.readUTF();
+        String animation = input.readUTF();
+        if (!animation.isEmpty()) {
+            projectile.animation = AnimationType.valueOf(animation);
+        } else {
+            if (!sprite.isEmpty()) {
+                projectile.sprite = SpriteType.valueOf(sprite);
+            } else {
+                projectile.sprite = SpriteType.PROJECTILE;
+            }
+        }
+
+        String onHitSound = input.readUTF();
+        if (!onHitSound.isEmpty()) {
+            projectile.onHitSound = GameSFX.valueOf(onHitSound);
+        }
+        String onLaunchSound = input.readUTF();
+        if (!onLaunchSound.isEmpty()) {
+            projectile.onLaunchSound = GameSFX.valueOf(onLaunchSound);
+        }
+
+        if (input.readBoolean()) {
+            projectile.particleOnHit = ParticleEffect.deserializeEffect(input);
+        }
     }
     
     float renderDelta = 0;

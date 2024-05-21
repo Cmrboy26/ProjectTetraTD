@@ -18,6 +18,7 @@ import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -52,9 +53,8 @@ public class ShooterTower extends TowerEntity {
                         .setPrecision(1)
                         .setAOE(0)
                         .setOnLaunchSound(GameSFX.SHOOT);
-                //Projectile arrow = new Projectile(enemy, SpriteType.PROJECTILE, new Vector2(getPosition()), .5f, (int) damage, getArrowAirTime(), 0, 1);
                 Projectile arrow = builder.build();
-                data.getWorld().addEntity(arrow);
+                Projectile.launchProjectile(data, arrow);
                 animationDelta = 0;
                 attacking = true;
                 return attacking;
@@ -104,7 +104,7 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public void render(UpdateData data, Batch batch, float delta) {
-        preRender(batch, delta);
+        preRender(data, batch, delta);
         
         if (attacking) {
             animationDelta += delta/getAttackSpeed();
@@ -129,8 +129,14 @@ public class ShooterTower extends TowerEntity {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
 
-        postRender(batch, delta);
+        postRender(data, batch, delta);
         super.render(data, batch, delta);
+    }
+
+    @Override
+    public void onAttackClient(UpdateData data) {
+        animationDelta = 0;
+        attacking = true;
     }
     
 }

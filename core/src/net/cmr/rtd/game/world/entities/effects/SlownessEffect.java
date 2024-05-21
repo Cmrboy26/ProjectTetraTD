@@ -10,12 +10,12 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class SlownessEffect extends Effect {
 
-    public SlownessEffect(EntityEffects target, float duration, int level) {
-        super(target, duration, level);
+    public SlownessEffect(UpdateData data, EntityEffects target, float duration, int level) {
+        super(data, target, duration, level);
     }
 
-    public SlownessEffect(EntityEffects target, float duration, float maxDuration, int level) {
-        super(target, duration, maxDuration, level);
+    public SlownessEffect(UpdateData data, EntityEffects target, float duration, float maxDuration, int level) {
+        super(data, target, duration, maxDuration, level);
     }
 
     @Override

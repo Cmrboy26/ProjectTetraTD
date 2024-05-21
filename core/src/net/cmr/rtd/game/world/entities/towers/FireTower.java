@@ -16,9 +16,11 @@ import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
@@ -53,10 +55,11 @@ public class FireTower extends TowerEntity {
         boolean actionOccured = false;
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
-                actionOccured = true;
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new FireEffect(enemy.getEffects(), 1, (int) Math.floor(targetDPS + (getLevel() - 1) * .5f));
-                if (!launchedFireball) {
+                int targetLevel = (int) Math.floor(targetDPS + (getLevel() - 1) * .5f);
+                new FireEffect(data, enemy.getEffects(), 1, targetLevel);
+                actionOccured = true;
+                if (!launchedFireball && data.isServer()) {
                     ProjectileBuilder builder = new ProjectileBuilder()
                         .setEntity(enemy)
                         .setAnimation(AnimationType.FIRE)
@@ -64,12 +67,11 @@ public class FireTower extends TowerEntity {
                         .setScale(3f)
                         .setDamage(getLevel() * getLevel() * 3)
                         .setTimeToReachTarget(1)
-                        .setAOE(2)
+                        .setAOE(1.5f)
                         .setPrecision(1)
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);
                     Projectile fireball = builder.build();
-                    //Projectile fireball = new Projectile(enemy, AnimationType.FIRE, new Vector2(getPosition()), 3f, 3, 1, 1, 1);
                     fireball.setParticleOnHit(SpreadEmitterEffect.factory()
                         .setParticle(AnimationType.FIRE)
                         .setDuration(1)
@@ -78,12 +80,14 @@ public class FireTower extends TowerEntity {
                         .setParticleLife(.5f)
                         .setFollowEntity(true)
                         .setAnimationSpeed(2f)
+                        .setAreaSize(1.5f)
                         .create());
                     if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
                         // dont launch it
                         continue;
                     }
-                    data.getWorld().addEntity(fireball);
+                    //data.getWorld().addEntity(fireball);
+                    Projectile.launchProjectile(data, fireball);
                     launchedFireball = true;
                     fireballDelta = 0;
                 }
@@ -114,7 +118,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public void render(UpdateData data, Batch batch, float delta) {
-        preRender(batch, delta);
+        preRender(data, batch, delta);
 
         animationDelta += delta;
         /*if (attacking) {
@@ -130,13 +134,13 @@ public class FireTower extends TowerEntity {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 1.5f);
         batch.setColor(Color.WHITE);
 
-        postRender(batch, delta);
+        postRender(data, batch, delta);
         super.render(data, batch, delta);
     }
 
     @Override
     public float getDisplayRange() {
-        return range;
+        return range + getLevel() / 4f;
     }
 
     @Override

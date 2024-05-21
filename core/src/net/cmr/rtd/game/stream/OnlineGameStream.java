@@ -8,8 +8,10 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
+import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
+import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
@@ -128,6 +130,8 @@ public class OnlineGameStream extends GameStream {
         kryo.register(Packet.EncryptionType.class);
         kryo.register(TeamUpdatePacket.class);
         kryo.register(SkipRequestPacket.class);
+        kryo.register(AttackPacket.class);
+        kryo.register(EffectPacket.class);
     }
     
 }

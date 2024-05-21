@@ -13,12 +13,12 @@ import net.cmr.util.Sprites.AnimationType;
 
 public class FireEffect extends Effect {
 
-    public FireEffect(EntityEffects target, float duration, float maxDuration, int level) {
-        super(target, duration, maxDuration, level);
+    public FireEffect(UpdateData data, EntityEffects target, float duration, float maxDuration, int level) {
+        super(data, target, duration, maxDuration, level);
     }
 
-    public FireEffect(EntityEffects target, float duration, int level) {
-        super(target, duration, level);
+    public FireEffect(UpdateData data, EntityEffects target, float duration, int level) {
+        super(data, target, duration, level);
     }
 
     transient float damageDelta = 0;

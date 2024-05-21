@@ -79,9 +79,6 @@ public class BasicEnemy extends EnemyEntity {
     private void findNextTile(UpdateData data) {
         int tileX = getTileX(this);
         int tileY = getTileY(this);
-        if (tileX == 10 && tileY == 5) {
-            System.out.println("10, 5");
-        }
         int lastTileX = lastTile == null ? tileX : lastTile.x;
         int lastTileY = lastTile == null ? tileY : lastTile.y;
         int dX = tileX - lastTileX;

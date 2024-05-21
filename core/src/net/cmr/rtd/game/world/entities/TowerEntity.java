@@ -7,12 +7,18 @@ import java.util.Objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.ParticleEmitter.Particle;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
@@ -29,7 +35,7 @@ public abstract class TowerEntity extends Entity {
 
     float levelUpDelta = -1; // -1 means not currently upgrading, 0 and lower means done upgrading, positive means time left 
     float upgradeTime = 1;
-    float placementDelta = 0;
+    float placementDelta = -1;
     int level = 1;
     // TODO: Add other tower upgrades
 
@@ -54,12 +60,14 @@ public abstract class TowerEntity extends Entity {
             if (placementDelta <= 0) {
                 placementDelta = -1;
             }
-        } else {
+        } else if (data.isServer()) { 
             // CANNOT attack while upgrading
             attackDelta += delta;
             if (attackDelta >= getAttackSpeed()) {
                 boolean attacked = attack(data);
                 if (attacked) {
+                    AttackPacket packet = new AttackPacket(this.getID());
+                    data.getManager().sendPacketToAll(packet);
                     attackDelta = 0;
                 }
             }
@@ -94,23 +102,57 @@ public abstract class TowerEntity extends Entity {
         deserializeTower(tower, input);
     }
 
-    public void preRender(Batch batch, float delta) {
+    public void preRender(UpdateData data, Batch batch, float delta) {
         if (getRemainingUpgradeTime() != -1f) {
             batch.draw(Sprites.sprite(SpriteType.UPGRADE_BACK), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
         }
     }
 
     float lastProgress = -1;
-    public void postRender(Batch batch, float delta) {
+    boolean building = false, lastBuilding = false;
+    public void postRender(UpdateData data, Batch batch, float delta) {    
         float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
+        float buildProgress = 1 - getRemainingBuildTime() / 3;
+
+        if (buildProgress < 1 && buildProgress > 0) {
+            progress = Math.max(buildProgress, 0.05f);
+            building = true;
+        } else {
+            building = false;
+        }
         if (getRemainingUpgradeTime() != -1f || placementDelta != -1f) {
             batch.draw(Sprites.sprite(SpriteType.UPGRADE_FRONT), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
+            if (progress < 1 && progress > 0) {
+                progress = Math.max(progress, 0.05f);
+                progress = Interpolation.sineOut.apply(progress);
+                batch.setColor(1, 1, 1, 1);
+                GameScreen.upgradeProgressBackground.draw(batch, getX() - Tile.SIZE / 2.5f, getY() - Tile.SIZE / 2.5f, Tile.SIZE * .8f, Tile.SIZE / 8);
+                batch.setColor(1, 1, 1, .7f);
+                GameScreen.upgradeProgress.draw(batch, getX() - Tile.SIZE / 2.5f, getY() - Tile.SIZE / 2.5f, Tile.SIZE * progress * .8f, Tile.SIZE / 8);
+                batch.setColor(1, 1, 1, 1);
+            }
         }
-        if (lastProgress != -1 && getRemainingUpgradeTime() == -1) {
+        boolean upgradeComplete = getRemainingUpgradeTime() == -1 && lastProgress != -1;
+        boolean buildingComplete = lastBuilding != building && !building;
+        if (upgradeComplete || buildingComplete) {
             // Play sound
-            Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1);
+            Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, .5f);
+            // Display completed particle
+            SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+                .setParticle(AnimationType.SPARKLE)
+                .setDuration(1.5f)
+                .setEmissionRate(15)
+                .setScale(.2f)
+                .setParticleLife(.5f)
+                .setAnimationSpeed(1.5f)
+                .setAreaSize(1.2f)
+                .create();
+            effect.setPosition(new Vector2(getX(), getY()));
+            data.getScreen().addEffect(effect);
         }
-        lastProgress = getRemainingUpgradeTime() ;
+        lastProgress = getRemainingUpgradeTime();
+        lastBuilding = building;
+
         // draw a circle of radius getDisplayRange() centered at getPosition()
         if (displayRange && (displayRangeTower == null || displayRangeTower == this)) {
             SpriteType type = SpriteType.AREA;
@@ -284,9 +326,16 @@ public abstract class TowerEntity extends Entity {
      * @see #getAttackSpeed()
      * @see #getEnemiesInRange(double, UpdateData)
      * @param data world data
-     * @return if any action occured (this will reset the attack delta)
+     * @apiNote This method is called every {@link #getAttackSpeed()} seconds (if the tower is not upgrading and {@link #attack(UpdateData)} returns true all the time)
+     * @return if any action occured, which will reset the attack delta if true
      */
     public boolean attack(UpdateData data) { return false; }
+
+    /**
+     * @apiNote This method should only be called on the client side when the client receives an {@link AttackPacket}
+     * @param data world data
+     */
+    public void onAttackClient(UpdateData data) { }
 
     public int getTeam() { return team; }
 

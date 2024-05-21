@@ -1,11 +1,14 @@
 package net.cmr.rtd.game.world.particles;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -18,7 +21,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
 
     SpriteType spriteType;
     AnimationType animationType;
-    float duration, scale, emissionRate, particleLife, animationSpeed;
+    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize;
     boolean followEntity;
 
     public static class SpreadEmitterFactory {
@@ -26,7 +29,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
         Entity attachedEntity = null;
         SpriteType spriteType = null;
         AnimationType animationType = null;
-        float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1;
+        float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1;
         boolean followEntity = false;
 
         public SpreadEmitterFactory() {
@@ -78,6 +81,11 @@ public class SpreadEmitterEffect extends ParticleEffect{
             return this;
         }
 
+        public SpreadEmitterFactory setAreaSize(float areaSize) {
+            this.areaSize = areaSize;
+            return this;
+        }
+
         public SpreadEmitterEffect create() {
             SpreadEmitterEffect effect = new SpreadEmitterEffect(attachedEntity);
             effect.spriteType = spriteType;
@@ -88,8 +96,13 @@ public class SpreadEmitterEffect extends ParticleEffect{
             effect.particleLife = particleLife;
             effect.followEntity = followEntity;
             effect.animationSpeed = animationSpeed;
+            effect.areaSize = areaSize;
             return effect;
         }
+    }
+
+    public SpreadEmitterEffect() {
+        super(null);
     }
 
     public SpreadEmitterEffect(Entity attachedEntity) {
@@ -121,8 +134,9 @@ public class SpreadEmitterEffect extends ParticleEffect{
             if (followEntity) {
                 particlePosition.set(0, 0);
             }
-            particlePosition.x += (float) (Math.random() * Tile.SIZE - Tile.SIZE / 2);
-            particlePosition.y += (float) (Math.random() * Tile.SIZE - Tile.SIZE / 2);
+            float range = Tile.SIZE * this.areaSize;
+            particlePosition.x += (float) (Math.random() * range - range / 2);
+            particlePosition.y += (float) (Math.random() * range - range / 2);
             Vector2 velocity = new Vector2((float) (0), (float) (Math.random()));
             velocity.scl(.5f);
             particles.add(new Particle(particlePosition, velocity));
@@ -172,6 +186,48 @@ public class SpreadEmitterEffect extends ParticleEffect{
     @Override
     public float getDuration() {
         return duration;
+    }
+
+    @Override
+    public void serialize(DataBuffer buffer) throws IOException {
+        super.serialize(buffer);
+        buffer.writeFloat(duration);
+        buffer.writeFloat(scale);
+        buffer.writeFloat(emissionRate);
+        buffer.writeFloat(particleLife);
+        buffer.writeFloat(animationSpeed);
+        buffer.writeBoolean(followEntity);
+        if (spriteType != null) {
+            buffer.writeUTF(spriteType.name());
+        } else {
+            buffer.writeUTF("");
+        }
+        if (animationType != null) {
+            buffer.writeUTF(animationType.name());
+        } else {
+            buffer.writeUTF("");
+        }
+        buffer.writeFloat(areaSize);
+    }
+
+    @Override
+    public void deserialize(DataInputStream input) throws IOException {
+        super.deserialize(input);
+        duration = input.readFloat();
+        scale = input.readFloat();
+        emissionRate = input.readFloat();
+        particleLife = input.readFloat();
+        animationSpeed = input.readFloat();
+        followEntity = input.readBoolean();
+        String spriteName = input.readUTF();
+        if (!spriteName.equals("")) {
+            spriteType = SpriteType.valueOf(spriteName);
+        }
+        String animationName = input.readUTF();
+        if (!animationName.equals("")) {
+            animationType = AnimationType.valueOf(animationName);
+        }
+        areaSize = input.readFloat();
     }
 
 }

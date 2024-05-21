@@ -1,7 +1,11 @@
 package net.cmr.rtd.game.world.particles;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.world.Entity;
@@ -80,6 +84,32 @@ public abstract class ParticleEffect {
 
     public boolean isParticleFinished() {
         return particleFinished;
+    }
+
+    public void serialize(DataBuffer buffer) throws IOException {
+        buffer.writeUTF(getClass().getName());
+        buffer.writeFloat(position.x);
+        buffer.writeFloat(position.y);
+        buffer.writeFloat(elapsedTime);
+        buffer.writeBoolean(particleFinished);
+    }
+    public void deserialize(DataInputStream input) throws IOException {
+        position.set(input.readFloat(), input.readFloat());
+        elapsedTime = input.readFloat();
+        particleFinished = input.readBoolean();
+    }
+
+    public static ParticleEffect deserializeEffect(DataInputStream input) throws IOException {
+        String effectType = input.readUTF();
+        try {
+            Class<?> effectClass = Class.forName(effectType);
+            ParticleEffect effect = (ParticleEffect) effectClass.newInstance();
+            effect.deserialize(input);
+            return effect;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

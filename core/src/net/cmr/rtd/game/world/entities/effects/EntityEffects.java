@@ -2,11 +2,13 @@ package net.cmr.rtd.game.world.entities.effects;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 
@@ -52,7 +54,7 @@ public class EntityEffects {
         return effects;
     }
 
-    public void addEffect(Effect effect) {
+    public void addEffect(UpdateData data, Effect effect) {
         for (Class<? extends Effect> immune : immunity) {
             if (immune.isInstance(effect)) {
                 return;
@@ -62,16 +64,55 @@ public class EntityEffects {
         if (existing != null) {
             existing.duration = Math.max(existing.duration, effect.duration);
             existing.level = Math.max(existing.level, effect.level);
+            if (data == null) {
+                return;
+            }
+            if (data.isServer()) {
+                EffectPacket packet = new EffectPacket(entity.getID(), effect);
+                data.getManager().sendPacketToAll(packet);
+            }
             return;
         }
         effects.add(effect);
+        if (data == null) {
+            return;
+        }
+        if (data.isServer()) {
+            EffectPacket packet = new EffectPacket(entity.getID(), effect);
+            data.getManager().sendPacketToAll(packet);
+        }
+    }
+
+    public void removeEffect(UpdateData data, Class<? extends Effect> effectClass) {
+        Effect effect = getEffect(effectClass);
+        if (effect != null) {
+            effects.remove(effect);
+            effect.duration = 0;
+        }
+        if (data == null) {
+            return;
+        }
+        if (data.isServer()) {
+            EffectPacket packet = new EffectPacket(entity.getID(), effect);
+            data.getManager().sendPacketToAll(packet);
+        }
     }
 
     public void update(float delta, UpdateData data) {
+        ArrayList<Effect> finishedEffects = new ArrayList<Effect>();
         for (Effect effect : effects) {
             effect.update(delta, data);
+            if (effect.effectFinished()) {
+                finishedEffects.add(effect);
+            }
         }
-        effects.removeIf(Effect::effectFinished);
+        for (Effect effect : finishedEffects) {
+            effects.remove(effect);
+            if (data.isServer()) {
+                EffectPacket packet = new EffectPacket(entity.getID(), effect);
+                data.getManager().sendPacketToAll(packet);
+            }
+        }
     }
 
     public void serialize(DataBuffer buffer) throws IOException {
@@ -107,7 +148,7 @@ public class EntityEffects {
                 float duration = input.readFloat();
                 float maxDuration = input.readFloat();
                 int level = input.readInt();
-                Effect effect = (Effect) effectClass.getConstructor(EntityEffects.class, float.class, float.class, int.class).newInstance(effects, duration, maxDuration, level);
+                Effect effect = (Effect) effectClass.getConstructor(UpdateData.class, EntityEffects.class, float.class, float.class, int.class).newInstance(null, effects, duration, maxDuration, level);
             } catch (Exception e) {
                 throw new IOException("Failed to deserialize effect", e);
             }

@@ -38,7 +38,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -49,7 +48,9 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
+import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
+import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
@@ -72,12 +73,12 @@ import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
-import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
+import net.cmr.rtd.game.world.store.UpgradeOption;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
@@ -127,6 +128,7 @@ public class GameScreen extends AbstractScreenEX {
     boolean areWavesPaused = false;
 
     LevelSave save;
+    public static NinePatch upgradeProgress, upgradeProgressBackground;
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, @Null LevelSave save) {
         super(INITIALIZE_ALL);
@@ -168,29 +170,29 @@ public class GameScreen extends AbstractScreenEX {
         lifeLabel.setSize(iconSize, iconSize);
         lifeLabel.setPosition(15 + iconSize, 360-5, Align.topLeft);
         
-        add(Align.topLeft, life);
-        add(Align.topLeft, lifeLabel);
+        //add(Align.topLeft, life);
+        //add(Align.topLeft, lifeLabel);
 
         cash = new Image(Sprites.drawable(SpriteType.CASH));
         cash.setSize(iconSize, iconSize);
-        cash.setPosition(5, 360-5-iconSize, Align.topLeft);
+        cash.setPosition(5, 360-5-iconSize+iconSize, Align.topLeft);
 
         cashLabel = new Label("100", Sprites.skin(), "small");
         cashLabel.setAlignment(Align.left);
         cashLabel.setSize(iconSize, iconSize);
-        cashLabel.setPosition(15 + iconSize, 360-5-iconSize, Align.topLeft);
+        cashLabel.setPosition(15 + iconSize, 360-5-iconSize+iconSize, Align.topLeft);
 
         add(Align.topLeft, cash);
         add(Align.topLeft, cashLabel);
 
         structureLife = new Image(Sprites.drawable(SpriteType.STRUCTURE_LIFE));
         structureLife.setSize(iconSize, iconSize);
-        structureLife.setPosition(5, 360-5-iconSize*2, Align.topLeft);
+        structureLife.setPosition(5, 360-5-iconSize*2+iconSize, Align.topLeft);
 
         structureLifeLabel = new Label("100", Sprites.skin(), "small");
         structureLifeLabel.setAlignment(Align.left);
         structureLifeLabel.setSize(iconSize, iconSize);
-        structureLifeLabel.setPosition(15 + iconSize, 360-5-iconSize*2, Align.topLeft);
+        structureLifeLabel.setPosition(15 + iconSize, 360-5-iconSize*2+iconSize, Align.topLeft);
 
         add(Align.topLeft, structureLife);
         add(Align.topLeft, structureLifeLabel);
@@ -387,6 +389,9 @@ public class GameScreen extends AbstractScreenEX {
         resetGameDialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         resetGameDialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         resetGameDialog.key(Input.Keys.ESCAPE, false);
+
+        upgradeProgress = new NinePatch(Sprites.sprite(SpriteType.UPGRADE_PROGRESS), 2, 2, 2, 2);
+        upgradeProgressBackground = new NinePatch(Sprites.sprite(SpriteType.UPGRADE_PROGRESS_BACKGROUND), 2, 2, 2, 2);
     }
 
     public void onRecievePacket(Packet packet) {
@@ -457,7 +462,7 @@ public class GameScreen extends AbstractScreenEX {
                         world.removeEntity(entity);
                         if (entity instanceof EnemyEntity) {
                             EnemyEntity enemy = (EnemyEntity) entity;
-                            enemy.playHitSound(data, DamageType.PHYSICAL);
+                            //enemy.playHitSound(data, DamageType.PHYSICAL);
                         }
                     }
                 } else {
@@ -475,6 +480,21 @@ public class GameScreen extends AbstractScreenEX {
                 player.setPosition(inputPacket.getPosition());
             }
             return;
+        }
+
+        if (packet instanceof AttackPacket) {
+            AttackPacket attackPacket = (AttackPacket) packet;
+            Entity entity = getEntity(attackPacket.getTowerUUID());
+            if (entity instanceof TowerEntity) {
+                TowerEntity tower = (TowerEntity) entity;
+                tower.onAttackClient(data);
+            }
+            return;
+        }
+
+        if (packet instanceof EffectPacket) {
+            EffectPacket effectPacket = (EffectPacket) packet;
+            effectPacket.apply(this);
         }
 
         if (packet instanceof StatsUpdatePacket) {
@@ -1149,7 +1169,12 @@ public class GameScreen extends AbstractScreenEX {
         dialog.setVisible(true);
         dialog.setKeepWithinStage(false);
 
-        Label label = new Label("LVL "+(towerAt.getLevel()+1)+"\nCost: "+ShopManager.costToString(cost), Sprites.skin(), "small");
+        UpgradeOption option = ShopManager.getUpgradeCatalog().get(towerAt.type);
+        float time = option.levelUpTime.apply(towerAt.getLevel()+1);
+
+        Label label = new Label("LVL "+(towerAt.getLevel()+1)
+            +"\nCost: "+ShopManager.costToString(cost)
+            +"\nTime: "+((int)time)+"s", Sprites.skin(), "small");
         label.setAlignment(Align.center);
         label.setFontScale(.45f);
         dialog.text(label);

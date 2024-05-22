@@ -29,6 +29,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -271,7 +273,7 @@ public class GameScreen extends AbstractScreenEX {
         style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
         style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
         style.disabled = Sprites.drawable(SpriteType.BORDER_DISABLED);
-        style.imageUp = Sprites.drawable(SpriteType.CASH);
+        style.imageUp = Sprites.drawable(SpriteType.UPGRADE);
 
         upgradeButton = new ImageButton(style);
         upgradeButton.setSize(iconSize, iconSize);
@@ -303,6 +305,33 @@ public class GameScreen extends AbstractScreenEX {
         style2.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
         style2.disabled = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DISABLED), patch, patch, patch, patch));
         style2.font = Sprites.skin().get("small", LabelStyle.class).font;
+
+        ImageButtonStyle smallButton = new ImageButtonStyle();
+        smallButton.down = style2.checked;
+        smallButton.up = style2.up;
+        smallButton.over = style2.up;
+        smallButton.checked = style2.checked;
+        smallButton.disabled = style2.up;
+        smallButton.imageUp = Sprites.drawable(SpriteType.CASH);
+
+        ImageButton sellButton = new ImageButton(smallButton) {
+            @Override
+            public void act(float delta) {
+                setChecked(Gdx.input.isKeyPressed(Input.Keys.R));
+                super.act(delta);
+            }
+        };
+        sellButton.setSize(iconSize / 1.25f, iconSize / 1.25f);
+        sellButton.setPosition(320 + (32 * 2) - iconSize / 1.25f, 5, Align.bottomLeft);
+        Label r = new Label("R", Sprites.skin(), "small");
+        r.setFontScale(.2f);
+        r.setFillParent(true);
+        r.setAlignment(Align.bottomRight);
+        r.setPosition(4, 3, Align.bottomRight);
+        sellButton.addActor(r);
+        buttonGroup.add(sellButton);
+        add(Align.bottom, sellButton);
+
 
         GlyphLayout layout = new GlyphLayout();
         layout.setText(style2.font, "Skip Prep");
@@ -354,13 +383,19 @@ public class GameScreen extends AbstractScreenEX {
         add(Align.center, shopWindow);
 
         // TODO: Add all the shop items
+        Table scrollTable = new Table();
+        ScrollPaneStyle scrollstype = new ScrollPaneStyle(Sprites.skin().get(ScrollPaneStyle.class));
+        ScrollPane scroll = new ScrollPane(scrollTable, scrollstype);
+        scroll.setScrollingDisabled(true, false);
+        scroll.setScrollbarsVisible(false);
+        shopWindow.add(scroll).grow().pad(5);
         
         for (TowerOption option : ShopManager.getTowerCatalog().values()) {
             GameType type = option.type;
             Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
             Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
-            shopWindow.add(towerSection).pad(5);
-            shopWindow.row();
+            scrollTable.add(towerSection).pad(5).growX();
+            scrollTable.row();
         }
 
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
@@ -1014,15 +1049,15 @@ public class GameScreen extends AbstractScreenEX {
         Table table = new Table();
         Image towerImage = new Image(drawable);
         float fontScale = .5f;
-        Label towerName = new Label(name, Sprites.skin(), "small");
-        Label towerCost = new Label("Cost: $"+cost, Sprites.skin(), "small");
+        Label towerName = new Label(name + ": $"+cost, Sprites.skin(), "small");
         towerName.setFontScale(fontScale);
-        towerCost.setFontScale(fontScale);
-        table.add(towerImage).expandX().size(32).pad(5);
+        int targetHeight = 32;
+        int targetWidth = (int) (targetHeight / (drawable.getMinHeight() / drawable.getMinWidth()));
+        float sidepad = (targetHeight - targetWidth)/2f;
+        table.add(towerImage).padRight(sidepad).padLeft(sidepad).width(targetWidth).height(targetHeight).colspan(1).left();
         VerticalGroup group = new VerticalGroup();
         group.addActor(towerName);
-        group.addActor(towerCost);
-        table.add(group).expandX().pad(5);
+        table.add(group).expandX().pad(5).colspan(1);
         TextButton buyButton = new TextButton("Buy", Sprites.skin(), "small");
         buyButton.addListener(new ClickListener() {
             @Override
@@ -1032,7 +1067,7 @@ public class GameScreen extends AbstractScreenEX {
                 Audio.getInstance().playSFX(GameSFX.SELECT, 1);
             }
         });
-        table.add(buyButton).size(32).expandX().pad(5);
+        table.add(buyButton).width(40).height(32).padLeft(5).padRight(5).colspan(1).right();
 
         TextTooltip tooltip = new TextTooltip(tooltipDescription, Sprites.skin(), "small");
         tooltip.getContainer().pad(5);

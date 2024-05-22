@@ -52,6 +52,7 @@ public class Sprites implements Disposable {
         WARNING("warning"),
         UPGRADE_PROGRESS("upgradeProgress"),
         UPGRADE_PROGRESS_BACKGROUND("upgradeProgressBackground"),
+        UPGRADE("upgrade")
         ;
 
         private String spriteName;

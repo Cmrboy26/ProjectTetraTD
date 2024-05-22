@@ -65,7 +65,7 @@ public class FireTower extends TowerEntity {
                         .setAnimation(AnimationType.FIRE)
                         .setPosition(new Vector2(getPosition()))
                         .setScale(3f)
-                        .setDamage(getLevel() * getLevel() * 3)
+                        .setDamage(getLevel() * getLevel())
                         .setTimeToReachTarget(1)
                         .setAOE(1.5f)
                         .setPrecision(1)

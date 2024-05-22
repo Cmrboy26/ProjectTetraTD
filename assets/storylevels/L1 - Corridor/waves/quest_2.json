@@ -4,20 +4,20 @@
     "endlessMode": false,
     "preparationTime": 5,
 	"startingHealth": 30,
-	"startingMoney": 49,
+	"startingMoney": 35,
     "waves": [
         {
             "waveTime": 45,
             "waveUnits": [
                 {
-                    "type": "BASIC_ONE",
-                    "quantity": 10,
+                    "type": "BASIC_TWO",
+                    "quantity": 6,
                     "startTime": 0,
                     "endTime": 30
                 },
                 {
-                    "type": "BASIC_TWO",
-                    "quantity": 2,
+                    "type": "BASIC_ONE",
+                    "quantity": 7,
                     "startTime": 30,
                     "endTime": 45
                 }

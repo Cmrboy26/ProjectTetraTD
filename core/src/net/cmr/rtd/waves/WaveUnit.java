@@ -90,4 +90,9 @@ public class WaveUnit {
         return value >= min && value < max;
     }
 
+    @Override
+    public String toString() {
+        return "WaveUnit [timeStart=" + timeStart + ", timeEnd=" + timeEnd + ", type=" + type + ", quantity=" + quantity + "]";
+    }
+
 }

@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 
 public class Wave {
 
-    final float waveTime;
+    float waveTime;
     boolean warnPlayer = false;
     int additionalPrepTime = 0;
     ArrayList<WaveUnit> waveUnits;
@@ -25,8 +25,16 @@ public class Wave {
         return waveTime;
     }
 
+    public void setWaveTime(float waveTime) {
+        this.waveTime = waveTime;
+    }
+
     public ArrayList<WaveUnit> getWaveUnits() {
         return waveUnits;
+    }
+
+    public void clearWaveUnits() {
+        waveUnits.clear();
     }
 
     public boolean shouldWarnPlayer() {

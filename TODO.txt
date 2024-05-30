@@ -4,3 +4,13 @@
 - Better synchronization between client and server (especially with fire tower fireball) (DONE)
 - Autosaving (DONE)
 - Mining/Automation Element of the game (buildings dedicated to mining)
+
+
+IDEAS:
+- Resources can be obtained through mining/drilling in order to build/upgrade towers
+- Enemies drop robotic parts that can be used to upgrade towers (DONE)
+- GEMS obtained from mining can be applied to structures to give them buffs (one gem per tower)
+  - examples of this: 
+  -   Diamond=piercing bullets for shooter towers
+  -   Ruby=sets every other enemy on fire
+  -   Sapphire?=halves attack speed, doubles range and doubles damage

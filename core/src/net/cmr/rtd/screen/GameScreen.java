@@ -29,8 +29,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -67,6 +67,7 @@ import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -78,6 +79,7 @@ import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
@@ -89,6 +91,7 @@ import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
@@ -109,13 +112,12 @@ public class GameScreen extends AbstractScreenEX {
     ImageButton upgradeButton, shopButton, inventoryButton;
     TextButton skipWaveButton;
     Window shopWindow, inventoryWindow;
-    long localMoney;
 
     GameType typeToPurchase;
     Entity entityToPlace;
     PlacementMode placementMode = PlacementMode.NONE;
     public enum PlacementMode {
-        NONE, PLACE, UPGRADE
+        NONE, PLACE, UPGRADE, COMPONENT
     }
 
     ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
@@ -128,6 +130,9 @@ public class GameScreen extends AbstractScreenEX {
     float waveCountdown = -1, waveDuration = 0;
     int wave = 0;
     boolean areWavesPaused = false;
+
+    TeamInventory inventory = null;
+    PurchaseAction componentAction = null;
 
     LevelSave save;
     public static NinePatch upgradeProgress, upgradeProgressBackground;
@@ -187,7 +192,7 @@ public class GameScreen extends AbstractScreenEX {
         add(Align.topLeft, cash);
         add(Align.topLeft, cashLabel);
 
-        structureLife = new Image(Sprites.drawable(SpriteType.STRUCTURE_LIFE));
+        structureLife = new Image(Sprites.drawable(SpriteType.HEART));
         structureLife.setSize(iconSize, iconSize);
         structureLife.setPosition(5, 360-5-iconSize*2+iconSize, Align.topLeft);
 
@@ -405,6 +410,109 @@ public class GameScreen extends AbstractScreenEX {
         inventoryWindow.setPosition(320, 180, Align.center);
         inventoryWindow.setMovable(false);
         inventoryWindow.setVisible(false);
+        
+        Table inventoryTable = new Table();
+        inventoryTable.setFillParent(true);
+        int pad = 6;
+        int imagePad = 10;
+
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).pad(imagePad).colspan(1);
+        TextButton lubricant = new TextButton("Lubricant x0", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                if (inventory == null) { return; }
+                setText("Lubricant x"+inventory.getWd40()+"");
+                super.act(delta);
+            }
+        };
+        lubricant.pad(0, pad, 0, pad);
+        lubricant.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                componentAction = PurchaseAction.APPLY_LUBRICANT;
+                enterComponentMode();
+            }
+        });
+        inventoryTable.add(lubricant).pad(pad).growX().colspan(1);
+        inventoryTable.row();
+
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.CASH))).pad(imagePad).colspan(1);
+        TextButton scopes = new TextButton("Scopes x0", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                if (inventory == null) { return; }
+                setText("Scopes x"+inventory.getScopes()+"");
+                super.act(delta);
+            }
+        };
+        scopes.pad(0, pad, 0, pad);
+        scopes.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                componentAction = PurchaseAction.APPLY_SCOPE;
+                enterComponentMode();
+            }
+        });
+        inventoryTable.add(scopes).pad(pad).growX().colspan(1);
+        inventoryTable.row();
+
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.HEART))).pad(imagePad).colspan(1);
+        TextButton scraps = new TextButton("Scraps x0", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                if (inventory == null) { return; }
+                setText("Scraps x"+inventory.getScraps()+"");
+                super.act(delta);
+            }
+        };
+        scraps.pad(0, pad, 0, pad);
+        scraps.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                componentAction = PurchaseAction.APPLY_SCRAP_METAL;
+                enterComponentMode();
+            }
+        });
+        inventoryTable.add(scraps).pad(pad).growX().colspan(1);
+        inventoryTable.row();
+        
+
+
+        /*inventoryTable.defaults().pad(5);
+        inventoryTable.setFillParent(true);
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).colspan(1);
+        inventoryTable.add(new Label("", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                setText("Lubricant ("+inventory.getWd40()+")");
+                super.act(delta);
+            }
+        }).colspan(1);
+        inventoryTable.row();
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.CASH))).colspan(1);
+        inventoryTable.add(new Label("", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                setText("Scopes ("+inventory.getScopes()+")");
+                super.act(delta);
+            }
+        }).colspan(1);
+        inventoryTable.row();
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.HEART))).colspan(1);
+        inventoryTable.add(new Label("", Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                setText("Scraps ("+inventory.getScraps()+")");
+                super.act(delta);
+            }
+        }).colspan(1);
+        inventoryTable.row();*/
+
+        inventoryWindow.add(inventoryTable).grow();
+
         add(Align.center, inventoryWindow);
 
         title = new Label("", Sprites.skin(), "small");
@@ -535,9 +643,10 @@ public class GameScreen extends AbstractScreenEX {
         if (packet instanceof StatsUpdatePacket) {
             StatsUpdatePacket statsPacket = (StatsUpdatePacket) packet;
             lifeLabel.setText(String.valueOf(statsPacket.getHealth()));
-            cashLabel.setText(ShopManager.costToString(statsPacket.getMoney()).substring(1));
+            cashLabel.setText(ShopManager.costToString(statsPacket.getInventory().getCash()).substring(1));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
-            localMoney = statsPacket.getMoney();
+
+            inventory = statsPacket.getInventory();
             return;
         }
 
@@ -599,11 +708,24 @@ public class GameScreen extends AbstractScreenEX {
                 notification(SpriteType.STRUCTURE, "Team " + (teamPacket.getTeamIndex()+1) + " won the game!", 10);
                 if (gameManager != null) {
                     notification(SpriteType.STRUCTURE, "Game Over! Press ';' to restart the game.", 30);
+                    String currentLife = structureLifeLabel.getText().toString();
+                    // if current life is greater than zero, set the level as cleared
+                    try {
+                        int life = Integer.parseInt(currentLife);
+                        if (life > 0) {
+                            Log.info("Level successfully cleared!");
+                            RetroTowerDefense.setLevelCleared(gameManager.getSave());
+                        }
+                    } catch (NumberFormatException e) {
+                        // Do nothing
+                    }
                 }
             }
         }
 
     }
+
+    int lastScopes = -1, lastWD40 = -1, lastScraps = -1;
 
     public void update(float delta) {
         worldStage.act(delta);
@@ -632,6 +754,30 @@ public class GameScreen extends AbstractScreenEX {
 
             waveCountdownLabel.setText(String.format("%.2f", displayCountdown));
             waveLabel.setText(waveText);
+        }
+        
+        if (inventory != null) {
+
+            int scopes = inventory.getScopes();
+            int wd40 = inventory.getWd40();
+            int scraps = inventory.getScraps();
+
+            if (scopes != lastScopes || wd40 != lastWD40 || scraps != lastScraps) {
+                if (scopes > lastScopes && lastScopes != -1) {
+                    notification(SpriteType.ICON, "Scope collected!", 3);
+                }
+                if (wd40 > lastWD40 && lastWD40 != -1) {
+                    notification(SpriteType.ICON, "Lubricant collected!", 3);
+                }
+                if (scraps > lastScraps && lastScraps != -1) {
+                    notification(SpriteType.ICON, "Scrap collected!", 3);
+                }
+
+                lastScopes = scopes;
+                lastWD40 = wd40;
+                lastScraps = scraps;
+            }
+
         }
 
         if (world != null) {
@@ -774,7 +920,11 @@ public class GameScreen extends AbstractScreenEX {
         
         if (inPlacementMode()) {
             updatePlacementMode(tileX, tileY);
-            setTitleText("Click to " + (placementMode == PlacementMode.UPGRADE ? "upgrade" : "place") +" tower (Press ESC to cancel)");
+            String action = placementMode == PlacementMode.UPGRADE ? "upgrade tower" : "place tower";
+            if (placementMode == PlacementMode.COMPONENT) {
+                action = "insert component";
+            }
+            setTitleText("Click to " + (action) +" (Press ESC to cancel)");
         } else {
             setTitleText("");
             if (Gdx.input.isKeyPressed(Input.Keys.R)) {
@@ -838,11 +988,28 @@ public class GameScreen extends AbstractScreenEX {
                 upgradeDialog.setSize(200, 200);
                 upgradeDialog.setMovable(true);
                 upgradeDialog.setVisible(true);
+                String componentPath = "None";
+                String benefits = "None";
+                if (tower.getLubricantApplied() > 0) {
+                    componentPath = "Lubricant";
+                    benefits = "+"+tower.getLubricantSpeedBoostPercent()+"% Attack Speed";
+                } else if (tower.getScopesApplied() > 0) {
+                    componentPath = "Scopes";
+                    benefits = "+"+tower.getScopeRangeBoostPercent()+"% Range";
+                } else if (tower.getScrapMetalApplied() > 0) {
+                    componentPath = "Scrap Metal";
+                    benefits = "+"+tower.getScrapMetalDamageBoostPercent()+"% Damage";
+                }
                 String text = "Level: " + tower.getLevel();
                 text += "\nDamage: " + tower.getDisplayDamage();
                 text += "\nRange: " + tower.getDisplayRange();
                 text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
                 text += "\nDescription: "+tower.getDescription();
+                text += "\nComponent Path: " + componentPath;
+                if (!componentPath.equals("None")) {
+                    text += "\n- Progress: "+tower.getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS;
+                    text += "\n- Benefits: "+benefits;
+                }
                 Label label = new Label(text, Sprites.skin(), "small");
                 label.setFontScale(.25f);
                 upgradeDialog.text(label);
@@ -1100,6 +1267,16 @@ public class GameScreen extends AbstractScreenEX {
         inventoryWindow.setVisible(false);
     }
 
+    public void enterComponentMode() {
+        placementMode = PlacementMode.COMPONENT;
+        shopButton.setDisabled(true);
+        inventoryButton.setDisabled(true);
+        inventoryButton.setChecked(false);
+        upgradeButton.setDisabled(true);
+        shopWindow.setVisible(false);
+        inventoryWindow.setVisible(false);
+    }
+
     public void exitPlacementMode() {
         typeToPurchase = null;
         entityToPlace = null;
@@ -1129,7 +1306,7 @@ public class GameScreen extends AbstractScreenEX {
                     canPlace = false;
                 }
                 else if (option != null) {
-                    if (localMoney < option.cost) {
+                    if (inventory.getCash() < option.cost) {
                         notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost).substring(1)+")");
                         canPlace = false;
                     }
@@ -1162,6 +1339,102 @@ public class GameScreen extends AbstractScreenEX {
 
                 // Open the upgrade dialog
                 upgradeDialog(towerAt);
+            } else if (placementMode == PlacementMode.COMPONENT) {
+                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
+                if (towerAt == null) {
+                    return;
+                }
+                int totalApplied = Math.max(towerAt.getScopesApplied(), Math.max(towerAt.getLubricantApplied(), towerAt.getScrapMetalApplied()));
+                if (totalApplied >= TowerEntity.MAX_COMPONENTS) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply more components!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                
+                if (componentAction == PurchaseAction.APPLY_LUBRICANT && (towerAt.getScopesApplied() > 0 || towerAt.getScrapMetalApplied() > 0)) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply lubricant\nwith other components!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                if (componentAction == PurchaseAction.APPLY_SCOPE && (towerAt.getLubricantApplied() > 0 || towerAt.getScrapMetalApplied() > 0)) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply scope\nwith other components!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && (towerAt.getLubricantApplied() > 0 || towerAt.getScopesApplied() > 0)) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply scrap metal\nwith other components!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+
+                if (componentAction == PurchaseAction.APPLY_LUBRICANT && inventory.getWd40() <= 0) {
+                    notification(SpriteType.STRUCTURE, "Not enough lubricant!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                if (componentAction == PurchaseAction.APPLY_SCOPE && inventory.getScopes() <= 0) {
+                    notification(SpriteType.STRUCTURE, "Not enough scopes!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && inventory.getScraps() <= 0) {
+                    notification(SpriteType.STRUCTURE, "Not enough scrap metal!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+
+                Dialog componentDialog = new Dialog("Component", Sprites.skin(), "small") {
+                    @Override
+                    protected void result(Object object) {
+                        if (object.equals(false)) {
+                            Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                            return;
+                        }
+                        PurchaseItemPacket packet = new PurchaseItemPacket(componentAction, null, tileX, tileY);
+                        ioStream.sendPacket(packet);
+                        // Play sound
+                        Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
+                        // Display completed particle
+                        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+                            .setParticle(AnimationType.SPARKLE)
+                            .setDuration(1.5f)
+                            .setEmissionRate(19)
+                            .setScale(.225f)
+                            .setParticleLife(.8f)
+                            .setAnimationSpeed(1.5f)
+                            .setAreaSize(1.2f)
+                            .create();
+                        effect.setPosition(new Vector2(towerAt.getX(), towerAt.getY()));
+                        data.getScreen().addEffect(effect);
+                    }
+                };
+                componentDialog.getTitleLabel().setAlignment(Align.center);
+                componentDialog.getTitleLabel().setFontScale(.5f);
+                componentDialog.pad(Tile.SIZE/2f);
+                componentDialog.padTop(Tile.SIZE);
+                componentDialog.setSize(Tile.SIZE*4f, Tile.SIZE*4f);
+                componentDialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
+                componentDialog.setMovable(false);
+                componentDialog.setVisible(true);
+                componentDialog.setKeepWithinStage(false);
+                String componentName = componentAction == PurchaseAction.APPLY_LUBRICANT ? "Lubricant" : (componentAction == PurchaseAction.APPLY_SCOPE ? "Scope" : "Scrap");
+                
+                Label label = new Label("Apply "+componentName+"?", Sprites.skin(), "small");
+                label.setFontScale(.45f);
+                componentDialog.text(label);
+                componentDialog.getContentTable().row();
+                Label totalLabel = new Label((totalApplied)+"/"+TowerEntity.MAX_COMPONENTS+" -> "+(totalApplied+1)+"/"+TowerEntity.MAX_COMPONENTS, Sprites.skin(), "small");
+                totalLabel.setFontScale(.45f);
+                componentDialog.text(totalLabel);
+
+                TextButton yes = new TextButton("Yes", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                yes.pad(0, 5, 0, 5);
+                componentDialog.button(yes, true);
+                TextButton no = new TextButton("No", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                no.pad(0, 5, 0, 5);
+                componentDialog.button(no, false);
+                componentDialog.key(Input.Keys.ESCAPE, false);
+                componentDialog.show(worldStage);
             }
             if (!multiPlace) {
                 exitPlacementMode();
@@ -1182,7 +1455,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
-                if (cost > localMoney) {
+                if (cost > inventory.getCash()) {
                     notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(cost).substring(1)+")");
                     Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                     return;

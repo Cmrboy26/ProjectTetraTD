@@ -3,6 +3,7 @@ package net.cmr.rtd.game.world.tile;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.esotericsoftware.kryo.Kryo;
 
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.World.Point3D;
@@ -24,6 +25,7 @@ public abstract class TileData {
         kryo.register(TeamTileData.class);
         kryo.register(StartTileData.class);
         kryo.register(StructureTileData.class);
+        kryo.register(TeamInventory.class);
     }
 
     public void render(Batch batch, int tileX, int tileY) {

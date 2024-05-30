@@ -11,6 +11,7 @@ import org.json.simple.parser.JSONParser;
 import com.badlogic.gdx.files.FileHandle;
 
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.rtd.game.world.entities.TowerEntity;
 
 /**
  * Stores the data for each of the waves in the game.
@@ -27,12 +28,14 @@ public class WavesData {
     public DifficultyRating difficulty;
     public boolean endlessMode;
     public float preparationTime;
-    public int startingMoney; // TODO: Implement
-    public int startingHealth; // TODO: Implement
+    public int startingMoney;
+    public int startingHealth;
     public HashMap<Integer, Wave> waves;
+    public int wavesPerComponentTarget;
 
     public static int DEFAULT_STARTING_MONEY = 100;
     public static int DEFAULT_STARTING_HEALTH = 50;
+    public static int DEFAULT_WAVES_PER_COMPONENT_TARGET = 3;
 
     public WavesData() {
         this.waves = new HashMap<Integer, Wave>();
@@ -77,6 +80,12 @@ public class WavesData {
         data.difficulty = DifficultyRating.deserialize(((Number) main.get("difficulty")).intValue());
         data.endlessMode = (boolean) main.get("endlessMode");
         data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
+        
+        if (main.containsKey("wavesPerComponentTarget")) {
+            data.wavesPerComponentTarget = ((Number) main.get("wavesPerComponentTarget")).intValue();
+        } else {
+            data.wavesPerComponentTarget = DEFAULT_WAVES_PER_COMPONENT_TARGET;
+        }
 
         if (main.containsKey("startingMoney")) {
             data.startingMoney = ((Number) main.get("startingMoney")).intValue();
@@ -135,6 +144,7 @@ public class WavesData {
         main.put("preparationTime", preparationTime);
         main.put("startingMoney", startingMoney);
         main.put("startingHealth", startingHealth);
+        main.put("wavesPerComponentTarget", wavesPerComponentTarget);
         
         JSONArray waves = new JSONArray();
         for (int waveNumber : this.waves.keySet()) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.serializers.CompatibleFieldSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
@@ -27,6 +28,7 @@ import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.GameObject.GameType;
 
 public class OnlineGameStream extends GameStream {
@@ -132,6 +134,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(SkipRequestPacket.class);
         kryo.register(AttackPacket.class);
         kryo.register(EffectPacket.class);
+        kryo.register(TeamInventory.class);
     }
     
 }

@@ -75,7 +75,7 @@ public class IceTower extends TowerEntity {
     
     @Override
     public float getAttackSpeed() {
-        return .5f;
+        return .5f/getLubricantSpeedBoost();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class IceTower extends TowerEntity {
 
     private float getRange() {
         // Every 3 levels, the range increases by .25 tiles
-        return calculateIncrementedValue(3, .25f, range);
+        return calculateIncrementedValue(3, .25f, range)*getScopeRangeBoost();
     }
 
     @Override
@@ -116,7 +116,7 @@ public class IceTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayDamage() { return 0; }
+    public float getDisplayDamage() { return 0*getScrapMetalDamageBoost(); }
     @Override
     public String getDescription() { return "Slows down enemies within range.\nSlowness increases as level increases."; }
 

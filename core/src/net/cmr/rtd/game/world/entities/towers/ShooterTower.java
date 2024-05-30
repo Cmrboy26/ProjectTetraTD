@@ -49,7 +49,7 @@ public class ShooterTower extends TowerEntity {
                         .setPosition(new Vector2(getPosition()))
                         .setScale(.5f)
                         .setDamage((int) damage)
-                        .setTimeToReachTarget(getArrowAirTime())
+                        .setTimeToReachTarget(getProjectileAirTime())
                         .setPrecision(1)
                         .setAOE(0)
                         .setOnLaunchSound(GameSFX.SHOOT);
@@ -63,13 +63,13 @@ public class ShooterTower extends TowerEntity {
         return attacking;
     }
 
-    public float getArrowAirTime() {
-        return Math.max(.25f - ((getLevel() - 1) * .005f), 0);
+    public float getProjectileAirTime() {
+        return Math.max((.25f - ((getLevel() - 1) * .005f)) / getLubricantSpeedBoost(), 0);
     }
 
     @Override
     public float getAttackSpeed() {
-        return Math.max(1 - ((getLevel() - 1) * .05f), 0.1f);
+        return Math.max((1 - ((getLevel() - 1) * .05f)) / getLubricantSpeedBoost(), 0.1f);
     }
 
     @Override
@@ -86,12 +86,12 @@ public class ShooterTower extends TowerEntity {
     public float getDisplayDamage() {
         float damage = calculateIncrementedValue(1, 1, 1);
         damage *= damage * .5f;
-        return (float) Math.ceil(damage);
+        return (float) Math.ceil(damage * getScrapMetalDamageBoost());
     }
 
     @Override
     public float getDisplayRange() {
-        return calculateIncrementedValue(3, .25f, 2f);
+        return calculateIncrementedValue(3, .25f, 2f)*getScopeRangeBoost();
     }
 
     @Override

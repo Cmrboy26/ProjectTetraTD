@@ -530,7 +530,7 @@ public class GameManager implements Disposable {
     public void sendStatsUpdatePacket(GamePlayer player) {
         if (player.getPlayer() == null) return;
         TeamData team = teams.get(player.getTeam());
-        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getMoney(), team.getHealth());
+        StatsUpdatePacket packet = new StatsUpdatePacket(player.getPlayer().getHealth(), team.getInventory(), team.getHealth());
         player.sendPacket(packet);
     }
 
@@ -704,6 +704,7 @@ public class GameManager implements Disposable {
             return save.getSaveFolder(FileType.Absolute);
         }
     }
+    public GameSave getSave() { return save; }
 
     public void resetWorld(LevelSave level) {
         GameSave save = this.save.copySave(level);

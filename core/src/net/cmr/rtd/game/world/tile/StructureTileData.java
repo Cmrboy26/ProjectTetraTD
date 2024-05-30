@@ -1,5 +1,8 @@
 package net.cmr.rtd.game.world.tile;
 
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
+
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
@@ -7,14 +10,16 @@ import net.cmr.rtd.game.world.World;
 public class StructureTileData extends TeamTileData {
     
     public int health;
-    public long money;
+    public TeamInventory inventory = new TeamInventory();
     boolean healthChanged = false;
 
     public StructureTileData() { }
     public StructureTileData(int team) {
         super(team);
         health = -1;
-        money = -1;
+        
+        inventory = new TeamInventory();
+        inventory.setCash(-1);
     }
 
     @Override
@@ -49,13 +54,17 @@ public class StructureTileData extends TeamTileData {
     @Override
     public void reset(World world) {
         health = world.getWavesData().startingHealth;
-        money = world.getWavesData().startingMoney;
+        inventory.setCash(world.getWavesData().startingMoney);
 
         healthChanged = true;
     }
 
     public long getMoney() {
-        return money;
+        return inventory.getCash();
+    }
+
+    public TeamInventory getInventory() {
+        return inventory;
     }
 
     public int getHealth() {

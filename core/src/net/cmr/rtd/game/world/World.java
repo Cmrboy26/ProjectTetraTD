@@ -24,6 +24,7 @@ import com.esotericsoftware.kryo.io.Output;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
@@ -427,6 +428,7 @@ public class World extends GameObject {
         TileData.registerKryo(kryo);
         Input kryoInput = new Input(input);
         for (int i = 0; i < tileDataCount; i++) {
+            kryo.getContext().put("wet", new TeamInventory());
             Point3D point = (Point3D) kryo.readClassAndObject(kryoInput);
             TileData data = (TileData) kryo.readClassAndObject(kryoInput);
             world.tileDataMap.put(point, data);

@@ -88,7 +88,7 @@
 			"additionalPrep": 3,
         },
         {
-            "waveTime": 20,
+            "waveTime": 25,
             "waveUnits": [
                 {
                     "distributedSpawn": [
@@ -100,6 +100,7 @@
         },
         {
             "waveTime": 20,
+			"additionalPrep": 3,
             "waveUnits": [
                 {
                     "distributedSpawn": [
@@ -112,6 +113,72 @@
                         "BASIC_THREE",
                         12
                     ]
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+			"additionalPrep": 3,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        30
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        10
+                    ]
+                }
+            ]
+        },
+		{
+            "waveTime": 30,
+			"additionalPrep": 3,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        5
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_TWO",
+						10
+					]
+				},
+				{
+					"distributedSpawn": [
+						"BASIC_TWO",
+						20
+					]
+				},
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						1
+					]
+				}
+            ]
+        },
+		{
+			"additionalPrep": 3,
+            "waveTime": 20,
+            "waveUnits": [
+				{
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        25
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        17
+                    ]
                 },
 				{
 					"distributedSpawn": [
@@ -121,90 +188,39 @@
 				}
             ]
         },
-        {
-            "waveTime": 30,
-            "waveUnits": [
-                {
-                    "distributedSpawn": [
-                        "BASIC_TWO",
-                        14
-                    ]
-                },
-                {
-                    "distributedSpawn": [
-                        "BASIC_THREE",
-                        20
-                    ]
-                },
-				{
-					"distributedSpawn": [
-						"BASIC_FOUR",
-						2
-					]
-				}
-            ]
-        },
 		{
-            "waveTime": 30,
-            "waveUnits": [
-                {
-                    "distributedSpawn": [
-                        "BASIC_THREE",
-                        40
-                    ]
-                },
-				{
-					"distributedSpawn": [
-						"BASIC_FOUR",
-						2
-					]
-				}
-            ]
-        },
-		{
-            "waveTime": 20,
-            "waveUnits": [
-                {
-                    "distributedSpawn": [
-                        "BASIC_THREE",
-                        20
-                    ]
-                },
-				{
-					"distributedSpawn": [
-						"BASIC_FOUR",
-						6
-					]
-				}
-            ]
-        },
-		{
-			"additionalPrep": 2,
+			"additionalPrep": 3,
             "waveTime": 20,
             "waveUnits": [
                 {
                     "distributedSpawn": [
                         "BASIC_ONE",
-                       25
+                       15
+                    ]
+                },
+				{
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                       20
                     ]
                 },
 				{
 					"distributedSpawn": [
 						"BASIC_FOUR",
-						10
+						4
 					]
 				}
             ]
         },
 		{
 			"warnPlayer": true,
-			"additionalPrep": 5,
+			"additionalPrep": 6,
             "waveTime": 30,
             "waveUnits": [
                 {
                     "distributedSpawn": [
-                        "BASIC_ONE",
-                       40
+                        "BASIC_TWO",
+                       10
                     ]
                 },
 				{
@@ -216,7 +232,7 @@
 				{
 					"distributedSpawn": [
 						"BASIC_FOUR",
-						20
+						5
 					]
 				}
             ]

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.effects.Effect;
@@ -117,7 +118,10 @@ public abstract class EnemyEntity extends Entity {
     }
 
     public void onDeath(UpdateData data) {
-        
+        if (data.isServer()) {
+            TeamData team = data.getManager().getTeam(this.team);
+            team.rollRandomItem(data);
+        }
     }
 
     @Override

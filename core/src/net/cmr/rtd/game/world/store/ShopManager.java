@@ -154,6 +154,36 @@ public class ShopManager {
                 manager.updateTeamStats(player.getTeam());
                 break;
             }
+            case APPLY_LUBRICANT: {
+                // Increase tower speed
+                if (towerAt == null) { return; }
+                TeamData data = manager.getTeam(player.getTeam());
+                boolean successful = towerAt.applyLubricant(data.getInventory());
+                if (!successful) { return; }
+                manager.updateTeamStats(player.getTeam());
+                towerAt.updatePresenceOnClients(manager);
+                break;
+            }
+            case APPLY_SCOPE: {
+                // Increase tower range
+                if (towerAt == null) { return; }
+                TeamData data = manager.getTeam(player.getTeam());
+                boolean successful = towerAt.applyScope(data.getInventory());
+                if (!successful) { return; }
+                manager.updateTeamStats(player.getTeam());
+                towerAt.updatePresenceOnClients(manager);
+                break;
+            }
+            case APPLY_SCRAP_METAL: {
+                // Increase tower damage
+                if (towerAt == null) { return; }
+                TeamData data = manager.getTeam(player.getTeam());
+                boolean successful = towerAt.applyScrapMetal(data.getInventory());
+                if (!successful) { return; }
+                manager.updateTeamStats(player.getTeam());
+                towerAt.updatePresenceOnClients(manager);
+                break;
+            }
             default:
                 break; 
         }

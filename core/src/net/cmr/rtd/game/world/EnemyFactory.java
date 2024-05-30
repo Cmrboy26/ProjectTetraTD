@@ -96,7 +96,7 @@ public class EnemyFactory {
     private void createBasicEnemyThree() { send(createBasicEnemy("basic3", 25, 1f) 
                                             .immuneTo(FireEffect.class)
                                             .immuneTo(SlownessEffect.class)); }
-    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", 125, .9f)
+    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", 125, .8f)
                                             .immuneTo(SlownessEffect.class)); }
     private void createHealerEnemyOne() { 
         /* 

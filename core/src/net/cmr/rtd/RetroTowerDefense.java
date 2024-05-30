@@ -251,7 +251,7 @@ public class RetroTowerDefense extends CMRGame {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setLevelCleared(GameSave save) {
+	public static void setLevelCleared(GameSave save) {
 		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);

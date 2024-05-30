@@ -55,6 +55,7 @@ public class Sprites implements Disposable {
         UPGRADE("upgrade"),
         ICON("icon"),
         TROPHY("trophy"),
+        LUBRICANT("lubricant"),
         ;
 
         private String spriteName;

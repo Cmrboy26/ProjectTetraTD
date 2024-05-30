@@ -113,7 +113,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getAttackSpeed() {
-        return .1f;
+        return .1f/getLubricantSpeedBoost();
     }
 
     @Override
@@ -140,12 +140,12 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getDisplayRange() {
-        return range + getLevel() / 3f;
+        return (range + getLevel() / 6f)*getScopeRangeBoost();
     }
 
     @Override
     public float getDisplayDamage() {
-        return targetDPS + (getLevel() - 1) * .5f;
+        return (targetDPS + (getLevel() - 1) * .5f)*getScrapMetalDamageBoost();
     }
 
     @Override

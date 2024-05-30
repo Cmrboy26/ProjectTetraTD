@@ -17,7 +17,11 @@ public class PurchaseItemPacket extends Packet {
     public enum PurchaseAction implements SerializableEnum {
         TOWER(0), 
         UPGRADE(1), 
-        SELL(2);
+        SELL(2),
+        APPLY_LUBRICANT(3),
+        APPLY_SCOPE(4),
+        APPLY_SCRAP_METAL(5)
+        ;
 
         private final int id;
         private static final HashMap<Integer, SerializableEnum> map = new HashMap<Integer, SerializableEnum>();

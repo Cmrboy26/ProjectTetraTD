@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.packets.AttackPacket;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -37,7 +38,14 @@ public abstract class TowerEntity extends Entity {
     float upgradeTime = 1;
     float placementDelta = -1;
     int level = 1;
+
     // TODO: Add other tower upgrades
+    // NOTE: The player must select only ONE type of upgrade for the tower and must stick with that path.
+    static final int VERSION = 0;
+    public static final int MAX_COMPONENTS = 4;
+    int scrapsApplied = 0;
+    int lubricantApplied = 0;
+    int scopesApplied = 0;
 
     public TowerEntity(GameType type, int team) {
         super(type);
@@ -81,24 +89,32 @@ public abstract class TowerEntity extends Entity {
 
     @Override
     protected void serializeEntity(DataBuffer buffer) throws IOException {
+        buffer.writeInt(VERSION);
         buffer.writeFloat(attackDelta);
         buffer.writeInt(team);
         buffer.writeInt(level);
         buffer.writeFloat(levelUpDelta);
         buffer.writeFloat(upgradeTime);
         buffer.writeFloat(placementDelta);
+        buffer.writeInt(scrapsApplied);
+        buffer.writeInt(lubricantApplied);
+        buffer.writeInt(scopesApplied);
         serializeTower(buffer);
     }
 
     @Override
     protected void deserializeEntity(GameObject object, DataInputStream input) throws IOException {
         TowerEntity tower = (TowerEntity) object;
+        int version = input.readInt();
         tower.attackDelta = input.readFloat();
         tower.team = input.readInt();
         tower.level = input.readInt();
         tower.levelUpDelta = input.readFloat();
         tower.upgradeTime = input.readFloat();
         tower.placementDelta = input.readFloat();
+        tower.scrapsApplied = input.readInt();
+        tower.lubricantApplied = input.readInt();
+        tower.scopesApplied = input.readInt();
         deserializeTower(tower, input);
     }
 
@@ -375,6 +391,84 @@ public abstract class TowerEntity extends Entity {
             }
         }
         return levels[levels.length - 1];
+    }
+
+    public boolean applyLubricant(TeamInventory inventory) {
+        if (lubricantApplied >= MAX_COMPONENTS) {
+            return false;
+        }
+        if (scopesApplied != 0 || scrapsApplied != 0) {
+            return false;
+        }
+        if (inventory.getWd40() <= 0) {
+            return false;
+        }
+        lubricantApplied++;
+        inventory.removeWd40();
+        return true;
+    }
+
+    public boolean applyScope(TeamInventory inventory) {
+        if (scopesApplied >= MAX_COMPONENTS) {
+            return false;
+        }
+        if (lubricantApplied != 0 || scrapsApplied != 0) {
+            return false;
+        }
+        if (inventory.getScopes() <= 0) {
+            return false;
+        }
+        scopesApplied++;
+        inventory.removeScope();
+        return true;
+    }
+
+    public boolean applyScrapMetal(TeamInventory inventory) {
+        if (scrapsApplied >= MAX_COMPONENTS) {
+            return false;
+        }
+        if (lubricantApplied != 0 || scopesApplied != 0) {
+            return false;
+        }
+        if (inventory.getScraps() <= 0) {
+            return false;
+        }
+        scrapsApplied++;
+        inventory.removeScrapMetal();
+        return true;
+    }
+
+    public int getScrapMetalApplied() {
+        return scrapsApplied;
+    }
+    public int getLubricantApplied() {
+        return lubricantApplied;
+    }
+    public int getScopesApplied() {
+        return scopesApplied;
+    }
+    public int getComponentsApplied() {
+        return scrapsApplied + lubricantApplied + scopesApplied;
+    }
+
+    public int getScrapMetalDamageBoostPercent() {
+        return (int) (((getScrapMetalDamageBoost() - 1) * 100));
+    }
+    public int getLubricantSpeedBoostPercent() {
+        return (int) ((getLubricantSpeedBoost() - 1) * 100);
+    }
+    public int getScopeRangeBoostPercent() {
+        return (int) ((getScopeRangeBoost() - 1) * 100);
+    }
+
+    public float getScrapMetalDamageBoost() {
+        return Math.max(1, 1 + scrapsApplied * .05f);
+    }
+    public float getLubricantSpeedBoost() {
+        return Math.max(1, 1 + lubricantApplied * .1f);
+    }
+    public float getScopeRangeBoost() {
+        return Math.max(1, 1 + scopesApplied * .25f);
     }
 
 }

@@ -657,6 +657,19 @@ public class GameManager implements Disposable {
         pauseWaves();
     }
 
+    int autoSaveCounter = 0;
+
+    public void onWaveChange(int newWave, Wave waveObj) {
+        // Send the current wave data to the clients.
+        sendWaveUpdateToAll();
+        // Save the game every 5 waves.
+        autoSaveCounter++;
+        if (autoSaveCounter >= 5) {
+            autoSaveCounter = 0;
+            save();
+        }
+    }
+
     /**
      * Place a tower at the specified tile.
      * @param tower The tower to place.

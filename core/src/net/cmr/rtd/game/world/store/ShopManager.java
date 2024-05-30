@@ -32,12 +32,12 @@ public class ShopManager {
     static {
         // Register the purchase of towers
         registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, 35, "Shooter Tower", "Shoots pellets at enemies."));
-        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, 80, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
-        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.ICE_TOWER, 50, "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, 70, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
+        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.ICE_TOWER, 40, "Ice Tower", "Slows enemies."));
 
         // Register the purchase of upgrades
         registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 30L + (level - 1) * level * 20L,         level -> 5f + (level)));
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + level * level * 30L,  level -> 5f + level * 1.5f));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + (level + 1) * level * level * 30L,  level -> 5f + level * 2f));
         registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
     }
 

@@ -1,5 +1,7 @@
 package net.cmr.util;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -34,7 +36,6 @@ public class IntroScreen extends AbstractScreenEX {
     public void render(float delta) {   
         elapsedTime += delta;
 
-        // plug in elapsed time into f(x)=-x^3+x^2+x
         float x = elapsedTime/2f;
         float alpha = -x*x*x + x*x + x;
         alpha = Math.min(1, Math.max(0, alpha));
@@ -48,7 +49,7 @@ public class IntroScreen extends AbstractScreenEX {
         game.batch().draw(Sprites.sprite(SpriteType.CMRBOY26), 130, 130, 100, 100);
 		game.batch().end();
 
-        if(elapsedTime>=3.3f || CMRGame.SKIP_INTRO) {
+        if (elapsedTime>=3.3f || CMRGame.SKIP_INTRO || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (nextScreen == null) {
                 game.setScreen(null);
                 return;

@@ -57,7 +57,7 @@ public class FireTower extends TowerEntity {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
                 int targetLevel = (int) Math.floor(targetDPS + (getLevel() - 1) * .5f);
-                new FireEffect(data, enemy.getEffects(), 1, targetLevel);
+                new FireEffect(data, enemy.getEffects(), getLevel(), targetLevel);
                 actionOccured = true;
                 if (!launchedFireball && data.isServer()) {
                     ProjectileBuilder builder = new ProjectileBuilder()
@@ -67,7 +67,7 @@ public class FireTower extends TowerEntity {
                         .setScale(3f)
                         .setDamage(getLevel() * getLevel())
                         .setTimeToReachTarget(1)
-                        .setAOE(1.5f)
+                        .setAOE(1.15f)
                         .setPrecision(1)
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);
@@ -80,7 +80,7 @@ public class FireTower extends TowerEntity {
                         .setParticleLife(.5f)
                         .setFollowEntity(true)
                         .setAnimationSpeed(2f)
-                        .setAreaSize(1.5f)
+                        .setAreaSize(1.15f)
                         .create());
                     if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
                         // dont launch it
@@ -140,7 +140,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getDisplayRange() {
-        return range + getLevel() / 4f;
+        return range + getLevel() / 3f;
     }
 
     @Override

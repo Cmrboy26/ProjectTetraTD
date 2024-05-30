@@ -3,6 +3,8 @@
   "name": "Quest 3",
   "endlessMode": false,
   "preparationTime": 5,
+  "startingHealth": 15,
+  "startingMoney": 35,
   "waves": [
     {
       "waveTime": 45,
@@ -128,39 +130,6 @@
 		{"distributedSpawn": ["BASIC_TWO", 25]},
 		{"distributedSpawn": ["BASIC_THREE", 18]},
         {"distributedSpawn": ["BASIC_FOUR", 8]},
-      ]
-    },
-	{
-      "waveTime": 30,
-	  "warnPlayer": true,
-	  "additionalPrep": 10,
-      "waveUnits": [
-		{"distributedSpawn": ["BASIC_ONE", 30]},
-		{"distributedSpawn": ["BASIC_TWO", 30]},
-		{"distributedSpawn": ["BASIC_THREE", 23]},
-        {"distributedSpawn": ["BASIC_FOUR", 14]},
-      ]
-    },
-	{
-      "waveTime": 30,
-	  "warnPlayer": true,
-	  "additionalPrep": 10,
-      "waveUnits": [
-		{"distributedSpawn": ["BASIC_ONE", 30]},
-		{"distributedSpawn": ["BASIC_TWO", 30]},
-		{"distributedSpawn": ["BASIC_THREE", 23]},
-        {"distributedSpawn": ["BASIC_FOUR", 14]},
-      ]
-    },
-	{
-      "waveTime": 30,
-	  "warnPlayer": true,
-	  "additionalPrep": 10,
-      "waveUnits": [
-		{"distributedSpawn": ["BASIC_ONE", 30]},
-		{"distributedSpawn": ["BASIC_TWO", 30]},
-		{"distributedSpawn": ["BASIC_THREE", 23]},
-        {"distributedSpawn": ["BASIC_FOUR", 14]},
       ]
     },
 	{

@@ -10,7 +10,8 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
-		config.setTitle("retroTowerDefense");
+		config.setTitle("Retro Tower Defense");
+		config.setWindowIcon("raw/icon.png");
 		NativeFileChooser chooser = new DesktopFileChooser();
 		new Lwjgl3Application(new RetroTowerDefense(chooser), config);
 	}

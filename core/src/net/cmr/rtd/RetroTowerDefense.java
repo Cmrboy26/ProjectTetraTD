@@ -1,10 +1,14 @@
 package net.cmr.rtd;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.function.Consumer;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -245,4 +249,58 @@ public class RetroTowerDefense extends CMRGame {
 		}
 		return "Unknown";
 	}
+
+	@SuppressWarnings("unchecked")
+	public void setLevelCleared(GameSave save) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			JSONArray completions = (JSONArray) obj.get("clearedLevels");
+			if (completions == null) {
+				completions = new JSONArray();
+				obj.put("clearedLevels", completions);
+			}
+			String name = save.getName();
+			if (completions.contains(name)) {
+				return;
+			} else {
+				completions.add(name);
+				dataFile.writeString(obj.toJSONString(), false);
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}	
+
+	public static boolean isLevelCleared(GameSave save) {
+		return isLevelCleared(save.getName());
+	}
+
+	public static boolean isLevelCleared(String saveFolder) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{\"clearedLevels\": []}", false);
+			return false;
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			JSONArray completions = (JSONArray) obj.get("clearedLevels");
+			if (completions == null) {
+				return false;
+			}
+			String name = saveFolder;
+			return completions.contains(name);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 }

@@ -4,6 +4,8 @@ import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import net.cmr.rtd.waves.WavesData.DifficultyRating;
+
 public class LevelSave {
 
     private static final String LOCATION = "retrotowerdefense/levels/"; 

@@ -1,4 +1,6 @@
 - Bestiary
 - More (better) levels
-- Better synchronization between client and server (especially with fire tower fireball)
-- Autosaving
+- Achievements
+- Better synchronization between client and server (especially with fire tower fireball) (DONE)
+- Autosaving (DONE)
+- Mining/Automation Element of the game (buildings dedicated to mining)

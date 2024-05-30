@@ -7,7 +7,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
+
+import net.cmr.rtd.game.packets.SkipRequestPacket;
 
 /**
  * The Audio class handles the management and playback of sound effects and music in the game.
@@ -317,6 +322,16 @@ public class Audio implements Disposable {
             instance = new Audio();
         }
         return instance;
+    }
+
+    public static Button addClickSFX(Button button) {
+        button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+            }
+        });
+        return button;
     }
 
     /**

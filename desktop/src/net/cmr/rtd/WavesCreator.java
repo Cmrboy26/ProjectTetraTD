@@ -47,6 +47,9 @@ public class WavesCreator {
                         break;
                     }
                     String everythingAfterCommand = input.substring(command.length()).trim();
+                    everythingAfterCommand = everythingAfterCommand.replace("\"", "");
+
+                    System.out.println("Importing: \""+everythingAfterCommand+"\"");
                     File file = new File(everythingAfterCommand);
                     String json = "{}";
                     if (!file.exists()) {
@@ -186,9 +189,9 @@ public class WavesCreator {
                             }
                             Wave wave = wavesData.getWave(waveNum);
                             if (wave == null) {
-                                outputStream.println("Wave "+(waveNum+1)+" does not exist.");
+                                outputStream.println("Wave "+(waveNum)+" does not exist.");
                             } else {
-                                outputStream.println("Wave "+(waveNum+1)+":");
+                                outputStream.println("Wave "+(waveNum)+":");
                                 outputStream.println("Duration: "+wave.getWaveTime());
                                 outputStream.println("Warn: "+(wave.shouldWarnPlayer() ? "Yes" : "No"));
                                 outputStream.println("Additional Preparation Time: "+wave.getAdditionalPrepTime());
@@ -204,7 +207,7 @@ public class WavesCreator {
                             if (args.length >= 2) {
                                 try {
                                     waveNum = Integer.parseInt(args[1]) - 1;
-                                    if (waveNum <= 0) {
+                                    if (waveNum < 0) {
                                         outputStream.println("Invalid wave number. Must be greater than 0.");
                                         break;
                                     }
@@ -214,7 +217,11 @@ public class WavesCreator {
                                 }
                             } else {
                                 outputStream.println("Enter the wave number: ");
-                                waveNum = getNextInt();
+                                waveNum = getNextInt() - 1;
+                                if (waveNum < 0) {
+                                    outputStream.println("Invalid wave number. Must be greater than 0.");
+                                    break;
+                                }
                             }
                             modifyWave(waveNum);
                             break; 
@@ -335,6 +342,7 @@ public class WavesCreator {
                         }
                     } else {
                         outputStream.println("Enter the unit number (\"l\" for list): ");
+                        boolean exit = false;
                         while (true) {
                             input = getInput();
                             if (input.equalsIgnoreCase("l")) {
@@ -343,6 +351,7 @@ public class WavesCreator {
                                     outputStream.println("-- "+i + ": " + EnemyType.values()[i]);
                                 }
                             }
+                            if (input.equals("")) { exit = true; break; }
                             try {
                                 unitNumber = Integer.parseInt(input);
                             } catch (NumberFormatException e) {
@@ -355,6 +364,7 @@ public class WavesCreator {
                                 outputStream.println("Invalid unit number. Please enter a number between 0 and " + (EnemyType.values().length - 1));
                             }
                         }
+                        if (exit) { break; }
                     }
 
                     if (args.length >= 2) {

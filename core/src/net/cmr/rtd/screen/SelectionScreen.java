@@ -27,8 +27,10 @@ import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
 import net.cmr.util.Stages;
+import net.cmr.util.Audio.GameSFX;
 
 public class SelectionScreen extends AbstractScreenEX {
     
@@ -58,6 +60,7 @@ public class SelectionScreen extends AbstractScreenEX {
         FileHandle[] levels = Gdx.files.external("retrotowerdefense/levels").list();
         for (FileHandle level : levels) {
             TextButton button = new TextButton(level.nameWithoutExtension(), Sprites.skin(), "toggle-small");
+            Audio.addClickSFX(button);
             group.add(button);
             button.addListener(new ClickListener() {
                 @Override
@@ -81,6 +84,8 @@ public class SelectionScreen extends AbstractScreenEX {
         table.add(details).fillX().expand().row();
         
         TextButton online = new TextButton("Join Online", Sprites.skin(), "small");
+        online.pad(0, 15f, 0, 15f);
+        Audio.addClickSFX(online);
         online.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -88,8 +93,11 @@ public class SelectionScreen extends AbstractScreenEX {
                 game.setScreen(new MultiplayerJoinScreen());
             }
         });
-        table.add(online).left().bottom().pad(10f).width(100).expandX().colspan(1);
+        table.add(online).left().bottom().padBottom(10f).width(120).expandX().colspan(1);
+
         TextButton back = new TextButton("Back", Sprites.skin(), "small");
+        Audio.addClickSFX(back);
+        back.pad(0, 15f, 0, 15f);
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -97,7 +105,7 @@ public class SelectionScreen extends AbstractScreenEX {
                 game.setScreen(new MainMenuScreen());
             }
         });
-        table.add(back).right().bottom().pad(5f).width(100).expandX().colspan(1);
+        table.add(back).right().bottom().padBottom(10f).width(120).expandX().colspan(1);
 
 		add(Align.center, table);
     }
@@ -169,7 +177,12 @@ public class SelectionScreen extends AbstractScreenEX {
             try {
                 final WavesData data = WavesData.load(difficulty);
                 String name = data.name;
+                String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
+                if (RetroTowerDefense.isLevelCleared(fn)) {
+                    name += " (Clear)";
+                }
                 TextButton button = new TextButton(name, Sprites.skin(), "toggle-small");
+                Audio.addClickSFX(button);
                 button.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
@@ -212,6 +225,7 @@ public class SelectionScreen extends AbstractScreenEX {
         }
 
         TextButton resume = new TextButton("Resume", Sprites.skin(), "small");
+        Audio.addClickSFX(resume);
         resume.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -254,6 +268,7 @@ public class SelectionScreen extends AbstractScreenEX {
         }
 
         TextButton newSave = new TextButton("New Game", Sprites.skin(), "small");
+        Audio.addClickSFX(newSave);
         newSave.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -290,6 +305,7 @@ public class SelectionScreen extends AbstractScreenEX {
                     Dialog dialog = new Dialog("WARNING", Sprites.skin()) {
                         @Override
                         protected void result(Object object) {
+                            Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                             if ((Boolean) object == true) {
                                 startGame.run();
                             }
@@ -304,8 +320,10 @@ public class SelectionScreen extends AbstractScreenEX {
                     text.setWidth(400);
                     text.setWrap(true);
                     dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-                    dialog.button("OVERRIDE IT", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                    dialog.button("NO, CANCEL", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    TextButton cancel = new TextButton("NO, CANCEL", Sprites.skin(), "small");
+                    dialog.button(cancel, false);
+                    TextButton confirm = new TextButton("OVERRIDE IT", Sprites.skin(), "small");
+                    dialog.button(confirm, true);
                     dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
                     dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, false);
                     dialog.key(com.badlogic.gdx.Input.Keys.Y, true);
@@ -336,6 +354,7 @@ public class SelectionScreen extends AbstractScreenEX {
                 if (object == null) {
                     return;
                 }
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                 chooseOnlineCallback.accept((Boolean) object);
             }
         };

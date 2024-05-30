@@ -160,11 +160,8 @@ public class World extends GameObject {
                     }
                     return;
                 }
-
                 waveCountdown = PREPARATION_TIME + waveObj.getWaveTime() + waveObj.getAdditionalPrepTime();
-
-                // Notify the clients that the wave has ended
-                data.getManager().sendWaveUpdateToAll();
+                data.getManager().onWaveChange(wave, waveObj);
             }
         }
         for (UUID id : removalList) {

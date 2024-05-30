@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Audio;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
@@ -71,10 +72,12 @@ public class SettingsScreen extends AbstractScreenEX {
         settingsTable.add(username).expandX().fillX().colspan(3).pad(10).colspan(1);
 
         CheckBox showFPS = new CheckBox("", Sprites.skin());
+        Audio.addClickSFX(showFPS);
         showFPS.setChecked(Settings.getPreferences().getBoolean(Settings.SHOW_FPS));
         settingsTable.add(showFPS).expandX().fillX().colspan(1).pad(10);
 
         CheckBox showPlacementGrid = new CheckBox("", Sprites.skin());
+        Audio.addClickSFX(showPlacementGrid);
         showPlacementGrid.setChecked(Settings.getPreferences().getBoolean(Settings.SHOW_PLACEMENT_GRID));
         settingsTable.add(showPlacementGrid).expandX().fillX().colspan(1).pad(10).row();
 
@@ -85,6 +88,7 @@ public class SettingsScreen extends AbstractScreenEX {
         Table horizontalGroup = new Table();
 
         TextButton apply = new TextButton("Apply", Sprites.skin(), labelType);
+        Audio.addClickSFX(apply);
         apply.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -103,6 +107,7 @@ public class SettingsScreen extends AbstractScreenEX {
         horizontalGroup.add(apply).width(100).padLeft(20f).padRight(20);
 
         TextButton backButton = new TextButton("Back", Sprites.skin(), labelType);
+        Audio.addClickSFX(backButton);
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

@@ -4,7 +4,7 @@
 - Better synchronization between client and server (especially with fire tower fireball) (DONE)
 - Autosaving (DONE)
 - Mining/Automation Element of the game (buildings dedicated to mining)
-
+- Implement endless mode
 
 IDEAS:
 - Resources can be obtained through mining/drilling in order to build/upgrade towers

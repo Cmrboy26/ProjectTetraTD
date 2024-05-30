@@ -1,0 +1,16 @@
+{
+	"difficulty": 1,
+	"name": "Endless",
+	"endlessMode": true,
+	"preparationTime": 10,
+	"startingHealth": 50,
+	"startingMoney": 35,
+	"waves": [
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 14]}
+			]
+		}
+	]
+}

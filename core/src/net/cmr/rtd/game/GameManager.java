@@ -757,4 +757,17 @@ public class GameManager implements Disposable {
         return players.values();
     }
 
+    public ArrayList<TowerEntity> getTowers(int team) {
+        ArrayList<TowerEntity> towers = new ArrayList<TowerEntity>();
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof TowerEntity) {
+                TowerEntity tower = (TowerEntity) entity;
+                if (tower.getTeam() == team) {
+                    towers.add(tower);
+                }
+            }
+        }
+        return towers;
+    }
+
 }

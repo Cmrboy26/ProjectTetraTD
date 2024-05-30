@@ -100,20 +100,6 @@ public class World extends GameObject {
         this.tileDataMap = new HashMap<>();
         this.removalList = new HashSet<>();
         this.storedPlayerData = new HashMap<>();
-
-        /*for (int i = 0; i < DEFAULT_WORLD_SIZE; i++) {
-            for (int j = 0; j < DEFAULT_WORLD_SIZE; j++) {
-                setTile(i, j, 0, TileType.FLOOR);
-            }
-        }
-        for (int x = 1; x < DEFAULT_WORLD_SIZE - 1; x++) {
-            setTile(x, 1, 1, TileType.PATH);
-            setTileData(x, 1, 1, new TeamTileData(0));
-        }
-        setTile(0, 1, 1, TileType.START);
-        setTileData(0, 1, 1, new StartTileData(0));
-        setTile(DEFAULT_WORLD_SIZE-1, 1, 1, TileType.END);
-        setTileData(DEFAULT_WORLD_SIZE-1, 1, 1, new StructureTileData(0));*/
     }
 
     @Override
@@ -149,7 +135,7 @@ public class World extends GameObject {
             waveCountdown -= delta;
             if (waveCountdown <= 0) {
                 wave++;
-                waveObj = wavesData.getWave(this.wave);
+                waveObj = wavesData.getNextWave(this.wave, data);
                 if (waveObj == null) {
                     // The game has ended!
                     // TODO: Add a game win screen.

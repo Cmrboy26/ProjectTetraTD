@@ -10,6 +10,8 @@ import org.json.simple.parser.JSONParser;
 
 import com.badlogic.gdx.files.FileHandle;
 
+import net.cmr.rtd.game.endless.EndlessUtils;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 
@@ -209,6 +211,20 @@ public class WavesData {
             }
         }
         return entities.toArray(new EnemyType[entities.size()]);
+    }
+
+    public Wave getNextWave(int waveNumber, UpdateData updateData) {
+        if (updateData.isClient()) throw new UnsupportedOperationException("Cannot get next wave on client.");
+
+        Wave at = getWave(waveNumber);
+
+        if (endlessMode && at != null) {
+            Wave next = EndlessUtils.generateDynamicWave(updateData.getManager());
+            waves.put(waveNumber + 1, next);
+            return next;
+        }
+
+        return at;
     }
 
     public Wave getWave(int waveNumber) {

@@ -1,12 +1,15 @@
 package net.cmr.rtd.game.stream;
 
+import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.UUID;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers.UUIDSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.minlog.Log;
 
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.AttackPacket;
@@ -76,7 +79,18 @@ public class OnlineGameStream extends GameStream {
     @Override
     public void sendPacket(Packet packet) {
         packet.beforeSend(getEncryptor());
-        connection.sendTCP(packet);
+        try {
+            connection.sendTCP(packet);
+        } catch(Exception e) {
+            e.printStackTrace();
+            Log.error("Error sending packet: "+packet+" Attempting to send again...");
+            try {
+                connection.sendTCP(packet);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                Log.error("Failed to resend again. Packet will not be sent.");
+            }
+        }
     }
 
     @Override
@@ -137,6 +151,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(EffectPacket.class);
         kryo.register(TeamInventory.class);
         kryo.register(JumpPacket.class);
+        kryo.register(UUID.class, new UUIDSerializer());
     }
     
 }

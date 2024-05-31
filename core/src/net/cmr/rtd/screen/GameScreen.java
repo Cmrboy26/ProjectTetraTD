@@ -579,9 +579,9 @@ public class GameScreen extends AbstractScreenEX {
                 }
                 Player player = (Player) getEntity(UUID.fromString(positionsPacket.uuids[i]));
                 if (player != null) {
-                    player.setPosition(positionsPacket.positions[i]);
+                    player.setPosition(new Vector2(positionsPacket.positions[i]));
                     // TODO: On multiplayer, the player's sprint is not accounted for their velocity, which causes visual bugs in animations
-                    player.setVelocity(positionsPacket.velocities[i]);
+                    player.setVelocity(new Vector2(positionsPacket.velocities[i]));
                 }
             }
         }
@@ -862,9 +862,11 @@ public class GameScreen extends AbstractScreenEX {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON) && gameManager != null) {
             resetGameDialog.show(stages.get(Align.center));
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            getLocalPlayer().jump(data);
-            ioStream.sendPacket(new JumpPacket());
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            boolean successful = getLocalPlayer().jump(data);
+            if (successful) {
+                ioStream.sendPacket(new JumpPacket());
+            }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {

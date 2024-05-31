@@ -244,13 +244,16 @@ public class ShopManager {
     }
 
     private static long towerSellValue(TowerEntity tower) {
-        return towerValue(tower) / 2L;
+        return towerValue(tower);
     }
 
     private static long towerValue(TowerEntity tower) {
         int level = tower.getLevel();
         long purchaseCost = towerCatalog.get(tower.type).cost;
-        long upgradesCost = upgradeCatalog.get(tower.type).cost.apply(level); // only the cost of the latest upgrade is accounted for
+        long upgradesCost = Math.max(0, upgradeCatalog.get(tower.type).cost.apply(level - 1)) / 2L; // only the cost of the latest upgrade is accounted for
+        if (level == 1) {
+            upgradesCost = 0;
+        }
         return purchaseCost + upgradesCost;
     }
 

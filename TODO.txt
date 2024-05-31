@@ -7,6 +7,11 @@
 - Implement endless mode (DONE)
 - In competitive modes, allow players to send enemies to the other side (even during cooldown periods) and decrease the endless mode impact on the game slightly
 
+- Allow other menus to be clicked in middle click tower
+- Make left shift force upgrade instead of showing the dialog
+- More music
+- Consider: should fire and ice deal more damage?
+
 IDEAS:
 - Resources can be obtained through mining/drilling in order to build/upgrade towers
 - Enemies drop robotic parts that can be used to upgrade towers (DONE)

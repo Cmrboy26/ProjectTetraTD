@@ -20,7 +20,7 @@ public class EndlessUtils {
     float dpsThresholdScale = 1/4f;
 
     // Determines how much DPS is required to defeat the generated wave at the maximum of the sinusoidal function 
-    float maximumScale = 1.01f;
+    public static final float maximumScale = 1.03f;
     // Determines the period of the sinusoidal function (how many waves to go from maximum to maximum)
     float sinusoidalPeriod = 7;
     // The distance from maximumScale to the peaks/trophs of the sinusoidal function
@@ -92,7 +92,6 @@ public class EndlessUtils {
         targetDPS = Math.max(2, targetDPS); // Minimum DPS (to prevent waves with no enemies)
 
         // TODO: FIX RESUMING ENDLESS MODE.
-        // TODO: Add another wave type that have half of one enemy and half of another enemy
         int waveType = currentWave % 4; // 0 = default, 1 = small type enemy wave, 2 = large type enemy wave, 3 = default
         if (currentWave <= 3) {
             waveType = 0;

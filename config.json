@@ -1,0 +1,14 @@
+{
+	"platform": "windows64",
+	"jdk": "C:/Program Files/Java/jdk-17.0.1",
+	"executable": "rtd",
+	"classpath": ["desktop/build/libs/desktop-1.0.jar"],
+	"removelibs": ["desktop/build/libs/desktop-1.0.jar"],
+	"mainclass": "net.cmr.rtd.DesktopLauncher",
+	"vmargs": [
+		"-Xmx1G"
+	],
+    "minimizejre": "soft",
+	"verbose": "true",
+	"output": "../RTDGame"
+}

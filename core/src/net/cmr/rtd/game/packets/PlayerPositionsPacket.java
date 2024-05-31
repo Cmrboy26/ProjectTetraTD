@@ -11,10 +11,10 @@ public class PlayerPositionsPacket extends Packet {
     public String[] uuids;
     public Vector2[] positions, velocities;
 
-    // TODO: Implement this class. Sync the positions and velocities of all players in the game.
     public PlayerPositionsPacket() { super(); }
-    public PlayerPositionsPacket(ArrayList<GamePlayer> players) {
+    public PlayerPositionsPacket(ArrayList<GamePlayer> playerz) {
         super();
+        ArrayList<GamePlayer> players = new ArrayList<>(playerz);
         players.removeIf(player -> player.getPlayer() == null); // Remove null players
         positions = new Vector2[players.size()];
         velocities = new Vector2[players.size()];

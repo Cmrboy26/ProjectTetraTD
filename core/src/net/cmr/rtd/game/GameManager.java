@@ -80,6 +80,9 @@ public class GameManager implements Disposable {
     private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
     private boolean pauseWaves = true;
 
+    public static final int WRITE_BUFFER_SIZE = 16384 * 4;
+    public static final int READ_BUFFER_SIZE = 2048 * 4;
+
     /**
      * Create a new game manager.
      * After this is called, {@link #initialize(GameSave)} should be called to initialize the game.
@@ -90,7 +93,7 @@ public class GameManager implements Disposable {
         this.data = new UpdateData(this);
         if (details.isHostedOnline()) {
             // Create server objects
-            server = new Server();
+            server = new Server(WRITE_BUFFER_SIZE, READ_BUFFER_SIZE);
             // Register packets
             OnlineGameStream.registerPackets(server.getKryo());
             server.addListener(new Listener() {
@@ -602,6 +605,19 @@ public class GameManager implements Disposable {
                 playerpositions.add(player);
             }
         }
+        // CRASHES AFTER A BIT OF TIME
+        /*
+         * Exception in thread "Thread-2" java.nio.BufferOverflowException
+                at java.nio.HeapByteBuffer.put(Unknown Source)
+                at com.esotericsoftware.kryo.io.ByteBufferOutputStream.write(ByteBufferOutputStream.java:60)
+                at com.esotericsoftware.kryo.io.Output.flush(Output.java:207)
+                at com.esotericsoftware.kryonet.KryoSerialization.write(KryoSerialization.java:51)
+                at com.esotericsoftware.kryonet.TcpConnection.send(TcpConnection.java:192)
+                at com.esotericsoftware.kryonet.Connection.sendTCP(Connection.java:59)
+                at net.cmr.rtd.game.stream.OnlineGameStream.sendPacket(OnlineGameStream.java:80)
+                at net.cmr.rtd.game.GamePlayer.sendPacket(GamePlayer.java:114)
+                at java.lang.Thread.run(Unknown Source)
+         */
         PlayerPositionsPacket packet = new PlayerPositionsPacket(playerpositions);
         sendPacketToAll(packet);
 
@@ -638,7 +654,7 @@ public class GameManager implements Disposable {
             return;
         }
         TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
-        sendPacketToAll(packet);
+        //sendPacketToAll(packet);
         winningTeams.remove(teams.get(team));
         if (winningTeams.size() == 1) {
             TeamData winner = winningTeams.get(0);

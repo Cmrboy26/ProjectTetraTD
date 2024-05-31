@@ -141,7 +141,8 @@ public class Player extends Entity {
         }
     }
 
-    public void jump(UpdateData data) {
+    public boolean jump(UpdateData data) {
+        if (jumpProgress > 0) return false;
         if (jumpProgress <= 0) {
             jumpProgress = jumpTime;
         }
@@ -153,6 +154,7 @@ public class Player extends Entity {
                 manager.sendPacketToAll(packet);
             }
         }
+        return true;
     }
 
     private AnimationType getAnimationFromMovement() {

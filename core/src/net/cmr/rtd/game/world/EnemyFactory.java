@@ -109,4 +109,10 @@ public class EnemyFactory {
         ALSO, healer should not be immune to anything. Slowness could be a downside for the player, so they must consider it when using the slowness tower.
         */
     }
+    private void createProtectorateEnemyOne() {
+        /*
+        TODO: Implement
+        A very slow enemy that makes nearby enemies immune to all effects.
+         */
+    }
 }

@@ -1,9 +1,9 @@
 {
-	"difficulty": 1,
+	"difficulty": 2,
 	"name": "Endless",
 	"endlessMode": true,
 	"preparationTime": 10,
-	"startingHealth": 50,
+	"startingHealth": 20,
 	"startingMoney": 35,
 	"waves": []
 }

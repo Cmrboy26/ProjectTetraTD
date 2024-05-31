@@ -496,6 +496,16 @@ public class EditorScreen extends AbstractScreenEX {
     }
 
     private void processKeyboard() {
+        float dzoom = 0;
+        dzoom += (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_EQUALS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_MULTIPLY)|| Gdx.input.isKeyPressed(Input.Keys.EQUALS)) ? 1 : 0;
+        dzoom -= (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_SUBTRACT)) ? 1 : 0;
+
+        if (dzoom != 0) {
+            OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
+            camera.zoom += dzoom * Gdx.graphics.getDeltaTime();
+            camera.zoom = Math.max(.1f, Math.min(2, camera.zoom));
+        }
+
         if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
             selectedTile = 2; // wall
             wall.setChecked(true);

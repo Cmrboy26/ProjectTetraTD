@@ -28,6 +28,7 @@ import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
@@ -124,7 +125,7 @@ public class World extends GameObject {
 
             if (waveObj != null) {
                 float elapsedTime = waveObj.getWaveTime() - waveCountdown;
-                EnemyType[] entities = wavesData.getEntities(elapsedTime, delta, this.wave);
+                EnemyType[] entities = wavesData.getEntities(data, elapsedTime, delta, this.wave);
                 for (EnemyType type : entities) {
                     for (TeamData teamData : data.getManager().getTeams()) {
                         teamData.spawnEnemy(type);
@@ -138,7 +139,6 @@ public class World extends GameObject {
                 waveObj = wavesData.getNextWave(this.wave, data);
                 if (waveObj == null) {
                     // The game has ended!
-                    // TODO: Add a game win screen.
                     //data.getManager().stop();
                     data.getManager().gameOver();
                     if (wave > wavesData.size()) {
@@ -172,7 +172,7 @@ public class World extends GameObject {
         this.wave = 0;
     }
     public boolean passedAllWaves() {
-        return wave > wavesData.size();
+        return wave > wavesData.size() && !wavesData.endlessMode;
     }
     public void requestSkip(GamePlayer player) {
         Objects.requireNonNull(player);
@@ -440,7 +440,23 @@ public class World extends GameObject {
                     if (tile == null) {
                         continue;
                     }
-                    tile.render(batch, delta, this, x, y, z);
+                    if (type == TileType.END) {
+                        Color beforeColor = new Color(batch.getColor());
+                        TileData data = tileDataMap.get(new Point3D(x, y, z));
+                        if (data instanceof StructureTileData) {
+                            StructureTileData structureData = (StructureTileData) data;
+                            if (structureData.team == udata.getScreen().team) {
+                                batch.setColor(Color.WHITE);
+                            }
+                            if (structureData.health <= 0) {
+                                batch.setColor(Color.GRAY);
+                            }
+                        }
+                        tile.render(batch, delta, this, x, y, z);
+                        batch.setColor(beforeColor);
+                    } else {
+                        tile.render(batch, delta, this, x, y, z);
+                    }
                     if (tileDataMap.containsKey(new Point3D(x, y, z))) {
                         TileData data = tileDataMap.get(new Point3D(x, y, z));
                         data.render(batch, x, y);

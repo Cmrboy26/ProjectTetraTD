@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.Function;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
 import net.cmr.rtd.game.world.Collidable;

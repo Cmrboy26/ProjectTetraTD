@@ -37,7 +37,7 @@ public class ShopManager {
 
         // Register the purchase of upgrades
         registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 30L + (level - 1) * level * 20L,         level -> 5f + (level)));
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + (level + 1) * level * level * 30L,  level -> 5f + level * 2f));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + (level + 2) * level * level * 50L,  level -> 5f + level * 2f));
         registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
     }
 

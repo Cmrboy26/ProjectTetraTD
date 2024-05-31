@@ -59,8 +59,14 @@ public class RetroTowerDefense extends CMRGame {
 		// Create story level folders from the assets
 		FileHandle storyLevelsHandle = Gdx.files.internal("assets/storylevels/");
 		for (FileHandle level : storyLevelsHandle.list()) {
+			// level is the folder containing the level data (waves folder, world.dat) in the assets folder
 			FileHandle internal = storyLevelsHandle.child(level.name());
 			FileHandle external = levelsFolder;
+			FileHandle externalLevelFolder = external.child(level.name());
+			if (externalLevelFolder.isDirectory() && externalLevelFolder.exists()) {
+				// Delete the directory so outdated story mode levels and waves are removed
+				externalLevelFolder.deleteDirectory();
+			}
 			internal.copyTo(external);
 		}
 
@@ -110,7 +116,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 		Log.info("Connected.");
-		GameScreen screen = new GameScreen(stream, null, null, null);
+		GameScreen screen = new GameScreen(stream, null, null, null, team);
 		setScreen(screen);
 
 		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
@@ -165,7 +171,7 @@ public class RetroTowerDefense extends CMRGame {
 
 		manager.initialize(save);
 		manager.start();
-		GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave);
+		GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave, team);
 		setScreen(screen);
 
 		clientsidestream.addListener(new PacketListener() {
@@ -223,7 +229,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 
-		GameScreen screen = new GameScreen(clientsideStream, manager, null, lsave);
+		GameScreen screen = new GameScreen(clientsideStream, manager, null, lsave, team);
 		//manager.initialize(new GameSave("default")); 
 		manager.initialize(save);
 		setScreen(screen);

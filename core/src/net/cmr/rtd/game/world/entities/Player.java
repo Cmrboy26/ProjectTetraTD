@@ -11,11 +11,11 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -33,6 +33,7 @@ public class Player extends Entity {
     private Vector2 velocity;
     private String username;
     private int health;
+    private transient float jumpProgress = 0;
 
     public Player() {
         super(GameType.PLAYER);
@@ -67,15 +68,24 @@ public class Player extends Entity {
         World world = data.getWorld();
         if (world == null) return;
         // Collision detection and response
-        world.moveHandleCollision(this, delta, velocity);
+        world.moveHandleCollision(this, delta, new Vector2(velocity));
+        if (jumpProgress > 0) {
+            jumpProgress -= delta;
+        }
     }
 
     float animationDelta = 0;
     GlyphLayout layout;
 
+    final float jumpTime = .5f; 
+    final float jumpHeight = .4f;
+
     @Override
     public void render(UpdateData data, Batch batch, float delta) {
         GameScreen screen = data.getScreen();
+
+        float x = jumpProgress;
+        float jumpY = Math.max(0, (float) -4*x*(x-jumpTime)/(jumpTime*jumpTime));
         if (screen.getLocalPlayer() != null && !screen.getLocalPlayer().getName().equals(username)) {
             // DRAW THE NAME
             batch.setColor(Color.WHITE);
@@ -86,14 +96,15 @@ public class Player extends Entity {
             if(layout == null) {
                 layout = new GlyphLayout(font, username);
             }
-            font.draw(batch, username, getX() - Tile.SIZE * 1f/8f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f);
+            font.draw(batch, username, getX() - Tile.SIZE * 1f/8f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f + (jumpY*(Tile.SIZE*jumpHeight)));
             font.getData().setScale(scaleBefore);
         }
+
         animationDelta += delta;
         updateMovementRendering(delta);
         TextureRegion sprite = Sprites.animation(getAnimationFromMovement(), movementCountdown);
         //TextureRegion sprite = /*Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //*/Sprites.sprite(Sprites.SpriteType.CMRBOY26);
-        batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY(), Tile.SIZE, Tile.SIZE);
+        batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);
         super.render(data, batch, delta);
     }
 
@@ -127,6 +138,20 @@ public class Player extends Entity {
 
         if (lastDirection != direction || lastMoving != moving) {
             movementCountdown = 0;
+        }
+    }
+
+    public void jump(UpdateData data) {
+        if (jumpProgress <= 0) {
+            jumpProgress = jumpTime;
+        }
+        if (data.isServer()) {
+            GameManager manager = data.getManager();
+            GamePlayer player = manager.getPlayer(this);
+            if (player != null) {
+                JumpPacket packet = new JumpPacket(getID());
+                manager.sendPacketToAll(packet);
+            }
         }
     }
 

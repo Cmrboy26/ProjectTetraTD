@@ -1,0 +1,230 @@
+{
+    "difficulty": 2,
+    "waves": [
+        {
+            "waveTime": 45,
+            "waveUnits": [
+                {
+                    "quantity": 14,
+                    "startTime": 0,
+                    "endTime": 30,
+                    "type": "BASIC_ONE"
+                },
+                {
+                    "quantity": 3,
+                    "startTime": 30,
+                    "endTime": 45,
+                    "type": "BASIC_TWO"
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        15
+                    ]
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        10
+                    ]
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        16
+                    ]
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        8
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        18
+                    ]
+                }
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        16
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        25
+                    ]
+                }
+            ],
+            "warnPlayer": true
+			"additionalPrep": 3,
+        },
+        {
+            "waveTime": 20,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        10
+                    ]
+                }
+            ]
+        },
+        {
+            "waveTime": 20,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                        10
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        12
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						1
+					]
+				}
+            ]
+        },
+        {
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_TWO",
+                        14
+                    ]
+                },
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        20
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						2
+					]
+				}
+            ]
+        },
+		{
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        40
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						2
+					]
+				}
+            ]
+        },
+		{
+            "waveTime": 20,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                        20
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						6
+					]
+				}
+            ]
+        },
+		{
+			"additionalPrep": 2,
+            "waveTime": 20,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                       25
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						10
+					]
+				}
+            ]
+        },
+		{
+			"warnPlayer": true,
+			"additionalPrep": 5,
+            "waveTime": 30,
+            "waveUnits": [
+                {
+                    "distributedSpawn": [
+                        "BASIC_ONE",
+                       40
+                    ]
+                },
+				{
+                    "distributedSpawn": [
+                        "BASIC_THREE",
+                       14
+                    ]
+                },
+				{
+					"distributedSpawn": [
+						"BASIC_FOUR",
+						20
+					]
+				}
+            ]
+        }
+    ],
+	"startingHealth": 20,
+    "startingMoney": 35,
+    "name": "Type II",
+    "endlessMode": false,
+    "preparationTime": 5
+}

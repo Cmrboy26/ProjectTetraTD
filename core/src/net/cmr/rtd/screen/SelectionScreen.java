@@ -83,17 +83,6 @@ public class SelectionScreen extends AbstractScreenEX {
         table.add(scrollPane).fillX().expand();
         table.add(details).fillX().expand().row();
         
-        TextButton online = new TextButton("Join Online", Sprites.skin(), "small");
-        online.pad(0, 15f, 0, 15f);
-        Audio.addClickSFX(online);
-        online.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                game.setScreen(new MultiplayerJoinScreen());
-            }
-        });
-        table.add(online).left().bottom().padBottom(10f).width(120).expandX().colspan(1);
 
         TextButton back = new TextButton("Back", Sprites.skin(), "small");
         Audio.addClickSFX(back);
@@ -105,7 +94,19 @@ public class SelectionScreen extends AbstractScreenEX {
                 game.setScreen(new MainMenuScreen());
             }
         });
-        table.add(back).right().bottom().padBottom(10f).width(120).expandX().colspan(1);
+        table.add(back).left().bottom().padBottom(10f).width(120).expandX().colspan(1);
+
+        TextButton online = new TextButton("Join Online", Sprites.skin(), "small");
+        online.pad(0, 15f, 0, 15f);
+        Audio.addClickSFX(online);
+        online.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                game.setScreen(new MultiplayerJoinScreen());
+            }
+        });
+        table.add(online).right().bottom().padBottom(10f).width(120).expandX().colspan(1);
 
 		add(Align.center, table);
     }
@@ -214,14 +215,14 @@ public class SelectionScreen extends AbstractScreenEX {
         difficultyLabel.setAlignment(Align.center);
         playOptions.add(difficultyLabel).fillX().expandX().colspan(2).row();
 
-        Label waveCount = new Label("Waves: " + data.size(), Sprites.skin(), "small");
-        waveCount.setAlignment(Align.center);
-        playOptions.add(waveCount).fillX().expandX().colspan(2).row();
-        
         if (data.endlessMode) {
             Label endless = new Label("Endless Mode", Sprites.skin(), "small");
             endless.setAlignment(Align.center);
             playOptions.add(endless).fillX().expandX().colspan(2).row();
+        } else {   
+            Label waveCount = new Label("Waves: " + data.size(), Sprites.skin(), "small");
+            waveCount.setAlignment(Align.center);
+            playOptions.add(waveCount).fillX().expandX().colspan(2).row();
         }
 
         TextButton resume = new TextButton("Resume", Sprites.skin(), "small");
@@ -321,8 +322,10 @@ public class SelectionScreen extends AbstractScreenEX {
                     text.setWrap(true);
                     dialog.getContentTable().add(text).width(400).fillX().expandX().row();
                     TextButton cancel = new TextButton("NO, CANCEL", Sprites.skin(), "small");
+                    cancel.pad(0, 10, 0, 10);
                     dialog.button(cancel, false);
                     TextButton confirm = new TextButton("OVERRIDE IT", Sprites.skin(), "small");
+                    confirm.pad(0, 10, 0, 10);
                     dialog.button(confirm, true);
                     dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
                     dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, false);
@@ -365,11 +368,18 @@ public class SelectionScreen extends AbstractScreenEX {
         Label text = new Label("Select Play Type:", Sprites.skin(), "small");
         text.setFontScale(.4f);
         text.setWidth(400);
+        text.setAlignment(Align.center);
         text.setWrap(true);
         dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-        dialog.button("Cancel", null, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-        dialog.button("Online", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-        dialog.button("Singleplayer", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        TextButton cancel = new TextButton("Cancel", Sprites.skin(), "small");
+        cancel.pad(0, 10, 0, 10);
+        TextButton online = new TextButton("Online", Sprites.skin(), "small");
+        online.pad(0, 10, 0, 10);
+        TextButton singleplayer = new TextButton("Singleplayer", Sprites.skin(), "small");
+        singleplayer.pad(0, 10, 0, 10);
+        dialog.button(cancel, null);
+        dialog.button(online, true);
+        dialog.button(singleplayer, false);
         dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
         dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, null);
         dialog.key(com.badlogic.gdx.Input.Keys.O, true);

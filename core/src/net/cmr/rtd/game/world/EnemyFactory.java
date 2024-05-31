@@ -40,20 +40,25 @@ public class EnemyFactory {
     }
 
     public enum EnemyType {
-        BASIC_ONE((factory) -> factory.createBasicEnemyOne()),
-        BASIC_TWO((factory) -> factory.createBasicEnemyTwo()),
-        BASIC_THREE((factory) -> factory.createBasicEnemyThree()),
-        BASIC_FOUR((factory) -> factory.createBasicEnemyFour()),
+        BASIC_ONE(4, (factory) -> factory.createBasicEnemyOne()),
+        BASIC_TWO(10, (factory) -> factory.createBasicEnemyTwo()),
+        BASIC_THREE(25, (factory) -> factory.createBasicEnemyThree()),
+        BASIC_FOUR(125, (factory) -> factory.createBasicEnemyFour()),
         ;
 
         private Consumer<EnemyFactory> factory;
+        private int health;
 
-        EnemyType(Consumer<EnemyFactory> factory) {
+        EnemyType(int health, Consumer<EnemyFactory> factory) {
+            this.health = health;
             this.factory = factory;
         }
 
         public void createEnemy(EnemyFactory factory) {
             this.factory.accept(factory);
+        }
+        public int getHealth() {
+            return health;
         }
 
         public static EnemyType fromString(String type) {
@@ -90,13 +95,13 @@ public class EnemyFactory {
     }
 
 
-    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", 4, 1.5f)
+    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", EnemyType.BASIC_ONE.getHealth(), 1.5f)
                                             .immuneTo(FireEffect.class)); }
-    private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", 10, 1f)); }
-    private void createBasicEnemyThree() { send(createBasicEnemy("basic3", 25, 1f) 
+    private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", EnemyType.BASIC_TWO.getHealth(), 1f)); }
+    private void createBasicEnemyThree() { send(createBasicEnemy("basic3", EnemyType.BASIC_THREE.getHealth(), 1f) 
                                             .immuneTo(FireEffect.class)
                                             .immuneTo(SlownessEffect.class)); }
-    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", 125, .8f)
+    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR.getHealth(), .8f)
                                             .immuneTo(SlownessEffect.class)); }
     private void createHealerEnemyOne() { 
         /* 

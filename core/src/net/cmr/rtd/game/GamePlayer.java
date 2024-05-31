@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.badlogic.gdx.math.Vector2;
 
 import net.cmr.rtd.game.packets.DisconnectPacket;
+import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
@@ -174,6 +175,13 @@ public class GamePlayer {
         if (packet instanceof SkipRequestPacket) {
             SkipRequestPacket request = (SkipRequestPacket) packet;
             getManager().getWorld().requestSkip(this);
+        }
+
+        if (packet instanceof JumpPacket) {
+            Player player = getPlayer();
+            if (player != null) {
+                player.jump(manager.getUpdateData());
+            }
         }
 
     }

@@ -54,6 +54,7 @@ import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
@@ -96,7 +97,7 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
     
-    GameStream ioStream;
+    public GameStream ioStream;
     @Null GameManager gameManager; // Will be null if the local player is not the host
     World world;
     Stage worldStage;
@@ -136,12 +137,14 @@ public class GameScreen extends AbstractScreenEX {
 
     LevelSave save;
     public static NinePatch upgradeProgress, upgradeProgressBackground;
+    public final int team;
 
-    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, @Null LevelSave save) {
+    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, @Null LevelSave save, int team) {
         super(INITIALIZE_ALL);
         this.ioStream = ioStream;
         this.gameManager = gameManager;
         this.save = save;
+        this.team = team;
         this.ioStream.addListener(new PacketListener() {
             @Override
             public void packetReceived(Packet packet) {
@@ -577,6 +580,7 @@ public class GameScreen extends AbstractScreenEX {
                 Player player = (Player) getEntity(UUID.fromString(positionsPacket.uuids[i]));
                 if (player != null) {
                     player.setPosition(positionsPacket.positions[i]);
+                    // TODO: On multiplayer, the player's sprint is not accounted for their velocity, which causes visual bugs in animations
                     player.setVelocity(positionsPacket.velocities[i]);
                 }
             }
@@ -688,6 +692,16 @@ public class GameScreen extends AbstractScreenEX {
                 // If it isn't initializing the world, then notify
                 // this screen that a player has joined or left.
                 Log.info("Player " + playerPacket.username + " has " + (playerPacket.isConnecting() ? "joined" : "left")); 
+            }
+            return;
+        }
+
+        if (packet instanceof JumpPacket) {
+            JumpPacket jumpPacket = (JumpPacket) packet;
+            Entity entity = getEntity(jumpPacket.getPlayerUUID());
+            if (entity instanceof Player) {
+                Player player = (Player) entity;
+                player.jump(data);
             }
             return;
         }
@@ -847,6 +861,10 @@ public class GameScreen extends AbstractScreenEX {
     private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON) && gameManager != null) {
             resetGameDialog.show(stages.get(Align.center));
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            getLocalPlayer().jump(data);
+            ioStream.sendPacket(new JumpPacket());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {
@@ -1120,9 +1138,10 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public @Null Player getLocalPlayer() {
-        if (localPlayer != null) {
-            return localPlayer;
-        }
+        // TODO: uncommenting this code sometimes freezes the player and "desyncs" the players actual position and the camera
+        //if (localPlayer != null) {
+        //    return localPlayer;
+        //}
         if (world == null) { return null; }
         for (Entity entity : world.getEntities()) {
             if (entity instanceof Player) {
@@ -1344,6 +1363,9 @@ public class GameScreen extends AbstractScreenEX {
                 if (towerAt == null) {
                     return;
                 }
+                int tileX2 = Entity.getTileX(towerAt.getX());
+                int tileY2 = Entity.getTileY(towerAt.getY());
+
                 int totalApplied = Math.max(towerAt.getScopesApplied(), Math.max(towerAt.getLubricantApplied(), towerAt.getScrapMetalApplied()));
                 if (totalApplied >= TowerEntity.MAX_COMPONENTS) {
                     notification(SpriteType.STRUCTURE, "Cannot apply more components!");
@@ -1412,8 +1434,8 @@ public class GameScreen extends AbstractScreenEX {
                 componentDialog.getTitleLabel().setFontScale(.5f);
                 componentDialog.pad(Tile.SIZE/2f);
                 componentDialog.padTop(Tile.SIZE);
-                componentDialog.setSize(Tile.SIZE*4f, Tile.SIZE*4f);
-                componentDialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
+                componentDialog.setSize(Tile.SIZE*5f, Tile.SIZE*4f);
+                componentDialog.setPosition((tileX2 + .5f) * Tile.SIZE, (tileY2 + 1.25f) * Tile.SIZE, Align.bottom);
                 componentDialog.setMovable(false);
                 componentDialog.setVisible(true);
                 componentDialog.setKeepWithinStage(false);
@@ -1434,7 +1456,10 @@ public class GameScreen extends AbstractScreenEX {
                 no.pad(0, 5, 0, 5);
                 componentDialog.button(no, false);
                 componentDialog.key(Input.Keys.ESCAPE, false);
-                componentDialog.show(worldStage);
+                worldStage.addActor(componentDialog);
+                
+                //dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
+                //worldStage.addActor(dialog);
             }
             if (!multiPlace) {
                 exitPlacementMode();
@@ -1489,7 +1514,7 @@ public class GameScreen extends AbstractScreenEX {
         dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         worldStage.addActor(dialog);
-        dialog = upgradeDialog;
+        upgradeDialog = dialog;
     }
 
     public void setTitleText(String string) {

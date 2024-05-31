@@ -56,7 +56,7 @@ public class FireTower extends TowerEntity {
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                int targetLevel = (int) Math.floor(targetDPS + (getLevel() - 1) * .5f);
+                int targetLevel = (int) Math.floor(targetDPS + ((getLevel() - 1) / 5f));
                 new FireEffect(data, enemy.getEffects(), getLevel(), targetLevel);
                 actionOccured = true;
                 if (!launchedFireball && data.isServer()) {
@@ -67,7 +67,7 @@ public class FireTower extends TowerEntity {
                         .setScale(3f)
                         .setDamage(getLevel() * getLevel())
                         .setTimeToReachTarget(1)
-                        .setAOE(1.15f)
+                        .setAOE(.5f)
                         .setPrecision(1)
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);
@@ -80,7 +80,7 @@ public class FireTower extends TowerEntity {
                         .setParticleLife(.5f)
                         .setFollowEntity(true)
                         .setAnimationSpeed(2f)
-                        .setAreaSize(1.15f)
+                        .setAreaSize(.5f)
                         .create());
                     if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
                         // dont launch it
@@ -114,6 +114,13 @@ public class FireTower extends TowerEntity {
     @Override
     public float getAttackSpeed() {
         return .1f/getLubricantSpeedBoost();
+    }
+
+    public float calculateApproximateFireballDPS(float enemyDensity) {
+        float damagePerFireball = getLevel() * getLevel();
+        float timeBetweenFireballs = Math.max(2f, (6f - ((getLevel() - 1) * .5f)))/getLubricantSpeedBoost();
+        float fireballDPS = damagePerFireball / timeBetweenFireballs;
+        return fireballDPS * enemyDensity;
     }
 
     @Override

@@ -30,7 +30,7 @@ public class TeamData {
                 if (data instanceof StructureTileData) {
                     StructureTileData tile = (StructureTileData) data;
                     if (tile.team == team) {
-                        System.out.println("Team "+team+" has a structure at "+x+", "+y);
+                        //System.out.println("Team "+team+" has a structure at "+x+", "+y);
                         if (structurePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple end structures");
                         }
@@ -45,7 +45,7 @@ public class TeamData {
                 if (data instanceof StartTileData) {
                     StartTileData tile = (StartTileData) data;
                     if (tile.team == team) {
-                        System.out.println("Team "+team+" has a start tile at "+x+", "+y);
+                        //System.out.println("Team "+team+" has a start tile at "+x+", "+y);
                         if (startTilePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple start tiles");
                         }
@@ -100,18 +100,22 @@ public class TeamData {
         data.getManager().updateTeamStats(team);
     }
 
-    public void rollRandomItem(UpdateData data) {
+    int totalEnemies = 0;
 
-        int totalEnemies = 0;
+    public void rollRandomItem(UpdateData data) {
         Wave wave = data.getManager().getWorld().getCurrentWave();
         if (wave == null) {
             return;
         }
-        WavesData wavesData = data.getManager().getWorld().getWavesData();
-        for (WaveUnit unit : wave.getWaveUnits()) {
-            totalEnemies += unit.getQuantity();
-        }
 
+        WavesData wavesData = data.getManager().getWorld().getWavesData();
+        if (wave.getWaveUnits().size() != 0) {
+            totalEnemies = 0;
+            for (WaveUnit unit : wave.getWaveUnits()) {
+                totalEnemies += unit.getQuantity();
+            }
+        }
+    
         float random = (float) Math.random();
         float chance = 1f / totalEnemies;
         float desiredWavesPerDrop = wavesData.wavesPerComponentTarget;

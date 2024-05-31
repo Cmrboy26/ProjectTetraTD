@@ -34,10 +34,12 @@ public class WavesData {
     public int startingHealth;
     public HashMap<Integer, Wave> waves;
     public int wavesPerComponentTarget;
+    public EndlessUtils endlessUtils;
 
     public static int DEFAULT_STARTING_MONEY = 100;
     public static int DEFAULT_STARTING_HEALTH = 50;
     public static int DEFAULT_WAVES_PER_COMPONENT_TARGET = 3;
+
 
     public WavesData() {
         this.waves = new HashMap<Integer, Wave>();
@@ -195,13 +197,16 @@ public class WavesData {
      * @param waveNumber The number of the wave
      * @return The entities that will spawn within the time frame given by the elapsed time and delta time
      */
-    public EnemyType[] getEntities(float elapsedTime, float delta, int waveNumber) {
+    public EnemyType[] getEntities(UpdateData data, float elapsedTime, float delta, int waveNumber) {
         Wave wave = waves.get(waveNumber);
         if (wave == null) {
             return null;
         }
 
         ArrayList<EnemyType> entities = new ArrayList<EnemyType>();
+        if (endlessMode && wave.waveUnits.size() == 0 && elapsedTime >= -.5f) {
+            endlessUtils.generateWaveUnits(wave, data.getManager());
+        }
         for (WaveUnit unit : wave.getWaveUnits()) {
             EnemyType[] types = unit.getEnemiesToSpawn(elapsedTime, delta);
             if (types != null) {
@@ -218,9 +223,12 @@ public class WavesData {
 
         Wave at = getWave(waveNumber);
 
-        if (endlessMode && at != null) {
-            Wave next = EndlessUtils.generateDynamicWave(updateData.getManager());
-            waves.put(waveNumber + 1, next);
+        if (endlessMode && endlessUtils == null) {
+            endlessUtils = new EndlessUtils();
+        }
+        if (endlessMode && at == null) {
+            Wave next = endlessUtils.generateDynamicWave(updateData.getManager());
+            waves.put(waveNumber, next);
             return next;
         }
 

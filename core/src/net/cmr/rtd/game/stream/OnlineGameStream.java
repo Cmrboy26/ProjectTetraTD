@@ -1,10 +1,10 @@
 package net.cmr.rtd.game.stream;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.serializers.CompatibleFieldSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
@@ -15,6 +15,7 @@ import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
 import net.cmr.rtd.game.packets.PacketEncryption;
@@ -135,6 +136,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(AttackPacket.class);
         kryo.register(EffectPacket.class);
         kryo.register(TeamInventory.class);
+        kryo.register(JumpPacket.class);
     }
     
 }

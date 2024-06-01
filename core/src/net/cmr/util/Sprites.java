@@ -60,6 +60,7 @@ public class Sprites implements Disposable {
         RESUME("resume"),
         SKIP("skip"),
         RESTART("restart"),
+        SETTINGS("settings"),
         ;
 
         private String spriteName;

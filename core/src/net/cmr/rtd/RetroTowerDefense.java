@@ -13,7 +13,9 @@ import org.json.simple.parser.ParseException;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Client;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
@@ -30,16 +32,20 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.screen.GameScreen;
+import net.cmr.rtd.screen.HostScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
+import net.cmr.util.Sprites;
 
 public class RetroTowerDefense extends CMRGame {
 	
 	public RetroTowerDefense(NativeFileChooser fileChooser) {
 		super(fileChooser);
 	}
+
+	ScreenViewport viewport = new ScreenViewport();
 
 	@Override
 	public void create () {
@@ -82,6 +88,21 @@ public class RetroTowerDefense extends CMRGame {
 
 		ScreenUtils.clear(0, 0, 0, 1);
 		super.render();
+
+		if (Settings.getPreferences().getBoolean(Settings.SHOW_FPS)) {
+			viewport.apply(true);
+			batch().setProjectionMatrix(viewport.getCamera().combined);
+			batch().begin();
+			batch().setColor(Color.WHITE);
+			Sprites.skin().getFont("small-font").draw(batch(), "FPS: " + Gdx.graphics.getFramesPerSecond(), 5, Gdx.graphics.getHeight()-5);
+			batch().end();
+		}
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		viewport.update(width, height);
+		super.resize(width, height);
 	}
 	
 	@Override
@@ -158,12 +179,15 @@ public class RetroTowerDefense extends CMRGame {
 		}
 	}
 
-	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
-		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), levelSave, team);
+	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int teams) {
+		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), levelSave, teams);
 	}
 
-	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int team) {
-		details.setHostedOnline(true);
+	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int teams) {
+		HostScreen screen = new HostScreen(details, save, lsave, teams);
+		setScreen(screen);
+
+		/*details.setHostedOnline(true);
 		GameManager manager = save.loadGame(details);
 		//OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), new Client());
 		LocalGameStream[] pair = LocalGameStream.createStreamPair();
@@ -181,7 +205,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 		manager.onNewConnection(pair[1]);
-		clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+		clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));*/
 	}
 
 	/**

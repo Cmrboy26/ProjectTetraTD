@@ -3,6 +3,9 @@ package net.cmr.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
+import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.stream.OnlineGameStream;
+
 @SuppressWarnings("unused")
 public class Settings {
     
@@ -12,7 +15,15 @@ public class Settings {
     public static final String SFX_VOLUME = "sfxVolume";
     public static final String USERNAME = "username";
     public static final String SHOW_FPS = "showFPS";
+    public static final String FPS = "fps";
     public static final String SHOW_PLACEMENT_GRID = "showPlacementGrid";
+    // Host settings
+    public static final String USE_NPNP = "useNPnP";
+    public static final String PORT = "port";
+    public static final String MAX_PLAYERS = "maxPlayers";
+    // Join settings
+    public static final String JOIN_IP = "joinIP";
+    public static final String JOIN_PORT = "joinPort";
     private static Preferences preferences;
 
     public static void initializeSettings() {
@@ -33,6 +44,14 @@ public class Settings {
         defaultString(USERNAME, System.getProperty("user.name"), force, preferences);
         defaultBoolean(SHOW_FPS, false, force, preferences);
         defaultBoolean(SHOW_PLACEMENT_GRID, false, force, preferences);
+        defaultInt(FPS, -1, force, preferences);
+
+        defaultBoolean(USE_NPNP, true, force, preferences);
+        defaultInt(PORT, 11265, force, preferences);
+        defaultInt(MAX_PLAYERS, 4, force, preferences);
+
+        defaultString(JOIN_IP, "", force, preferences);
+        defaultInt(JOIN_PORT, 11265, force, preferences);
 
         preferences.flush();
     }
@@ -75,6 +94,14 @@ public class Settings {
         // Apply the settings to the game
         Audio.getInstance().setMusicVolume(preferences.getFloat(MUSIC_VOLUME) * preferences.getFloat(MASTER_VOLUME));
         Audio.getInstance().setSFXVolume(preferences.getFloat(SFX_VOLUME) * preferences.getFloat(MASTER_VOLUME));
+
+        int fps = preferences.getInteger(FPS);
+        if (fps <= -1) {
+            Gdx.graphics.setVSync(true);
+        } else {
+            Gdx.graphics.setVSync(false);
+        }
+        Gdx.graphics.setForegroundFPS(fps);
 
         Log.info("Applied settings.");
     }

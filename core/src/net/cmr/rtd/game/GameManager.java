@@ -11,10 +11,14 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
+import java.net.InetAddress;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.apache.commons.io.input.CloseShieldInputStream;
+import org.bitlet.weupnp.GatewayDevice;
+import org.bitlet.weupnp.GatewayDiscover;
 
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
@@ -269,6 +273,8 @@ public class GameManager implements Disposable {
             throw new IllegalStateException("The game manager has not been initialized.");
         }
         if (details.isHostedOnline()) {
+            // Attempt to port forward
+            attemptPortForward();
             // Start the server
             server.start();
             try {
@@ -331,6 +337,7 @@ public class GameManager implements Disposable {
         if (details.isHostedOnline()) {
             // Stop the server
             server.stop();
+            removePortForward();
         }
 
         dispose();
@@ -737,6 +744,7 @@ public class GameManager implements Disposable {
         private boolean hostedOnline = false;
         private String password = null;
         private boolean console;
+        private boolean useUPNP = false;
 
         public GameManagerDetails() {
 
@@ -747,14 +755,15 @@ public class GameManager implements Disposable {
         public void setTCPPort(int tcpPort) { this.tcpPort = tcpPort; }
         public void setPassword(String password) { this.password = password; }
         public void setUseConsole(boolean console) { this.console = console; }
-        
+        public void setUseUPNP(boolean useUPNP) { this.useUPNP = useUPNP; }
 
         public boolean isHostedOnline() { return hostedOnline; }
         public int getMaxPlayers() { return maxPlayers; }
         public int getTCPPort() { return tcpPort; }
         public String getPassword() { return password; }
-        public boolean usePassword() { return password != null; }
+        public boolean usePassword() { return password != null && !password.isEmpty(); }
         public boolean useConsole() { return console; }
+        public boolean useUPNP() { return useUPNP; }
     }
 
     public World getWorld() {
@@ -784,6 +793,56 @@ public class GameManager implements Disposable {
             }
         }
         return towers;
+    }
+
+    GatewayDiscover discover;
+
+    public boolean attemptPortForward() {
+        if (!details.useUPNP()) {
+            return false;
+        }
+        try {
+            discover = new GatewayDiscover();
+            discover.discover();
+            GatewayDevice d = discover.getValidGateway();
+            if (d == null) {
+                Log.warning("Failed to port forward on port: "+details.getTCPPort()+"! A manual port forward may be required.");
+                return false;
+            }
+            InetAddress localAddress = d.getLocalAddress();
+            String externalIPAddress = d.getExternalIPAddress();
+            boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
+            if (portMappingSuccessful) {
+                Log.info("Port forwarding successful: "+externalIPAddress+":"+details.getTCPPort());
+            }
+            if (!portMappingSuccessful) {
+                Log.warning("Failed to port forward on port: "+details.getTCPPort()+"! A manual port forward may be required.");
+            }
+            return portMappingSuccessful;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void removePortForward() {
+        if (!details.useUPNP()) {
+            return;
+        }
+        try {
+            GatewayDevice d = discover.getValidGateway();
+            if (d == null) {
+                discover.discover(); // Attempt to discover the gateway again to delete the port mapping
+                d = discover.getValidGateway();
+                if (d == null) {
+                    Log.warning("Failed to remove port forward on port: "+details.getTCPPort()+"!");
+                    return;
+                }
+            }
+            d.deletePortMapping(details.getTCPPort(), "TCP");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

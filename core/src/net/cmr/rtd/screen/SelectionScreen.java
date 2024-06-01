@@ -239,7 +239,7 @@ public class SelectionScreen extends AbstractScreenEX {
                                 GameSave save = new GameSave(fn);
                                 RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
                                 if (online) {
-                                    game.hostOnlineGame(details, save, lsave, team);
+                                    game.hostOnlineGame(details, save, lsave, teams);
                                 } else {
                                     game.joinSingleplayerGame(details, save, lsave, team);
                                 }
@@ -254,7 +254,11 @@ public class SelectionScreen extends AbstractScreenEX {
                             return null;
                         }
                     };
-                    game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                    if (!online) {
+                        game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                    } else {
+                        joinGameFunction.apply(0);
+                    }
                 });
             }
         });
@@ -285,7 +289,7 @@ public class SelectionScreen extends AbstractScreenEX {
                                         LevelSave levelSave = new LevelSave(folderName);
                                         RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
                                         if (online) {
-                                            game.hostOnlineGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, team);
+                                            game.hostOnlineGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, teams);
                                         } else {
                                             game.joinSingleplayerGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, team);
                                         }
@@ -297,7 +301,11 @@ public class SelectionScreen extends AbstractScreenEX {
                                     return null;
                                 }
                             };
-                            game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                            if (!online) {
+                                game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                            } else {
+                                joinGameFunction.apply(0);
+                            }
                         });
                     }
                 };

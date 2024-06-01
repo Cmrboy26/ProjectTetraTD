@@ -22,6 +22,16 @@ public class SettingsScreen extends AbstractScreenEX {
     public SettingsScreen() {
         super(INITIALIZE_ALL);
 
+
+
+		add(Align.center, getSettingsTable(() -> {
+            RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+            game.setScreen(new MainMenuScreen());
+        }));
+    }
+
+    public static Table getSettingsTable(Runnable onBack) {
+
 		Table table = new Table();
 		table.setFillParent(true);
 
@@ -81,11 +91,41 @@ public class SettingsScreen extends AbstractScreenEX {
         showPlacementGrid.setChecked(Settings.getPreferences().getBoolean(Settings.SHOW_PLACEMENT_GRID));
         settingsTable.add(showPlacementGrid).expandX().fillX().colspan(1).pad(10).row();
 
+        Slider fpsSlider = new Slider(-10.0f, 120.0f, 10.0f, false, Sprites.skin());
+        fpsSlider.setValue(Settings.getPreferences().getInteger(Settings.FPS));
+        Label fpsLabel = new Label("", Sprites.skin(), labelType) {
+            @Override
+            public void act(float delta) {
+                int fps = (int) fpsSlider.getValue();
+                if (fps < 0) {
+                    setText("FPS: VSync");
+                } else if(fps == 0) {
+                    setText("FPS: " + "Unlimited");
+                } else {
+                    setText("FPS: " + fps);
+                }
+                super.act(delta);
+            }
+        };
+        settingsTable.add(fpsLabel).left().padRight(10.0f).colspan(1);
+        settingsTable.add(fpsSlider).expandX().fillX().colspan(2).pad(10).row();
+
         // Settings End
 
         table.row();
         
         Table horizontalGroup = new Table();
+
+        TextButton backButton = new TextButton("Back", Sprites.skin(), labelType);
+        Audio.addClickSFX(backButton);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                onBack.run();
+                backButton.setChecked(false);
+            }
+        });
+        horizontalGroup.add(backButton).width(100).padLeft(20f).padRight(20);
 
         TextButton apply = new TextButton("Apply", Sprites.skin(), labelType);
         Audio.addClickSFX(apply);
@@ -99,27 +139,17 @@ public class SettingsScreen extends AbstractScreenEX {
                 Settings.getPreferences().putString(Settings.USERNAME, username.getText());
                 Settings.getPreferences().putBoolean(Settings.SHOW_FPS, showFPS.isChecked());
                 Settings.getPreferences().putBoolean(Settings.SHOW_PLACEMENT_GRID, showPlacementGrid.isChecked());
+                Settings.getPreferences().putInteger(Settings.FPS, (int)fpsSlider.getValue());
 
                 Settings.getPreferences().flush();
                 Settings.applySettings();
+                apply.setChecked(false);
             }
         });
         horizontalGroup.add(apply).width(100).padLeft(20f).padRight(20);
 
-        TextButton backButton = new TextButton("Back", Sprites.skin(), labelType);
-        Audio.addClickSFX(backButton);
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                game.setScreen(new MainMenuScreen());
-            }
-        });
-        horizontalGroup.add(backButton).width(100).padLeft(20f).padRight(20);
-
         table.add(horizontalGroup).bottom().pad(5f).width(100).expandX().row();
-
-		add(Align.center, table);
+        return table;
     }
 
     @Override

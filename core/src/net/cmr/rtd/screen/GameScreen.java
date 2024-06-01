@@ -114,7 +114,7 @@ public class GameScreen extends AbstractScreenEX {
     ImageButton wavePauseButton;
     ImageButton skipButton;
     //TextButton skipWaveButton;
-    Window shopWindow, inventoryWindow;
+    Window shopWindow, inventoryWindow, settings;
 
     GameType typeToPurchase;
     Entity entityToPlace;
@@ -212,18 +212,20 @@ public class GameScreen extends AbstractScreenEX {
         float waveLabelWidth = (iconSize * 5) + (5 * 2 * 2.5f);
 
         waveLabel = new Label("Waiting to start...", Sprites.skin(), "small");
-        waveLabel.setAlignment(Align.center);
+        waveLabel.setAlignment(Align.right);
         waveLabel.setSize(waveLabelWidth, iconSize);
-        waveLabel.setPosition(640-5, iconSize*1.65f, Align.bottomRight);
+        waveLabel.setPosition(640-5, 360-5, Align.topRight);
+        //waveLabel.setPosition(640-5, iconSize*1.65f, Align.bottomRight);
 
-        add(Align.bottomRight, waveLabel);
+        add(Align.topRight, waveLabel);
 
         waveCountdownLabel = new Label("", Sprites.skin(), "small");
-        waveCountdownLabel.setAlignment(Align.center);
+        waveCountdownLabel.setAlignment(Align.right);
         waveCountdownLabel.setSize(waveLabelWidth, iconSize);
-        waveCountdownLabel.setPosition(640-5, iconSize+3, Align.bottomRight);
+        //waveCountdownLabel.setPosition(640-5, iconSize+3, Align.bottomRight);
+        waveCountdownLabel.setPosition(640-5, 360-(5+iconSize/1.25f), Align.topRight);
 
-        add(Align.bottomRight, waveCountdownLabel);
+        add(Align.topRight, waveCountdownLabel);
 
         ButtonGroup<ImageButton> buttonGroup = new ButtonGroup<ImageButton>();
         buttonGroup.setMaxCheckCount(1);
@@ -246,6 +248,7 @@ public class GameScreen extends AbstractScreenEX {
                 if (shopButton.isDisabled()) { return; }
                 // NOTE: when switching to shop screen, deselect any other screens that are open (i.e. inventory screen)
                 shopWindow.setVisible(shopButton.isChecked());
+                settings.setVisible(false);
                 inventoryWindow.setVisible(false);
                 Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
@@ -272,6 +275,7 @@ public class GameScreen extends AbstractScreenEX {
                 // NOTE: when switching to inventory screen, deselect any other screens that are open
                 inventoryWindow.setVisible(inventoryButton.isChecked());
                 shopWindow.setVisible(false);
+                settings.setVisible(false);
                 Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
             }
         });
@@ -568,6 +572,23 @@ public class GameScreen extends AbstractScreenEX {
         });
         add(Align.bottomRight, restartButton);
 
+        ImageButtonStyle settingsStyle = new ImageButtonStyle(waveButtonStyles);
+        settingsStyle.imageUp = Sprites.drawable(SpriteType.SETTINGS);
+        settingsStyle.checked = settingsStyle.up;
+        settingsStyle.disabled = settingsStyle.up;
+        ImageButton settingsButton = new ImageButton(settingsStyle);
+        settingsButton.setSize(iconSize, iconSize);
+        settingsButton.setPosition(5, 5, Align.bottomLeft);
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (settingsButton.isDisabled()) { return; }
+                settings.setVisible(!settings.isVisible());
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+            }
+        });
+        add(Align.bottomLeft, settingsButton);
+
         /*inventoryTable.defaults().pad(5);
         inventoryTable.setFillParent(true);
         inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).colspan(1);
@@ -628,6 +649,18 @@ public class GameScreen extends AbstractScreenEX {
 
         upgradeProgress = new NinePatch(Sprites.sprite(SpriteType.UPGRADE_PROGRESS), 2, 2, 2, 2);
         upgradeProgressBackground = new NinePatch(Sprites.sprite(SpriteType.UPGRADE_PROGRESS_BACKGROUND), 2, 2, 2, 2);
+
+        settings = new Window("", Sprites.skin(), "small");
+        Table settingsTable = SettingsScreen.getSettingsTable(() -> {
+            settings.setVisible(false);
+        });
+        settings.add(settingsTable).grow();
+        settings.setSize(640, 300);
+        settings.setScale(.6f);
+        settings.setOrigin(Align.center);
+        settings.setVisible(false);
+        settings.setPosition(640/2, 360/2, Align.center);
+        add(Align.center, settings);
     }
 
     public void onRecievePacket(Packet packet) {
@@ -1314,7 +1347,7 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean inMenu() {
-        return shopButton.isChecked() || inventoryButton.isChecked();
+        return shopButton.isChecked() || inventoryButton.isChecked() || settings.isVisible();
     }
     public void closeMenu() {
         shopButton.setChecked(false);
@@ -1325,6 +1358,7 @@ public class GameScreen extends AbstractScreenEX {
             informationUpgradeWindow.remove();
             informationUpgradeWindow = null;
         }
+        settings.setVisible(false);
     }
 
     HashSet<Integer> notificationsActive = new HashSet<Integer>();

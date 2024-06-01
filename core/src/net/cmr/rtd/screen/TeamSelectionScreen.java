@@ -17,6 +17,8 @@ public class TeamSelectionScreen extends AbstractScreenEX {
     
     Function<Integer, Void> joinGameFunction;
     int availableTeams;
+    int selectedTeam = -1;
+    float countdown = 0.0f;
 
     public TeamSelectionScreen(Function<Integer, Void> joinGameFunction, int availableTeams) {
         super(INITIALIZE_ALL);
@@ -50,10 +52,13 @@ public class TeamSelectionScreen extends AbstractScreenEX {
             button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (team != -1) {
+                    if (team != -1 && selectedTeam == -1) {
                         System.out.println(team);
-                        joinGameFunction.apply(team);
-                        button.remove();
+                        table.row();
+                        Label label = new Label("Joining game...", Sprites.skin(), "small");
+                        label.setAlignment(Align.center);
+                        table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams).expandX().fillX().row();
+                        selectedTeam = team;
                     }
                 }
             });
@@ -74,6 +79,17 @@ public class TeamSelectionScreen extends AbstractScreenEX {
         table.add(joinButton).padTop(20.0f).padBottom(20.0f).space(10.0f).colspan(availableTeams);*/
 
         add(Align.center, table);
+    }
+
+    @Override
+    public void render(float delta) {
+        if (selectedTeam != -1) {
+            countdown += delta;
+        }
+        if (countdown > .1f) {
+            joinGameFunction.apply(selectedTeam);
+        }
+        super.render(delta);
     }
 
 }

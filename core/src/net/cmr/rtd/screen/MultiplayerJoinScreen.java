@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Align;
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
 public class MultiplayerJoinScreen extends AbstractScreenEX {
@@ -29,7 +30,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
         title.setAlignment(Align.center);
         table.add(title).padTop(20.0f).padBottom(20.0f).colspan(2).expandX().growX().row();
 
-        TextField ipField = new TextField("", Sprites.skin(), "small");
+        TextField ipField = new TextField(Settings.getPreferences().getString(Settings.JOIN_IP), Sprites.skin(), "small");
         ipField.setMessageText("localhost");
         ipField.setAlignment(Align.center);
         Label label = new Label("IP Address:", Sprites.skin(), "small");
@@ -37,7 +38,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
         table.add(label).expandX().padRight(10.0f).colspan(1);
         table.add(ipField).expandX().fillX().pad(10).colspan(1).row();
         
-        TextField portField = new TextField("", Sprites.skin(), "small");
+        TextField portField = new TextField(Settings.getPreferences().getString(Settings.JOIN_PORT), Sprites.skin(), "small");
         portField.setMessageText("11265");
         portField.setMaxLength(6);
         portField.setTextFieldFilter(new TextField.TextFieldFilter.DigitsOnlyFilter());
@@ -63,6 +64,14 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                 RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
                 final String ip = ipField.getText();
                 final int port = portField.getText().isEmpty() ? 11265 : Integer.parseInt(portField.getText());
+
+                Settings.getPreferences().putString(Settings.JOIN_IP, ip);
+                if (port == 11265) {
+                    Settings.getPreferences().putString(Settings.JOIN_PORT, "");
+                } else {
+                    Settings.getPreferences().putString(Settings.JOIN_PORT, portField.getText());
+                }
+                Settings.getPreferences().flush();
 
                 Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
                     @Override
@@ -91,8 +100,6 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                     SelectionScreen.displayErrorDialog(e, screen.stages);
                     e.printStackTrace();
                 }
-
-                // TODO: join game
             }
         });
         table.add(join).left().bottom().pad(5f).width(100).expandX().colspan(1);

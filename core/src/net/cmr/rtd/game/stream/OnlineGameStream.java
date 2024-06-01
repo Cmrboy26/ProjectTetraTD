@@ -1,6 +1,5 @@
 package net.cmr.rtd.game.stream;
 
-import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -34,6 +33,7 @@ import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.GameObject.GameType;
+import net.cmr.rtd.game.world.entities.HealerEnemy;
 
 public class OnlineGameStream extends GameStream {
 
@@ -152,6 +152,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(TeamInventory.class);
         kryo.register(JumpPacket.class);
         kryo.register(UUID.class, new UUIDSerializer());
+        kryo.register(HealerEnemy.HealerPacket.class);
     }
     
 }

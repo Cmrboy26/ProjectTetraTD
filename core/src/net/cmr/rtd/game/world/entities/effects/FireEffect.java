@@ -58,7 +58,7 @@ public class FireEffect extends Effect {
                 .setEntity(getEntity())
                 .setParticle(AnimationType.FIRE)
                 .setDuration(1)
-                .setEmissionRate(getLevel() + 1)
+                .setEmissionRate(2)
                 .setScale(.25f)
                 .setParticleLife(.5f)
                 .setFollowEntity(true)
@@ -73,7 +73,7 @@ public class FireEffect extends Effect {
 
     @Override
     public Color getDiscoloration() {
-        return new Color(255f/255f, 80/255f, 80/255f, 1f);
+        return new Color(255f/255f, 80/255f, 80/255f, 1f).mul(2f);
     }
     
 }

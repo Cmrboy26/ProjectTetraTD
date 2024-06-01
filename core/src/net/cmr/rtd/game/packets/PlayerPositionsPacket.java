@@ -8,8 +8,8 @@ import net.cmr.rtd.game.GamePlayer;
 
 public class PlayerPositionsPacket extends Packet {
 
-    public String[] uuids;
-    public Vector2[] positions, velocities;
+    public String[] uuids = new String[0];
+    public Vector2[] positions = new Vector2[0], velocities = new Vector2[0];
 
     public PlayerPositionsPacket() { super(); }
     public PlayerPositionsPacket(ArrayList<GamePlayer> playerz) {

@@ -654,7 +654,7 @@ public class GameManager implements Disposable {
             return;
         }
         TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
-        //sendPacketToAll(packet);
+        sendPacketToAll(packet);
         winningTeams.remove(teams.get(team));
         if (winningTeams.size() == 1) {
             TeamData winner = winningTeams.get(0);

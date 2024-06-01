@@ -36,9 +36,20 @@ public class BasicEnemy extends EnemyEntity {
     public BasicEnemy() {
         super(0, GameType.BASIC_ENEMY);
     }
+    public BasicEnemy(GameType type) {
+        super(0, type);
+    }
 
     public BasicEnemy(int team, String displayType, int maxHealth, float speed) {
         super(team, GameType.BASIC_ENEMY);
+        this.maxHealth = maxHealth;
+        this.health = maxHealth;
+        this.displayType = displayType;
+        this.speed = speed;
+    }
+
+    public BasicEnemy(GameType type, int team, String displayType, int maxHealth, float speed) {
+        super(team, type);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.displayType = displayType;

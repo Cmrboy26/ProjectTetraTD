@@ -259,6 +259,7 @@ public class ShopManager {
 
     public static boolean areTilesBlocking(UpdateData data, int x, int y) {
         World world = data.getWorld();
+        if (world == null) {return true;}
         TileType at = world.getTile(x, y, 1);
         TileType below = world.getTile(x, y, 0);
         if (below != TileType.FLOOR) {

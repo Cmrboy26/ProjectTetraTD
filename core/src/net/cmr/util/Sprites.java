@@ -36,7 +36,7 @@ public class Sprites implements Disposable {
         STRUCTURE_LIFE("structureLife"),
         STRUCTURE("structure"),
         DARKENED("darkened"),
-        PROJECTILE("area"),
+        PROJECTILE("projectile"),
         AREA("area"),
         BORDER_DEFAULT("borderDefault"),
         BORDER_SELECTED("borderSelected"),
@@ -56,6 +56,10 @@ public class Sprites implements Disposable {
         ICON("icon"),
         TROPHY("trophy"),
         LUBRICANT("lubricant"),
+        PAUSE("pause"),
+        RESUME("resume"),
+        SKIP("skip"),
+        RESTART("restart"),
         ;
 
         private String spriteName;
@@ -89,6 +93,11 @@ public class Sprites implements Disposable {
         BASIC_FOUR_UP("basic4/up", PlayMode.LOOP, enemySpeed),
         BASIC_FOUR_LEFT("basic4/left", PlayMode.LOOP, enemySpeed),
         BASIC_FOUR_RIGHT("basic4/right", PlayMode.LOOP, enemySpeed),
+
+        BASIC_FIVE_DOWN("basic5/down", PlayMode.LOOP, enemySpeed),
+        BASIC_FIVE_UP("basic5/up", PlayMode.LOOP, enemySpeed),
+        BASIC_FIVE_LEFT("basic5/left", PlayMode.LOOP, enemySpeed),
+        BASIC_FIVE_RIGHT("basic5/right", PlayMode.LOOP, enemySpeed),
 
         HEALER_ONE_DOWN("healer1/down", PlayMode.LOOP, enemySpeed),
         HEALER_ONE_UP("healer1/up", PlayMode.LOOP, enemySpeed),

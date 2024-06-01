@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.ParticleEmitter.Particle;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
@@ -195,7 +194,7 @@ public abstract class TowerEntity extends Entity {
         /**
          * Highest health to lowest health
          */
-        HEALTH {
+        HIGHEST_HEALTH {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (b.getHealth() - a.getHealth()));
@@ -204,7 +203,7 @@ public abstract class TowerEntity extends Entity {
         /**
          * Lowest health to highest health
          */
-        HEALTH_REVERSE {
+        LOWEST_HEALTH {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (a.getHealth() - b.getHealth()));
@@ -236,7 +235,6 @@ public abstract class TowerEntity extends Entity {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // TODO: Implement
-                // Cannot be implemented with current without syncing team point positions to the client
             }
         },
         /**
@@ -260,8 +258,8 @@ public abstract class TowerEntity extends Entity {
 
     public ArrayList<EnemyEntity> getEnemiesInRange(double tileRadius, UpdateData data, SortType sortType) {
         Objects.requireNonNull(sortType, "sortType cannot be null");
-        
-        double worldDistance = tileRadius = Tile.SIZE * tileRadius;
+        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(team, getPosition(), tileRadius, data);
+        /*double worldDistance = tileRadius = Tile.SIZE * tileRadius;
         ArrayList<EnemyEntity> entitiesInRange = new ArrayList<EnemyEntity>();
         double threshold = Tile.SIZE / 16;
         for (Entity entity : data.getWorld().getEntities()) {
@@ -274,8 +272,26 @@ public abstract class TowerEntity extends Entity {
                     entitiesInRange.add(enemy);
                 }
             }
-        }
+        }*/
         sortType.sort(entitiesInRange, this, data);
+        return entitiesInRange;
+    }
+
+    public static ArrayList<EnemyEntity> getEnemiesInRange(int team, Vector2 position, double tileRadius, UpdateData data) {
+        double worldDistance = tileRadius = Tile.SIZE * tileRadius;
+        ArrayList<EnemyEntity> entitiesInRange = new ArrayList<EnemyEntity>();
+        double threshold = Tile.SIZE / 16;
+        for (Entity entity : data.getWorld().getEntities()) {
+            if (entity instanceof EnemyEntity) {
+                EnemyEntity enemy = (EnemyEntity) entity;
+                if (enemy.getTeam() != team) continue;
+                //double distance = Math.abs(Math.max(entity.getX() - enemy.getX(), entity.getY() - enemy.getY()));
+                double distance = entity.getPosition().dst(position);
+                if (distance <= worldDistance + threshold) {
+                    entitiesInRange.add(enemy);
+                }
+            }
+        }
         return entitiesInRange;
     }
 
@@ -291,7 +307,7 @@ public abstract class TowerEntity extends Entity {
     public abstract String getDescription();
 
     public SortType getPreferedSortType() {
-        return SortType.HEALTH;
+        return SortType.HIGHEST_HEALTH;
     }
 
     public float getUpgradeTime() {

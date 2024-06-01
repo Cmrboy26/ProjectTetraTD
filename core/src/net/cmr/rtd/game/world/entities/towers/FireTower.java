@@ -65,9 +65,9 @@ public class FireTower extends TowerEntity {
                         .setAnimation(AnimationType.FIRE)
                         .setPosition(new Vector2(getPosition()))
                         .setScale(3f)
-                        .setDamage(getLevel() * getLevel())
+                        .setDamage((int) (getLevel() * getLevel() * .75f))
                         .setTimeToReachTarget(1)
-                        .setAOE(.5f)
+                        .setAOE(getFireballAOE())
                         .setPrecision(1)
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);
@@ -100,6 +100,10 @@ public class FireTower extends TowerEntity {
         return actionOccured;
     }
 
+    public float getFireballAOE() {
+        return .5f;
+    }
+
     @Override
     protected void serializeTower(DataBuffer buffer) throws IOException {
         buffer.writeFloat(fireballDelta);
@@ -120,7 +124,8 @@ public class FireTower extends TowerEntity {
         float damagePerFireball = getLevel() * getLevel();
         float timeBetweenFireballs = Math.max(2f, (6f - ((getLevel() - 1) * .5f)))/getLubricantSpeedBoost();
         float fireballDPS = damagePerFireball / timeBetweenFireballs;
-        return fireballDPS * enemyDensity;
+        float areaFactor = enemyDensity * getFireballAOE();
+        return fireballDPS * areaFactor;
     }
 
     @Override

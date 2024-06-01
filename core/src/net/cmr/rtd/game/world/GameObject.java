@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.world.entities.BasicEnemy;
+import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
@@ -31,12 +32,13 @@ public abstract class GameObject {
         WORLD(World.class),
         PLAYER(Player.class),
         BASIC_ENEMY(BasicEnemy.class),
+        HEALER_ENEMY(HealerEnemy.class),
         
         ICE_TOWER(IceTower.class),
         FIRE_TOWER(FireTower.class),
         SHOOTER_TOWER(ShooterTower.class),
 
-        PROJECTILE(Projectile.class)
+        PROJECTILE(Projectile.class), 
         ;
 
         private final Class<? extends GameObject> clazz;

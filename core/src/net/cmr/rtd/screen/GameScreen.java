@@ -111,7 +111,9 @@ public class GameScreen extends AbstractScreenEX {
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
     ImageButton upgradeButton, shopButton, inventoryButton;
-    TextButton skipWaveButton;
+    ImageButton wavePauseButton;
+    ImageButton skipButton;
+    //TextButton skipWaveButton;
     Window shopWindow, inventoryWindow;
 
     GameType typeToPurchase;
@@ -124,7 +126,7 @@ public class GameScreen extends AbstractScreenEX {
     ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
 
     Dialog quitDialog;
-    Dialog upgradeDialog;
+    Window informationUpgradeWindow;
     Dialog resetGameDialog;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
@@ -207,19 +209,21 @@ public class GameScreen extends AbstractScreenEX {
         add(Align.topLeft, structureLife);
         add(Align.topLeft, structureLifeLabel);
 
-        waveLabel = new Label("Waiting to start...", Sprites.skin(), "small");
-        waveLabel.setAlignment(Align.right);
-        waveLabel.setSize(200, iconSize);
-        waveLabel.setPosition(640-5, 360-5, Align.topRight);
+        float waveLabelWidth = (iconSize * 5) + (5 * 2 * 2.5f);
 
-        add(Align.topRight, waveLabel);
+        waveLabel = new Label("Waiting to start...", Sprites.skin(), "small");
+        waveLabel.setAlignment(Align.center);
+        waveLabel.setSize(waveLabelWidth, iconSize);
+        waveLabel.setPosition(640-5, iconSize*1.65f, Align.bottomRight);
+
+        add(Align.bottomRight, waveLabel);
 
         waveCountdownLabel = new Label("", Sprites.skin(), "small");
-        waveCountdownLabel.setAlignment(Align.right);
-        waveCountdownLabel.setSize(200, iconSize);
-        waveCountdownLabel.setPosition(640-5, 360-5-iconSize, Align.topRight);
+        waveCountdownLabel.setAlignment(Align.center);
+        waveCountdownLabel.setSize(waveLabelWidth, iconSize);
+        waveCountdownLabel.setPosition(640-5, iconSize+3, Align.bottomRight);
 
-        add(Align.topRight, waveCountdownLabel);
+        add(Align.bottomRight, waveCountdownLabel);
 
         ButtonGroup<ImageButton> buttonGroup = new ButtonGroup<ImageButton>();
         buttonGroup.setMaxCheckCount(1);
@@ -342,8 +346,8 @@ public class GameScreen extends AbstractScreenEX {
 
 
         GlyphLayout layout = new GlyphLayout();
-        layout.setText(style2.font, "Skip Prep");
-        skipWaveButton = new TextButton("Skip Prep", style2) {
+        layout.setText(style2.font, "Voted");
+        /*skipWaveButton = new TextButton("Skip", style2) {
             boolean preping = false;
             boolean initialized = false;
             @Override
@@ -356,7 +360,7 @@ public class GameScreen extends AbstractScreenEX {
                     skipWaveButton.setVisible(true);
                     skipWaveButton.setDisabled(false);
                     if (preping && !areWavesPaused) {
-                        skipWaveButton.setText("Skip Prep");
+                        skipWaveButton.setText("Skip");
                         skipWaveButton.addAction(Actions.fadeIn(0.5f, Interpolation.linear));
                     } else {
                         skipWaveButton.addAction(Actions.fadeOut(0.5f, Interpolation.linear));
@@ -373,12 +377,12 @@ public class GameScreen extends AbstractScreenEX {
                 if (skipWaveButton.isDisabled()) { return; }
                 skipWaveButton.setDisabled(true);
                 Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
-                skipWaveButton.setText("Skipping...");
+                skipWaveButton.setText("Voted");
                 ioStream.sendPacket(new SkipRequestPacket());
             }
-        });
+        });*/
 
-        add(Align.bottomLeft, skipWaveButton);
+        //add(Align.bottomLeft, skipWaveButton);
 
         // TODO: Add inventory menus and functionality
         shopWindow = new Window("Shop", Sprites.skin(), "small");
@@ -481,8 +485,88 @@ public class GameScreen extends AbstractScreenEX {
         });
         inventoryTable.add(scraps).pad(pad).growX().colspan(1);
         inventoryTable.row();
-        
 
+        ImageButtonStyle waveButtonStyles = new ImageButtonStyle();
+        waveButtonStyles.down = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DOWN), patch, patch, patch, patch));
+        waveButtonStyles.up = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
+        waveButtonStyles.over = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_HOVER), patch, patch, patch, patch));
+        waveButtonStyles.checkedOver = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_HOVER), patch, patch, patch, patch));
+        waveButtonStyles.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
+        waveButtonStyles.disabled = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DISABLED), patch, patch, patch, patch));
+        ImageButtonStyle skipButtonStyle = new ImageButtonStyle(waveButtonStyles);
+        skipButtonStyle.imageUp = Sprites.drawable(SpriteType.SKIP);
+        skipButton = new ImageButton(skipButtonStyle) {
+            boolean preping = false;
+            boolean initialized = false;
+            @Override
+            public void act(float delta) {
+                float preptime = waveCountdown - waveDuration;
+                boolean lastPrep = preping;
+                preping = preptime > 0 && !areWavesPaused && wave != 0;
+                if (lastPrep != preping || !initialized || !areWavesPaused) {
+                    initialized = true;
+                    setDisabled(false);
+                }
+                if (preptime <= 0 || areWavesPaused) {
+                    setDisabled(true);
+                }   
+
+                super.act(delta);
+            }
+        };
+        skipButton.setSize(iconSize*2, iconSize);
+        skipButton.setPosition(640-5, 5, Align.bottomRight);
+        skipButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (skipButton.isDisabled()) { return; }
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                voteSkip();
+            }
+        });
+        add(Align.bottomRight, skipButton);
+
+        ImageButtonStyle style3 = new ImageButtonStyle(waveButtonStyles);
+        style3.imageChecked = Sprites.drawable(SpriteType.PAUSE);
+        style3.imageUp = Sprites.drawable(SpriteType.RESUME);
+        style3.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_SELECTED), patch, patch, patch, patch));
+
+        wavePauseButton = new ImageButton(style3);
+        wavePauseButton.setSize(iconSize*2, iconSize);
+        wavePauseButton.setPosition(640-10-iconSize*2, 5, Align.bottomRight);
+        wavePauseButton.setDisabled(gameManager == null);
+        wavePauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (wavePauseButton.isDisabled()) { return; }
+                if (!wavePauseButton.isChecked()) {
+                    gameManager.pauseWaves();
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1f);
+                } else {
+                    gameManager.resumeWaves();
+                    Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                }
+            }
+        });
+        add(Align.bottomRight, wavePauseButton);
+        
+        ImageButtonStyle style4 = new ImageButtonStyle(waveButtonStyles);
+        style4.imageUp = Sprites.drawable(SpriteType.RESTART);
+        ImageButton restartButton = new ImageButton(style4);
+        if (gameManager == null) {
+            restartButton.setDisabled(true);
+        }
+        restartButton.setSize(iconSize * 1.5f, iconSize);
+        restartButton.setPosition(640-5*3-iconSize*4, 5, Align.bottomRight);
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (restartButton.isDisabled()) { return; }
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                resetGameDialog.show(stages.get(Align.center));
+            }
+        });
+        add(Align.bottomRight, restartButton);
 
         /*inventoryTable.defaults().pad(5);
         inventoryTable.setFillParent(true);
@@ -520,7 +604,8 @@ public class GameScreen extends AbstractScreenEX {
 
         title = new Label("", Sprites.skin(), "small");
         title.setAlignment(Align.center);
-        title.setPosition(640/2, 50, Align.bottom);
+        title.setPosition(640/2, 58, Align.bottom);
+        title.setFontScale(.4f);
         add(Align.bottom, title);
 
         resetGameDialog = new Dialog("", Sprites.skin(), "small") {
@@ -531,9 +616,14 @@ public class GameScreen extends AbstractScreenEX {
                 }
             }
         };
+        resetGameDialog.pad(10f);
         resetGameDialog.text("Are you sure you want to reset the game?", Sprites.skin().get("small", LabelStyle.class));
-        resetGameDialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-        resetGameDialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        TextButton yes = new TextButton("Yes", Sprites.skin().get("small", TextButtonStyle.class));
+        yes.pad(0, 10f, 0, 10f);
+        TextButton no = new TextButton("No", Sprites.skin().get("small", TextButtonStyle.class));
+        no.pad(0, 10f, 0, 10f);
+        resetGameDialog.button(yes, true);
+        resetGameDialog.button(no, false);
         resetGameDialog.key(Input.Keys.ESCAPE, false);
 
         upgradeProgress = new NinePatch(Sprites.sprite(SpriteType.UPGRADE_PROGRESS), 2, 2, 2, 2);
@@ -661,6 +751,8 @@ public class GameScreen extends AbstractScreenEX {
             this.waveCountdown = wavePacket.getDuration();
             this.wave = wavePacket.getWaveNumber();
             this.areWavesPaused = wavePacket.isPaused();
+            wavePauseButton.setChecked(!areWavesPaused);
+
             if (wavePacket.shouldWarn()) {
                 notification(SpriteType.WARNING, "Special wave incoming! Be careful!");
                 Audio.getInstance().playSFX(GameSFX.SCARY_WARNING, 1f);
@@ -701,7 +793,7 @@ public class GameScreen extends AbstractScreenEX {
             Entity entity = getEntity(jumpPacket.getPlayerUUID());
             if (entity instanceof Player) {
                 Player player = (Player) entity;
-                player.jump(data);
+                player.jump(data, true);
             }
             return;
         }
@@ -746,7 +838,7 @@ public class GameScreen extends AbstractScreenEX {
         ioStream.update();
 
         if (areWavesPaused) {
-            waveCountdownLabel.setText("Waves Paused" + (gameManager != null ? " (Press \"P\" to resume)" : ""));
+            waveCountdownLabel.setText("(Paused)");
         } else if (waveCountdown != -1) {
 
             String waveText = "Wave " + wave;
@@ -868,6 +960,9 @@ public class GameScreen extends AbstractScreenEX {
                 ioStream.sendPacket(new JumpPacket());
             }
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            if (!skipButton.isDisabled()) {voteSkip();}
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {
                 exitPlacementMode();
@@ -944,19 +1039,19 @@ public class GameScreen extends AbstractScreenEX {
             if (placementMode == PlacementMode.COMPONENT) {
                 action = "insert component";
             }
-            setTitleText("Click to " + (action) +" (Press ESC to cancel)");
+            setTitleText("Click to " + (action) +"\n(Press ESC to cancel)");
         } else {
             setTitleText("");
             if (Gdx.input.isKeyPressed(Input.Keys.R)) {
                 // Sell the tower at the mouse position if it's on the same team
-                setTitleText("Click to sell tower (Release R to cancel)");
+                setTitleText("Click to sell tower\n(Release R to cancel)");
                 if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
                     Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
                     ioStream.sendPacket(packet);
                 }
             } else {
-                if (title.getText().toString().equals("Click to sell tower (Release R to cancel)")) {
+                if (title.getText().toString().equals("Click to sell tower\n(Release R to cancel)")) {
                     setTitleText("");
                 }
             }
@@ -982,64 +1077,108 @@ public class GameScreen extends AbstractScreenEX {
         }
     }
 
+    int infoTowerX = -1, infoTowerY = -1;
+    float infoWindowX = -1, infoWindowY = -1;
+
     private void processMouse(int tileX, int tileY) {
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE) || Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
-            if (tower != null) {
-                // Display the tower's stats
-                if (upgradeDialog != null) {
-                    upgradeDialog.remove();
-                    upgradeDialog = null;
-                }
-                TowerEntity.displayRange(tower);
-                upgradeDialog = new Dialog(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
-                    @Override
-                    protected void result(Object object) {
-                        if (object.equals(true)) {
-                            upgradeDialog(tower);
-                        }
-                        TowerEntity.displayRange = false;
-                        TowerEntity.displayRangeTower = null;
+            if (tileX == infoTowerX && tileY == infoTowerY && informationUpgradeWindow != null) {
+                removeInfoWindow();
+            } else {
+                infoTowerX = tileX;
+                infoTowerY = tileY;
+                if (tower == null && informationUpgradeWindow != null) {
+                    removeInfoWindow();
+                } else if (tower != null) {
+                    // Display the tower's stats
+                    if (informationUpgradeWindow != null) {
+                        removeInfoWindow();
                     }
-                };
-                upgradeDialog.getTitleLabel().setAlignment(Align.center);
-                upgradeDialog.pad(10);
-                upgradeDialog.padTop(30);
-                upgradeDialog.setSize(200, 200);
-                upgradeDialog.setMovable(true);
-                upgradeDialog.setVisible(true);
-                String componentPath = "None";
-                String benefits = "None";
-                if (tower.getLubricantApplied() > 0) {
-                    componentPath = "Lubricant";
-                    benefits = "+"+tower.getLubricantSpeedBoostPercent()+"% Attack Speed";
-                } else if (tower.getScopesApplied() > 0) {
-                    componentPath = "Scopes";
-                    benefits = "+"+tower.getScopeRangeBoostPercent()+"% Range";
-                } else if (tower.getScrapMetalApplied() > 0) {
-                    componentPath = "Scrap Metal";
-                    benefits = "+"+tower.getScrapMetalDamageBoostPercent()+"% Damage";
+                    TowerEntity.displayRange(tower);
+                    informationUpgradeWindow = new Window(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
+                        @Override
+                        public void act(float delta) {
+                            super.act(delta);
+                        }
+                    };
+                    informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
+                    informationUpgradeWindow.pad(10);
+                    informationUpgradeWindow.padTop(30);
+                    informationUpgradeWindow.setSize(225, 200);
+                    informationUpgradeWindow.setMovable(true);
+                    informationUpgradeWindow.setVisible(true);
+                    informationUpgradeWindow.setResizable(true);
+                    String componentPath = "None";
+                    String benefits = "None";
+                    if (tower.getLubricantApplied() > 0) {
+                        componentPath = "Lubricant";
+                        benefits = "+"+tower.getLubricantSpeedBoostPercent()+"% Attack Speed";
+                    } else if (tower.getScopesApplied() > 0) {
+                        componentPath = "Scopes";
+                        benefits = "+"+tower.getScopeRangeBoostPercent()+"% Range";
+                    } else if (tower.getScrapMetalApplied() > 0) {
+                        componentPath = "Scrap Metal";
+                        benefits = "+"+tower.getScrapMetalDamageBoostPercent()+"% Damage";
+                    }
+                    String text = "Level: " + tower.getLevel();
+                    text += "\nDamage: " + tower.getDisplayDamage();
+                    text += "\nRange: " + tower.getDisplayRange();
+                    text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
+                    text += "\nDescription: "+tower.getDescription();
+                    text += "\nComponent Path: " + componentPath;
+                    if (!componentPath.equals("None")) {
+                        text += "\n- Progress: "+tower.getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS;
+                        text += "\n- Bonuses: "+benefits;
+                    }
+                    Label label = new Label(text, Sprites.skin(), "small");
+                    label.setWrap(true);
+                    label.setFontScale(.25f);
+                    informationUpgradeWindow.add(label).grow().colspan(2).row();
+                    TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    upgradeButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                            removeInfoWindow();
+                            upgradeDialog(tower, false);
+                        }
+                    });
+                    informationUpgradeWindow.add(upgradeButton).pad(3f).growX();
+                    informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
+                    TextButton closeButton = new TextButton("Close", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    closeButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            Audio.getInstance().playSFX(GameSFX.DESELECT, 1f);
+                            removeInfoWindow();
+                        }
+                    });
+                    informationUpgradeWindow.add(closeButton).pad(3f).growX();
+                    //informationDialog.button("Close", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    //informationDialog.key(Input.Keys.ESCAPE, false);
+                    stages.get(Align.center).addActor(informationUpgradeWindow);
+                    if (infoWindowX != -1 && infoWindowY != -1) {
+                        informationUpgradeWindow.setPosition(infoWindowX, infoWindowY);
+                    } else {
+                        informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
+                    }
                 }
-                String text = "Level: " + tower.getLevel();
-                text += "\nDamage: " + tower.getDisplayDamage();
-                text += "\nRange: " + tower.getDisplayRange();
-                text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
-                text += "\nDescription: "+tower.getDescription();
-                text += "\nComponent Path: " + componentPath;
-                if (!componentPath.equals("None")) {
-                    text += "\n- Progress: "+tower.getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS;
-                    text += "\n- Benefits: "+benefits;
-                }
-                Label label = new Label(text, Sprites.skin(), "small");
-                label.setFontScale(.25f);
-                upgradeDialog.text(label);
-                upgradeDialog.button("Upgrade", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                upgradeDialog.button("Close", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                upgradeDialog.key(Input.Keys.ESCAPE, false);
-                upgradeDialog.show(stages.get(Align.center));
-                upgradeDialog.setPosition(640 - 10, 180, Align.right);
             }
         }
+    }
+
+    private void removeInfoWindow() {
+        if (informationUpgradeWindow == null) {
+            return;
+        }
+        //infoWindowX = informationWindow.getX();
+        //infoWindowY = informationWindow.getY();
+        informationUpgradeWindow.setVisible(false);
+        informationUpgradeWindow.remove();
+        informationUpgradeWindow = null;
+        TowerEntity.displayRange = false;
+        TowerEntity.displayRangeTower = null;
     }
 
     float lastVelocityX = 0, lastVelocityY = 0;
@@ -1175,16 +1314,16 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean inMenu() {
-        return shopButton.isChecked() || inventoryButton.isChecked() || upgradeDialog != null;
+        return shopButton.isChecked() || inventoryButton.isChecked();
     }
     public void closeMenu() {
         shopButton.setChecked(false);
         inventoryButton.setChecked(false);
         shopWindow.setVisible(false);
         inventoryWindow.setVisible(false);
-        if (upgradeDialog != null) {
-            upgradeDialog.remove();
-            upgradeDialog = null;
+        if (informationUpgradeWindow != null) {
+            informationUpgradeWindow.remove();
+            informationUpgradeWindow = null;
         }
     }
 
@@ -1205,7 +1344,7 @@ public class GameScreen extends AbstractScreenEX {
         final int result = notificationPosition;
         notificationsActive.add(result);
 
-        float targetY = 5 + 5 + 32 * result;
+        float targetY = 5 + 5 + 32 * result + 70;
 
         group.space(5);
         group.setPosition(640+5, targetY, Align.bottomLeft);
@@ -1353,13 +1492,13 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
-                if (upgradeDialog != null) {
-                    upgradeDialog.remove();
-                    upgradeDialog = null;
+                if (informationUpgradeWindow != null) {
+                    informationUpgradeWindow.remove();
+                    informationUpgradeWindow = null;
                 }
 
                 // Open the upgrade dialog
-                upgradeDialog(towerAt);
+                upgradeDialog(towerAt, multiPlace);
             } else if (placementMode == PlacementMode.COMPONENT) {
                 TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
                 if (towerAt == null) {
@@ -1469,10 +1608,16 @@ public class GameScreen extends AbstractScreenEX {
         }
     }
 
-    public void upgradeDialog(TowerEntity towerAt) {
+    public void upgradeDialog(TowerEntity towerAt, boolean multiplace) {
+        removeInfoWindow();
         int tileX = Entity.getTileX(towerAt.getX());
         int tileY = Entity.getTileY(towerAt.getY());
         long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel());
+        if (multiplace) {
+            GameScreen.this.upgrade(cost, tileX, tileY);
+            return;
+        }
+
         TowerEntity.displayRange = false;
         TowerEntity.displayRangeTower = null;
         Dialog dialog = new Dialog("Upgrade?", Sprites.skin(), "small") {
@@ -1482,16 +1627,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
-                if (cost > inventory.getCash()) {
-                    notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(cost).substring(1)+")");
-                    Audio.getInstance().playSFX(GameSFX.WARNING, 1);
-                    return;
-                }
-                Audio.getInstance().playSFX(GameSFX.SELECT, 1);
-                PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.UPGRADE, null, tileX, tileY);
-                ioStream.sendPacket(packet);
-                Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1);
-                upgradeDialog = null;
+                GameScreen.this.upgrade(cost, tileX, tileY);
             }
         };
         dialog.getTitleLabel().setAlignment(Align.center);
@@ -1516,11 +1652,30 @@ public class GameScreen extends AbstractScreenEX {
         dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         worldStage.addActor(dialog);
-        upgradeDialog = dialog;
+        informationUpgradeWindow = dialog;
+    }
+
+    private void upgrade(long cost, int tileX, int tileY) {
+        if (cost > inventory.getCash()) {
+            notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(cost).substring(1)+")");
+            Audio.getInstance().playSFX(GameSFX.WARNING, 1);
+            return;
+        }
+        Audio.getInstance().playSFX(GameSFX.SELECT, 1);
+        PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.UPGRADE, null, tileX, tileY);
+        ioStream.sendPacket(packet);
+        Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1);
+        informationUpgradeWindow = null;   
     }
 
     public void setTitleText(String string) {
         title.setText(string);
+    }
+
+    public void voteSkip() {
+        skipButton.setDisabled(true);
+        skipButton.setChecked(true);
+        ioStream.sendPacket(new SkipRequestPacket());
     }
 
 }

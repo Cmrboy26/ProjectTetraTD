@@ -176,9 +176,9 @@ public class World extends GameObject {
     }
     public void requestSkip(GamePlayer player) {
         Objects.requireNonNull(player);
-        Wave waveObj = wavesData.getWave(this.wave);
-        float waveCountdown = PREPARATION_TIME + waveObj.getWaveTime() + waveObj.getAdditionalPrepTime();
-        float elapsedTime = waveCountdown - this.waveCountdown;
+        Wave waveObj = wavesData.getNextWave(this.wave, player.getManager().getUpdateData());
+        float calculatedWaveCountdown = PREPARATION_TIME + waveObj.getWaveTime() + waveObj.getAdditionalPrepTime();
+        float elapsedTime = calculatedWaveCountdown - this.waveCountdown;
         if (elapsedTime < waveObj.getAdditionalPrepTime() + PREPARATION_TIME) {
             // Process the skip request.
             if (skipRequests == null) {
@@ -414,7 +414,6 @@ public class World extends GameObject {
         TileData.registerKryo(kryo);
         Input kryoInput = new Input(input);
         for (int i = 0; i < tileDataCount; i++) {
-            kryo.getContext().put("wet", new TeamInventory());
             Point3D point = (Point3D) kryo.readClassAndObject(kryoInput);
             TileData data = (TileData) kryo.readClassAndObject(kryoInput);
             world.tileDataMap.put(point, data);

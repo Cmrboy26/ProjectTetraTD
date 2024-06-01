@@ -141,8 +141,8 @@ public class Player extends Entity {
         }
     }
 
-    public boolean jump(UpdateData data) {
-        if (jumpProgress > 0) return false;
+    public boolean jump(UpdateData data, boolean force) {
+        if (jumpProgress > 0 && !force) return false;
         if (jumpProgress <= 0) {
             jumpProgress = jumpTime;
         }
@@ -155,6 +155,9 @@ public class Player extends Entity {
             }
         }
         return true;
+    }
+    public boolean jump(UpdateData data) {
+        return jump(data, false);
     }
 
     private AnimationType getAnimationFromMovement() {

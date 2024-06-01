@@ -27,6 +27,8 @@ public class StructureTileData extends TeamTileData {
         return super.toString();
     }
 
+    transient int lastHealth = 0;
+
     @Override
     public void update(float delta, int tileX, int tileY, UpdateData data) {
         if (data.isClient()) {
@@ -39,9 +41,10 @@ public class StructureTileData extends TeamTileData {
             TeamData teamm = data.getManager().getTeam(team);
 
             data.getManager().updateTeamStats(team);
-            if (health <= 0) {
+            if (health <= 0 && lastHealth > 0) {
                 data.getManager().teamLost(team);
             }
+            lastHealth = health;
         }
 
     }

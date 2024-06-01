@@ -3,8 +3,10 @@ package net.cmr.rtd.game.world;
 import java.util.function.Consumer;
 
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -40,10 +42,13 @@ public class EnemyFactory {
     }
 
     public enum EnemyType {
-        BASIC_ONE(4, (factory) -> factory.createBasicEnemyOne()),
-        BASIC_TWO(10, (factory) -> factory.createBasicEnemyTwo()),
-        BASIC_THREE(25, (factory) -> factory.createBasicEnemyThree()),
-        BASIC_FOUR(125, (factory) -> factory.createBasicEnemyFour()),
+        BASIC_ONE(4, EnemyFactory::createBasicEnemyOne),
+        BASIC_TWO(10, EnemyFactory::createBasicEnemyTwo),
+        BASIC_THREE(25, EnemyFactory::createBasicEnemyThree),
+        BASIC_FOUR(125, EnemyFactory::createBasicEnemyFour),
+        BASIC_FIVE(1000, EnemyFactory::createBasicEnemyFive),
+
+        HEALER_ONE(250, EnemyFactory::createHealerEnemyOne),
         ;
 
         private Consumer<EnemyFactory> factory;
@@ -89,26 +94,25 @@ public class EnemyFactory {
         }
     }
 
-    private BasicEnemy createBasicEnemy(String displayType, int maxHealth, float speed) {
-        BasicEnemy enemy = new BasicEnemy(team, displayType, maxHealth, speed);
+    private BasicEnemy createBasicEnemy(String displayType, EnemyType type, float speed) {
+        BasicEnemy enemy = new BasicEnemy(team, displayType, type.health, speed);
+        return enemy;
+    }
+    private HealerEnemy createHealerEnemy(String displayType, EnemyType type, float speed) {
+        HealerEnemy enemy = new HealerEnemy(team, displayType, type.health, speed);
         return enemy;
     }
 
 
-    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", EnemyType.BASIC_ONE.getHealth(), 1.5f)
+    private void createBasicEnemyOne() { send(createBasicEnemy("basic1", EnemyType.BASIC_ONE, 1.5f)
                                             .immuneTo(FireEffect.class)); }
-    private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", EnemyType.BASIC_TWO.getHealth(), 1f)); }
-    private void createBasicEnemyThree() { send(createBasicEnemy("basic3", EnemyType.BASIC_THREE.getHealth(), 1f) 
-                                            .immuneTo(FireEffect.class)
+    private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", EnemyType.BASIC_TWO, 1f)); }
+    private void createBasicEnemyThree() { send(createBasicEnemy("basic3", EnemyType.BASIC_THREE, 1f) 
+                                            .immuneTo(FireEffect.class)); }
+    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR, .8f)); }
+    private void createBasicEnemyFive() { send(createBasicEnemy("basic5", EnemyType.BASIC_FIVE, .5f)
                                             .immuneTo(SlownessEffect.class)); }
-    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR.getHealth(), .8f)
-                                            .immuneTo(SlownessEffect.class)); }
-    private void createHealerEnemyOne() { 
-        /* 
-        TODO: Implement
-        ALSO, healer should not be immune to anything. Slowness could be a downside for the player, so they must consider it when using the slowness tower.
-        */
-    }
+    private void createHealerEnemyOne() { send(createHealerEnemy("healer1", EnemyType.HEALER_ONE, .7f));}
     private void createProtectorateEnemyOne() {
         /*
         TODO: Implement

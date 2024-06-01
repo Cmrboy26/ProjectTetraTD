@@ -154,12 +154,18 @@ public class EndlessUtils {
     }
 
     private void defaultWave(float targetDPS, float targetHealthPoints, Wave wave) {
-        smallWave(targetDPS, targetHealthPoints, wave);
+        int maxSmallEnemies = (int) Math.max(25, Math.round(5f*Math.sqrt(targetDPS)));
+        for (int i = 0; i < EnemyType.values().length; i++) {
+            EnemyType type = EnemyType.values()[i];
+            if (type == EnemyType.HEALER_ONE) {continue;}
+            if (targetDPS >= type.getHealth()*dpsThresholdScale) {targetHealthPoints = fillWaveUnitMaximum(type, targetHealthPoints, wave, (int) (maxSmallEnemies/(1 + i*.5f)));}
+        }
     } 
 
     private void largeWave(float targetDPS, float targetHealthPoints, Wave wave) {
         for (int i = EnemyType.values().length-1; i >= 0; i--) {
             EnemyType type = EnemyType.values()[i];
+            if (type == EnemyType.HEALER_ONE) {continue;}
             if (targetDPS >= type.getHealth()*dpsThresholdScale) {targetHealthPoints = fillWaveUnit(type, targetHealthPoints, wave);}
         }
     }

@@ -1,0 +1,9 @@
+{
+	"difficulty": 2,
+	"name": "Cheated Endless",
+	"endlessMode": true,
+	"preparationTime": 10,
+	"startingHealth": 20000,
+	"startingMoney": 350000,
+	"waves": []
+}

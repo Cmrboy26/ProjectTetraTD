@@ -1,6 +1,7 @@
 {
 	"difficulty": 1,
-	"name": "Endless",
+	"recommendedEndlessSettingsDifficulty": 1,
+	"name": "Endless Easy",
 	"endlessMode": true,
 	"preparationTime": 10,
 	"startingHealth": 50,

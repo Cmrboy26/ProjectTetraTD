@@ -1,6 +1,7 @@
 package net.cmr.rtd.game;
 
 import java.io.DataInputStream;
+import java.net.InetAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -10,8 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
-
-import java.net.InetAddress;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -48,7 +47,6 @@ import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
-import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
@@ -59,7 +57,6 @@ import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.waves.Wave;
-import net.cmr.rtd.waves.WaveUnit;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
@@ -455,12 +452,15 @@ public class GameManager implements Disposable {
             WavesData wavesData = WavesData.load(wavesDataFile);
             world.setWavesData(wavesData);
         } else {
+            throw new IllegalStateException("No waves data was found in the save.");
+        } 
+        /*else {
             WavesData wavesData = new WavesData();
             Wave wave = new Wave(1000);
             wave.addWaveUnit(new WaveUnit(wave, EnemyType.BASIC_ONE, 1000));
             wavesData.waves.put(1, wave);
             world.setWavesData(wavesData);
-        }
+        }*/
         
         this.teams = new ArrayList<TeamData>(MAX_TEAMS);
         for (int i = 0; i < MAX_TEAMS; i++) {
@@ -656,12 +656,17 @@ public class GameManager implements Disposable {
     }
 
     public void teamLost(int team) {
+        // TODO: If a player is playing a multiplayer map by themselves, they get a notification when the other team with no one loses. Fix this. 
         if (winningTeams.size() == 0) {
             // Allow the players to continue playing if they decide to resume the game
             return;
         }
-        TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
-        sendPacketToAll(packet);
+        boolean teamHasPlayers = doesTeamHavePlayers(team);
+        if (teamHasPlayers) {
+            TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
+            sendPacketToAll(packet);
+        }
+
         winningTeams.remove(teams.get(team));
         if (winningTeams.size() == 1) {
             TeamData winner = winningTeams.get(0);
@@ -716,6 +721,15 @@ public class GameManager implements Disposable {
         // Place it in the world and, as a result, send the packet to all players
         world.addEntity(tower);
         return true;
+    }
+
+    public boolean doesTeamHavePlayers(int team) {
+        for (GamePlayer player : players.values()) {
+            if (player.getTeam() == team) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isRunning() { return running; }

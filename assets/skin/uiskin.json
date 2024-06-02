@@ -189,7 +189,7 @@ com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 		over: boxOver
 		focused: boxSelected
 		disabled: boxDisabled
-		checked: boxSelected
+		checked: box
 		checkedOver: boxOver
 		checkedDown: boxSelected
 		checkedFocused: boxOver
@@ -200,7 +200,7 @@ com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 	}
 	toggle: {
 		parent: default
-		checked: box
+		checked: boxSelected
 		checkedOver: boxOver
 		checkedDown: boxSelected
 		checkedFocused: boxOver

@@ -29,7 +29,7 @@ public class WavesData {
     public String name;
     public DifficultyRating difficulty;
     public boolean endlessMode;
-    public float preparationTime;
+    public float preparationTime = -1;
     public int startingMoney;
     public int startingHealth;
     public HashMap<Integer, Wave> waves;
@@ -40,6 +40,13 @@ public class WavesData {
     public static int DEFAULT_STARTING_HEALTH = 50;
     public static int DEFAULT_WAVES_PER_COMPONENT_TARGET = 3;
 
+    public int sinusoidalGameDifficultyPeriod = 7; // 7 waves to go from peak to peak of the sinusoidal function
+    public float sinusoidalGameDifficultyAmplitude = 1/21f; // (1/21) * 100 = + or - 9% difficulty 
+    public float requiredDPSIncreasePercentageForStagnancy = 0.10f; // 10% increase in DPS required to not be considered stagnant
+    public float dpsThresholdScale = 1/4f; // 25% of the enemy's health must be dealt in DPS in order to have that enemy appear in the wave
+    public float sinusoidalCenterValue = 1.03f; // The "center" percentage of the sinusoidal function
+    public int stagnationThreshold = 2; // The number of waves that the player can be stagnant before penalties will be applied
+    public float stagnationDifficultyIncrease = 0.2f; // The penalty to the player's health and money for being stagnant
 
     public WavesData() {
         this.waves = new HashMap<Integer, Wave>();
@@ -83,8 +90,28 @@ public class WavesData {
         data.name = (String) main.get("name");
         data.difficulty = DifficultyRating.deserialize(((Number) main.get("difficulty")).intValue());
         data.endlessMode = (boolean) main.get("endlessMode");
-        data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
+
+        if (data.endlessMode) {
+            if (main.containsKey("recommendedEndlessSettingsDifficulty")) {
+                data.setRecommendedValuesForEndless(DifficultyRating.deserialize(((Number) main.get("recommendedEndlessSettingsDifficulty")).intValue()));
+            }
+
+            data.requiredDPSIncreasePercentageForStagnancy = main.containsKey("requiredDPSIncreasePercentageForStagnancy") ? ((Number) main.get("requiredDPSIncreasePercentageForStagnancy")).floatValue() : data.requiredDPSIncreasePercentageForStagnancy;
+            data.dpsThresholdScale = main.containsKey("dpsThresholdScale") ? ((Number) main.get("dpsThresholdScale")).floatValue() : data.dpsThresholdScale;
+            data.sinusoidalCenterValue = main.containsKey("sinusoidalCenterValue") ? ((Number) main.get("sinusoidalCenterValue")).floatValue() : data.sinusoidalCenterValue;
+            data.sinusoidalGameDifficultyPeriod = main.containsKey("sinusoidalGameDifficultyPeriod") ? ((Number) main.get("sinusoidalGameDifficultyPeriod")).intValue() : data.sinusoidalGameDifficultyPeriod;
+            data.sinusoidalGameDifficultyAmplitude = main.containsKey("sinusoidalGameDifficultyAmplitude") ? ((Number) main.get("sinusoidalGameDifficultyAmplitude")).floatValue() : data.sinusoidalGameDifficultyAmplitude;
+            data.stagnationThreshold = main.containsKey("stagnationThreshold") ? ((Number) main.get("stagnationThreshold")).intValue() : data.stagnationThreshold;
+            data.stagnationDifficultyIncrease = main.containsKey("stagnationDifficultyIncrease") ? ((Number) main.get("stagnationDifficultyIncrease")).floatValue() : data.stagnationDifficultyIncrease;
+        }
         
+        if (main.containsKey("preparationTime")) {
+            data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
+        }
+        if (data.preparationTime == -1) {
+            throw new IOException("Preparation time has not been set for the waves data.");
+        }
+
         if (main.containsKey("wavesPerComponentTarget")) {
             data.wavesPerComponentTarget = ((Number) main.get("wavesPerComponentTarget")).intValue();
         } else {
@@ -145,10 +172,20 @@ public class WavesData {
         main.put("name", name);
         main.put("difficulty", DifficultyRating.serialize(difficulty));
         main.put("endlessMode", endlessMode);
-        main.put("preparationTime", preparationTime);
         main.put("startingMoney", startingMoney);
         main.put("startingHealth", startingHealth);
         main.put("wavesPerComponentTarget", wavesPerComponentTarget);
+
+        if (endlessMode) {
+            main.put("requiredDPSIncreasePercentageForStagnancy", requiredDPSIncreasePercentageForStagnancy);
+            main.put("dpsThresholdScale", dpsThresholdScale);
+            main.put("sinusoidalCenterValue", sinusoidalCenterValue);
+            main.put("sinusoidalGameDifficultyPeriod", sinusoidalGameDifficultyPeriod);
+            main.put("sinusoidalGameDifficultyAmplitude", sinusoidalGameDifficultyAmplitude);
+            main.put("stagnationThreshold", stagnationThreshold);
+        }
+
+        main.put("preparationTime", preparationTime);
         
         JSONArray waves = new JSONArray();
         for (int waveNumber : this.waves.keySet()) {
@@ -224,7 +261,7 @@ public class WavesData {
         Wave at = getWave(waveNumber);
 
         if (endlessMode && endlessUtils == null) {
-            endlessUtils = new EndlessUtils();
+            endlessUtils = new EndlessUtils(this);
         }
         if (endlessMode && at == null) {
             Wave next = endlessUtils.generateDynamicWave(updateData.getManager());
@@ -267,6 +304,26 @@ public class WavesData {
             }
             return DifficultyRating.UNDEFINED;
         }
+    }
+
+    public void setRecommendedValuesForEndless(DifficultyRating difficulty) {
+        int[] period = { 7, 7, 7, 7, 6 };
+        float[] amplitude = { 1/21f, 1/21f, 1/21f, 1/18f, 1/14f };
+        float[] requiredDPSIncrease = { 0.7f, 0.8f, 0.10f, 0.12f, 0.14f };
+        float[] dpsThreshold = { 1/4f, 1/4f, 1/4f, 1/4f, 1/4f };
+        float[] centerValue = { 1.01f, 1.02f, 1.03f, 1.04f, 1.06f };
+        float[] preparationTime = { 11, 10, 9, 8, 7 };
+        int[] stagnationThreshold = { 3, 2, 2, 2, 1 };
+        float[] stagnationDifficultyIncrease = { 0.1f, 0.15f, 0.2f, 0.25f, 0.3f };
+
+        sinusoidalGameDifficultyPeriod = period[difficulty.id - 1];
+        sinusoidalGameDifficultyAmplitude = amplitude[difficulty.id - 1];
+        requiredDPSIncreasePercentageForStagnancy = requiredDPSIncrease[difficulty.id - 1];
+        dpsThresholdScale = dpsThreshold[difficulty.id - 1];
+        sinusoidalCenterValue = centerValue[difficulty.id - 1];
+        this.preparationTime = preparationTime[difficulty.id - 1];
+        this.stagnationThreshold = stagnationThreshold[difficulty.id - 1];
+        this.stagnationDifficultyIncrease = stagnationDifficultyIncrease[difficulty.id - 1];
     }
 
     public int size() {

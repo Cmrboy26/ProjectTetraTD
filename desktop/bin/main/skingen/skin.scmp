@@ -3,7 +3,7 @@ atlasData: {
 	atlasCurrent: true
 	drawables: [
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/box.9.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/box.9.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -23,7 +23,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxOver.9.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxOver.9.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -43,7 +43,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxSelected.9.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxSelected.9.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -63,7 +63,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxDisabled.9.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxDisabled.9.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -103,7 +103,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/checkmark.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/checkmark.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -123,7 +123,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/x.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/x.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -143,7 +143,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/xDisabled.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/xDisabled.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -163,7 +163,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/checkmarkDisabled.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/checkmarkDisabled.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -183,7 +183,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/knob.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/knob.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -203,7 +203,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/corner.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/corner.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -223,7 +223,7 @@ atlasData: {
 			hidden: false
 		}
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxYellow.9.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/boxYellow.9.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -245,7 +245,7 @@ atlasData: {
 	]
 	fontDrawables: [
 		{
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourDefault.png
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourDefault.png
 			bgColor: {
 				r: 1
 				g: 1
@@ -316,7 +316,7 @@ jsonData: {
 			flip: false
 			markupEnabled: true
 			scaling: -1
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourDefault.fnt
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourDefault.fnt
 		}
 		{
 			class: com.ray3k.skincomposer.data.FontData
@@ -324,7 +324,7 @@ jsonData: {
 			flip: false
 			markupEnabled: false
 			scaling: -1
-			file: D:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourSmall.fnt
+			file: Q:/Programming Projects/RetroTowerDefense/assets/skingen/rawskin/seymourSmall.fnt
 		}
 	]
 	freeTypeFonts: []
@@ -1261,7 +1261,7 @@ jsonData: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
 						name: checked
 						optional: true
-						value: boxSelected
+						value: box
 					}
 					checkedOver: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -1579,7 +1579,7 @@ jsonData: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
 						name: checked
 						optional: true
-						value: box
+						value: boxSelected
 					}
 					checkedOver: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -2641,6 +2641,75 @@ jsonData: {
 				deletable: false
 				parent: null
 			}
+			{
+				class: com.ray3k.skincomposer.data.StyleData
+				name: small
+				clazz: com.badlogic.gdx.scenes.scene2d.ui.SelectBox
+				properties: {
+					font: {
+						type: com.badlogic.gdx.graphics.g2d.BitmapFont
+						name: font
+						optional: false
+						value: small-font
+					}
+					fontColor: {
+						type: com.badlogic.gdx.graphics.Color
+						name: fontColor
+						optional: false
+						value: null
+					}
+					overFontColor: {
+						type: com.badlogic.gdx.graphics.Color
+						name: overFontColor
+						optional: true
+						value: null
+					}
+					disabledFontColor: {
+						type: com.badlogic.gdx.graphics.Color
+						name: disabledFontColor
+						optional: true
+						value: null
+					}
+					background: {
+						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
+						name: background
+						optional: true
+						value: null
+					}
+					scrollStyle: {
+						type: com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle
+						name: scrollStyle
+						optional: false
+						value: default
+					}
+					listStyle: {
+						type: com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle
+						name: listStyle
+						optional: false
+						value: default
+					}
+					backgroundOver: {
+						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
+						name: backgroundOver
+						optional: true
+						value: null
+					}
+					backgroundOpen: {
+						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
+						name: backgroundOpen
+						optional: true
+						value: null
+					}
+					backgroundDisabled: {
+						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
+						name: backgroundDisabled
+						optional: true
+						value: null
+					}
+				}
+				deletable: true
+				parent: default
+			}
 		]
 		com.badlogic.gdx.scenes.scene2d.ui.ScrollPane: [
 			{
@@ -2770,7 +2839,7 @@ preferences: {
 	}
 	last-import-export-path: {
 		class: java.lang.String
-		value: D:/Programming Projects/RetroTowerDefense/assets/skin/uiskin.json
+		value: Q:/Programming Projects/RetroTowerDefense/assets/skin/uiskin.json
 	}
 	resources-relative: {
 		class: java.lang.Boolean
@@ -2781,7 +2850,7 @@ preferences: {
 		value: 30
 	}
 }
-saveFile: D:/Programming Projects/RetroTowerDefense/assets/skingen/skin.scmp
+saveFile: Q:/Programming Projects/RetroTowerDefense/assets/skingen/skin.scmp
 version: 56
 sceneComposer: {
 	children: [

@@ -20,7 +20,7 @@ public class PurchaseItemPacket extends Packet {
         SELL(2),
         APPLY_LUBRICANT(3),
         APPLY_SCOPE(4),
-        APPLY_SCRAP_METAL(5)
+        APPLY_SCRAP_METAL(5),
         ;
 
         private final int id;

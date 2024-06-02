@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WaveUnit;
+import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
 
 /**
@@ -15,21 +17,33 @@ import net.cmr.util.Log;
  */
 public class EndlessUtils {
 
-    int stagnation = 0;
-    float maximumDPS = 0;
-    float dpsThresholdScale = 1/4f;
+    transient int stagnation = 0;
+    transient float maximumDPS = 0;
 
-    // Determines how much DPS is required to defeat the generated wave at the maximum of the sinusoidal function 
-    public static final float maximumScale = 1.03f;
+    // The percentage of the enemy's health that the DPS must be to add the enemy to the wave
+    /// Sinusoidal wave desmos graph: https://www.desmos.com/calculator/zov2sjdqvo
+    float dpsThresholdScale = 1/4f; // The percentage of the enemy's health that the DPS must be to add the enemy to the wave
+    // The "center" of the sinusoidal function
+    float sinusoidalCenterValue = 1.03f;
     // Determines the period of the sinusoidal function (how many waves to go from maximum to maximum)
-    float sinusoidalPeriod = 7;
+    float sinusoidalGameDifficultyPeriod = 7;
     // The distance from maximumScale to the peaks/trophs of the sinusoidal function
-    float sinusoidalFunctionAmplitude = 1/21f;
+    float sinusoidalGameDifficultyAmplitude = 1/21f;
+    // To not be considered stagnant, the player must increase their DPS by this percentage each wave
+    float requiredDPSIncreasePercentageForStagnancy = 0.10f;
+    // The number of waves that the player can be stagnant before penalties will be applied
+    int stagnationThreshold = 2;
+    // Stagnation difficulty increase per wave
+    float stagnationDifficultyIncrease = 0.2f;
 
-    final int STAGNATION_THRESHOLD = 2;
-
-    public EndlessUtils() {
-        
+    public EndlessUtils(WavesData data) {
+        this.requiredDPSIncreasePercentageForStagnancy = data.requiredDPSIncreasePercentageForStagnancy;
+        this.dpsThresholdScale = data.dpsThresholdScale;
+        this.sinusoidalCenterValue = data.sinusoidalCenterValue;
+        this.sinusoidalGameDifficultyPeriod = data.sinusoidalGameDifficultyPeriod;
+        this.sinusoidalGameDifficultyAmplitude = data.sinusoidalGameDifficultyAmplitude;
+        this.stagnationThreshold = data.stagnationThreshold;
+        this.stagnationDifficultyIncrease = data.stagnationDifficultyIncrease;
     }    
 
     public Wave generateDynamicWave(GameManager manager) {
@@ -42,11 +56,31 @@ public class EndlessUtils {
     transient float previousRoundDensity = 1; // enemies / tile. used for calculating approximateDPS with fire towers
 
     public void generateWaveUnits(Wave wave, GameManager gameManager) {
-        int teams = gameManager.getTeams().size();
+        // TODO: When there are no teams, the game makes targetDPS NAN. FIX THIS!!
+        ArrayList<TeamData> teamData = new ArrayList<>();
+        for (TeamData team : gameManager.getTeams()) {
+            if (team.getHealth() > 0 && gameManager.doesTeamHavePlayers(team.team)) {
+                teamData.add(team);
+            }
+        }
+        if (teamData.size() == 0) {
+            // Every team is dead, so attempt to generate enemies for any team with players
+            for (TeamData team : gameManager.getTeams()) {
+                if (gameManager.doesTeamHavePlayers(team.team)) {
+                    teamData.add(team);
+                }
+            }
+        } 
+        if (teamData.size() == 0) {
+            // If there are no players on any of the teams, use every team
+            teamData.addAll(gameManager.getTeams());
+        }
+        int teams = teamData.size();
+
         int currentWave = gameManager.getWorld().getWave();
         ArrayList<TowerEntity>[] teamTowers = new ArrayList[teams];
         for (int i = 0; i < teams; i++) {
-            teamTowers[i] = gameManager.getTowers(i);
+            teamTowers[i] = gameManager.getTowers(teamData.get(i).team);
         }
         
         float[] dps = new float[teams];
@@ -61,10 +95,10 @@ public class EndlessUtils {
         }
         targetDPS /= teams;
 
-        boolean isStagnant = targetDPS <= maximumDPS && currentWave >= 2; // If DPS hasn't increased, increase the stagnant counter
+        boolean isStagnant = targetDPS <= maximumDPS * (1 + requiredDPSIncreasePercentageForStagnancy) && currentWave >= 2; // If DPS hasn't increased by stagnantIncreasePercentage, increase the stagnant counter
         if (isStagnant) {
-            Log.info("Player was STAGNANT... current stagnant progress: "+stagnation);
             stagnation++;
+            Log.info("Player was STAGNANT... current stagnant progress: "+stagnation);
         } else {
             stagnation--;
             if (stagnation < 0) {
@@ -75,12 +109,12 @@ public class EndlessUtils {
         targetDPS = Math.max(maximumDPS, targetDPS);
         maximumDPS = Math.max(maximumDPS, targetDPS);
 
-        float max = maximumScale;
-        double sinusoidalFunctionOutput = -Math.cos(2*currentWave*Math.PI/sinusoidalPeriod);
-        double scale = (sinusoidalFunctionOutput + (max / sinusoidalFunctionAmplitude) - 1d)*sinusoidalFunctionAmplitude;
-        if (stagnation >= STAGNATION_THRESHOLD) { // Punish players for not upgrading their towers
-            Log.info("Player was STAGNANT for "+stagnation+" waves");
-            scale += 0.2 * (stagnation - STAGNATION_THRESHOLD + 1);
+        float max = sinusoidalCenterValue;
+        double sinusoidalFunctionOutput = -Math.cos(2*currentWave*Math.PI/sinusoidalGameDifficultyPeriod);
+        double scale = (sinusoidalFunctionOutput + (max / sinusoidalGameDifficultyAmplitude) - 1d)*sinusoidalGameDifficultyAmplitude;
+        if (stagnation >= stagnationThreshold) { // Punish players for not upgrading their towers
+            Log.info("Player was STAGNANT for "+stagnation+" waves. Punishing...");
+            scale += stagnationDifficultyIncrease * (stagnation - stagnationThreshold + 1);
         }
         // Don't fluctuate the difficulty during the beginning few waves
         if (currentWave <= 3) {
@@ -102,6 +136,7 @@ public class EndlessUtils {
 
         wave.addWaveUnit(new WaveUnit(0, EnemyType.BASIC_ONE, 0)); // To prevent a bug where this method is called repeatedly when no enemies are added
 
+        // Generate wave to get density estimate
         if (waveType == 0 || waveType == 1) {
             defaultWave(targetDPS, targetHealthPoints, wave);
         }
@@ -112,6 +147,21 @@ public class EndlessUtils {
             largeWave(targetDPS, targetHealthPoints, wave);
         }
         calculateEnemyDensity(wave);
+        // With the new density, generate the wave again
+        wave.clearWaveUnits();
+        if (waveType == 0 || waveType == 1) {
+            defaultWave(targetDPS, targetHealthPoints, wave);
+        }
+        else if (waveType == 2) {
+            smallWave(targetDPS, targetHealthPoints, wave);
+        }
+        else if (waveType == 3) {
+            largeWave(targetDPS, targetHealthPoints, wave);
+        }
+
+        for (WaveUnit unit : wave.getWaveUnits()) {
+            Log.info("- Added " + unit.getQuantity() + " " + unit.getType() + " enemies");
+        }
     }
 
     /**
@@ -175,7 +225,6 @@ public class EndlessUtils {
         WaveUnit unit = new WaveUnit(wave, enemy, totalEnemies);
         wave.addWaveUnit(unit);
         targetHP -= totalEnemies * enemy.getHealth();
-        Log.info("- Added " + totalEnemies + " " + enemy + " enemies");
         return targetHP;
     }
 
@@ -184,7 +233,6 @@ public class EndlessUtils {
         WaveUnit unit = new WaveUnit(wave, enemy, totalEnemies);
         wave.addWaveUnit(unit);
         targetHP -= totalEnemies * enemy.getHealth();
-        Log.info("- Added " + totalEnemies + " " + enemy + " enemies");
         return targetHP;
     }
 

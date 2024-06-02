@@ -143,7 +143,7 @@ public class Player extends Entity {
 
     public boolean jump(UpdateData data, boolean force) {
         if (jumpProgress > 0 && !force) return false;
-        if (jumpProgress <= 0) {
+        if (jumpProgress <= 0 || force) {
             jumpProgress = jumpTime;
         }
         if (data.isServer()) {

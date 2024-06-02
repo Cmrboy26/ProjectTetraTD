@@ -109,7 +109,8 @@ public class EnemyFactory {
     private void createBasicEnemyTwo() { send(createBasicEnemy("basic2", EnemyType.BASIC_TWO, 1f)); }
     private void createBasicEnemyThree() { send(createBasicEnemy("basic3", EnemyType.BASIC_THREE, 1f) 
                                             .immuneTo(FireEffect.class)); }
-    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR, .8f)); }
+    private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR, .8f)
+                                            .immuneTo(SlownessEffect.class)); }
     private void createBasicEnemyFive() { send(createBasicEnemy("basic5", EnemyType.BASIC_FIVE, .5f)
                                             .immuneTo(SlownessEffect.class)); }
     private void createHealerEnemyOne() { send(createHealerEnemy("healer1", EnemyType.HEALER_ONE, .7f));}

@@ -3,6 +3,7 @@ package net.cmr.rtd.game.world.entities;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 import com.badlogic.gdx.graphics.Color;
@@ -40,11 +41,12 @@ public abstract class TowerEntity extends Entity {
 
     // TODO: Add other tower upgrades
     // NOTE: The player must select only ONE type of upgrade for the tower and must stick with that path.
-    static final int VERSION = 0;
+    static final int VERSION = 1;
     public static final int MAX_COMPONENTS = 4;
     int scrapsApplied = 0;
     int lubricantApplied = 0;
     int scopesApplied = 0;
+    SortType preferedSortType = SortType.HIGHEST_HEALTH;
 
     public TowerEntity(GameType type, int team) {
         super(type);
@@ -98,6 +100,7 @@ public abstract class TowerEntity extends Entity {
         buffer.writeInt(scrapsApplied);
         buffer.writeInt(lubricantApplied);
         buffer.writeInt(scopesApplied);
+        buffer.writeInt(preferedSortType.getID());
         serializeTower(buffer);
     }
 
@@ -114,6 +117,11 @@ public abstract class TowerEntity extends Entity {
         tower.scrapsApplied = input.readInt();
         tower.lubricantApplied = input.readInt();
         tower.scopesApplied = input.readInt();
+        if (version >= 1) {
+            tower.preferedSortType = SortType.fromID(input.readInt());
+        } else {
+            tower.preferedSortType = SortType.HIGHEST_HEALTH;
+        }
         deserializeTower(tower, input);
     }
 
@@ -181,11 +189,13 @@ public abstract class TowerEntity extends Entity {
     protected abstract void serializeTower(DataBuffer buffer) throws IOException;
     protected abstract void deserializeTower(TowerEntity entity, DataInputStream input) throws IOException;
 
+    private static HashMap<Integer, SortType> sortTypeMap;
+
     public enum SortType {
         /**
          * Returns a list in any order (fastest).
          */
-        ANY {
+        ANY(0) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // Do nothing
@@ -194,7 +204,7 @@ public abstract class TowerEntity extends Entity {
         /**
          * Highest health to lowest health
          */
-        HIGHEST_HEALTH {
+        HIGHEST_HEALTH(1) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (b.getHealth() - a.getHealth()));
@@ -203,25 +213,25 @@ public abstract class TowerEntity extends Entity {
         /**
          * Lowest health to highest health
          */
-        LOWEST_HEALTH {
+        LOWEST_HEALTH(2) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (a.getHealth() - b.getHealth()));
             }
         },
         /**
-         * Closest to farthest to the tower
+         * Closest to farthest to the shooting tower
          */
-        TOWER_DISTANCE {
+        TOWER_DISTANCE(3) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (a.getPosition().dst(tower.getPosition()) - b.getPosition().dst(tower.getPosition())));
             }
         },
         /**
-         * Farthest to closest to the tower
+         * Farthest to closest to the shooting tower
          */
-        TOWER_DISTANCE_REVERSE {
+        TOWER_DISTANCE_REVERSE(4) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 entities.sort((a, b) -> (int) (b.getPosition().dst(tower.getPosition()) - a.getPosition().dst(tower.getPosition())));
@@ -230,8 +240,7 @@ public abstract class TowerEntity extends Entity {
         /**
          * Closest to the end of the path/structure
          */
-        @Deprecated
-        STRUCTURE_DISTANCE {
+        STRUCTURE_DISTANCE(5) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // TODO: Implement
@@ -240,14 +249,40 @@ public abstract class TowerEntity extends Entity {
         /**
          * Farthest to the end of the path/structure
          */
-        @Deprecated
-        STRUCTURE_DISTANCE_REVERSE {
+        STRUCTURE_DISTANCE_REVERSE(6) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // TODO: Implement
                 // Cannot be implemented with current without syncing team point positions to the client
             }
-        };
+        },
+        RANDOM(7) {
+            @Override
+            public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
+                entities.sort((a, b) -> (int) (Math.random() * 2 - 1));
+            }
+        }
+        ;
+
+        static {
+            sortTypeMap = new HashMap<>();
+            for (SortType type : values()) {
+                sortTypeMap.put(type.getID(), type);
+            }
+            sortTypeMap.put(-1, null);
+        }
+
+        int id;
+        SortType(int id) {
+            this.id = id;
+        }
+        public int getID() {
+            return id;
+        }
+        public static SortType fromID(int id) {
+            return sortTypeMap.get(id);
+        }
+
 
         public abstract void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data);
     }
@@ -307,7 +342,10 @@ public abstract class TowerEntity extends Entity {
     public abstract String getDescription();
 
     public SortType getPreferedSortType() {
-        return SortType.HIGHEST_HEALTH;
+        return preferedSortType;
+    }
+    public void setPreferedSortType(SortType type) {
+        preferedSortType = type;
     }
 
     public float getUpgradeTime() {

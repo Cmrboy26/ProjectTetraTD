@@ -1,0 +1,9 @@
+{
+	"difficulty": 4,
+	"recommendedEndlessSettingsDifficulty": 4,
+	"name": "Endless Insane",
+	"endlessMode": true,
+	"startingHealth": 15,
+	"startingMoney": 35,
+	"waves": []
+}

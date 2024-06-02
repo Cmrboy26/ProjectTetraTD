@@ -77,6 +77,8 @@ import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.HealerEnemy;
+import net.cmr.rtd.game.world.entities.HealerEnemy.HealerPacket;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
@@ -821,6 +823,27 @@ public class GameScreen extends AbstractScreenEX {
             return;
         }
 
+        if (packet instanceof HealerPacket) {
+            HealerPacket healerPacket = (HealerPacket) packet;
+            Entity entity = getEntity(healerPacket.healerId);
+            if (entity instanceof HealerEnemy) {
+                HealerEnemy healer = (HealerEnemy) entity;
+                ParticleEffect effect = SpreadEmitterEffect.factory()
+                    .setParticle(AnimationType.SPARKLE)
+                    .setDuration(1.5f)
+                    .setEmissionRate(15)
+                    .setScale(.2f)
+                    .setParticleLife(.5f)
+                    .setAnimationSpeed(1.5f)
+                    .setAreaSize(1.2f)
+                    .setFollowEntity(true)
+                    .setEntity(healer)
+                    .create();
+                particleEffects.add(effect);
+                Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
+            }
+        }
+
         if (packet instanceof JumpPacket) {
             JumpPacket jumpPacket = (JumpPacket) packet;
             Entity entity = getEntity(jumpPacket.getPlayerUUID());
@@ -1135,6 +1158,7 @@ public class GameScreen extends AbstractScreenEX {
                             super.act(delta);
                         }
                     };
+                    // TODO: add the ability to send a sorttypepacket to change the targeting style of the selected tower
                     informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
                     informationUpgradeWindow.pad(10);
                     informationUpgradeWindow.padTop(30);
@@ -1378,7 +1402,7 @@ public class GameScreen extends AbstractScreenEX {
         final int result = notificationPosition;
         notificationsActive.add(result);
 
-        float targetY = 5 + 5 + 32 * result + 70;
+        float targetY = 5 + 5 + 32 * result + 40;
 
         group.space(5);
         group.setPosition(640+5, targetY, Align.bottomLeft);
@@ -1517,7 +1541,7 @@ public class GameScreen extends AbstractScreenEX {
                     return;
                 }
                 if (towerAt.getRemainingUpgradeTime() >= 0) {
-                    notification(SpriteType.STRUCTURE, "Tower is actively upgrading..." + (int) towerAt.getRemainingUpgradeTime() + "s");
+                    notification(SpriteType.STRUCTURE, "Tower is upgrading..." + (int) towerAt.getRemainingUpgradeTime() + "s");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }

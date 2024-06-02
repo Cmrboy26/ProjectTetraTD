@@ -1,9 +1,10 @@
 {
 	"difficulty": 2,
-	"name": "Endless",
+	"recommendedEndlessSettingsDifficulty": 2,
+	"name": "Endless Medium",
 	"endlessMode": true,
 	"preparationTime": 10,
-	"startingHealth": 20,
+	"startingHealth": 30,
 	"startingMoney": 35,
 	"waves": []
 }

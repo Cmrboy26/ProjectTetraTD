@@ -93,7 +93,7 @@ public abstract class EnemyEntity extends Entity {
         // play the sound effect
         if (data.isClient()) {
             if (type == DamageType.FIRE) {
-                Audio.getInstance().playSFX(GameSFX.FIRE_DAMAGE, .4f, .5f);
+                Audio.getInstance().playSFX(GameSFX.FIRE_DAMAGE, .4f, .25f);
             } else {
                 if (randomNumber == 1) {
                     Audio.getInstance().playSFX(GameSFX.HIT1, 1, .8f);

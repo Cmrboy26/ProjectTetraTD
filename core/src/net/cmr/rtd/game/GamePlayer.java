@@ -12,10 +12,12 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.SkipRequestPacket;
+import net.cmr.rtd.game.packets.SortTypePacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.GameStream.StateListener;
 import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Log;
@@ -170,6 +172,16 @@ public class GamePlayer {
             // Purchase an item from the shop.
             PurchaseItemPacket purchase = (PurchaseItemPacket) packet;
             ShopManager.processPurchase(manager, this, purchase);
+        }
+
+        if (packet instanceof SortTypePacket) {
+            // Update the player's sort type.
+            SortTypePacket sort = (SortTypePacket) packet;
+            TowerEntity entity = ShopManager.towerAt(getPlayer().getWorld(), sort.tileX, sort.tileY);
+            if (entity != null && entity.getTeam() == getTeam()) {
+                entity.setPreferedSortType(sort.type);
+                entity.updatePresenceOnClients(getManager());
+            }
         }
 
         if (packet instanceof SkipRequestPacket) {

@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.UUIDSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -28,12 +31,14 @@ import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.SkipRequestPacket;
+import net.cmr.rtd.game.packets.SortTypePacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
+import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 
 public class OnlineGameStream extends GameStream {
 
@@ -153,6 +158,21 @@ public class OnlineGameStream extends GameStream {
         kryo.register(JumpPacket.class);
         kryo.register(UUID.class, new UUIDSerializer());
         kryo.register(HealerEnemy.HealerPacket.class);
+        kryo.register(SortTypePacket.class);
+        kryo.register(SortType.class, new Serializer<SortType>(true) {
+            @Override
+            public void write(Kryo kryo, Output output, SortType object) {
+                if (object == null) {
+                    output.writeInt(-1);
+                    return;
+                }
+                output.writeInt(object.getID());
+            }
+            @Override
+            public SortType read(Kryo kryo, Input input, Class<? extends SortType> type) {
+                return SortType.fromID(input.readInt());
+            }
+        });
     }
     
 }

@@ -4,12 +4,12 @@ A simple, pixel-art-styled, endless tower defense game with online multiplayer s
 
 ## Learning Goals
 
-In developing this game, I want to learn more about
+In developing this game, I want to learn more about:
 - encryption
 - networking protocols
 - unit testing
 
-So far, this project has unexpectedly taught me about
+So far, this project has unexpectedly taught me about:
 - separating axis theorem
 - swept AABB
 - Minkowski sums

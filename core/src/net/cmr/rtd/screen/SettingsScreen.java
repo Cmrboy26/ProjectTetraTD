@@ -125,7 +125,7 @@ public class SettingsScreen extends AbstractScreenEX {
                 backButton.setChecked(false);
             }
         });
-        horizontalGroup.add(backButton).width(100).padLeft(20f).padRight(20);
+        horizontalGroup.add(backButton).width(200).padLeft(20f).padRight(20).growX();
 
         TextButton apply = new TextButton("Apply", Sprites.skin(), labelType);
         Audio.addClickSFX(apply);
@@ -146,7 +146,7 @@ public class SettingsScreen extends AbstractScreenEX {
                 apply.setChecked(false);
             }
         });
-        horizontalGroup.add(apply).width(100).padLeft(20f).padRight(20);
+        horizontalGroup.add(apply).width(200).padLeft(20f).padRight(20).growX();
 
         table.add(horizontalGroup).bottom().pad(5f).width(100).expandX().row();
         return table;

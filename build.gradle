@@ -56,12 +56,16 @@ project(":core") {
     apply plugin: "java-library"
 
     dependencies {
-        api group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
-        api group: 'kryonet', name: 'kryonet', version: '2.21'
+        api (group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0') {
+            exclude group: "com.esotericsoftware", module: "minlog"
+        }
+        api (group: 'kryonet', name: 'kryonet', version: '2.21')
         api group: 'org.bitlet', name: 'weupnp', version: '0.1.2'
         api 'commons-io:commons-io:2.15.1'
-        api 'com.googlecode.json-simple:json-simple:1.1.1'
-        
+        api ('com.googlecode.json-simple:json-simple:1.1.1') {
+            exclude group: "junit", module: "junit"
+        }
+
         api 'com.esotericsoftware:kryo:5.4.0:sources'
         api "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
         api "com.github.tommyettinger:textratypist:0.10.0"
@@ -77,7 +81,9 @@ project(":android") {
     apply plugin: "com.android.application"
 
     configurations {
-        natives 
+        natives
+        api.exclude group: 'com.esotericsoftware', module: 'minlog'
+        api.exclude group: 'com.esotericsoftware', module: 'reflectasm'
     }
 
     dependencies {
@@ -119,6 +125,7 @@ project(":tests") {
         testImplementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         testImplementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         testImplementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
+    
     }
 
     test {

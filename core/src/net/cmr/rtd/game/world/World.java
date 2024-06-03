@@ -1,6 +1,6 @@
 package net.cmr.rtd.game.world;
 
-import java.awt.Point;
+import net.cmr.util.Point;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;

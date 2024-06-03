@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -63,7 +64,11 @@ public class RetroTowerDefense extends CMRGame {
 		levelsFolder.mkdirs();
 		
 		// Create story level folders from the assets
-		FileHandle storyLevelsHandle = Gdx.files.internal("assets/storylevels/");
+		FileHandle storyLevelsHandle = Gdx.files.internal("storylevels/");
+		if (!storyLevelsHandle.exists()) {
+			storyLevelsHandle = Gdx.files.internal("assets/storylevels/");
+			return;
+		}
 		for (FileHandle level : storyLevelsHandle.list()) {
 			// level is the folder containing the level data (waves folder, world.dat) in the assets folder
 			FileHandle internal = storyLevelsHandle.child(level.name());
@@ -75,7 +80,6 @@ public class RetroTowerDefense extends CMRGame {
 			}
 			internal.copyTo(external);
 		}
-
 		FileHandle editorFolder = gameDataFolder.child("editor/");
 		editorFolder.mkdirs();
 	}
@@ -186,26 +190,6 @@ public class RetroTowerDefense extends CMRGame {
 	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int teams) {
 		HostScreen screen = new HostScreen(details, save, lsave, teams);
 		setScreen(screen);
-
-		/*details.setHostedOnline(true);
-		GameManager manager = save.loadGame(details);
-		//OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), new Client());
-		LocalGameStream[] pair = LocalGameStream.createStreamPair();
-		LocalGameStream clientsidestream = pair[0];
-
-		manager.initialize(save);
-		manager.start();
-		GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave, team);
-		setScreen(screen);
-
-		clientsidestream.addListener(new PacketListener() {
-			@Override
-			public void packetReceived(Packet packet) {
-				Log.debug("Server received packet: " + packet);
-			}
-		});
-		manager.onNewConnection(pair[1]);
-		clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));*/
 	}
 
 	/**

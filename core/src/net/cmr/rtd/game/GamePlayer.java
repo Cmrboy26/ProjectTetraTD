@@ -192,7 +192,7 @@ public class GamePlayer {
         if (packet instanceof JumpPacket) {
             Player player = getPlayer();
             if (player != null) {
-                player.jump(manager.getUpdateData());
+                player.jump(manager.getUpdateData(), true);
             }
         }
 

@@ -1,6 +1,5 @@
 package net.cmr.rtd.screen;
 
-import java.awt.Point;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +8,7 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -31,12 +32,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
@@ -65,6 +69,7 @@ import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
 import net.cmr.rtd.game.packets.SkipRequestPacket;
+import net.cmr.rtd.game.packets.SortTypePacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
@@ -81,17 +86,21 @@ import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.HealerEnemy.HealerPacket;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.mobile.Joystick;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
+import net.cmr.util.Point;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
@@ -138,6 +147,8 @@ public class GameScreen extends AbstractScreenEX {
 
     TeamInventory inventory = null;
     PurchaseAction componentAction = null;
+
+    Joystick joystick;
 
     LevelSave save;
     public static NinePatch upgradeProgress, upgradeProgressBackground;
@@ -509,7 +520,7 @@ public class GameScreen extends AbstractScreenEX {
                 float preptime = waveCountdown - waveDuration;
                 boolean lastPrep = preping;
                 preping = preptime > 0 && !areWavesPaused && wave != 0;
-                if (lastPrep != preping || !initialized || !areWavesPaused) {
+                if (wave != 0 && (lastPrep != preping || !initialized || !areWavesPaused)) {
                     initialized = true;
                     setDisabled(false);
                 }
@@ -656,13 +667,32 @@ public class GameScreen extends AbstractScreenEX {
         Table settingsTable = SettingsScreen.getSettingsTable(() -> {
             settings.setVisible(false);
         });
+        settingsTable.row();
+        TextButton leave = new TextButton("Leave Game", Sprites.skin(), "small");
+        leave.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                settings.setVisible(false);
+                showQuitDialog();
+            }
+        });
+        settingsTable.add(leave).pad(5).padBottom(15).growX();
+
         settings.add(settingsTable).grow();
-        settings.setSize(640, 300);
+        settings.setSize(640, 380);
         settings.setScale(.6f);
         settings.setOrigin(Align.center);
         settings.setVisible(false);
         settings.setPosition(640/2, 360/2, Align.center);
         add(Align.center, settings);
+
+        if (isMobile()) {
+            joystick = new Joystick(Sprites.drawable(SpriteType.JOYSTICK), Sprites.drawable(SpriteType.JOYSTICK_BACKGROUND));
+            joystick.setRadius(50);
+            joystick.setKnobRadius(15);
+            joystick.setPosition(90, 70, Align.center);
+            add(Align.bottomLeft, joystick);
+        }
     }
 
     public void onRecievePacket(Packet packet) {
@@ -1025,30 +1055,7 @@ public class GameScreen extends AbstractScreenEX {
             } else if (inMenu()) {
                 closeMenu();
             } else {
-                if (quitDialog != null) {
-                    quitDialog.remove();
-                    quitDialog = null;
-                } else {
-                    Dialog dialog = new Dialog("", Sprites.skin(), "small") {
-                        @Override
-                        protected void result(Object object) {
-                            if (object.equals(false)) {
-                                return;
-                            }
-                            if (gameManager != null) {
-                                gameManager.save();
-                            }
-                            game.setScreen(new MainMenuScreen());
-                        }
-                    };
-                    dialog.text("Are you sure you want to quit?", Sprites.skin().get("small", LabelStyle.class));
-                    dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                    dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                    dialog.key(Input.Keys.ESCAPE, false);
-                    dialog.pad(5);
-                    dialog.show(stages.get(Align.center));
-                    quitDialog = dialog;
-                }
+                showQuitDialog();
             }
         }
 
@@ -1137,7 +1144,11 @@ public class GameScreen extends AbstractScreenEX {
     float infoWindowX = -1, infoWindowY = -1;
 
     private void processMouse(int tileX, int tileY) {
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+        boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT);
+        if (isMobile()) {
+            openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && placementMode == PlacementMode.NONE && !inMenu();
+        }
+        if (openMenu) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
             if (tileX == infoTowerX && tileY == infoTowerY && informationUpgradeWindow != null) {
                 removeInfoWindow();
@@ -1162,7 +1173,8 @@ public class GameScreen extends AbstractScreenEX {
                     informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
                     informationUpgradeWindow.pad(10);
                     informationUpgradeWindow.padTop(30);
-                    informationUpgradeWindow.setSize(225, 200);
+                    informationUpgradeWindow.setSize(225, 250);
+                    informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
                     informationUpgradeWindow.setMovable(true);
                     informationUpgradeWindow.setVisible(true);
                     informationUpgradeWindow.setResizable(true);
@@ -1192,7 +1204,94 @@ public class GameScreen extends AbstractScreenEX {
                     label.setWrap(true);
                     label.setFontScale(.25f);
                     informationUpgradeWindow.add(label).grow().colspan(2).row();
-                    TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+
+                    /*TextButton modifyTargetMethodButton = new TextButton("Targeting", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    modifyTargetMethodButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                            Audio.getInstance().playSFX(GameSFX.SCARY_WARNING, 1f);
+                            removeInfoWindow();
+                            //targetingDialog(tower);
+                            // TODO: Implement targeting dialog
+                        }
+                    });
+                    informationUpgradeWindow.add(modifyTargetMethodButton).pad(3f).growX();*/
+
+                    //Label targetMethodLabel = new Label("Targeting: ", Sprites.skin(), "small");
+                    //informationUpgradeWindow.add(targetMethodLabel).pad(3f).growX().colspan(2).row();
+
+                    int buttonHeight = 20;
+                    float pad = 3;
+                    float spacing = 10;
+
+                    SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+
+                    style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+                    style.scrollStyle.background.setTopHeight(spacing / 2);
+                    style.scrollStyle.background.setBottomHeight(spacing / 2);
+                    style.scrollStyle.background.setLeftWidth(spacing / 2);
+                    style.scrollStyle.background.setRightWidth(spacing / 2);
+                    
+                    SelectBox<String> targetMethodSelectBox = new SelectBox<String>(style);
+                    targetMethodSelectBox.setScale(.8f);
+                    targetMethodSelectBox.setAlignment(Align.center);
+                    targetMethodSelectBox.setItems("Strongest", "Weakest", "First", "Last", "Closest", "Random");
+                    switch (tower.getPreferedSortType()) {
+                        case HIGHEST_HEALTH:
+                            targetMethodSelectBox.setSelected("Strongest");
+                            break;
+                        case LOWEST_HEALTH:
+                            targetMethodSelectBox.setSelected("Weakest");
+                            break;
+                        case STRUCTURE_DISTANCE:
+                            targetMethodSelectBox.setSelected("First");
+                            break;
+                        case STRUCTURE_DISTANCE_REVERSE:
+                            targetMethodSelectBox.setSelected("Last");
+                            break;
+                        case TOWER_DISTANCE:
+                            targetMethodSelectBox.setSelected("Closest");
+                            break;
+                        case ANY:
+                            targetMethodSelectBox.setSelected("Random");
+                            break;
+                        default:
+                            break;
+                    }
+                    targetMethodSelectBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                            SortType type = SortType.HIGHEST_HEALTH;
+                            switch (targetMethodSelectBox.getSelected()) {
+                                case "Strongest":
+                                    type = SortType.HIGHEST_HEALTH;
+                                    break;
+                                case "Weakest":
+                                    type = SortType.LOWEST_HEALTH;
+                                    break;
+                                case "First":
+                                    type = SortType.STRUCTURE_DISTANCE;
+                                    break;
+                                case "Last":
+                                    type = SortType.STRUCTURE_DISTANCE_REVERSE;
+                                    break;
+                                case "Closest":
+                                    type = SortType.TOWER_DISTANCE;
+                                    break;
+                                case "Random":
+                                    type = SortType.ANY;
+                                    break;
+                            }
+                            SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
+                            ioStream.sendPacket(packet);
+                        } 
+                    });
+
+                    informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(2).growX().row();
+
+                    TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin(), "small");
                     upgradeButton.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
@@ -1201,9 +1300,22 @@ public class GameScreen extends AbstractScreenEX {
                             upgradeDialog(tower, false);
                         }
                     });
-                    informationUpgradeWindow.add(upgradeButton).pad(3f).growX();
-                    informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
-                    TextButton closeButton = new TextButton("Close", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+                    informationUpgradeWindow.add(upgradeButton).bottom().pad(pad).colspan(2).maxHeight(buttonHeight).growX().row();
+                    informationUpgradeWindow.row();
+
+                    TextButton sellButton = new TextButton("Sell", Sprites.skin(), "small");
+                    sellButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
+                            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
+                            ioStream.sendPacket(packet);
+                            removeInfoWindow();
+                        }
+                    });
+                    informationUpgradeWindow.add(sellButton).left().bottom().pad(pad).maxHeight(buttonHeight).growX().colspan(1);
+
+                    TextButton closeButton = new TextButton("Close", Sprites.skin(), "small");
                     closeButton.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
@@ -1211,7 +1323,11 @@ public class GameScreen extends AbstractScreenEX {
                             removeInfoWindow();
                         }
                     });
-                    informationUpgradeWindow.add(closeButton).pad(3f).growX();
+                    informationUpgradeWindow.add(closeButton).right().bottom().pad(pad).maxHeight(buttonHeight).growX();
+
+                    informationUpgradeWindow.layout();
+
+                    
                     //informationDialog.button("Close", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
                     //informationDialog.key(Input.Keys.ESCAPE, false);
                     stages.get(Align.center).addActor(informationUpgradeWindow);
@@ -1248,6 +1364,11 @@ public class GameScreen extends AbstractScreenEX {
         float vx = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
         float vy = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
         boolean sprinting = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+        if (isMobile()) {
+            vx = joystick.getInputX();
+            vy = joystick.getInputY();
+            sprinting = true;
+        }
 
         if (lastVelocityX != vx || lastVelocityY != vy || sprinting != lastSprinting) {
             // Something changed, send the new input to the server.
@@ -1371,7 +1492,7 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean inMenu() {
-        return shopButton.isChecked() || inventoryButton.isChecked() || settings.isVisible();
+        return shopButton.isChecked() || inventoryButton.isChecked() || settings.isVisible() || (informationUpgradeWindow != null && informationUpgradeWindow.isVisible());
     }
     public void closeMenu() {
         shopButton.setChecked(false);
@@ -1380,6 +1501,8 @@ public class GameScreen extends AbstractScreenEX {
         inventoryWindow.setVisible(false);
         if (informationUpgradeWindow != null) {
             informationUpgradeWindow.remove();
+            TowerEntity.displayRange = false;
+            TowerEntity.displayRangeTower = null;
             informationUpgradeWindow = null;
         }
         settings.setVisible(false);
@@ -1511,9 +1634,25 @@ public class GameScreen extends AbstractScreenEX {
         return placementMode != PlacementMode.NONE;
     }
 
+    boolean lastTouched = false;
+    boolean touchBeganOnJoystick = false;
+
     public void updatePlacementMode(int tileX, int tileY) {
         boolean multiPlace = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        boolean placementConfirm = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+
+        if (isMobile()) {
+            Vector2 input = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+            Vector2 unprojected = joystick.screenToLocalCoordinates(input);
+            boolean hitJoystick = joystick.hit(unprojected.x, unprojected.y, true) != null;
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                touchBeganOnJoystick = hitJoystick;
+            }
+            placementConfirm = !hitJoystick && !Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lastTouched && !touchBeganOnJoystick;
+            lastTouched = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        }
+
+        if (placementConfirm) {
             PurchaseItemPacket packet = null;
             if (placementMode == PlacementMode.PLACE) {
                 packet = new PurchaseItemPacket(PurchaseAction.TOWER, typeToPurchase, tileX, tileY);
@@ -1538,16 +1677,25 @@ public class GameScreen extends AbstractScreenEX {
             } else if (placementMode == PlacementMode.UPGRADE) {
                 TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
                 if (towerAt == null) {
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (towerAt.getRemainingUpgradeTime() >= 0) {
                     notification(SpriteType.STRUCTURE, "Tower is upgrading..." + (int) towerAt.getRemainingUpgradeTime() + "s");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (towerAt.isBeingBuilt()) {
                     notification(SpriteType.STRUCTURE, "Tower is being built..." + ((int) towerAt.getRemainingBuildTime()) + "s");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (informationUpgradeWindow != null) {
@@ -1560,6 +1708,9 @@ public class GameScreen extends AbstractScreenEX {
             } else if (placementMode == PlacementMode.COMPONENT) {
                 TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
                 if (towerAt == null) {
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 int tileX2 = Entity.getTileX(towerAt.getX());
@@ -1569,38 +1720,59 @@ public class GameScreen extends AbstractScreenEX {
                 if (totalApplied >= TowerEntity.MAX_COMPONENTS) {
                     notification(SpriteType.STRUCTURE, "Cannot apply more components!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 
                 if (componentAction == PurchaseAction.APPLY_LUBRICANT && (towerAt.getScopesApplied() > 0 || towerAt.getScrapMetalApplied() > 0)) {
                     notification(SpriteType.STRUCTURE, "Cannot apply lubricant\nwith other components!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (componentAction == PurchaseAction.APPLY_SCOPE && (towerAt.getLubricantApplied() > 0 || towerAt.getScrapMetalApplied() > 0)) {
                     notification(SpriteType.STRUCTURE, "Cannot apply scope\nwith other components!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && (towerAt.getLubricantApplied() > 0 || towerAt.getScopesApplied() > 0)) {
                     notification(SpriteType.STRUCTURE, "Cannot apply scrap metal\nwith other components!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
 
                 if (componentAction == PurchaseAction.APPLY_LUBRICANT && inventory.getWd40() <= 0) {
                     notification(SpriteType.STRUCTURE, "Not enough lubricant!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (componentAction == PurchaseAction.APPLY_SCOPE && inventory.getScopes() <= 0) {
                     notification(SpriteType.STRUCTURE, "Not enough scopes!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
                 if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && inventory.getScraps() <= 0) {
                     notification(SpriteType.STRUCTURE, "Not enough scrap metal!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
                     return;
                 }
 
@@ -1660,7 +1832,8 @@ public class GameScreen extends AbstractScreenEX {
                 //dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
                 //worldStage.addActor(dialog);
             }
-            if (!multiPlace) {
+        
+            if (!multiPlace || isMobile()) {
                 exitPlacementMode();
             }
         }
@@ -1734,6 +1907,46 @@ public class GameScreen extends AbstractScreenEX {
         skipButton.setDisabled(true);
         skipButton.setChecked(true);
         ioStream.sendPacket(new SkipRequestPacket());
+    }
+
+    public boolean isMobile() {
+        return Gdx.app.getType() == ApplicationType.Android || CMRGame.SIMULATE_MOBILE;
+    }
+
+    public void showQuitDialog() {
+        if (quitDialog != null) {
+            quitDialog.remove();
+            quitDialog = null;
+        } else {
+            Dialog dialog = new Dialog("", Sprites.skin(), "small") {
+                @Override
+                protected void result(Object object) {
+                    if (object == null || object.equals(false)) {
+                        if (quitDialog == null) {
+                            return;
+                        }
+                        quitDialog.remove();
+                        quitDialog = null;
+                        return;
+                    }
+                    if (gameManager != null) {
+                        gameManager.save();
+                    }
+                    game.setScreen(new MainMenuScreen());
+                }
+            };
+            dialog.text("Are you sure you want to quit?", Sprites.skin().get("small", LabelStyle.class));
+            TextButton button = new TextButton("Yes", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+            button.pad(0, 10, 0, 10);
+            dialog.button(button, true);
+            TextButton button2 = new TextButton("No", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+            button2.pad(0, 10, 0, 10);
+            dialog.button(button2, false);
+            dialog.key(Input.Keys.ESCAPE, false);
+            dialog.pad(5);
+            dialog.show(stages.get(Align.center));
+            quitDialog = dialog;
+        }
     }
 
 }

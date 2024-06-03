@@ -1,20 +1,18 @@
 - Bestiary
 - More (better) levels
 - Achievements
-- Better synchronization between client and server (especially with fire tower fireball) (DONE)
-- Autosaving (DONE)
 - Mining/Automation Element of the game (buildings dedicated to mining)
-- Implement endless mode (DONE)
 - In competitive modes, allow players to send enemies to the other side (even during cooldown periods) and decrease the endless mode impact on the game slightly
 
 - Allow other menus to be clicked in middle click tower (DONE)
 - Make left shift force upgrade instead of showing the dialog (DONE)
-- Make left shift force insert component instead of showing the dialog
+- Make left shift force insert component instead of showing the dialog 
 - More music
 - Consider: should fire and ice deal more damage?
 - Hue shift enemies
-- FIX: Find out why story levels aren't copied to the user folder when it is packaged into a jar or EXE
+- FIX: Find out why story levels aren't copied to the user folder when it is packaged into a jar or EXE (DONE)
 - Improve shop layout (ADD TABS)
+- ADD LOSE/WIN SCREEN (where you can reset or play again)
 
 IDEAS:
 - Resources can be obtained through mining/drilling in order to build/upgrade towers

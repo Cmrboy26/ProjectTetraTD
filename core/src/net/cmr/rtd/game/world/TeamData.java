@@ -1,6 +1,6 @@
 package net.cmr.rtd.game.world;
 
-import java.awt.Point;
+import net.cmr.util.Point;
 
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;

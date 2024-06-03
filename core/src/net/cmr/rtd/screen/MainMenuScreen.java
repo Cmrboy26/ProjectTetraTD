@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.mobile.Joystick;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Sprites;

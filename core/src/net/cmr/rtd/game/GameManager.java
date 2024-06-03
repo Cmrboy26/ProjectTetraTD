@@ -18,6 +18,7 @@ import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
+import org.bitlet.weupnp.PortMappingEntry;
 
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
@@ -657,10 +658,20 @@ public class GameManager implements Disposable {
 
     public void teamLost(int team) {
         // TODO: If a player is playing a multiplayer map by themselves, they get a notification when the other team with no one loses. Fix this. 
+
         if (winningTeams.size() == 0) {
             // Allow the players to continue playing if they decide to resume the game
             return;
         }
+
+        int teamsWithPlayers = 0;
+        for (TeamData winningTeams : teams) {
+            if (doesTeamHavePlayers(winningTeams.team)) {
+                teamsWithPlayers++;
+            }
+        }
+
+        // Only send wave data info about teams with players in them
         boolean teamHasPlayers = doesTeamHavePlayers(team);
         if (teamHasPlayers) {
             TeamUpdatePacket packet = new TeamUpdatePacket(team, true);
@@ -668,16 +679,22 @@ public class GameManager implements Disposable {
         }
 
         winningTeams.remove(teams.get(team));
-        if (winningTeams.size() == 1) {
-            TeamData winner = winningTeams.get(0);
-            sendPacketToAll(new TeamUpdatePacket(winner.team, false));
-            pauseWaves();
-            winningTeams.clear();
+        if (teamsWithPlayers > 1) {
+            // Show all players in the multiplayer game the winner
+            if (winningTeams.size() == 1) {
+                gameOver();
+            }
+        } else {
+            // Show the player in the single player game that they lost
+            if (winningTeams.size() == 0) {
+                gameOver();
+            }
         }
     }
     public void gameOver() {
-        // The game is over.
+        // There are no more waves in the level OR there is only one team remaining in the multiplayer match OR the player lost in the single player match.
         // Send a packet to all players to show that the game is over.
+        Log.info("GAME OVER!");
         for (TeamData data : winningTeams) {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
         }
@@ -820,19 +837,32 @@ public class GameManager implements Disposable {
             discover.discover();
             GatewayDevice d = discover.getValidGateway();
             if (d == null) {
-                Log.warning("Failed to port forward on port: "+details.getTCPPort()+"! A manual port forward may be required.");
+                Log.warning("Failed to port forward on port: "+details.getTCPPort()+": Device not detected! A manual port forward may be required.");
                 return false;
             }
             InetAddress localAddress = d.getLocalAddress();
             String externalIPAddress = d.getExternalIPAddress();
-            boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
+            int port = details.getTCPPort();
+            PortMappingEntry entry = new PortMappingEntry();
+            if(!d.getSpecificPortMappingEntry(port, "TCP", entry)) {
+                Log.info("Port already forwarded: "+details.getTCPPort());
+            } else {
+                boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
+                if (portMappingSuccessful) {
+                    Log.info("Port forwarding successful: "+externalIPAddress+":"+details.getTCPPort());
+                } else {
+                    Log.warning("Failed to port forward on port: "+details.getTCPPort()+": Mapping unsuccessful! A manual port forward may be required.");
+                }
+                return true;
+            }
+            /*boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
             if (portMappingSuccessful) {
                 Log.info("Port forwarding successful: "+externalIPAddress+":"+details.getTCPPort());
             }
             if (!portMappingSuccessful) {
-                Log.warning("Failed to port forward on port: "+details.getTCPPort()+"! A manual port forward may be required.");
-            }
-            return portMappingSuccessful;
+                Log.warning("Failed to port forward on port: "+details.getTCPPort()+": Mapping unsuccessful! A manual port forward may be required.");
+            }*/
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }

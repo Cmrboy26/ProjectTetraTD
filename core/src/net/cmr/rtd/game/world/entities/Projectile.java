@@ -161,7 +161,7 @@ public class Projectile extends Entity {
         
         if (!playedLaunchSound) {
             if (data.isClient() && onLaunchSound != null) {
-                Audio.getInstance().playSFX(onLaunchSound, 1, 1);
+                Audio.getInstance().worldSFX(onLaunchSound, 1, 1, getPosition(), data.getScreen());
             }
             playedLaunchSound = true;
         }
@@ -200,7 +200,7 @@ public class Projectile extends Entity {
             }
             if (data.isClient()) {
                 if (onHitSound != null) {
-                    Audio.getInstance().playSFX(onHitSound, 1, 1);
+                    Audio.getInstance().worldSFX(onHitSound, 1, 1, getPosition(), data.getScreen());
                 }
             }
             // Display a particle?

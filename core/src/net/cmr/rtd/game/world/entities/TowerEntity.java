@@ -46,7 +46,7 @@ public abstract class TowerEntity extends Entity {
     int scrapsApplied = 0;
     int lubricantApplied = 0;
     int scopesApplied = 0;
-    SortType preferedSortType = SortType.HIGHEST_HEALTH;
+    SortType preferedSortType = SortType.LOWEST_HEALTH;
 
     public TowerEntity(GameType type, int team) {
         super(type);
@@ -119,8 +119,6 @@ public abstract class TowerEntity extends Entity {
         tower.scopesApplied = input.readInt();
         if (version >= 1) {
             tower.preferedSortType = SortType.fromID(input.readInt());
-        } else {
-            tower.preferedSortType = SortType.HIGHEST_HEALTH;
         }
         deserializeTower(tower, input);
     }
@@ -243,7 +241,8 @@ public abstract class TowerEntity extends Entity {
         STRUCTURE_DISTANCE(5) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
-                // TODO: Implement
+                // AKA: Highest distance traveled first, lowest distance traveled last
+                entities.sort((a, b) -> (int) (b.getDistanceTraveled() - a.getDistanceTraveled()));
             }
         },
         /**
@@ -252,17 +251,10 @@ public abstract class TowerEntity extends Entity {
         STRUCTURE_DISTANCE_REVERSE(6) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
-                // TODO: Implement
-                // Cannot be implemented with current without syncing team point positions to the client
+                // AKA: Lowest distance traveled first, highest distance traveled last
+                entities.sort((a, b) -> (int) (a.getDistanceTraveled() - b.getDistanceTraveled()));
             }
-        },
-        RANDOM(7) {
-            @Override
-            public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
-                entities.sort((a, b) -> (int) (Math.random() * 2 - 1));
-            }
-        }
-        ;
+        };
 
         static {
             sortTypeMap = new HashMap<>();

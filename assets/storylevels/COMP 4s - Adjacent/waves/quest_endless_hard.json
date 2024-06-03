@@ -1,9 +1,0 @@
-{
-	"difficulty": 3,
-	"recommendedEndlessSettingsDifficulty": 3,
-	"name": "Endless Hard",
-	"endlessMode": true,
-	"startingHealth": 20,
-	"startingMoney": 35,
-	"waves": []
-}

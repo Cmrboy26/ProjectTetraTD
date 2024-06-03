@@ -24,6 +24,8 @@ public abstract class EnemyEntity extends Entity {
 
     public int team;
     public int health;
+    public static final int VERSION = 0;
+    public float distanceTraveled = 0;
 
     protected EnemyEntity(int team, GameType type) {
         super(type);
@@ -33,6 +35,7 @@ public abstract class EnemyEntity extends Entity {
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
+        distanceTraveled += delta * getSpeed();
         if (health <= 0) {
             onDeath(data);
             if (data.isServer()) {
@@ -48,6 +51,11 @@ public abstract class EnemyEntity extends Entity {
 
     protected abstract void serializeEnemy(DataBuffer buffer) throws IOException;
     protected abstract void deserializeEnemy(GameObject object, DataInputStream input) throws IOException;
+
+    // Used to calculate if the entity is closest to the tower
+    public float getDistanceTraveled() {
+        return distanceTraveled;
+    }
 
     public abstract int getMaxHealth();
     public final float getSpeed() {
@@ -93,14 +101,14 @@ public abstract class EnemyEntity extends Entity {
         // play the sound effect
         if (data.isClient()) {
             if (type == DamageType.FIRE) {
-                Audio.getInstance().playSFX(GameSFX.FIRE_DAMAGE, .4f, .25f);
+                Audio.getInstance().worldSFX(GameSFX.FIRE_DAMAGE, .4f, .25f, getPosition(), data.getScreen());
             } else {
                 if (randomNumber == 1) {
-                    Audio.getInstance().playSFX(GameSFX.HIT1, 1, .8f);
+                    Audio.getInstance().worldSFX(GameSFX.HIT1, 1, .8f, getPosition(), data.getScreen());
                 } else if (randomNumber == 2) {
-                    Audio.getInstance().playSFX(GameSFX.HIT2, 1, .8f);
+                    Audio.getInstance().worldSFX(GameSFX.HIT2, 1, .8f, getPosition(), data.getScreen());
                 } else {
-                    Audio.getInstance().playSFX(GameSFX.HIT3, 1, .8f);
+                    Audio.getInstance().worldSFX(GameSFX.HIT3, 1, .8f, getPosition(), data.getScreen());
                 }
             }
         }
@@ -126,16 +134,22 @@ public abstract class EnemyEntity extends Entity {
 
     @Override
     protected final void serializeEntity(DataBuffer buffer) throws IOException {
+        buffer.writeInt(VERSION);
         buffer.writeInt(team);
         buffer.writeInt(health);
+        buffer.writeFloat(distanceTraveled);
         serializeEnemy(buffer);
     }
 
     @Override
     protected final void deserializeEntity(GameObject object, DataInputStream input) throws IOException {
         EnemyEntity entity = (EnemyEntity) object;
+        int version = input.readInt();
         entity.team = input.readInt();
         entity.health = input.readInt();
+        if (version >= 0) {
+            entity.distanceTraveled = input.readFloat();
+        }
         deserializeEnemy(object, input);
     }
 

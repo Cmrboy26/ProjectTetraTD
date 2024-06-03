@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -61,6 +62,8 @@ public class Sprites implements Disposable {
         SKIP("skip"),
         RESTART("restart"),
         SETTINGS("settings"),
+        JOYSTICK("joystick"),
+        JOYSTICK_BACKGROUND("joystickBackground"),
         ;
 
         private String spriteName;

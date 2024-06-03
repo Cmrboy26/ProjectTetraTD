@@ -143,7 +143,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
         }
         for (int i = 0; i < particles.size(); i++) {
             Particle particle = particles.get(i);
-            particle.position.add(particle.velocity);
+            particle.position.add(particle.velocity.cpy().scl(delta*60));
             particle.elapsedTime += delta;
             if (particle.elapsedTime >= particleLife) {
                 particles.remove(i);

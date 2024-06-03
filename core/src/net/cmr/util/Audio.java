@@ -7,12 +7,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
 
-import net.cmr.rtd.game.packets.SkipRequestPacket;
+import net.cmr.rtd.game.world.Entity;
+import net.cmr.rtd.game.world.entities.Player;
+import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.screen.GameScreen;
 
 /**
  * The Audio class handles the management and playback of sound effects and music in the game.
@@ -21,6 +25,8 @@ public class Audio implements Disposable {
 
     private static final String SFX_PATH = "audio/sfx/";
     private static final String MUSIC_PATH = "audio/music/";
+
+    public static final float SOUND_DROPOFF_DISTANCE = 9; // tiles
 
     /**
      * Represents the sound effects used in the game.
@@ -237,6 +243,30 @@ public class Audio implements Disposable {
         }
         long output = sound.play(volume * sfxVolume, pitch, pan);
         return output;
+    }
+
+    /**
+     * Plays a sound effect in the world with the given volume and pitch.
+     * @param position The position of the sound effect.
+     * @see #playSFX(GameSFX, float, float)
+     */
+    public void worldSFX(GameSFX sfx, float volume, float pitch, Vector2 position, GameScreen screen) {
+        if (screen == null) {
+            return;
+        }
+        float newVolume = volume;
+        Player player = screen.getLocalPlayer();
+        if (player != null) {
+            Vector2 playerPos = player.getPosition().cpy();
+            Vector2 soundPos = position.cpy();
+            float distance = playerPos.dst(soundPos) / Tile.SIZE; // distance in tiles
+            float dropoffDistance = SOUND_DROPOFF_DISTANCE;
+            if (distance > dropoffDistance) {
+                return;
+            }
+            newVolume *= Math.sqrt(dropoffDistance - distance) / Math.sqrt(dropoffDistance);
+        }
+        playSFX(sfx, newVolume, pitch);
     }
 
     /**

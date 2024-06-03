@@ -37,8 +37,8 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
         label.setAlignment(Align.center);
         table.add(label).expandX().padRight(10.0f).colspan(1);
         table.add(ipField).expandX().fillX().pad(10).colspan(1).row();
-        
-        TextField portField = new TextField(Settings.getPreferences().getString(Settings.JOIN_PORT), Sprites.skin(), "small");
+
+        TextField portField = new TextField(Settings.getPreferences().getInteger(Settings.JOIN_PORT)+"", Sprites.skin(), "small");
         portField.setMessageText("11265");
         portField.setMaxLength(6);
         portField.setTextFieldFilter(new TextField.TextFieldFilter.DigitsOnlyFilter());
@@ -56,7 +56,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                 game.setScreen(new SelectionScreen());
             }
         });
-        table.add(back).right().bottom().pad(5f).width(100).expandX().colspan(1);
+        table.add(back).left().bottom().pad(5f).width(100).expandX().colspan(1);
         TextButton join = new TextButton("Join", Sprites.skin(), "small");
         join.addListener(new ClickListener() {
             @Override
@@ -66,11 +66,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                 final int port = portField.getText().isEmpty() ? 11265 : Integer.parseInt(portField.getText());
 
                 Settings.getPreferences().putString(Settings.JOIN_IP, ip);
-                if (port == 11265) {
-                    Settings.getPreferences().putString(Settings.JOIN_PORT, "");
-                } else {
-                    Settings.getPreferences().putString(Settings.JOIN_PORT, portField.getText());
-                }
+                Settings.getPreferences().putInteger(Settings.JOIN_PORT, port);
                 Settings.getPreferences().flush();
 
                 Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
@@ -102,7 +98,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                 }
             }
         });
-        table.add(join).left().bottom().pad(5f).width(100).expandX().colspan(1);
+        table.add(join).right().bottom().pad(5f).width(100).expandX().colspan(1);
     }
 
 }

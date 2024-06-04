@@ -223,7 +223,19 @@ public abstract class TowerEntity extends Entity {
         TOWER_DISTANCE(3) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
-                entities.sort((a, b) -> (int) (a.getPosition().dst(tower.getPosition()) - b.getPosition().dst(tower.getPosition())));
+                entities.sort((a, b) -> {
+                    int adist = (int) a.getPosition().dst(tower.getPosition());
+                    int bdist = (int) b.getPosition().dst(tower.getPosition());
+                    /*if (adist > bdist) {
+                        return 1;
+                    }
+                    if (adist == bdist) {
+                        return 0;
+                    }
+                    return -1;*/
+                    return adist - bdist;
+                    //(int) (a.getPosition().dst(tower.getPosition()) - b.getPosition().dst(tower.getPosition()))
+                });
             }
         },
         /**
@@ -232,7 +244,20 @@ public abstract class TowerEntity extends Entity {
         TOWER_DISTANCE_REVERSE(4) {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
-                entities.sort((a, b) -> (int) (b.getPosition().dst(tower.getPosition()) - a.getPosition().dst(tower.getPosition())));
+                entities.sort((a, b) -> {
+                    int adist = (int) a.getPosition().dst(tower.getPosition());
+                    int bdist = (int) b.getPosition().dst(tower.getPosition());
+                    /*if (adist > bdist) {
+                        return 1;
+                    }
+                    if (adist == bdist) {
+                        return 0;
+                    }
+                    return -1;*/
+                    return bdist - adist;
+                    //(int) (a.getPosition().dst(tower.getPosition()) - b.getPosition().dst(tower.getPosition()))
+                });
+                //entities.sort((a, b) -> (int) (b.getPosition().dst(tower.getPosition()) - a.getPosition().dst(tower.getPosition())));
             }
         },
         /**
@@ -242,7 +267,12 @@ public abstract class TowerEntity extends Entity {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // AKA: Highest distance traveled first, lowest distance traveled last
-                entities.sort((a, b) -> (int) (b.getDistanceTraveled() - a.getDistanceTraveled()));
+                entities.sort((a, b) -> {
+                    int adist = (int) a.getDistanceTraveled();
+                    int bdist = (int) b.getDistanceTraveled();
+                    return bdist - adist;
+                });
+                //entities.sort((a, b) -> (int) (b.getDistanceTraveled() - a.getDistanceTraveled()));
             }
         },
         /**
@@ -252,7 +282,12 @@ public abstract class TowerEntity extends Entity {
             @Override
             public void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data) {
                 // AKA: Lowest distance traveled first, highest distance traveled last
-                entities.sort((a, b) -> (int) (a.getDistanceTraveled() - b.getDistanceTraveled()));
+                entities.sort((a, b) -> {
+                    int adist = (int) a.getDistanceTraveled();
+                    int bdist = (int) b.getDistanceTraveled();
+                    return adist - bdist;
+                });
+                //entities.sort((a, b) -> (int) (a.getDistanceTraveled() - b.getDistanceTraveled()));
             }
         };
 

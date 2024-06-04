@@ -35,6 +35,8 @@ import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.packets.GameOverPacket;
+import net.cmr.rtd.game.packets.GameResetPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
@@ -698,6 +700,14 @@ public class GameManager implements Disposable {
         for (TeamData data : winningTeams) {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
         }
+        for (TeamData data : teams) {
+            GameOverPacket packet = new GameOverPacket(world.getWave(), 694, data.getHealth() > 0);
+            for (GamePlayer player : players.values()) {
+                if (player.getTeam() == data.team) {
+                    player.sendPacket(packet);
+                }
+            }
+        }
         winningTeams.clear();
         pauseWaves();
     }
@@ -762,6 +772,7 @@ public class GameManager implements Disposable {
 
     public void resetWorld(LevelSave level) {
         GameSave save = this.save.copySave(level);
+        sendPacketToAll(new GameResetPacket());
         pauseWaves();
         load(save);
     }

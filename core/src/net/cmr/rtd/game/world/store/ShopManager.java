@@ -227,6 +227,30 @@ public class ShopManager {
         return null;
     }
 
+    /**
+     * Same as @see#towerAt(World, int, int) but also checks the team of the tower
+     */
+    public static TowerEntity towerAt(World world, int x, int y, int team) {
+        if (world == null) {
+            return null;
+        }
+        for (Entity entity : world.getEntities()) {
+            if (!(entity instanceof TowerEntity)) {
+                continue;
+            }
+            TowerEntity tower = (TowerEntity) entity;
+            int towerX = Entity.getTileX(tower);
+            int towerY = Entity.getTileY(tower);
+            if (towerX == x && towerY == y) {
+                if (tower != null && tower.getTeam() != team) {
+                    tower = null;
+                }
+                return tower;
+            }
+        }
+        return null;
+    }
+
     private static final DecimalFormat df = new DecimalFormat("#.#");
 
     public static String costToString(long cost) {

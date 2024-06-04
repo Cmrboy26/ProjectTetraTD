@@ -20,6 +20,8 @@ import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.packets.GameOverPacket;
+import net.cmr.rtd.game.packets.GameResetPacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
@@ -173,6 +175,9 @@ public class OnlineGameStream extends GameStream {
                 return SortType.fromID(input.readInt());
             }
         });
+
+        kryo.register(GameOverPacket.class);
+        kryo.register(GameResetPacket.class);
     }
     
 }

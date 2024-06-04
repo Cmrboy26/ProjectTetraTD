@@ -8,7 +8,6 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -58,6 +57,8 @@ import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
+import net.cmr.rtd.game.packets.GameOverPacket;
+import net.cmr.rtd.game.packets.GameResetPacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
@@ -98,7 +99,6 @@ import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Audio.GameSFX;
-import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 import net.cmr.util.Point;
 import net.cmr.util.Settings;
@@ -140,6 +140,7 @@ public class GameScreen extends AbstractScreenEX {
     Window informationUpgradeWindow;
     Dialog resetGameDialog;
     Dialog componentDialog;
+    Dialog gameOverDialog;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
@@ -912,6 +913,56 @@ public class GameScreen extends AbstractScreenEX {
             }
         }
 
+        if (packet instanceof GameResetPacket) {
+            GameResetPacket resetPacket = (GameResetPacket) packet;
+            if (gameOverDialog != null) {
+                gameOverDialog.remove();
+                gameOverDialog = null;
+            }
+        }
+
+        if (packet instanceof GameOverPacket) {
+            GameOverPacket gameOverPacket = (GameOverPacket) packet;
+            Log.info("GAME IS NOW OVER: ended on wave "+gameOverPacket.endingWave+", score: "+gameOverPacket.score+", still alive: "+gameOverPacket.stillAlive);
+            if (gameOverDialog != null) {
+                gameOverDialog.remove();
+                gameOverDialog = null;
+            }
+            gameOverDialog = new Dialog(gameOverPacket.stillAlive ? "YOU WON!" : "GAME OVER", Sprites.skin(), "small") {
+                @Override
+                protected void result(Object object) {
+                    if (object == null) return;
+                    if (object instanceof Boolean && (Boolean) object) {
+                        // Restart the game
+                        if (gameManager == null) return;
+                        gameManager.resetWorld(save);
+                        return;
+                    }
+                    MainMenuScreen mainMenu = new MainMenuScreen();
+                    game.setScreen(mainMenu);
+                }
+            };
+            gameOverDialog.getTitleLabel().setAlignment(Align.center);
+            gameOverDialog.pad(30, 5, 10, 5);
+            gameOverDialog.text("You made it to wave "+gameOverPacket.endingWave+" with a score of "+gameOverPacket.score+".", Sprites.skin().get("small", LabelStyle.class));
+            TextButton exit = new TextButton("Quit to Title", Sprites.skin().get("small", TextButtonStyle.class));
+            exit.pad(0, 10, 0, 10);
+            gameOverDialog.button(exit, false);
+            if (gameManager != null) {
+                TextButton restart = new TextButton("Restart", Sprites.skin().get("small", TextButtonStyle.class));
+                restart.pad(0, 10, 0, 10);
+                gameOverDialog.button(restart, true);
+            } else {
+                TextButton close = new TextButton("Close", Sprites.skin().get("small", TextButtonStyle.class));
+                close.pad(0, 10, 0, 10);
+                gameOverDialog.button(close, null);
+                gameOverDialog.key(Input.Keys.ESCAPE, null);
+            }
+
+            gameOverDialog.show(stages.get(Align.center));
+            // If game over packet is received and player is still alive, they have won the game
+        }
+
     }
 
     int lastScopes = -1, lastWD40 = -1, lastScraps = -1;
@@ -1151,7 +1202,7 @@ public class GameScreen extends AbstractScreenEX {
                         && componentDialog == null;
         //}
         if (openMenu) {
-            TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
+            TowerEntity tower = ShopManager.towerAt(world, tileX, tileY, team);
             if (informationUpgradeWindow != null && ((tileX != infoTowerX || tileY != infoTowerY) ^ !(tileX == infoTowerX && tileY == infoTowerY && !informationUpgradeWindow.isVisible()))) {
                 removeInfoWindow();
             } else {
@@ -1494,7 +1545,12 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean inMenu() {
-        return shopButton.isChecked() || inventoryButton.isChecked() || settings.isVisible() || (informationUpgradeWindow != null && informationUpgradeWindow.isVisible());
+        return shopButton.isChecked() 
+                || inventoryButton.isChecked() 
+                || settings.isVisible() 
+                || (informationUpgradeWindow != null && informationUpgradeWindow.isVisible())
+                || gameOverDialog != null
+                ;
     }
     public void closeMenu() {
         shopButton.setChecked(false);
@@ -1675,7 +1731,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                 }
             } else if (placementMode == PlacementMode.UPGRADE) {
-                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
+                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY, team);
                 if (towerAt == null) {
                     if (!multiPlace || isMobile()) {
                         exitPlacementMode();
@@ -1706,7 +1762,7 @@ public class GameScreen extends AbstractScreenEX {
                 // Open the upgrade dialog
                 upgradeDialog(towerAt, multiPlace);
             } else if (placementMode == PlacementMode.COMPONENT) {
-                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY);
+                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY, team);
                 if (towerAt == null) {
                     if (!multiPlace || isMobile()) {
                         exitPlacementMode();

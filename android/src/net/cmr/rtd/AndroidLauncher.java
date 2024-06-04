@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 //import games.spooky.gdx.nativefilechooser.android.AndroidFileChooser;
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.util.Settings;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

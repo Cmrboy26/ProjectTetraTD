@@ -139,6 +139,7 @@ public class GameScreen extends AbstractScreenEX {
     Dialog quitDialog;
     Window informationUpgradeWindow;
     Dialog resetGameDialog;
+    Dialog componentDialog;
 
     ArrayList<Entity> entityQueue = new ArrayList<Entity>();
     float waveCountdown = -1, waveDuration = 0;
@@ -185,6 +186,9 @@ public class GameScreen extends AbstractScreenEX {
         Audio.getInstance().playMusic(random);
 
         float iconSize = 32;
+        if (isMobile()) {
+            iconSize += 16;
+        }
 
         life = new Image(Sprites.drawable(SpriteType.HEART));
         life.setSize(iconSize, iconSize);
@@ -306,7 +310,7 @@ public class GameScreen extends AbstractScreenEX {
 
         upgradeButton = new ImageButton(style);
         upgradeButton.setSize(iconSize, iconSize);
-        upgradeButton.setPosition(320 - 7.5f - 32, 5, Align.bottomRight);
+        upgradeButton.setPosition(320 - 7.5f - iconSize, 5, Align.bottomRight);
         upgradeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -319,13 +323,6 @@ public class GameScreen extends AbstractScreenEX {
 
         add(Align.bottom, upgradeButton);
 
-        /*style = new ImageButtonStyle();
-        style.down = Sprites.drawable(SpriteType.BORDER_DOWN);
-        style.up = Sprites.drawable(SpriteType.BORDER_DEFAULT);
-        style.over = Sprites.drawable(SpriteType.BORDER_HOVER);
-        style.checked = Sprites.drawable(SpriteType.BORDER_SELECTED);
-        style.disabled = Sprites.drawable(SpriteType.BORDER_DISABLED);
-        style.imageUp = Sprites.drawable(SpriteType.SHOP_ICON);*/
         TextButtonStyle style2 = new TextButtonStyle();
         int patch = 5;
         style2.down = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DOWN), patch, patch, patch, patch));
@@ -343,7 +340,7 @@ public class GameScreen extends AbstractScreenEX {
         smallButton.disabled = style2.up;
         smallButton.imageUp = Sprites.drawable(SpriteType.CASH);
 
-        ImageButton sellButton = new ImageButton(smallButton) {
+        /*ImageButton sellButton = new ImageButton(smallButton) {
             @Override
             public void act(float delta) {
                 setChecked(Gdx.input.isKeyPressed(Input.Keys.R));
@@ -359,7 +356,7 @@ public class GameScreen extends AbstractScreenEX {
         r.setPosition(4, 3, Align.bottomRight);
         sellButton.addActor(r);
         buttonGroup.add(sellButton);
-        add(Align.bottom, sellButton);
+        add(Align.bottom, sellButton);*/
 
 
         GlyphLayout layout = new GlyphLayout();
@@ -549,7 +546,7 @@ public class GameScreen extends AbstractScreenEX {
         style3.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_SELECTED), patch, patch, patch, patch));
 
         wavePauseButton = new ImageButton(style3);
-        wavePauseButton.setSize(iconSize*2, iconSize);
+        wavePauseButton.setSize(iconSize, iconSize);
         wavePauseButton.setPosition(640-10-iconSize*2, 5, Align.bottomRight);
         wavePauseButton.setDisabled(gameManager == null);
         wavePauseButton.addListener(new ClickListener() {
@@ -573,8 +570,8 @@ public class GameScreen extends AbstractScreenEX {
         if (gameManager == null) {
             restartButton.setDisabled(true);
         }
-        restartButton.setSize(iconSize * 1.5f, iconSize);
-        restartButton.setPosition(640-5*3-iconSize*4, 5, Align.bottomRight);
+        restartButton.setSize(iconSize, iconSize);
+        restartButton.setPosition(640-5*3-iconSize*3, 5, Align.bottomRight);
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -690,7 +687,7 @@ public class GameScreen extends AbstractScreenEX {
             joystick = new Joystick(Sprites.drawable(SpriteType.JOYSTICK), Sprites.drawable(SpriteType.JOYSTICK_BACKGROUND));
             joystick.setRadius(50);
             joystick.setKnobRadius(15);
-            joystick.setPosition(90, 70, Align.center);
+            joystick.setPosition(iconSize + 5, iconSize / 1.5f, Align.bottomLeft);
             add(Align.bottomLeft, joystick);
         }
     }
@@ -1095,6 +1092,9 @@ public class GameScreen extends AbstractScreenEX {
 
         int tileX = (int) Math.floor(mousePos.x/Tile.SIZE);
         int tileY = (int) Math.floor(mousePos.y/Tile.SIZE);
+
+        processPlayerMovement(delta);
+        processMouse(tileX, tileY);
         
         if (inPlacementMode()) {
             updatePlacementMode(tileX, tileY);
@@ -1120,9 +1120,6 @@ public class GameScreen extends AbstractScreenEX {
             }
         }
 
-        processPlayerMovement(delta);
-        processMouse(tileX, tileY);
-
         if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
             TowerEntity.displayRange = !TowerEntity.displayRange;
         }
@@ -1144,13 +1141,18 @@ public class GameScreen extends AbstractScreenEX {
     float infoWindowX = -1, infoWindowY = -1;
 
     private void processMouse(int tileX, int tileY) {
-        boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT);
-        if (isMobile()) {
-            openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && placementMode == PlacementMode.NONE && !inMenu();
-        }
+        //boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        //if (isMobile()) {
+        boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) 
+                        && placementMode == PlacementMode.NONE 
+                        && (!inMenu() || informationUpgradeWindow != null) 
+                        && !isOverJoystick()
+                        && !isOverActor(informationUpgradeWindow)
+                        && componentDialog == null;
+        //}
         if (openMenu) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY);
-            if (tileX == infoTowerX && tileY == infoTowerY && informationUpgradeWindow != null) {
+            if (informationUpgradeWindow != null && ((tileX != infoTowerX || tileY != infoTowerY) ^ !(tileX == infoTowerX && tileY == infoTowerY && !informationUpgradeWindow.isVisible()))) {
                 removeInfoWindow();
             } else {
                 infoTowerX = tileX;
@@ -1642,9 +1644,7 @@ public class GameScreen extends AbstractScreenEX {
         boolean placementConfirm = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
 
         if (isMobile()) {
-            Vector2 input = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            Vector2 unprojected = joystick.screenToLocalCoordinates(input);
-            boolean hitJoystick = joystick.hit(unprojected.x, unprojected.y, true) != null;
+            boolean hitJoystick = isOverJoystick();
             if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                 touchBeganOnJoystick = hitJoystick;
             }
@@ -1776,9 +1776,18 @@ public class GameScreen extends AbstractScreenEX {
                     return;
                 }
 
-                Dialog componentDialog = new Dialog("Component", Sprites.skin(), "small") {
+                if (componentDialog != null) {
+                    componentDialog.remove();
+                    componentDialog = null;
+                }
+
+                componentDialog = new Dialog("Component", Sprites.skin(), "small") {
                     @Override
                     protected void result(Object object) {
+                        if (componentDialog != null) {
+                            componentDialog.remove();
+                            componentDialog = null;
+                        }
                         if (object.equals(false)) {
                             Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                             return;
@@ -1854,6 +1863,10 @@ public class GameScreen extends AbstractScreenEX {
         Dialog dialog = new Dialog("Upgrade?", Sprites.skin(), "small") {
             @Override
             protected void result(Object object) {
+                if (informationUpgradeWindow != null) {
+                    informationUpgradeWindow.remove();
+                    informationUpgradeWindow = null;
+                }
                 if (object.equals(false)) {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
@@ -1910,7 +1923,27 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean isMobile() {
-        return Gdx.app.getType() == ApplicationType.Android || CMRGame.SIMULATE_MOBILE;
+        return RetroTowerDefense.isMobile();
+    }
+
+    public boolean isOverJoystick() {
+        if (joystick == null) {
+            return false;
+        }
+        Vector2 input = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        Vector2 unprojected = joystick.screenToLocalCoordinates(input);
+        boolean hitJoystick = joystick.hit(unprojected.x, unprojected.y, true) != null;
+        return hitJoystick;
+    }
+
+    public boolean isOverActor(Actor actor) {
+        if (actor == null) {
+            return false;
+        }
+        Vector2 input = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        Vector2 unprojected = actor.screenToLocalCoordinates(input);
+        boolean hitActor = actor.hit(unprojected.x, unprojected.y, true) != null;
+        return hitActor;
     }
 
     public void showQuitDialog() {

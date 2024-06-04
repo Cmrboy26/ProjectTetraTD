@@ -10,11 +10,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Client;
@@ -53,6 +54,11 @@ public class RetroTowerDefense extends CMRGame {
 		super.create();
 		Settings.applySettings();
 		showIntroScreen(new MainMenuScreen());
+
+		if (isMobile()) {
+			// TODO: Find out why tooltips dont appear on mobile
+			TooltipManager.getInstance().instant();
+		}
 
 		FileHandle gameDataFolder = Gdx.files.external("retrotowerdefense/");
 		gameDataFolder.mkdirs();
@@ -117,6 +123,10 @@ public class RetroTowerDefense extends CMRGame {
 	public String getUsername() {
 		return Settings.getPreferences().getString(Settings.USERNAME);
 	}
+
+    public static boolean isMobile() {
+        return Gdx.app.getType() == ApplicationType.Android || CMRGame.SIMULATE_MOBILE;
+    }
 
 	/**
 	 * Joins an online game with the given IP and port

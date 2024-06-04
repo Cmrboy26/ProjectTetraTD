@@ -46,7 +46,7 @@ public abstract class TowerEntity extends Entity {
     int scrapsApplied = 0;
     int lubricantApplied = 0;
     int scopesApplied = 0;
-    SortType preferedSortType = SortType.LOWEST_HEALTH;
+    SortType preferedSortType = SortType.HIGHEST_HEALTH;
 
     public TowerEntity(GameType type, int team) {
         super(type);

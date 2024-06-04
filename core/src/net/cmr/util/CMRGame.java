@@ -8,7 +8,7 @@ import net.cmr.util.Log.LogLevel;
 
 public abstract class CMRGame extends Game {
 
-    public static final float DEADZONE = 0.2f;
+    public static final float DEADZONE = 0.05f;
 
     private static CMRGame instance = null;
     private static Object instanceLock = new Object();
@@ -94,9 +94,9 @@ public abstract class CMRGame extends Game {
 
     private static void setInstance(CMRGame instance) {
         synchronized (instanceLock) {
-            if (CMRGame.instance != null) {
-                throw new IllegalStateException("CMRGame instance has already been initialized.");
-            }
+            //if (CMRGame.instance != null) {
+            //    throw new IllegalStateException("CMRGame instance has already been initialized.");
+            //}
             CMRGame.instance = instance;
         }
     }

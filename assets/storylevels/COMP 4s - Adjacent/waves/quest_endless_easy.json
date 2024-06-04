@@ -1,0 +1,10 @@
+{
+	"difficulty": 1,
+	"recommendedEndlessSettingsDifficulty": 1,
+	"name": "Endless Easy",
+	"endlessMode": true,
+	"preparationTime": 10,
+	"startingHealth": 50,
+	"startingMoney": 35,
+	"waves": []
+}

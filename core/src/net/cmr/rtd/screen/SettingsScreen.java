@@ -8,8 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.github.tommyettinger.textra.TextraTooltip;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.util.AbstractScreenEX;
@@ -57,15 +59,15 @@ public class SettingsScreen extends AbstractScreenEX {
 
         Slider masterVolume = new Slider(0.0f, 1.0f, 0.01f, false, Sprites.skin());
         masterVolume.setValue(Settings.getPreferences().getFloat(Settings.MASTER_VOLUME));
-        settingsTable.add(masterVolume).expandX().fillX().colspan(1).pad(10);
+        settingsTable.add(masterVolume).expandX().fillX().colspan(1).pad(3);
 
         Slider musicVolume = new Slider(0.0f, 1.0f, 0.01f, false, Sprites.skin());
         musicVolume.setValue(Settings.getPreferences().getFloat(Settings.MUSIC_VOLUME));
-        settingsTable.add(musicVolume).expandX().fillX().colspan(1).pad(10);
+        settingsTable.add(musicVolume).expandX().fillX().colspan(1).pad(3);
 
         Slider sfxVolume = new Slider(0.0f, 1.0f, 0.01f, false, Sprites.skin());
         sfxVolume.setValue(Settings.getPreferences().getFloat(Settings.SFX_VOLUME));
-        settingsTable.add(sfxVolume).expandX().fillX().colspan(1).pad(10).row();
+        settingsTable.add(sfxVolume).expandX().fillX().colspan(1).pad(3).row();
 
         // Username
         settingsTable.add(new Label("Username", Sprites.skin(), labelType)).left().padRight(10.0f).colspan(1);
@@ -79,17 +81,17 @@ public class SettingsScreen extends AbstractScreenEX {
         username.setText(Settings.getPreferences().getString(Settings.USERNAME));
         username.setAlignment(Align.center);
         username.setMaxLength(16);
-        settingsTable.add(username).expandX().fillX().colspan(3).pad(10).colspan(1);
+        settingsTable.add(username).expandX().fillX().colspan(3).pad(3).colspan(1);
 
         CheckBox showFPS = new CheckBox("", Sprites.skin());
         Audio.addClickSFX(showFPS);
         showFPS.setChecked(Settings.getPreferences().getBoolean(Settings.SHOW_FPS));
-        settingsTable.add(showFPS).expandX().fillX().colspan(1).pad(10);
+        settingsTable.add(showFPS).expandX().fillX().colspan(1).pad(3);
 
         CheckBox showPlacementGrid = new CheckBox("", Sprites.skin());
         Audio.addClickSFX(showPlacementGrid);
         showPlacementGrid.setChecked(Settings.getPreferences().getBoolean(Settings.SHOW_PLACEMENT_GRID));
-        settingsTable.add(showPlacementGrid).expandX().fillX().colspan(1).pad(10).row();
+        settingsTable.add(showPlacementGrid).expandX().fillX().colspan(1).pad(3).row();
 
         Slider fpsSlider = new Slider(-10.0f, 120.0f, 10.0f, false, Sprites.skin());
         fpsSlider.setValue(Settings.getPreferences().getInteger(Settings.FPS));
@@ -107,8 +109,21 @@ public class SettingsScreen extends AbstractScreenEX {
                 super.act(delta);
             }
         };
+
+        if (RetroTowerDefense.isMobile()) {
+            TextTooltip tooltip = new TextTooltip("FPS changes may not function on mobile devices.", Sprites.skin(), "small");
+            tooltip.getContainer().pad(5);
+            tooltip.getContainer().setScale(.25f);
+            tooltip.getActor().setFontScale(.25f);
+            tooltip.setInstant(true);
+            fpsSlider.addListener(tooltip);
+        }
+
         settingsTable.add(fpsLabel).left().padRight(10.0f).colspan(1);
-        settingsTable.add(fpsSlider).expandX().fillX().colspan(2).pad(10).row();
+
+        settingsTable.row();
+
+        settingsTable.add(fpsSlider).expandX().fillX().colspan(1).pad(3);
 
         // Settings End
 

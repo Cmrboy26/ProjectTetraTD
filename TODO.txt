@@ -1,22 +1,60 @@
+ORDERED TODO LIST:
+- Create a "Game Over" screen for multiplayer and singleplayer modes (don't further support players playing past the game's end)
+- Create tabs for shop menu to separate combative towers, mining towers, and effect towers
+- Add new tiles to prepare for mining towers to be implemented
+  - Add ore veins (IRON, TITANIUM, URANIUM, ETC) for the material miner
+  - Add ONE gemstone-rich tile for gemstone miners to use 
+- Create some mining towers and have them add items to team inventories
+  - component escavator that discovers more burried components
+  - gemstone miner that uncovers gemstones (only one can be applied to a building and provides special abilities and perks)
+  - material miner that produces metals (DEPENDING ON WHERE THEY'RE PLACED) like steel, which can be used to construct/upgrade special towers
+- Add gemstone functionality
+  - Diamonds adds piercing to towers
+  - Cryonite inflicts slowness debuffs on enemies that are hit by it
+  - Quartz increases range of buildings
+  - Topaz halves attack speed, but doubles range and damage
+  - Thorium halves damage, but doubles attack speed and AOE
+  - Ruby inflicts flame debuffs on enemies
+- (Optionally) Create effect towers (similar to beacons in factorio)
+  - Distributor that applies a fraction of a gemstone's power to towers in range
+  - Other towers that increase tower stats
+- Create worlds instead of levels
+  - Replace the current level selector with a system like Infinitode 2, New Super Mario Bros U, etc.
+  - Players must complete either X amounts of waves if the level is endless OR finish the predefined waves to move on
+  - In the menu, have a button that allows you to toggle between "Online" and "Singleplayer"
+  - Create a story world for the base game ALONG WITH a competitive world for multiplayer
+- Make ~5 good base game levels (try not to do endless) and ~2 player levels
+- Create a tutorial button in the play menu for new players
+- Add a bestiary for players to learn more about the enemies they encounter 
+  - Keep it simple to understand with a lot of icons to signify immunities, health, money on death, other effects
+- Add achievements to the game (MAKE SURE THEY'RE UNIQUE AND NOT SOLELY USED TO INCREASE GAME TIME)
+- Add player customization options
+  - Make a money system outside of inside of a level (like geobits!!!!) that are granted for completing achievements and playing levels
+  - Allow them to color their avatar (might need to learn how to shift hues)
+  - Custom nametag colors
+
+  REMEMBER TO:
+  - incorporate the time aspect of the game as much as possible (mining towers should produce after a certain amount of time, not just RNG)
+  - probably come up with a name
+
 - Bestiary
 - More (better) levels
 - Achievements
 - Mining/Automation Element of the game (buildings dedicated to mining)
 - In competitive modes, allow players to send enemies to the other side (even during cooldown periods) and decrease the endless mode impact on the game slightly
 
-- Allow other menus to be clicked in middle click tower (DONE)
-- Make left shift force upgrade instead of showing the dialog (DONE)
 - Make left shift force insert component instead of showing the dialog 
 - More music
 - Consider: should fire and ice deal more damage?
-- Hue shift enemies
-- FIX: Find out why story levels aren't copied to the user folder when it is packaged into a jar or EXE (DONE)
 - Improve shop layout (ADD TABS)
 - ADD LOSE/WIN SCREEN (where you can reset or play again)
+- {
+  Instead of having a level selector, create a world where levels can be selected (similar to the diner dash worlds or new super mario bros u).
+  To progress in the world, you must either complete the predefined waves in a non-endless level OR get to a certain level in endless mode
+}
 
 IDEAS:
 - Resources can be obtained through mining/drilling in order to build/upgrade towers
-- Enemies drop robotic parts that can be used to upgrade towers (DONE)
 - GEMS obtained from mining can be applied to structures to give them buffs (one gem per tower)
   - examples of this: 
   -   Diamond=piercing bullets for shooter towers

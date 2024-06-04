@@ -1,6 +1,7 @@
 package net.cmr.rtd.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -32,7 +33,7 @@ public class MainMenuScreen extends AbstractScreenEX {
     
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 0;
-	public static final int PATCHVERSION = 0;
+	public static final int PATCHVERSION = 1;
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
@@ -74,35 +75,19 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.add(creation).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
 		table.row();
 
-		// TODO: Create level creation AND selection screen
-		/*TextButton textButton = new TextButton("Play", Sprites.skin(), labelType);
-		textButton.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				GameManagerDetails details = new GameManagerDetails();
-
-				LevelSave levelSave = new LevelSave("level_one");
-				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-				game.joinSingleplayerGame(details, levelSave, "default", "quest_one");
-
-				//GameSave save = new GameSave("testSave");
-				//RetroTowerDefense.getInstance(RetroTowerDefense.class).joinSingleplayerGame(details, save);
-			}
-		});
-		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).fillX();
-		table.row();*/
-
-		TextButton editor = new TextButton("Editor", Sprites.skin(), labelType);
-		Audio.addClickSFX(editor);
-		editor.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				FileHandle handle = Gdx.files.external("editorWorld.dat");
-				fadeToScreen(new EditorScreen(handle), .5f, Interpolation.linear, false);
-			}
-		});
-		table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
-		table.row();
+		if (!RetroTowerDefense.isMobile() && RetroTowerDefense.getInstance(RetroTowerDefense.class).getUsername().equals("Cmrboy26")) {
+			TextButton editor = new TextButton("Colten's Editor", Sprites.skin(), labelType);
+			Audio.addClickSFX(editor);
+			editor.addListener(new ClickListener() {
+				@Override
+				public void clicked(InputEvent event, float x, float y) {
+					FileHandle handle = Gdx.files.external("editorWorld.dat");
+					fadeToScreen(new EditorScreen(handle), .5f, Interpolation.linear, false);
+				}
+			});
+			table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+			table.row();	
+		}
 
 		TextButton textButton = new TextButton("Settings", Sprites.skin(), labelType);
 		Audio.addClickSFX(textButton);
@@ -131,7 +116,11 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table1.setFillParent(true);
 		Table leftBottomTable = new Table();
 		table1.add(leftBottomTable).expand().align(Align.bottomLeft);
-		leftBottomTable.add(new Label("RTD v"+MAJORVERSION+"."+MINORVERSION+"."+PATCHVERSION, Sprites.skin(), "small")).pad(5.0f);
+		String versionInfo = "RTD v"+MAJORVERSION+"."+MINORVERSION+"."+PATCHVERSION;
+		if (Gdx.app.getType() == ApplicationType.Android) {
+			versionInfo += " (Android)";
+		}
+		leftBottomTable.add(new Label(versionInfo, Sprites.skin(), "small")).pad(5.0f);
 		add(Align.bottomLeft, table1);
 
 		Table table2 = new Table();
@@ -156,7 +145,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.padTop(50);
 				creditsDialog.text("Programming, Music, Art: Colten Reissmann", small);
 				creditsDialog.getContentTable().row();
-				creditsDialog.text("Beta Testing: SirPotato42", small);
+				creditsDialog.text("Beta Testing: SirPotato42, Andrew", small);
 				creditsDialog.getContentTable().row();
 
 				TextButton button = new TextButton("Close", Sprites.skin(), "small");

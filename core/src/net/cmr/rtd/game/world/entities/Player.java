@@ -235,6 +235,4 @@ public class Player extends Entity {
         velocity.set(input).scl(getSpeed() * Tile.SIZE);
     }
 
-    
-
 }

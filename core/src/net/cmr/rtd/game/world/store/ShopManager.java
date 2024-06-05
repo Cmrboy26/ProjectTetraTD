@@ -13,6 +13,7 @@ import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
@@ -34,11 +35,13 @@ public class ShopManager {
         registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, 35, "Shooter Tower", "Shoots pellets at enemies."));
         registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, 70, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
         registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.ICE_TOWER, 40, "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, 500, "Drill Tower", "Mines resources from ore veins."));
 
         // Register the purchase of upgrades
         registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 30L + (level - 1) * level * 20L,         level -> 5f + (level)));
         registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + (level + 2) * level * level * 50L,  level -> 5f + level * 2f));
         registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
+        registerUpgrade(new UpgradeOption(GameType.DRILL_TOWER, level -> level * level * 500L,         level -> 10f + level / 3f));
     }
 
     private static void registerTower(TowerOption item) {
@@ -95,6 +98,15 @@ public class ShopManager {
                     // Not a tower
                     Log.debug("Not a tower");
                     return; 
+                }
+                if (tower instanceof MiningTower) {
+                    // Mining tower
+                    MiningTower miningTower = (MiningTower) tower;
+                    if (!miningTower.validMiningTarget(manager.getUpdateData().getWorld().getTile(packet.x, packet.y, 0))) {
+                        // Invalid mining target
+                        Log.debug("Invalid mining target");
+                        return;
+                    }
                 }
                 tower.setBuildDelta(3); // 3 seconds to construct tower
                 tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
@@ -286,7 +298,7 @@ public class ShopManager {
         if (world == null) {return true;}
         TileType at = world.getTile(x, y, 1);
         TileType below = world.getTile(x, y, 0);
-        if (below != TileType.FLOOR) {
+        if (!TileType.isFloor(below)) {
             return true;
         }
         TileData tdata = world.getTileData(x, y, 1);

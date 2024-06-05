@@ -1,7 +1,7 @@
 package net.cmr.rtd.screen;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -22,7 +23,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.mobile.Joystick;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
@@ -33,7 +33,7 @@ public class MainMenuScreen extends AbstractScreenEX {
     
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 0;
-	public static final int PATCHVERSION = 1;
+	public static final int PATCHVERSION = 2;
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
@@ -141,17 +141,47 @@ public class MainMenuScreen extends AbstractScreenEX {
 				LabelStyle small = Sprites.skin().get("small", LabelStyle.class);
 
 				Dialog creditsDialog = new Dialog("Credits", Sprites.skin());
+				creditsDialog.setKeepWithinStage(false);
 				creditsDialog.pad(20);
 				creditsDialog.padTop(50);
 				creditsDialog.text("Programming, Music, Art: Colten Reissmann", small);
 				creditsDialog.getContentTable().row();
 				creditsDialog.text("Beta Testing: SirPotato42, Andrew", small);
 				creditsDialog.getContentTable().row();
+				creditsDialog.text("Icon: Barnold Barnoldfanger Sr. (from Georgia)", small);
+				Image barnold = new Image(Sprites.drawable(SpriteType.BARNOLD2));
+				creditsDialog.getContentTable().add(barnold).size(48).pad(1);
+				creditsDialog.getContentTable().row();
+				creditsDialog.text("Thank you to the Barnoldfanger \nfamily for their generous \"donation\"", small);
+				creditsDialog.getContentTable().row();
+
+				Stack urlstack = new Stack();
+				Label underlines = new Label("__________________", small);
+				underlines.setColor(Color.BLUE);
+				urlstack.add(underlines);
+				Label label = new Label("In memory of Junior...", small);
+				label.addListener(new ClickListener() {
+					@Override
+					public void clicked(InputEvent event, float x, float y) {
+						Gdx.net.openURI("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+					}
+				});
+				urlstack.add(label);
+				label.setColor(Color.BLUE);
+				creditsDialog.getContentTable().add(urlstack);
+				barnold = new Image(Sprites.drawable(SpriteType.BARNOLD));
+				creditsDialog.getContentTable().add(barnold).size(48).pad(1);
+				creditsDialog.getContentTable().row();
 
 				TextButton button = new TextButton("Close", Sprites.skin(), "small");
 				button.pad(0, 15, 0, 15);
 
 				creditsDialog.button(button, false);
+				
+				creditsDialog.pack();
+				creditsDialog.setScale(.75f);
+				creditsDialog.setPosition(640/2, 360/2, Align.center);
+
 				creditsDialog.show(stage);
 			}
 		});

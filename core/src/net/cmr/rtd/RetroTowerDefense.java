@@ -327,4 +327,104 @@ public class RetroTowerDefense extends CMRGame {
 		return false;
 	}
 
+	public static long getHighscore(GameSave save) {
+		return getHighscore(save.getName());
+	}
+
+	public static long getHighscore(String saveFolder) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/highscores.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+			return 0;
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			Long score = (Long) obj.get(saveFolder);
+			if (score == null) {
+				return 0;
+			}
+			return score;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static void setHighscore(GameSave save, long score) {
+		setHighscore(save.getName(), score);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void setHighscore(String saveFolder, long score) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/highscores.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			long at = obj.get(saveFolder) == null ? 0 : (long) obj.get(saveFolder);
+			if (score <= at) {
+				return;
+			}
+			obj.put(saveFolder, score);
+			dataFile.writeString(obj.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static int getFarthestWave(GameSave save) {
+		return getFarthestWave(save.getName());
+	}
+
+	public static int getFarthestWave(String saveFolder) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/farthestwaves.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+			return 0;
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			Long wave = (Long) obj.get(saveFolder);
+			if (wave == null) {
+				return 0;
+			}
+			return wave.intValue();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static void setFarthestWave(GameSave save, int wave) {
+		setFarthestWave(save.getName(), wave);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void setFarthestWave(String saveFolder, int wave) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/farthestwaves.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject obj = (JSONObject) parser.parse(data);
+			int at = obj.get(saveFolder) == null ? 0 : (int) obj.get(saveFolder);
+			if (wave <= at) {
+				return;
+			}
+			obj.put(saveFolder, wave);
+			dataFile.writeString(obj.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

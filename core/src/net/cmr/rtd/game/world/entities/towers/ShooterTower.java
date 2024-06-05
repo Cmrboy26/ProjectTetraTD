@@ -119,10 +119,12 @@ public class ShooterTower extends TowerEntity {
             new AnimationType[] {
                 AnimationType.SHOOTER_TOWER_1, 
                 AnimationType.SHOOTER_TOWER_2, 
-                AnimationType.SHOOTER_TOWER_3
+                AnimationType.SHOOTER_TOWER_3,
+                AnimationType.SHOOTER_TOWER_4,
+                AnimationType.SHOOTER_TOWER_5,
             }, 
             new int[] {
-                1, 3, 5
+                1, 2, 3, 4, 5
             }
         );
         TextureRegion sprite = Sprites.animation(animation, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)

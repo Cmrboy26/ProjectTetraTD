@@ -33,6 +33,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -85,6 +86,7 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.HealerEnemy.HealerPacket;
+import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
@@ -94,6 +96,7 @@ import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.mobile.Joystick;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
@@ -259,7 +262,7 @@ public class GameScreen extends AbstractScreenEX {
 
         shopButton = new ImageButton(style);
         shopButton.setSize(iconSize, iconSize);
-        shopButton.setPosition(320 - 2.5f, 5, Align.bottomRight);
+        shopButton.setPosition(320, 5, Align.bottom);
         shopButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -285,7 +288,7 @@ public class GameScreen extends AbstractScreenEX {
 
         inventoryButton = new ImageButton(style);
         inventoryButton.setSize(iconSize, iconSize);
-        inventoryButton.setPosition(320 + (2.5f), 5, Align.bottomLeft);
+        inventoryButton.setPosition(320 + (iconSize / 2) + (5), 5, Align.bottomLeft);
         inventoryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -311,7 +314,7 @@ public class GameScreen extends AbstractScreenEX {
 
         upgradeButton = new ImageButton(style);
         upgradeButton.setSize(iconSize, iconSize);
-        upgradeButton.setPosition(320 - 7.5f - iconSize, 5, Align.bottomRight);
+        upgradeButton.setPosition(320 - (iconSize / 2) - (5f), 5, Align.bottomRight);
         upgradeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -340,24 +343,6 @@ public class GameScreen extends AbstractScreenEX {
         smallButton.checked = style2.checked;
         smallButton.disabled = style2.up;
         smallButton.imageUp = Sprites.drawable(SpriteType.CASH);
-
-        /*ImageButton sellButton = new ImageButton(smallButton) {
-            @Override
-            public void act(float delta) {
-                setChecked(Gdx.input.isKeyPressed(Input.Keys.R));
-                super.act(delta);
-            }
-        };
-        sellButton.setSize(iconSize / 1.25f, iconSize / 1.25f);
-        sellButton.setPosition(320 + (32 * 2) - iconSize / 1.25f, 5, Align.bottomLeft);
-        Label r = new Label("R", Sprites.skin(), "small");
-        r.setFontScale(.2f);
-        r.setFillParent(true);
-        r.setAlignment(Align.bottomRight);
-        r.setPosition(4, 3, Align.bottomRight);
-        sellButton.addActor(r);
-        buttonGroup.add(sellButton);
-        add(Align.bottom, sellButton);*/
 
 
         GlyphLayout layout = new GlyphLayout();
@@ -403,26 +388,100 @@ public class GameScreen extends AbstractScreenEX {
         shopWindow = new Window("Shop", Sprites.skin(), "small");
         shopWindow.getTitleLabel().setAlignment(Align.center);
         shopWindow.padTop(30);
-        shopWindow.setSize(300, 200);
+        shopWindow.setSize(300, 250);
         shopWindow.setPosition(320, 180, Align.center);
         shopWindow.setMovable(false);
         shopWindow.setVisible(false);
         add(Align.center, shopWindow);
 
+        Stack content = new Stack();
+
+        Table combativeTable = new Table();
+        Table miningTable = new Table();
+        Table effectTable = new Table();
+        content.add(combativeTable);
+        content.add(miningTable);
+        content.add(effectTable);
+
+        ButtonGroup<TextButton> tabGroup = new ButtonGroup<TextButton>();
+        HorizontalGroup shopTabs = new HorizontalGroup();
+        TextButton combativeTab = new TextButton("Combat", Sprites.skin(), "toggle-small");
+        combativeTab.setChecked(true);
+        combativeTab.pad(0, 10, 0, 10);
+        TextButton miningTab = new TextButton("Mining", Sprites.skin(), "toggle-small");
+        miningTab.pad(0, 10, 0, 10);
+        TextButton effectTab = new TextButton("Effects", Sprites.skin(), "toggle-small");
+        effectTab.pad(0, 10, 0, 10);
+        shopTabs.addActor(combativeTab);
+        shopTabs.addActor(miningTab);
+        shopTabs.addActor(effectTab);
+        shopTabs.space(5);
+        shopWindow.add(shopTabs).growX().center().padLeft(5);
+        shopWindow.row();
+
+        Table contentTable = new Table();
+        contentTable.add(content);
+        shopWindow.add(contentTable).pad(5).padTop(0);
+        shopWindow.row();
+
+        ChangeListener tabListener = new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                combativeTable.setVisible(combativeTab.isChecked());
+                miningTable.setVisible(miningTab.isChecked());
+                effectTable.setVisible(effectTab.isChecked());
+            }
+        };
+        tabGroup.add(combativeTab, miningTab, effectTab);
+        combativeTab.addListener(tabListener);
+        miningTab.addListener(tabListener);
+        effectTab.addListener(tabListener);
+        tabGroup.setMaxCheckCount(1);
+        tabGroup.setMinCheckCount(1);
+        
+        combativeTable.setVisible(combativeTab.isChecked());
+        miningTable.setVisible(miningTab.isChecked());
+        effectTable.setVisible(effectTab.isChecked());
+
+
+        
         // TODO: Add all the shop items
-        Table scrollTable = new Table();
-        ScrollPaneStyle scrollstype = new ScrollPaneStyle(Sprites.skin().get(ScrollPaneStyle.class));
-        ScrollPane scroll = new ScrollPane(scrollTable, scrollstype);
-        scroll.setScrollingDisabled(true, false);
-        scroll.setScrollbarsVisible(false);
-        shopWindow.add(scroll).grow().pad(5);
+        
+        ScrollPaneStyle scrollStyle = new ScrollPaneStyle(Sprites.skin().get(ScrollPaneStyle.class));
+
+        Table combativeShopTable = new Table();
+        combativeShopTable.setFillParent(true);
+        ScrollPane combatScroll = new ScrollPane(combativeShopTable, scrollStyle);
+        combatScroll.setScrollingDisabled(true, false);
+        combatScroll.setScrollbarsVisible(false);
+        combativeTable.add(combatScroll).grow().pad(1).padTop(5);
         
         for (TowerOption option : ShopManager.getTowerCatalog().values()) {
-            GameType type = option.type;
-            Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-            Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
-            scrollTable.add(towerSection).pad(5).growX();
-            scrollTable.row();
+            if (!MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
+                GameType type = option.type;
+                Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
+                combativeShopTable.add(towerSection).pad(5).growX();
+                combativeShopTable.row();
+            }
+        }
+
+        Table miningShopTable = new Table();
+        miningShopTable.setFillParent(true);
+        ScrollPane miningScroll = new ScrollPane(miningShopTable, scrollStyle);
+        miningScroll.setScrollingDisabled(true, false);
+        miningScroll.setScrollbarsVisible(false);
+        miningTable.add(miningScroll).grow().pad(1).padTop(5);
+
+        for (TowerOption option : ShopManager.getTowerCatalog().values()) {
+            System.out.println(option.type.getGameObjectClass());
+            if (MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
+                GameType type = option.type;
+                Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
+                miningShopTable.add(towerSection).pad(5).growX();
+                miningShopTable.row();
+            }
         }
 
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
@@ -435,8 +494,8 @@ public class GameScreen extends AbstractScreenEX {
         
         Table inventoryTable = new Table();
         inventoryTable.setFillParent(true);
-        int pad = 6;
-        int imagePad = 10;
+        int pad = 4;
+        int imagePad = 0;
 
         inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).pad(imagePad).colspan(1);
         TextButton lubricant = new TextButton("Lubricant x0", Sprites.skin(), "small") {
@@ -459,7 +518,7 @@ public class GameScreen extends AbstractScreenEX {
         inventoryTable.add(lubricant).pad(pad).growX().colspan(1);
         inventoryTable.row();
 
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.CASH))).pad(imagePad).colspan(1);
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.SCOPE))).pad(imagePad).colspan(1);
         TextButton scopes = new TextButton("Scopes x0", Sprites.skin(), "small") {
             @Override
             public void act(float delta) {
@@ -480,7 +539,7 @@ public class GameScreen extends AbstractScreenEX {
         inventoryTable.add(scopes).pad(pad).growX().colspan(1);
         inventoryTable.row();
 
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.HEART))).pad(imagePad).colspan(1);
+        inventoryTable.add(new Image(Sprites.drawable(SpriteType.SCRAP))).pad(imagePad).colspan(1);
         TextButton scraps = new TextButton("Scraps x0", Sprites.skin(), "small") {
             @Override
             public void act(float delta) {
@@ -863,12 +922,12 @@ public class GameScreen extends AbstractScreenEX {
                     .setScale(.2f)
                     .setParticleLife(.5f)
                     .setAnimationSpeed(1.5f)
-                    .setAreaSize(1.2f)
+                    .setAreaSize(HealerEnemy.EFFECT_RADIUS * 2)
                     .setFollowEntity(true)
                     .setEntity(healer)
                     .create();
                 particleEffects.add(effect);
-                Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
+                Audio.getInstance().worldSFX(GameSFX.UPGRADE_COMPLETE, .5f, 1.5f, healer.getPosition(), this);
             }
         }
 
@@ -944,7 +1003,29 @@ public class GameScreen extends AbstractScreenEX {
             };
             gameOverDialog.getTitleLabel().setAlignment(Align.center);
             gameOverDialog.pad(30, 5, 10, 5);
-            gameOverDialog.text("You made it to wave "+gameOverPacket.endingWave+" with a score of "+gameOverPacket.score+".", Sprites.skin().get("small", LabelStyle.class));
+            LabelStyle small = Sprites.skin().get("small", LabelStyle.class);
+            gameOverDialog.text("You made it to wave "+gameOverPacket.endingWave+" with a score of "+ShopManager.costToString(gameOverPacket.score).substring(1)+".", small);
+
+            // If competitive game, display the team win order
+            if (gameOverPacket.teamWinOrder.length > 1) {
+                for (int i = 0; i < gameOverPacket.teamWinOrder.length; i++) {
+                    gameOverDialog.getContentTable().row();
+                    
+                    String suffix = "th";
+                    if (i == 0) suffix = "st";
+                    if (i == 1) suffix = "nd";
+                    if (i == 2) suffix = "rd";
+
+                    gameOverDialog.text((i+1) + suffix + " Place: Team "+(gameOverPacket.teamWinOrder[i] + 1), small);
+                }
+            } else {
+                // Solo game. Set the high score if it is higher than the current high score.
+                if (gameManager != null) {
+                    RetroTowerDefense.setHighscore(gameManager.getSave(), gameOverPacket.score);
+                    RetroTowerDefense.setFarthestWave(gameManager.getSave(), gameOverPacket.endingWave);
+                }
+            }
+
             TextButton exit = new TextButton("Quit to Title", Sprites.skin().get("small", TextButtonStyle.class));
             exit.pad(0, 10, 0, 10);
             gameOverDialog.button(exit, false);
@@ -1199,7 +1280,8 @@ public class GameScreen extends AbstractScreenEX {
                         && (!inMenu() || informationUpgradeWindow != null) 
                         && !isOverJoystick()
                         && !isOverActor(informationUpgradeWindow)
-                        && componentDialog == null;
+                        && componentDialog == null
+                        && !Gdx.input.isKeyPressed(Input.Keys.R);
         //}
         if (openMenu) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY, team);
@@ -1360,10 +1442,15 @@ public class GameScreen extends AbstractScreenEX {
                     sellButton.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
-                            Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
-                            PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
-                            ioStream.sendPacket(packet);
-                            removeInfoWindow();
+                            if (sellButton.isChecked()) {
+                                Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
+                                sellButton.setText("Confirm?");
+                            } else {
+                                Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
+                                PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
+                                ioStream.sendPacket(packet);
+                                removeInfoWindow();
+                            }
                         }
                     });
                     informationUpgradeWindow.add(sellButton).left().bottom().pad(pad).maxHeight(buttonHeight).growX().colspan(1);
@@ -1714,11 +1801,18 @@ public class GameScreen extends AbstractScreenEX {
                 packet = new PurchaseItemPacket(PurchaseAction.TOWER, typeToPurchase, tileX, tileY);
                 boolean canPlace = true;
                 TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
+                TowerEntity newTower = (TowerEntity) typeToPurchase.createEntity();
+                TileType below = data.getWorld().getTile(tileX, tileY, 0);
                 if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
                     notification(SpriteType.STRUCTURE, "Cannot place here!");
                     canPlace = false;
-                }
-                else if (option != null) {
+                } else if (ShopManager.towerAt(world, tileX, tileY) != null) {
+                    notification(SpriteType.STRUCTURE, "Tower already exists here!");
+                    canPlace = false;
+                } else if (newTower instanceof MiningTower && !((MiningTower) newTower).validMiningTarget(below)) {
+                    notification(SpriteType.STRUCTURE, "This mining tower cannot\nbe placed here!");
+                    canPlace = false;
+                } else if (option != null) {
                     if (inventory.getCash() < option.cost) {
                         notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost).substring(1)+")");
                         canPlace = false;

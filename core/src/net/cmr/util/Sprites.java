@@ -64,6 +64,12 @@ public class Sprites implements Disposable {
         SETTINGS("settings"),
         JOYSTICK("joystick"),
         JOYSTICK_BACKGROUND("joystickBackground"),
+        BARNOLD("ripbarnold"),
+        BARNOLD2("barnold2"),
+        SCOPE("scope"),
+        SCRAP("scrap"),
+
+        DRILL_TOWER_ONE("drill/drillTower1"),
         ;
 
         private String spriteName;
@@ -118,6 +124,10 @@ public class Sprites implements Disposable {
         SHOOTER_TOWER_1("shooterTower1", PlayMode.NORMAL, .1f),
         SHOOTER_TOWER_2("shooterTower2", PlayMode.NORMAL, .1f),
         SHOOTER_TOWER_3("shooterTower3", PlayMode.NORMAL, .1f),
+        SHOOTER_TOWER_4("shooterTower4", PlayMode.NORMAL, .1f),
+        SHOOTER_TOWER_5("shooterTower5", PlayMode.NORMAL, .1f),
+
+        DRILL("drill/drill", PlayMode.LOOP_PINGPONG, .1f),
 
         FIRE("fire", PlayMode.LOOP, .5f),
         SPARKLE("effects/sparkle", PlayMode.NORMAL, .075f),

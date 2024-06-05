@@ -1,6 +1,5 @@
 package net.cmr.rtd.game.world;
 
-import net.cmr.util.Point;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import com.esotericsoftware.kryo.io.Output;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
-import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.WorldSerializationExempt;
@@ -32,9 +30,11 @@ import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.rtd.screen.EditorScreen;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
+import net.cmr.util.Point;
 
 /**
  * The world class will handle the game world
@@ -351,7 +351,7 @@ public class World extends GameObject {
         int tileDataCount = tileDataMap.size();
         buffer.writeInt(tileDataCount);
         Kryo kryo = new Kryo();
-        TileData.registerKryo(kryo);
+        TileData.registerSerializeKryo(kryo);
         Output output = new Output(buffer);
         for (Point3D point : tileDataMap.keySet()) {
             TileData data = tileDataMap.get(point);
@@ -411,7 +411,7 @@ public class World extends GameObject {
         // Deserialize tile data.
         int tileDataCount = input.readInt();
         Kryo kryo = new Kryo();
-        TileData.registerKryo(kryo);
+        TileData.registerDeserializeKryo(kryo);
         Input kryoInput = new Input(input);
         for (int i = 0; i < tileDataCount; i++) {
             Point3D point = (Point3D) kryo.readClassAndObject(kryoInput);
@@ -444,11 +444,13 @@ public class World extends GameObject {
                         TileData data = tileDataMap.get(new Point3D(x, y, z));
                         if (data instanceof StructureTileData) {
                             StructureTileData structureData = (StructureTileData) data;
-                            if (structureData.team == udata.getScreen().team) {
-                                batch.setColor(Color.WHITE);
-                            }
-                            if (structureData.health <= 0) {
-                                batch.setColor(Color.GRAY);
+                            if (udata.getScreen() != null) {
+                                if (structureData.team == udata.getScreen().team) {
+                                    batch.setColor(Color.WHITE);
+                                }
+                                if (structureData.health <= 0) {
+                                    batch.setColor(Color.GRAY);
+                                }
                             }
                         }
                         tile.render(batch, delta, this, x, y, z);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.TeamData;
+import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.waves.Wave;
@@ -106,6 +107,9 @@ public class EndlessUtils {
             }
         }
 
+        if (Float.isNaN(maximumDPS)) {
+            maximumDPS = 0;
+        }
         targetDPS = Math.max(maximumDPS, targetDPS);
         maximumDPS = Math.max(maximumDPS, targetDPS);
 
@@ -158,6 +162,7 @@ public class EndlessUtils {
         else if (waveType == 3) {
             largeWave(targetDPS, targetHealthPoints, wave);
         }
+        //fillWaveUnit(EnemyType.HEALER_ONE, 1000, wave); // Add a healer to the wave for debugging
 
         for (WaveUnit unit : wave.getWaveUnits()) {
             Log.info("- Added " + unit.getQuantity() + " " + unit.getType() + " enemies");
@@ -239,9 +244,15 @@ public class EndlessUtils {
     public float calculateApproximateDPS(ArrayList<TowerEntity> towers) {
         float totalDPS = 0;
         for (TowerEntity tower : towers) {
+            if (tower instanceof MiningTower) {
+                continue;
+            }
             if (tower instanceof FireTower) {
                 totalDPS += tower.getDisplayDamage();
                 totalDPS += ((FireTower)tower).calculateApproximateFireballDPS(Math.min(10, previousRoundDensity));
+                continue;
+            }
+            if (tower.getAttackSpeed() == 0) {
                 continue;
             }
             totalDPS += tower.getDisplayDamage() / tower.getAttackSpeed();

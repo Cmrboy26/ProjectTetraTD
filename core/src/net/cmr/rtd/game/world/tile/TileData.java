@@ -2,6 +2,8 @@ package net.cmr.rtd.game.world.tile;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.serializers.VersionFieldSerializer;
+import com.esotericsoftware.kryo.serializers.VersionFieldSerializer.VersionFieldSerializerConfig;
 
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.UpdateData;
@@ -19,13 +21,24 @@ public abstract class TileData {
 
     }
 
-    public static void registerKryo(Kryo kryo) {
-        kryo.register(Point3D.class);
+    public static void registerDeserializeKryo(Kryo kryo) {
+        registerSerializeKryo(kryo);
+        /*kryo.register(Point3D.class);
         kryo.register(TileData.class);
         kryo.register(TeamTileData.class);
         kryo.register(StartTileData.class);
         kryo.register(StructureTileData.class);
-        kryo.register(TeamInventory.class);
+        kryo.register(TeamInventory.class);*/
+    }
+    
+    public static void registerSerializeKryo(Kryo kryo) {
+        VersionFieldSerializerConfig config = new VersionFieldSerializerConfig();
+        kryo.register(Point3D.class);
+        kryo.register(TileData.class, new VersionFieldSerializer<TileData>(kryo, TileData.class, config));
+        kryo.register(TeamTileData.class, new VersionFieldSerializer<TeamTileData>(kryo, TeamTileData.class, config));
+        kryo.register(StartTileData.class, new VersionFieldSerializer<StartTileData>(kryo, StartTileData.class, config));
+        kryo.register(StructureTileData.class, new VersionFieldSerializer<StructureTileData>(kryo, StructureTileData.class, config));
+        kryo.register(TeamInventory.class, new VersionFieldSerializer<TeamInventory>(kryo, TeamInventory.class, config));
     }
 
     public void render(Batch batch, int tileX, int tileY) {

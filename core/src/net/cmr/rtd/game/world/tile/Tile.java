@@ -29,60 +29,71 @@ public class Tile implements Collidable {
     // Or you could just 
     public enum TileType {
 
-        FLOOR(1, "wallSprites20"),
-        WALL(2, true),
-        PATH(3, "pathDebug"), // NOTE: have entities prefer to continue on paths that they're facing towards rather than paths that are perpendicular to them
-        START (4, "startDebug"),
-        END (5, "endDebug"),
+        FLOOR(1, 0, "hires-wallSprites20"),
+        WALL(2, 1, true),
+        PATH(3, 1, "pathDebug"), // NOTE: have entities prefer to continue on paths that they're facing towards rather than paths that are perpendicular to them
+        START (4, 1, "startDebug"),
+        END (5, 1, "endDebug"),
+
+        GEMSTONE_VEIN(6, 0, "gemstoneVein"),
+        IRON_VEIN(7, 0, "ironVein"),
+        TITANIUM_VEIN(8, 0, "titaniumVein"),
         ;
 
         private final int id;
         private final String spriteName;
         private final boolean solid;
         private final Tile tile;
+        public final int layer;
 
-        TileType(int id) {
+        TileType(int id, int layer) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = "tile"+id;
             this.solid = false;
             this.tile = new Tile(this);
         }
 
-        TileType(int id, boolean solid) {
+        TileType(int id, int layer, boolean solid) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = "tile"+id;
             this.solid = solid;
             this.tile = new Tile(this);
         }
 
-        TileType(int id, Function<TileType, Tile> function) {
+        TileType(int id, int layer, Function<TileType, Tile> function) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = "tile"+id;
             this.solid = false;
             this.tile = function.apply(this);
         }
 
-        TileType(int id, boolean solid, Function<TileType, Tile> function) {
+        TileType(int id, int layer, boolean solid, Function<TileType, Tile> function) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = "tile"+id;
             this.solid = solid;
             this.tile = function.apply(this);
         }
 
-        TileType(int id, String spriteName) {
+        TileType(int id, int layer, String spriteName) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = spriteName;
             this.solid = false;
             this.tile = new Tile(this);
         }
 
-        TileType(int id, String spriteName, boolean solid) {
+        TileType(int id, int layer, String spriteName, boolean solid) {
             this.id = id;
+            this.layer = layer;
             types.put(id, this);
             this.spriteName = spriteName;
             this.solid = solid;
@@ -111,6 +122,9 @@ public class Tile implements Collidable {
         public boolean isSolid() {
             return solid;
         }
+        public static boolean isFloor(TileType type) {
+            return type != null && type.layer == 0;
+        }
     }
 
     protected TileType type;
@@ -121,11 +135,11 @@ public class Tile implements Collidable {
     }
 
     public void render(Batch batch, float delta, World world, int x, int y, int z) {
-        final String spriteName = "wallSprites";
+        final String spriteName = "hires-wallSprites";
+        if (TileType.isFloor(type)) {
+            batch.draw(Sprites.sprite(TileType.FLOOR.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
+        }
         switch (type) {
-            case FLOOR:
-                batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
-                break;
             case WALL:
                 TileType[][] floorNeighbors = new TileType[3][3];
                 TileType[][] neighbors = new TileType[3][3];
@@ -163,27 +177,27 @@ public class Tile implements Collidable {
                 else if (n && s && !e && !w) { drawSprite = spriteName+15; } 
                 else { drawSprite = spriteName+16; }
 
-                if (!n && !s && e && w && floorNeighbors[1][0] == TileType.FLOOR) {
+                if (!n && !s && e && w && TileType.isFloor(floorNeighbors[1][0])) {
                     drawSprite = spriteName+17; // down wall
                 }
                 if (n && s && !e && !w) {
-                    if (floorNeighbors[0][1] == TileType.FLOOR && floorNeighbors[2][1] != TileType.FLOOR) {
+                    if (TileType.isFloor(floorNeighbors[0][1]) && !TileType.isFloor(floorNeighbors[2][1])) {
                         drawSprite = spriteName+18; // left wall
-                    } else if (floorNeighbors[2][1] == TileType.FLOOR && floorNeighbors[0][1] != TileType.FLOOR) {
+                    } else if (TileType.isFloor(floorNeighbors[2][1]) && !TileType.isFloor(floorNeighbors[0][1])) {
                         drawSprite = spriteName+19; // right wall
                     }
                 }
-                if (n && !s && !e && w && floorNeighbors[1][0] == TileType.FLOOR) {
+                if (n && !s && !e && w && TileType.isFloor(floorNeighbors[1][0])) {
                     drawSprite = spriteName+5; // up wall
                 }
-                if (n && !s && e && !w && floorNeighbors[1][0] == TileType.FLOOR) {
+                if (n && !s && e && !w && TileType.isFloor(floorNeighbors[1][0])) {
                     drawSprite = spriteName+4; // up wall
                 } 
 
-                if (!n && s && e && !w && floorNeighbors[0][1] == TileType.FLOOR && floorNeighbors[1][2] == TileType.FLOOR) { 
+                if (!n && s && e && !w && TileType.isFloor(floorNeighbors[0][1]) && TileType.isFloor(floorNeighbors[1][2])) { 
                     drawSprite = spriteName+21; 
                 } 
-                if (!n && s && !e && w && floorNeighbors[2][1] == TileType.FLOOR && floorNeighbors[1][2] == TileType.FLOOR) { 
+                if (!n && s && !e && w && TileType.isFloor(floorNeighbors[2][1]) && TileType.isFloor(floorNeighbors[1][2])) { 
                     drawSprite = spriteName+22; 
                 } 
                 
@@ -209,9 +223,18 @@ public class Tile implements Collidable {
                 }
                 batch.draw(Sprites.sprite(spriteName+23), x * SIZE, y * SIZE, SIZE, SIZE);
                 break;
+            case IRON_VEIN:
+            case TITANIUM_VEIN:
+            case GEMSTONE_VEIN:
+                batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
+                break;
             default:
                 break;
         }
+    }
+
+    public TileType getType() {
+        return type;
     }
 
     @Override

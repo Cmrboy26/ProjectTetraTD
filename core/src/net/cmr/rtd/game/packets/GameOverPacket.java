@@ -9,6 +9,9 @@ public class GameOverPacket extends Packet {
     public long score; // Score of the client or client's team
     public boolean stillAlive; // If the client team is still alive
 
+    // Competitive mode only
+    public int[] teamWinOrder; // Order of teams that won (0 = winning team, size - 1 = first to lose team)
+
     public GameOverPacket() { /* Empty constructor for KryoNet */}
 
     public GameOverPacket(int endingWave, long score, boolean stillAlive) {
@@ -17,9 +20,14 @@ public class GameOverPacket extends Packet {
         this.stillAlive = stillAlive;
     }
 
+    public GameOverPacket(int endingWave, long score, boolean stillAlive, int[] teamWinOrder) {
+        this(endingWave, score, stillAlive);
+        this.teamWinOrder = teamWinOrder;
+    }
+
     @Override
     public Object[] packetVariables() {
-        return toPacketVariables(endingWave, score, stillAlive);
+        return toPacketVariables(endingWave, score, stillAlive, teamWinOrder);
     }
     
 }

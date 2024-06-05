@@ -22,6 +22,7 @@
 -verbose
 
 -dontwarn com.badlogic.gdx.backends.android.AndroidFragmentApplication
+-dontwarn java.lang.ClassValue
 
 # Required if using Gdx-Controllers extension
 -keep class com.badlogic.gdx.controllers.android.AndroidControllers

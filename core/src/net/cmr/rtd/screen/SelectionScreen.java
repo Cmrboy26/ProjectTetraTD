@@ -25,12 +25,13 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Stages;
-import net.cmr.util.Audio.GameSFX;
 
 public class SelectionScreen extends AbstractScreenEX {
     
@@ -219,6 +220,14 @@ public class SelectionScreen extends AbstractScreenEX {
             Label endless = new Label("Endless Mode", Sprites.skin(), "small");
             endless.setAlignment(Align.center);
             playOptions.add(endless).fillX().expandX().colspan(2).row();
+
+            long highscore = RetroTowerDefense.getHighscore(fn);
+            long farthestWave = RetroTowerDefense.getFarthestWave(fn);
+            if (highscore > 0) {
+                Label highscoreLabel = new Label("High Score: " + ShopManager.costToString(highscore).substring(1) + ", Farthest Wave: "+farthestWave, Sprites.skin(), "small");
+                highscoreLabel.setAlignment(Align.center);
+                playOptions.add(highscoreLabel).fillX().expandX().colspan(2).row();
+            }
         } else {   
             Label waveCount = new Label("Waves: " + data.size(), Sprites.skin(), "small");
             waveCount.setAlignment(Align.center);

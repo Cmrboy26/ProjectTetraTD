@@ -1,17 +1,20 @@
 package net.cmr.rtd.game.world.tile;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
+import com.esotericsoftware.kryo.serializers.VersionFieldSerializer.Since;
 
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.entities.EnemyEntity;
 
 public class StructureTileData extends TeamTileData {
     
-    public int health;
-    public TeamInventory inventory = new TeamInventory();
-    boolean healthChanged = false;
+    @Since(0) public int health;
+    @Since(0) public TeamInventory inventory = new TeamInventory();
+    @Since(0) boolean healthChanged = false;
+    @Since(1) long score = 0;
 
     public StructureTileData() { }
     public StructureTileData(int team) {
@@ -72,6 +75,16 @@ public class StructureTileData extends TeamTileData {
 
     public int getHealth() {
         return health;
+    }
+
+    public long getScore() {
+        return score;
+    }
+    public void addScore(long score) {
+        this.score += score;
+    }
+    public void setScore(long score) {
+        this.score = score;
     }
 
     @Override

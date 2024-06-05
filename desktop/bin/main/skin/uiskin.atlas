@@ -81,6 +81,8 @@ knob
   rotate: false
   xy: 515, 520
   size: 16, 16
+  split: 3, 3, 3, 3
+  pad: 0, 0, 0, 0
   orig: 16, 16
   offset: 0, 0
   index: -1

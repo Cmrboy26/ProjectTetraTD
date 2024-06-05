@@ -1,14 +1,14 @@
 ORDERED TODO LIST:
-- Create a "Game Over" screen for multiplayer and singleplayer modes (don't further support players playing past the game's end)
-  - Implement a score system as well
-- Create tabs for shop menu to separate combative towers, mining towers, and effect towers
-- Add new tiles to prepare for mining towers to be implemented
-  - Add ore veins (IRON, TITANIUM, URANIUM, ETC) for the material miner
-  - Add ONE gemstone-rich tile for gemstone miners to use 
+✓ Create a "Game Over" screen for multiplayer and singleplayer modes (don't further support players playing past the game's end)
+  ✓ Implement a score system as well
+✓ Create tabs for shop menu to separate combative towers, mining towers, and effect towers
+✓ Add new tiles to prepare for mining towers to be implemented
+  ✓ Add ore veins (IRON, TITANIUM, URANIUM, ETC) for the material miner
+  ✓ Add ONE gemstone-rich tile for gemstone miners to use 
 - Create some mining towers and have them add items to team inventories
   - component escavator that discovers more burried components
   - gemstone miner that uncovers gemstones (only one can be applied to a building and provides special abilities and perks)
-  - material miner that produces metals (DEPENDING ON WHERE THEY'RE PLACED) like steel, which can be used to construct/upgrade special towers
+  ✓ material miner that produces metals (DEPENDING ON WHERE THEY'RE PLACED) like steel, which can be used to construct/upgrade special towers
 - Add gemstone functionality
   - Diamonds adds piercing to towers
   - Cryonite inflicts slowness debuffs on enemies that are hit by it

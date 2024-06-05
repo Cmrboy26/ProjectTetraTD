@@ -11,7 +11,6 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.UUIDSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.minlog.Log;
 
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.AttackPacket;
@@ -41,6 +40,7 @@ import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
+import net.cmr.util.Log;
 
 public class OnlineGameStream extends GameStream {
 
@@ -89,13 +89,12 @@ public class OnlineGameStream extends GameStream {
         try {
             connection.sendTCP(packet);
         } catch(Exception e) {
-            e.printStackTrace();
-            Log.error("Error sending packet: "+packet+" Attempting to send again...");
+            Log.error("Error sending packet: "+packet+" Attempting to send again...", e);
             try {
                 connection.sendTCP(packet);
             } catch (Exception e2) {
-                e2.printStackTrace();
-                Log.error("Failed to resend again. Packet will not be sent.");
+                Log.error("Failed to resend again. Packet will not be sent.", e2);
+                throw e2;
             }
         }
     }
@@ -132,6 +131,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(Vector2.class);
         kryo.register(Vector2[].class);
         kryo.register(String[].class);
+        kryo.register(int[].class);
 
         kryo.register(GameType.class);
 

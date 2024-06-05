@@ -31,6 +31,7 @@ public class HealerEnemy extends BasicEnemy {
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
         if (data.isServer()) {
+            specialCooldown -= delta;
             if (specialCooldown <= 0) {
                 specialCooldown = PERIOD;
                 healNearby(data);

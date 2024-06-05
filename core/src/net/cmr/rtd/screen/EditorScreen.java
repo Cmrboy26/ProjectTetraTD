@@ -9,9 +9,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -19,6 +21,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -34,12 +38,12 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.StartTileData;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Files;
 import net.cmr.util.Log;
@@ -68,6 +72,7 @@ public class EditorScreen extends AbstractScreenEX {
 
     Dialog openDialog;
     World world;
+    Window tilePalette;
 
     public EditorScreen(FileHandle worldFile) {
         super(INITIALIZE_ALL);
@@ -93,9 +98,9 @@ public class EditorScreen extends AbstractScreenEX {
         window = new Window("Creator", Sprites.getInstance().getSkin(), "small");
         window.getTitleLabel().setAlignment(Align.center);
         window.setScale(.5f);
-        window.setSize(150, 300);
-        window.setOrigin(Align.center);
-        window.setPosition(5, (360 / 2), Align.left);
+        window.setSize(150, 250);
+        window.setOrigin(Align.left);
+        window.setPosition(10, (360 / 2), Align.left);
         window.padTop(20);
         window.setVisible(true);
         window.setMovable(true);
@@ -106,60 +111,9 @@ public class EditorScreen extends AbstractScreenEX {
 
         float size = 40;
 
-        ButtonGroup<Button> group = new ButtonGroup<Button>();
-        wall = new TextButton("Wall", Sprites.skin(), "toggle-small");
-        wall.setSize(size, size);
-        wall.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 2;
-            }
-        });
-
-        floor = new TextButton("Floor", Sprites.skin(), "toggle-small");
-        floor.setSize(size, size);
-        floor.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 1;
-            }
-        });
-
-        clear = new TextButton("Clear", Sprites.skin(), "toggle-small");
-        clear.setSize(size, size);
-        clear.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 0;
-            }
-        });
-
-        path = new TextButton("Path", Sprites.skin(), "toggle-small");
-        path.setSize(size, size);
-        path.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 3;
-            }
-        });
-
-        start = new TextButton("Start", Sprites.skin(), "toggle-small");
-        start.setSize(size, size);
-        start.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 4;
-            }
-        });
-
-        end = new TextButton("End", Sprites.skin(), "toggle-small");
-        end.setSize(size, size);
-        end.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                selectedTile = 5;
-            }
-        });
+        Label teamTitleLabel = new Label("Team Selection:", Sprites.skin(), "small");
+        teamTitleLabel.setSize(size * 3, size);
+        teamTitleLabel.setAlignment(Align.center);
 
         Label teamLabel = new Label("#" + teamNumber, Sprites.skin(), "small");
         teamLabel.setSize(size, size);
@@ -238,25 +192,51 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        group.add(wall);
-        group.add(floor);
-        group.add(clear);
-        group.add(path);
-        group.add(start);
-        group.add(end);
-
-        window.add(wall).size(size).pad(4);
-        window.add(floor).size(size).pad(4);
-        window.add(clear).size(size).pad(4).row();
-        window.add(path).size(size).pad(4);
-        window.add(start).size(size).pad(4);
-        window.add(end).size(size).pad(4).row();
+        window.add(teamTitleLabel).size(size * 3, size).colspan(3).row();
         window.add(sub).size(size).pad(4);
         window.add(teamLabel).size(size).pad(4);
         window.add(add).size(size).pad(4).row();
         window.add(export).size(size * 3, size).pad(4).colspan(3).row();
         window.add(importButton).size(size * 3, size).pad(4).colspan(3).row();
         window.add(color).size(size * 3, size).pad(4).colspan(3).row();
+
+        tilePalette = new Window("Tile Palette", Sprites.skin(), "small");
+        tilePalette.setKeepWithinStage(false);
+        tilePalette.setOrigin(Align.bottomLeft);
+        tilePalette.getTitleLabel().setAlignment(Align.center);
+        tilePalette.pad(30, 0, 10, 0);
+        tilePalette.setSize(300, 200);
+
+        Table tileTable = new Table();
+
+        ButtonGroup<Button> tileGroup = new ButtonGroup<Button>();
+        tileGroup.setMinCheckCount(1);
+        tileGroup.setMaxCheckCount(1);
+
+        int cols = 2;
+        int i = 0;
+        for (final TileType tileType : TileType.values()) {
+            TextButton button = new TextButton(tileType.name().replaceAll("_", " "), Sprites.skin(), "toggle-small");
+            
+            button.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    selectedTile = tileType.getID();
+                }
+            });
+            button.getLabel().setFontScale(.4f);
+            tileGroup.add(button);
+            tileTable.add(button).size(size * 3, size / 2).pad(4);
+            i++;
+            if (i % cols == 0 && i != 0) {
+                tileTable.row();
+            }
+        }
+        tilePalette.setScale(.5f);
+
+        tilePalette.setPosition(10, 10, Align.bottomLeft);
+        tilePalette.add(tileTable);
+        add(Align.left, tilePalette);
     }
 
     public void exportFile(FileHandle worldFile) {
@@ -588,7 +568,7 @@ public class EditorScreen extends AbstractScreenEX {
 
         Vector2 localMouse = window.screenToLocalCoordinates(new Vector2(mx, my));
 
-        if (localMouse.x < window.getX() + window.getWidth() && !entered) {
+        /*if (localMouse.x < window.getX() + window.getWidth() && !entered) {
             entered = true;
             window.clearActions();
             window.addAction(Actions.fadeIn(.15f));
@@ -596,7 +576,7 @@ public class EditorScreen extends AbstractScreenEX {
             entered = false;
             window.clearActions();
             window.addAction(Actions.fadeOut(.15f));
-        }
+        }*/
 
         // If mouse is over window, don't process mouse input.
         if (window.hit(localMouse.x, localMouse.y, true) != null) {
@@ -616,44 +596,52 @@ public class EditorScreen extends AbstractScreenEX {
         boolean left = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
         boolean right = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
 
+        if (tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize()) {
+            return;
+        }
+        Vector2 input = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        Vector2 local = tilePalette.screenToLocalCoordinates(input);
+        if (tilePalette.hit(local.x, local.y, true) != null) {
+            return;
+        }
+
         TileType type = TileType.getType(selectedTile);
         if (right) {
             type = null;
-        }
-        if ((left || right) && world != null && !(tileX < 0 || tileY < 0 || tileX >= world.getWorldSize() || tileY >= world.getWorldSize())) {
-            if (selectedTile == 1 || selectedTile == 0) {
-                world.setTile(tileX, tileY, 0, type);
+            world.setTile(tileX, tileY, 0, null);
+            world.setTile(tileX, tileY, 1, null);
+            world.setTileData(tileX, tileY, 0, null);
+            world.setTileData(tileX, tileY, 1, null);
+        } else if (left) {
+            if (type != null) {
+                world.setTile(tileX, tileY, type.layer, type);
             }
-            if (selectedTile != 1 || selectedTile == 0) {
-                world.setTile(tileX, tileY, 1, type);
-            }
-
-            if (selectedTile == 3) {
+            if (type == TileType.PATH) {
                 TileData teamTileData = new TeamTileData(teamNumber);
-                world.setTileData(tileX, tileY, 1, teamTileData);
+                world.setTileData(tileX, tileY, type.layer, teamTileData);
             }
-            if (selectedTile == 4) {
+            if (type == TileType.START) {
                 TileData startTileData = new StartTileData(teamNumber);
                 if (!dataExistsInWorld(startTileData)) {
-                    world.setTileData(tileX, tileY, 1, startTileData);
+                    world.setTileData(tileX, tileY, type.layer, startTileData);
                 } else {
-                    world.setTile(tileX, tileY, 1, null);
+                    world.setTile(tileX, tileY, type.layer, null);
                     System.out.println("Team " + teamNumber + " already has a start tile");
                 }
             }
-            if (selectedTile == 5) {
+            if (type == TileType.END) {
                 TileData endTileData = new StructureTileData(teamNumber);
                 if (!dataExistsInWorld(endTileData)) {
-                    world.setTileData(tileX, tileY, 1, endTileData);
+                    world.setTileData(tileX, tileY, type.layer, endTileData);
                 } else {
-                    world.setTile(tileX, tileY, 1, null);
+                    world.setTile(tileX, tileY, type.layer, null);
                     System.out.println("Team " + teamNumber + " already has an end tile");
                 }
             }
-            if (right && selectedTile >= 3 && selectedTile <= 5) {
-                world.setTileData(tileX, tileY, 1, null);
-                world.setTile(tileX, tileY, 1, null);
-            }
+            /*if (type == TileType.TITANIUM_VEIN || type == TileType.GEMSTONE_VEIN || type == TileType.IRON_VEIN) {
+                TileData teamTileData = new TeamTileData(teamNumber);
+                world.setTileData(tileX, tileY, type.layer, teamTileData);
+            }*/
         }
     }
 

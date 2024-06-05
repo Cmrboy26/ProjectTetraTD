@@ -7,9 +7,11 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.SecretKey;
@@ -82,6 +84,7 @@ public class GameManager implements Disposable {
     private World world;
     private ArrayList<TeamData> teams;
     private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
+    private Stack<TeamData> teamWinOrder = new Stack<TeamData>();  
     private boolean pauseWaves = true;
 
     public static final int WRITE_BUFFER_SIZE = 16384 * 4;
@@ -472,6 +475,8 @@ public class GameManager implements Disposable {
                 teams.add(data);
                 if (data.getHealth() > 0) {
                     winningTeams.add(data);
+                } else {
+                    teamWinOrder.push(data);
                 }
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
@@ -681,6 +686,10 @@ public class GameManager implements Disposable {
         }
 
         winningTeams.remove(teams.get(team));
+        if (teamHasPlayers) {
+            teamWinOrder.push(teams.get(team));
+        }
+
         if (teamsWithPlayers > 1) {
             // Show all players in the multiplayer game the winner
             if (winningTeams.size() == 1) {
@@ -696,12 +705,26 @@ public class GameManager implements Disposable {
     public void gameOver() {
         // There are no more waves in the level OR there is only one team remaining in the multiplayer match OR the player lost in the single player match.
         // Send a packet to all players to show that the game is over.
+        // TODO: Find out why the game sometimes sends the game over 4 teams participating in a singleplayer games.
         Log.info("GAME OVER!");
         for (TeamData data : winningTeams) {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
         }
+
+        for (TeamData data : winningTeams) {
+            if (doesTeamHavePlayers(data.team)) {
+                teamWinOrder.push(data);
+            }
+        }
+
+        int[] teamWinOrder = new int[this.teamWinOrder.size()];
+        for (int i = 0; i < this.teamWinOrder.size(); i++) {
+            teamWinOrder[i] = this.teamWinOrder.pop().team;
+            System.out.println(teamWinOrder[i]);
+        }
+
         for (TeamData data : teams) {
-            GameOverPacket packet = new GameOverPacket(world.getWave(), 694, data.getHealth() > 0);
+            GameOverPacket packet = new GameOverPacket(world.getWave(), data.getScore(), data.getHealth() > 0, teamWinOrder);
             for (GamePlayer player : players.values()) {
                 if (player.getTeam() == data.team) {
                     player.sendPacket(packet);

@@ -4,6 +4,7 @@ import net.cmr.util.Point;
 
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.TileData;
@@ -90,6 +91,18 @@ public class TeamData {
     }
     public void spawnEnemy(EnemyType type) {
         startTile.getFactory().createEnemy(type);
+    }
+    public long getScore() {
+        return structure.getScore();
+    }
+    public void addScore(long score) {
+        structure.addScore(score);
+    }
+    public void setScore(long score) {
+        structure.setScore(score);
+    }
+    public void onEnemyDeath(EnemyEntity entity, UpdateData data) {
+        addScore(entity.getMaxHealth());
     }
 
     public void depositMoney(long amount, UpdateData data) {

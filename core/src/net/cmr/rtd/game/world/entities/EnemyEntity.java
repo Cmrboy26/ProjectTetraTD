@@ -128,6 +128,7 @@ public abstract class EnemyEntity extends Entity {
     public void onDeath(UpdateData data) {
         if (data.isServer()) {
             TeamData team = data.getManager().getTeam(this.team);
+            team.onEnemyDeath(this, data);
             team.rollRandomItem(data);
         }
     }
@@ -174,6 +175,7 @@ public abstract class EnemyEntity extends Entity {
         if (timeToReach <= 0) {
             throw new IllegalArgumentException("Time to reach must be greater than 0");
         }
+        // TODO: Implement a better way to calculate the ending position of the enemy
         precision = Math.min(1, Math.max(0, precision));
         float velX = ((getX() + getVelocity().x * timeToReach * Tile.SIZE * precision) - projectile.getX()) / timeToReach;
         float velY = ((getY() + getVelocity().y * timeToReach * Tile.SIZE * precision) - projectile.getY()) / timeToReach;

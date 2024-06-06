@@ -7,6 +7,7 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
@@ -32,16 +33,33 @@ public class ShopManager {
 
     static {
         // Register the purchase of towers
-        registerTower(new TowerOption(GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, 35, "Shooter Tower", "Shoots pellets at enemies."));
-        registerTower(new TowerOption(GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, 70, "Fire Tower", "Sets enemies ablaze and\noccasionally shoots fireballs."));
-        registerTower(new TowerOption(GameType.ICE_TOWER, SpriteType.ICE_TOWER, 40, "Ice Tower", "Slows enemies."));
-        registerTower(new TowerOption(GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, 500, "Drill Tower", "Mines resources from ore veins."));
+        registerTower(new TowerOption(0, GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, Cost.money(level -> 35L), "Shooter Tower", "Shoots pellets at enemies."));
+        registerTower(new TowerOption(1, GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, Cost.money(level -> 70L), "Fire Tower", "Sets enemies on fire and\nshoots piercing fireballs."));
+        registerTower(new TowerOption(2, GameType.ICE_TOWER, SpriteType.ICE_TOWER, Cost.money(level -> 40L), "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(3, GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, Cost.money(level -> 50L), "Drill Tower", "Mines resources from ore veins."));
+        registerTower(new TowerOption(4, GameType.GEMSTONE_EXTRACTOR, SpriteType.GEMSTONE_EXTRACTOR_ONE, Cost.create(level -> {
+            TeamInventory inventory = new TeamInventory();
+            inventory.setCash(70L);
+            inventory.steel = 3;
+            return inventory;
+        }), "Gemstone Extractor", "Extracts various gems from gem veins."));
 
         // Register the purchase of upgrades
-        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, level -> 30L + (level - 1) * level * 20L,         level -> 5f + (level)));
-        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, level -> 50L + (level + 2) * level * level * 50L,  level -> 5f + level * 2f));
-        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, level -> level * level * 30L,         level -> 5f + level / 3f));
-        registerUpgrade(new UpgradeOption(GameType.DRILL_TOWER, level -> level * level * 500L,         level -> 10f + level / 3f));
+        //registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.money(level -> 30L + (level - 1) * level * 20L),         level -> 5f + (level)));
+        registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.create(level -> {
+            TeamInventory inventory = new TeamInventory();
+            inventory.setCash(30L + (level - 1) * level * 20L);
+            return inventory;
+        }), level -> 5f + (level)));
+        registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, Cost.money(level -> 50L + (level + 2) * level * level * 50L),    level -> 5f + level * 2f));
+        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, Cost.money(level -> level * level * 30L),                         level -> 5f + level / 3f));
+        registerUpgrade(new UpgradeOption(GameType.DRILL_TOWER, Cost.money(level -> level * level * 50L),                      level -> 10f + level * 2));
+        registerUpgrade(new UpgradeOption(GameType.GEMSTONE_EXTRACTOR, Cost.create(level -> {
+            TeamInventory inventory = new TeamInventory();
+            inventory.setCash(level * level * 60L);
+            inventory.steel = level;
+            return inventory;
+        }), level -> 10f + level * 2));
     }
 
     private static void registerTower(TowerOption item) {
@@ -80,11 +98,11 @@ public class ShopManager {
                     return;
                 }
                 TowerOption option = towerCatalog.get(type);
-                long cost = option.cost;
+                Cost cost = option.cost;
                 TeamData data = manager.getTeam(player.getTeam());
-                if (data.getMoney() < cost) {
+                if (!cost.canPurchase(data.getInventory())) {
                     // Not enough money
-                    Log.debug("Not enough money");
+                    Log.debug("Not enough money or resources");
                     return;
                 }
                 if (areTilesBlocking(manager.getUpdateData(), packet.x, packet.y)) {
@@ -114,7 +132,7 @@ public class ShopManager {
                 tower.updatePresenceOnClients(manager);
                 // Construction particle?
                 // Update the team's money.
-                data.payMoney(cost);
+                cost.purchase(data.getInventory());
                 manager.updateTeamStats(player.getTeam());
                 break;
             }
@@ -126,11 +144,11 @@ public class ShopManager {
                 }
                 int currentLevel = towerAt.getLevel();
                 UpgradeOption option = upgradeCatalog.get(towerAt.type);
-                long cost = option.cost.apply(currentLevel);
+                Cost cost = option.cost;
                 TeamData data = manager.getTeam(player.getTeam());
-                if (data.getMoney() < cost) {
+                if (!cost.canPurchase(data.getInventory(), currentLevel)) {
                     // Not enough money
-                    System.out.println("Not enough money");
+                    System.out.println("Not enough money or resources");
                     return;
                 }
                 boolean success = towerAt.levelUp(option.levelUpTime.apply(currentLevel));
@@ -147,7 +165,7 @@ public class ShopManager {
                 towerAt.updatePresenceOnClients(manager);
                 // Construction particle?
                 // Update the team's money.
-                data.payMoney(cost);
+                cost.purchase(data.getInventory(), currentLevel);
                 manager.updateTeamStats(player.getTeam());
                 break;
             }
@@ -280,13 +298,13 @@ public class ShopManager {
     }
 
     private static long towerSellValue(TowerEntity tower) {
-        return towerValue(tower);
+        return towerCashValue(tower);
     }
 
-    private static long towerValue(TowerEntity tower) {
+    private static long towerCashValue(TowerEntity tower) {
         int level = tower.getLevel();
-        long purchaseCost = towerCatalog.get(tower.type).cost;
-        long upgradesCost = Math.max(0, upgradeCatalog.get(tower.type).cost.apply(level - 1)) / 2L; // only the cost of the latest upgrade is accounted for
+        long purchaseCost = towerCatalog.get(tower.type).cost.apply(0).getCash();
+        long upgradesCost = Math.max(0, upgradeCatalog.get(tower.type).cost.apply(level - 1).getCash()) / 2L; // only the cost of the latest upgrade is accounted for
         if (level == 1) {
             upgradesCost = 0;
         }

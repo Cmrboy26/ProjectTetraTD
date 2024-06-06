@@ -80,7 +80,7 @@ public class FireTower extends TowerEntity {
                         .setParticleLife(.5f)
                         .setFollowEntity(true)
                         .setAnimationSpeed(2f)
-                        .setAreaSize(.5f)
+                        .setAreaSize(getFireballAOE())
                         .create());
                     if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
                         // dont launch it
@@ -101,7 +101,7 @@ public class FireTower extends TowerEntity {
     }
 
     public float getFireballAOE() {
-        return .5f;
+        return .5f * getScopeRangeBoost();
     }
 
     @Override

@@ -43,9 +43,9 @@ public abstract class TowerEntity extends Entity {
     // NOTE: The player must select only ONE type of upgrade for the tower and must stick with that path.
     static final int VERSION = 1;
     public static final int MAX_COMPONENTS = 4;
-    int scrapsApplied = 0;
-    int lubricantApplied = 0;
-    int scopesApplied = 0;
+    protected int scrapsApplied = 0;
+    protected int lubricantApplied = 0;
+    protected int scopesApplied = 0;
     SortType preferedSortType = SortType.HIGHEST_HEALTH;
 
     public TowerEntity(GameType type, int team) {
@@ -475,6 +475,9 @@ public abstract class TowerEntity extends Entity {
     }
 
     public boolean applyLubricant(TeamInventory inventory) {
+        if (!canApplyComponentLubricant()) {
+            return false;
+        }
         if (lubricantApplied >= MAX_COMPONENTS) {
             return false;
         }
@@ -490,6 +493,9 @@ public abstract class TowerEntity extends Entity {
     }
 
     public boolean applyScope(TeamInventory inventory) {
+        if (!canApplyComponentScope()) {
+            return false;
+        }
         if (scopesApplied >= MAX_COMPONENTS) {
             return false;
         }
@@ -505,6 +511,9 @@ public abstract class TowerEntity extends Entity {
     }
 
     public boolean applyScrapMetal(TeamInventory inventory) {
+        if (!canApplyComponentScrapMetal()) {
+            return false;
+        }
         if (scrapsApplied >= MAX_COMPONENTS) {
             return false;
         }
@@ -550,6 +559,14 @@ public abstract class TowerEntity extends Entity {
     }
     public float getScopeRangeBoost() {
         return Math.max(1, 1 + scopesApplied * .25f);
+    }
+
+    public boolean canApplyComponentScrapMetal() { return true; }
+    public boolean canApplyComponentLubricant() { return true; }
+    public boolean canApplyComponentScope() { return true; }
+
+    public boolean canEditSortType() {
+        return true;
     }
 
 }

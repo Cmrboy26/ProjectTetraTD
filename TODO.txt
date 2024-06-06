@@ -7,7 +7,7 @@ ORDERED TODO LIST:
   ✓ Add ONE gemstone-rich tile for gemstone miners to use 
 - Create some mining towers and have them add items to team inventories
   - component escavator that discovers more burried components
-  - gemstone miner that uncovers gemstones (only one can be applied to a building and provides special abilities and perks)
+  ✓ gemstone miner that uncovers gemstones (only one gemstone can be applied to a building and provides special abilities and perks)
   ✓ material miner that produces metals (DEPENDING ON WHERE THEY'RE PLACED) like steel, which can be used to construct/upgrade special towers
 - Add gemstone functionality
   - Diamonds adds piercing to towers

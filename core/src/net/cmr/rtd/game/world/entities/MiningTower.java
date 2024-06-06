@@ -26,14 +26,14 @@ public abstract class MiningTower extends TowerEntity {
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
-        if (data.isServer() && !data.getManager().areWavesPaused()) {
+        if (data.isServer() && !data.getManager().areWavesPaused() && getRemainingUpgradeTime() <= 0) {
             miningUpdate(data, delta);
         }
     }
 
     @Override
     public float getAttackSpeed() {
-        return 0;
+        return Float.POSITIVE_INFINITY;
     }
 
     @Override
@@ -44,6 +44,26 @@ public abstract class MiningTower extends TowerEntity {
     @Override
     public float getDisplayDamage() {
         return 0;
+    }
+
+    @Override
+    public boolean canApplyComponentLubricant() {
+        return false;
+    }
+
+    @Override
+    public boolean canApplyComponentScope() {
+        return false;
+    }
+
+    @Override
+    public boolean canApplyComponentScrapMetal() {
+        return false;
+    }
+
+    @Override
+    public boolean canEditSortType() {
+        return false;
     }
 
     /**

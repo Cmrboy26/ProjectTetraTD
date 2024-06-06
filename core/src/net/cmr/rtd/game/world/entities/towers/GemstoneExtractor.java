@@ -19,17 +19,16 @@ import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
-public class DrillTower extends MiningTower {
+public class GemstoneExtractor extends MiningTower {
 
     float timeUntilNextItem = 0;
-    TileType under = null;
 
-    public DrillTower() {
-        super(GameType.DRILL_TOWER, 0);
+    public GemstoneExtractor() {
+        super(GameType.GEMSTONE_EXTRACTOR, 0);
     }
 
-    public DrillTower(int team) {
-        super(GameType.DRILL_TOWER, team);
+    public GemstoneExtractor(int team) {
+        super(GameType.GEMSTONE_EXTRACTOR, team);
     }
 
     float animationDelta;
@@ -45,7 +44,7 @@ public class DrillTower extends MiningTower {
         Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.sprite(SpriteType.DRILL_TOWER_ONE);
+        TextureRegion sprite = Sprites.sprite(SpriteType.GEMSTONE_EXTRACTOR_ONE);
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         TextureRegion drill = Sprites.animation(AnimationType.DRILL, animationDelta);
         batch.draw(drill, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
@@ -53,12 +52,6 @@ public class DrillTower extends MiningTower {
         
         postRender(data, batch, delta);
         super.render(data, batch, delta);
-    }
-
-    @Override
-    public void update(float delta, UpdateData data) {
-        under = getTileBelow(data);
-        super.update(delta, data);
     }
 
     @Override
@@ -76,30 +69,48 @@ public class DrillTower extends MiningTower {
         return "A general-purpose mining drill that can be used to extract resources from the ground, which can be used to build and upgrade special towers.";
     }
 
-    public float getLubricantSpeedBoost() {
-        return Math.max(1, 1 + this.lubricantApplied * .1f);
-    }
-
     @Override
     public float getMiningTime() {
-        return (float) Math.max(15 - Math.sqrt((getLevel() - 1) * 10), 5) * (under == TileType.TITANIUM_VEIN ? 1.25f : 1);
+        return (float) Math.max(40 - Math.sqrt((getLevel() - 1) * 15), 5);
     }
 
     @Override
     public void onMiningComplete(UpdateData data) {
         TeamInventory inventory = getTeamInventory(data);
         TileType type = getTileBelow(data);
-        if (type == TileType.IRON_VEIN) {
-            inventory.steel++;
-        } else if (type == TileType.TITANIUM_VEIN) {
-            inventory.titanium++;
+        if (type == TileType.GEMSTONE_VEIN) {
+            Random random = new Random();
+            int selection = random.nextInt(6);
+            int amount = 1;
+            switch (selection) {
+                case 0:
+                    inventory.diamonds+=amount;
+                    break;
+                case 1:
+                    inventory.cryonite+=amount;
+                    break;
+                case 2:
+                    inventory.thorium+=amount;
+                    break;
+                case 3:
+                    inventory.ruby+=amount;
+                    break;
+                case 4:
+                    inventory.quartz+=amount;
+                    break;
+                case 5:
+                    inventory.topaz+=amount;
+                    break;
+                default:
+                    break;
+            }
         }
         updateInventoryOnClients(data);
     }
 
     @Override
     public boolean validMiningTarget(TileType type) {
-        return type == TileType.TITANIUM_VEIN || type == TileType.IRON_VEIN;
+        return type == TileType.GEMSTONE_VEIN;
     }
     
 }

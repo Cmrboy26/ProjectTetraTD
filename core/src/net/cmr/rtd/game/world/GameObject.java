@@ -17,9 +17,9 @@ import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.towers.DrillTower;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
+import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.rtd.game.world.entities.towers.ShooterTower;
-import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.util.Log;
 
 public abstract class GameObject {
@@ -39,6 +39,7 @@ public abstract class GameObject {
         FIRE_TOWER(FireTower.class),
         SHOOTER_TOWER(ShooterTower.class),
         DRILL_TOWER(DrillTower.class),
+        GEMSTONE_EXTRACTOR(GemstoneExtractor.class),
 
         PROJECTILE(Projectile.class), 
         ;

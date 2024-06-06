@@ -475,8 +475,6 @@ public class GameManager implements Disposable {
                 teams.add(data);
                 if (data.getHealth() > 0) {
                     winningTeams.add(data);
-                } else {
-                    teamWinOrder.push(data);
                 }
             } catch (NullTeamException e) {
                 // This team does not exist in the world.

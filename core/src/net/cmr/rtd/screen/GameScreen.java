@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -92,6 +93,7 @@ import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
+import net.cmr.rtd.game.world.store.Cost;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
@@ -450,39 +452,47 @@ public class GameScreen extends AbstractScreenEX {
         ScrollPaneStyle scrollStyle = new ScrollPaneStyle(Sprites.skin().get(ScrollPaneStyle.class));
 
         Table combativeShopTable = new Table();
-        combativeShopTable.setFillParent(true);
+        //combativeShopTable.setFillParent(true);
         ScrollPane combatScroll = new ScrollPane(combativeShopTable, scrollStyle);
         combatScroll.setScrollingDisabled(true, false);
         combatScroll.setScrollbarsVisible(false);
+        combatScroll.setOverscroll(false, false);
         combativeTable.add(combatScroll).grow().pad(1).padTop(5);
         
-        for (TowerOption option : ShopManager.getTowerCatalog().values()) {
-            if (!MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
+        ArrayList<TowerOption> combativeOptions = new ArrayList<TowerOption>(ShopManager.getTowerCatalog().values());
+        combativeOptions.sort((a, b) -> a.order - b.order);
+        combativeOptions.removeIf(option -> MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
+        for (TowerOption option : combativeOptions) {
+            //if (!MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
                 GameType type = option.type;
                 Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-                Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
+                Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
                 combativeShopTable.add(towerSection).pad(5).growX();
                 combativeShopTable.row();
-            }
+            //}
         }
 
         Table miningShopTable = new Table();
-        miningShopTable.setFillParent(true);
+        //miningShopTable.setFillParent(true);
         ScrollPane miningScroll = new ScrollPane(miningShopTable, scrollStyle);
         miningScroll.setScrollingDisabled(true, false);
         miningScroll.setScrollbarsVisible(false);
+        miningScroll.setOverscroll(false, false);
         miningTable.add(miningScroll).grow().pad(1).padTop(5);
 
-        for (TowerOption option : ShopManager.getTowerCatalog().values()) {
-            System.out.println(option.type.getGameObjectClass());
-            if (MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
-                GameType type = option.type;
-                Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-                Table towerSection = getTowerSection(drawable, type, option.name, String.valueOf(option.cost), option.description);
-                miningShopTable.add(towerSection).pad(5).growX();
-                miningShopTable.row();
-            }
+        ArrayList<TowerOption> miningOptions = new ArrayList<TowerOption>(ShopManager.getTowerCatalog().values());
+        miningOptions.sort((a, b) -> a.order - b.order);
+        miningOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
+        for (TowerOption option : miningOptions) {
+            GameType type = option.type;
+            Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+            Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
+            miningShopTable.add(towerSection).pad(5).growX();
+            miningShopTable.row();
         }
+
+        combatScroll.layout();
+        miningScroll.layout();
 
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
         inventoryWindow.getTitleLabel().setAlignment(Align.center);
@@ -1360,71 +1370,73 @@ public class GameScreen extends AbstractScreenEX {
                     float pad = 3;
                     float spacing = 10;
 
-                    SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+                    if (tower.canEditSortType()) {
+                        SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
 
-                    style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
-                    style.scrollStyle.background.setTopHeight(spacing / 2);
-                    style.scrollStyle.background.setBottomHeight(spacing / 2);
-                    style.scrollStyle.background.setLeftWidth(spacing / 2);
-                    style.scrollStyle.background.setRightWidth(spacing / 2);
-                    
-                    SelectBox<String> targetMethodSelectBox = new SelectBox<String>(style);
-                    targetMethodSelectBox.setScale(.8f);
-                    targetMethodSelectBox.setAlignment(Align.center);
-                    targetMethodSelectBox.setItems("Strongest", "Weakest", "First", "Last", "Closest", "Random");
-                    switch (tower.getPreferedSortType()) {
-                        case HIGHEST_HEALTH:
-                            targetMethodSelectBox.setSelected("Strongest");
-                            break;
-                        case LOWEST_HEALTH:
-                            targetMethodSelectBox.setSelected("Weakest");
-                            break;
-                        case STRUCTURE_DISTANCE:
-                            targetMethodSelectBox.setSelected("First");
-                            break;
-                        case STRUCTURE_DISTANCE_REVERSE:
-                            targetMethodSelectBox.setSelected("Last");
-                            break;
-                        case TOWER_DISTANCE:
-                            targetMethodSelectBox.setSelected("Closest");
-                            break;
-                        case ANY:
-                            targetMethodSelectBox.setSelected("Random");
-                            break;
-                        default:
-                            break;
+                        style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+                        style.scrollStyle.background.setTopHeight(spacing / 2);
+                        style.scrollStyle.background.setBottomHeight(spacing / 2);
+                        style.scrollStyle.background.setLeftWidth(spacing / 2);
+                        style.scrollStyle.background.setRightWidth(spacing / 2);
+                        
+                        SelectBox<String> targetMethodSelectBox = new SelectBox<String>(style);
+                        targetMethodSelectBox.setScale(.8f);
+                        targetMethodSelectBox.setAlignment(Align.center);
+                        targetMethodSelectBox.setItems("Strongest", "Weakest", "First", "Last", "Closest", "Random");
+                        switch (tower.getPreferedSortType()) {
+                            case HIGHEST_HEALTH:
+                                targetMethodSelectBox.setSelected("Strongest");
+                                break;
+                            case LOWEST_HEALTH:
+                                targetMethodSelectBox.setSelected("Weakest");
+                                break;
+                            case STRUCTURE_DISTANCE:
+                                targetMethodSelectBox.setSelected("First");
+                                break;
+                            case STRUCTURE_DISTANCE_REVERSE:
+                                targetMethodSelectBox.setSelected("Last");
+                                break;
+                            case TOWER_DISTANCE:
+                                targetMethodSelectBox.setSelected("Closest");
+                                break;
+                            case ANY:
+                                targetMethodSelectBox.setSelected("Random");
+                                break;
+                            default:
+                                break;
+                        }
+                        targetMethodSelectBox.addListener(new ChangeListener() {
+                            @Override
+                            public void changed(ChangeEvent event, Actor actor) {
+                                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                                SortType type = SortType.HIGHEST_HEALTH;
+                                switch (targetMethodSelectBox.getSelected()) {
+                                    case "Strongest":
+                                        type = SortType.HIGHEST_HEALTH;
+                                        break;
+                                    case "Weakest":
+                                        type = SortType.LOWEST_HEALTH;
+                                        break;
+                                    case "First":
+                                        type = SortType.STRUCTURE_DISTANCE;
+                                        break;
+                                    case "Last":
+                                        type = SortType.STRUCTURE_DISTANCE_REVERSE;
+                                        break;
+                                    case "Closest":
+                                        type = SortType.TOWER_DISTANCE;
+                                        break;
+                                    case "Random":
+                                        type = SortType.ANY;
+                                        break;
+                                }
+                                SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
+                                ioStream.sendPacket(packet);
+                            } 
+                        });
+
+                        informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(2).growX().row();
                     }
-                    targetMethodSelectBox.addListener(new ChangeListener() {
-                        @Override
-                        public void changed(ChangeEvent event, Actor actor) {
-                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                            SortType type = SortType.HIGHEST_HEALTH;
-                            switch (targetMethodSelectBox.getSelected()) {
-                                case "Strongest":
-                                    type = SortType.HIGHEST_HEALTH;
-                                    break;
-                                case "Weakest":
-                                    type = SortType.LOWEST_HEALTH;
-                                    break;
-                                case "First":
-                                    type = SortType.STRUCTURE_DISTANCE;
-                                    break;
-                                case "Last":
-                                    type = SortType.STRUCTURE_DISTANCE_REVERSE;
-                                    break;
-                                case "Closest":
-                                    type = SortType.TOWER_DISTANCE;
-                                    break;
-                                case "Random":
-                                    type = SortType.ANY;
-                                    break;
-                            }
-                            SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
-                            ioStream.sendPacket(packet);
-                        } 
-                    });
-
-                    informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(2).growX().row();
 
                     TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin(), "small");
                     upgradeButton.addListener(new ClickListener() {
@@ -1698,11 +1710,12 @@ public class GameScreen extends AbstractScreenEX {
         ));
     }
 
-    private Table getTowerSection(Drawable drawable, GameType type, String name, String cost, String tooltipDescription) {
+    private Table getTowerSection(Drawable drawable, GameType type, String name, Cost cost, String tooltipDescription) {
         Table table = new Table();
         Image towerImage = new Image(drawable);
         float fontScale = .5f;
-        Label towerName = new Label(name + ": $"+cost, Sprites.skin(), "small");
+        //  + ": $"+cost.apply(0).getCash()
+        Label towerName = new Label(name, Sprites.skin(), "small");
         towerName.setFontScale(fontScale);
         int targetHeight = 32;
         int targetWidth = (int) (targetHeight / (drawable.getMinHeight() / drawable.getMinWidth()));
@@ -1710,7 +1723,8 @@ public class GameScreen extends AbstractScreenEX {
         table.add(towerImage).padRight(sidepad).padLeft(sidepad).width(targetWidth).height(targetHeight).colspan(1).left();
         VerticalGroup group = new VerticalGroup();
         group.addActor(towerName);
-        table.add(group).expandX().pad(5).colspan(1);
+        group.addActor(getInventoryDisplay(cost.apply(0), false, 3));
+        table.add(group).expandX().colspan(1);
         TextButton buyButton = new TextButton("Buy", Sprites.skin(), "small");
         buyButton.addListener(new ClickListener() {
             @Override
@@ -1813,8 +1827,11 @@ public class GameScreen extends AbstractScreenEX {
                     notification(SpriteType.STRUCTURE, "This mining tower cannot\nbe placed here!");
                     canPlace = false;
                 } else if (option != null) {
-                    if (inventory.getCash() < option.cost) {
-                        notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost).substring(1)+")");
+                    if (inventory.getCash() < option.cost.apply(0).getCash()) {
+                        notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost.apply(0).getCash()).substring(1)+")");
+                        canPlace = false;
+                    } else if (!option.cost.canPurchase(inventory)) {
+                        notification(SpriteType.CASH, "Not enough resources!");
                         canPlace = false;
                     }
                 }
@@ -1894,6 +1911,33 @@ public class GameScreen extends AbstractScreenEX {
                 }
                 if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && (towerAt.getLubricantApplied() > 0 || towerAt.getScopesApplied() > 0)) {
                     notification(SpriteType.STRUCTURE, "Cannot apply scrap metal\nwith other components!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+
+                if (componentAction == PurchaseAction.APPLY_LUBRICANT && !towerAt.canApplyComponentLubricant()) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply lubricant on\nthis tower type!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+
+                if (componentAction == PurchaseAction.APPLY_SCOPE && !towerAt.canApplyComponentScope()) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply scope on\nthis tower type!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+
+                if (componentAction == PurchaseAction.APPLY_SCRAP_METAL && !towerAt.canApplyComponentScrapMetal()) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply scrap metal on\nthis tower type!");
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     if (!multiPlace || isMobile()) {
                         exitPlacementMode();
@@ -2002,9 +2046,9 @@ public class GameScreen extends AbstractScreenEX {
         removeInfoWindow();
         int tileX = Entity.getTileX(towerAt.getX());
         int tileY = Entity.getTileY(towerAt.getY());
-        long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel());
+        long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel()).getCash();
         if (multiplace) {
-            GameScreen.this.upgrade(cost, tileX, tileY);
+            GameScreen.this.upgrade(towerAt.type, tileX, tileY);
             return;
         }
 
@@ -2021,15 +2065,14 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
-                GameScreen.this.upgrade(cost, tileX, tileY);
+                GameScreen.this.upgrade(towerAt.type, tileX, tileY);
             }
         };
         dialog.getTitleLabel().setAlignment(Align.center);
         dialog.getTitleLabel().setFontScale(.5f);
         dialog.pad(Tile.SIZE/2f);
         dialog.padTop(Tile.SIZE);
-        dialog.setSize(Tile.SIZE*4f, Tile.SIZE*4f);
-        dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
+        dialog.setSize(Tile.SIZE*4f, Tile.SIZE*2f);
         dialog.setMovable(false);
         dialog.setVisible(true);
         dialog.setKeepWithinStage(false);
@@ -2038,22 +2081,35 @@ public class GameScreen extends AbstractScreenEX {
         float time = option.levelUpTime.apply(towerAt.getLevel()+1);
 
         Label label = new Label("LVL "+(towerAt.getLevel()+1)
-            +"\nCost: "+ShopManager.costToString(cost)
+            //+"\nCost: "+ShopManager.costToString(cost)
             +"\nTime: "+((int)time)+"s", Sprites.skin(), "small");
         label.setAlignment(Align.center);
         label.setFontScale(.45f);
         dialog.text(label);
+        Table costTable = getInventoryDisplay(option.cost.apply(towerAt.getLevel()), false, 3);
+        dialog.getContentTable().row();
+        dialog.getContentTable().add(costTable).center().grow().colspan(1).row();
         dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
         dialog.button("No", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        dialog.pack();
+        dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
         worldStage.addActor(dialog);
         informationUpgradeWindow = dialog;
     }
 
-    private void upgrade(long cost, int tileX, int tileY) {
-        if (cost > inventory.getCash()) {
-            notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(cost).substring(1)+")");
-            Audio.getInstance().playSFX(GameSFX.WARNING, 1);
+    private void upgrade(GameType typeToPurchase, int tileX, int tileY) {
+        TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
+        if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
+            notification(SpriteType.STRUCTURE, "Cannot place here!");
             return;
+        } else if (option != null) {
+            if (inventory.getCash() < option.cost.apply(0).getCash()) {
+                notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost.apply(0).getCash()).substring(1)+")");
+                return;
+            } else if (!option.cost.canPurchase(inventory)) {
+                notification(SpriteType.CASH, "Not enough resources!");
+                return;
+            }
         }
         Audio.getInstance().playSFX(GameSFX.SELECT, 1);
         PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.UPGRADE, null, tileX, tileY);
@@ -2130,6 +2186,45 @@ public class GameScreen extends AbstractScreenEX {
             dialog.show(stages.get(Align.center));
             quitDialog = dialog;
         }
+    }
+
+    int tempColumns = 0;
+    int targetColumns = 0;
+
+    public Table getInventoryDisplay(TeamInventory displayInventory, boolean displayAll, int columns) {
+        Table table = new Table();
+        tempColumns = 0;
+        targetColumns = columns;
+        if (displayAll || displayInventory.cash > 0) addInventorySection(SpriteType.CASH, displayInventory.cash, table);
+        if (displayAll || displayInventory.scopes > 0) addInventorySection(SpriteType.SCOPE, displayInventory.scopes, table);
+        if (displayAll || displayInventory.wd40 > 0) addInventorySection(SpriteType.LUBRICANT, displayInventory.wd40, table);
+        if (displayAll || displayInventory.scrapMetal > 0) addInventorySection(SpriteType.SCRAP, displayInventory.scrapMetal, table);
+
+        if (displayAll || displayInventory.steel > 0) addInventorySection(SpriteType.STEEL, displayInventory.steel, table);
+        if (displayAll || displayInventory.titanium > 0) addInventorySection(SpriteType.TITANIUM, displayInventory.titanium, table);
+
+        table.padTop(0);
+        table.padBottom(0);
+        return table;
+    }
+
+    private void addInventorySection(SpriteType type, long amount, Table table) {
+        Image image = new Image(Sprites.drawable(type));
+        image.setSize(16, 16);
+        table.add(image).width(16).height(16).pad(1);
+        String prefix = "x";
+        if (type == SpriteType.CASH) {
+            prefix = "";
+        }
+        Label label = new Label(prefix+ShopManager.costToString(amount).substring(1), Sprites.skin(), "small");
+        label.setFontScale(.4f);
+        table.add(label).pad(1).center();
+        tempColumns++;
+        if (tempColumns >= targetColumns) {
+            table.row();
+            tempColumns = 0;
+        }
+        //table.row();
     }
 
 }

@@ -22,6 +22,7 @@ public class TeamInventory {
     @Since(1) public int ruby = 0; // flaming
     @Since(1) public int quartz = 0; // increases range
     @Since(1) public int topaz = 0; // halves attack speed, doubles range and damage
+    // NOTE: When adding new materials, make sure to update the canPurchase method in Cost.java
 
     public TeamInventory() {
         
@@ -29,18 +30,25 @@ public class TeamInventory {
 
     public void setCash(long amount) { cash = amount; }
     public long addCash(long amount) { cash += amount; return cash; }
+    public void removeCash(long amount) { cash -= amount; }
     public long getCash() { return cash; }
     
     public int getScopes() { return scopes; }
     public void addScope() { scopes++; }
+    public void setScopes(int amount) { scopes = amount; }
     public void removeScope() { scopes--; }
+    public void removeScopes(int amount) { scopes -= amount; }
     
     public int getWd40() { return wd40; }
     public void addWd40() { wd40++; }
+    public void setWd40(int amount) { wd40 = amount; }
     public void removeWd40() { wd40--; }
+    public void removeWd40(int amount) { wd40 -= amount; }
 
     public int getScraps() { return scrapMetal; }
     public void addScrapMetal() { scrapMetal++; }
+    public void setScrapMetal(int amount) { scrapMetal = amount; }
     public void removeScrapMetal() { scrapMetal--; }
+    public void removeScrapMetal(int amount) { scrapMetal -= amount; }
 
 }

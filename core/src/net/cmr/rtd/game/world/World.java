@@ -121,6 +121,10 @@ public class World extends GameObject {
     private void updateWorld(float delta, UpdateData data) {
         if (data.isServer() && !data.getManager().areWavesPaused()) {
             Wave waveObj = wavesData.getWave(this.wave);
+            if (wavesData.endlessMode && waveObj == null && wave != 0) {
+                waveObj = wavesData.getNextWave(this.wave, data);
+                data.getManager().onWaveChange(wave, waveObj);
+            }
             // TODO: SPAWN ENTITIES
 
             if (waveObj != null) {

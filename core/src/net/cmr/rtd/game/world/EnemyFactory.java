@@ -46,9 +46,9 @@ public class EnemyFactory {
         BASIC_TWO(10, EnemyFactory::createBasicEnemyTwo),
         BASIC_THREE(25, EnemyFactory::createBasicEnemyThree),
         BASIC_FOUR(125, EnemyFactory::createBasicEnemyFour),
-        BASIC_FIVE(1000, EnemyFactory::createBasicEnemyFive),
+        BASIC_FIVE(750, EnemyFactory::createBasicEnemyFive),
 
-        HEALER_ONE(250, EnemyFactory::createHealerEnemyOne),
+        HEALER_ONE(200, EnemyFactory::createHealerEnemyOne),
         ;
 
         private Consumer<EnemyFactory> factory;
@@ -111,8 +111,7 @@ public class EnemyFactory {
                                             .immuneTo(FireEffect.class)); }
     private void createBasicEnemyFour() { send(createBasicEnemy("basic4", EnemyType.BASIC_FOUR, .8f)
                                             .immuneTo(SlownessEffect.class)); }
-    private void createBasicEnemyFive() { send(createBasicEnemy("basic5", EnemyType.BASIC_FIVE, .5f)
-                                            .immuneTo(SlownessEffect.class)); }
+    private void createBasicEnemyFive() { send(createBasicEnemy("basic5", EnemyType.BASIC_FIVE, .5f));}
     private void createHealerEnemyOne() { send(createHealerEnemy("healer1", EnemyType.HEALER_ONE, .7f));}
     private void createProtectorateEnemyOne() {
         /*

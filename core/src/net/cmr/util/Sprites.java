@@ -68,8 +68,11 @@ public class Sprites implements Disposable {
         BARNOLD2("barnold2"),
         SCOPE("scope"),
         SCRAP("scrap"),
+        TITANIUM("titanium"),
+        STEEL("steel"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
+        GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
         ;
 
         private String spriteName;

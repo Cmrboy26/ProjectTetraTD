@@ -76,7 +76,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.row();
 
 		if (!RetroTowerDefense.isMobile() && RetroTowerDefense.getInstance(RetroTowerDefense.class).getUsername().equals("Cmrboy26")) {
-			TextButton editor = new TextButton("Colten's Editor", Sprites.skin(), labelType);
+			TextButton editor = new TextButton("Editor", Sprites.skin(), labelType);
 			Audio.addClickSFX(editor);
 			editor.addListener(new ClickListener() {
 				@Override

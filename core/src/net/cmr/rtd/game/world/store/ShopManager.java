@@ -43,7 +43,7 @@ public class ShopManager {
         registerTower(new TowerOption(3, GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, Cost.money(level -> 50L), "Drill Tower", "Mines resources from ore veins."));
         registerTower(new TowerOption(4, GameType.GEMSTONE_EXTRACTOR, SpriteType.GEMSTONE_EXTRACTOR_ONE, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
-            inventory.setCash(70L);
+            inventory.setCash(100L);
             inventory.steel = 3;
             return inventory;
         }), "Gemstone Extractor", "Extracts various gems from gem veins."));

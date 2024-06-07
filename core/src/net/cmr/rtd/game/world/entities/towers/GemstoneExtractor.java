@@ -20,6 +20,7 @@ import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
+import net.cmr.util.StringUtils;
 
 public class GemstoneExtractor extends MiningTower {
 
@@ -68,12 +69,13 @@ public class GemstoneExtractor extends MiningTower {
 
     @Override
     public String getDescription() {
-        return "A general-purpose mining drill that can be used to extract resources from the ground, which can be used to build and upgrade special towers.";
+        return "A specialized tower that extracts gemstones from the ground, which can be used to specialize a tower's stats.";
     }
 
     @Override
     public float getMiningTime() {
-        return (float) Math.max(60 - Math.sqrt((getLevel() - 1) * 20), 5);
+        return (float) Math.max(60 - Math.sqrt((getLevel() - 1) * 160), 5);
+        //return 1f;
     }
 
     @Override
@@ -94,6 +96,16 @@ public class GemstoneExtractor extends MiningTower {
     @Override
     public boolean validMiningTarget(TileType type) {
         return type == TileType.GEMSTONE_VEIN;
+    }
+
+    public String getTowerDescription() {
+        StringBuilder builder = new StringBuilder();
+
+        appendLine(builder, "Level " + getLevel());
+        appendLine(builder, "Mining Time: " + StringUtils.truncateFloatingPoint(getMiningTime(), 2) + "s");
+        appendLine(builder, "Description: \n- " + getDescription());
+
+        return builder.toString();
     }
     
 }

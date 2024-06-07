@@ -37,12 +37,12 @@ public abstract class MiningTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayRange() {
+    public float getRange() {
         return 0;
     }
 
     @Override
-    public float getDisplayDamage() {
+    public float getDamage(boolean rollCritical) {
         return 0;
     }
 

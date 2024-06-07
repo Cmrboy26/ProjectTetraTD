@@ -27,6 +27,7 @@ import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
+import net.cmr.util.StringUtils;
 
 public abstract class TowerEntity extends Entity {
 
@@ -186,7 +187,7 @@ public abstract class TowerEntity extends Entity {
             SpriteType type = SpriteType.AREA;
             // set the color to a transparent yellow
             batch.setColor(new Color(Color.YELLOW).sub(0,0,0,.8f));
-            batch.draw(Sprites.sprite(type), getPosition().x - getDisplayRange() * Tile.SIZE, getPosition().y - getDisplayRange() * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE, getDisplayRange() * 2 * Tile.SIZE);
+            batch.draw(Sprites.sprite(type), getPosition().x - getRange() * Tile.SIZE, getPosition().y - getRange() * Tile.SIZE, getRange() * 2 * Tile.SIZE, getRange() * 2 * Tile.SIZE);
             batch.setColor(Color.WHITE);
         }
     }
@@ -371,8 +372,8 @@ public abstract class TowerEntity extends Entity {
         return 1;
     }
 
-    public abstract float getDisplayDamage();
-    public abstract float getDisplayRange();
+    public abstract float getDamage(boolean rollCritical);
+    public abstract float getRange();
     public abstract String getDescription();
 
     public SortType getPreferedSortType() {
@@ -601,7 +602,58 @@ public abstract class TowerEntity extends Entity {
     }
 
     public @Null Material[] getValidMaterials() {
-        return new Material[] {Material.CRYONITE, Material.DIAMONDS, Material.QUARTZ, Material.RUBY, Material.THORIUM, Material.TOPAZ};
+        return null;
+        //return new Material[] {Material.CRYONITE, Material.DIAMONDS, Material.QUARTZ, Material.RUBY, Material.THORIUM, Material.TOPAZ};
+    }
+
+    public String getTowerDescription() {
+        StringBuilder builder = new StringBuilder();
+
+        appendLine(builder, "Level " + getLevel());
+        appendLine(builder, "Range: " + StringUtils.truncateFloatingPoint(getRange(), 2) + " tiles");
+        appendLine(builder, "DPS: ~" + StringUtils.truncateFloatingPoint(getDamage(false)/getAttackSpeed(), 2));
+        appendLine(builder, "- Damage: " + StringUtils.truncateFloatingPoint(getDamage(false), 2));
+        appendLine(builder, "- Speed: " + StringUtils.truncateFloatingPoint(1f/getAttackSpeed(), 2));
+        appendLine(builder, "Description: \n- " + getDescription());
+        appendLine(builder, "");
+
+        String componentPath = "None";
+        
+        String benefits = "None";
+        if (getLubricantApplied() > 0) {
+            componentPath = "Lubricant";
+            benefits = "+"+getLubricantSpeedBoostPercent()+"% Attack Speed";
+        } else if (getScopesApplied() > 0) {
+            componentPath = "Scopes";
+            benefits = "+"+getScopeRangeBoostPercent()+"% Range";
+        } else if (getScrapMetalApplied() > 0) {
+            componentPath = "Scrap Metal";
+            benefits = "+"+getScrapMetalDamageBoostPercent()+"% Damage";
+        }
+
+        String amount = getComponentsApplied() + "/" + MAX_COMPONENTS;
+        amount = " ("+amount+")";
+        if (componentPath.equals("None")) {
+            amount = "";
+        }
+        appendLine(builder, "Components: "+componentPath+amount);
+        if (getComponentsApplied() > 0) {
+            appendLine(builder, "- Bonuses: "+benefits);
+        }
+
+        appendLine(builder, "");
+        if (getSelectedMaterial() == null) {
+            //appendLine(builder, "Gem: None");
+        } else {
+            appendLine(builder, "Gem: "+getSelectedMaterial().materialName);
+            appendLine(builder, "- "+getSelectedMaterial().description);
+        }
+
+        return builder.toString();
+    }
+
+    protected void appendLine(StringBuilder builder, String info) {
+        builder.append(info).append("\n");
     }
 
 }

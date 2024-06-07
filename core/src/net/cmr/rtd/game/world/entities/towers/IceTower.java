@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
@@ -67,7 +68,8 @@ public class IceTower extends TowerEntity {
             attacking = true;
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                new SlownessEffect(data, enemy.getEffects(), getAttackSpeed() + persistence, getLevel());
+                Material.attackEnemy(enemy, this, data);
+                new SlownessEffect(data, enemy.getEffects(), getAttackSpeed() + (persistence * getLevel() / 2f), getLevel());
             }
         }
         return attacking;
@@ -79,13 +81,8 @@ public class IceTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayRange() {
-        return getRange();
-    }
-
-    private float getRange() {
-        // Every 3 levels, the range increases by .25 tiles
-        return calculateIncrementedValue(3, .25f, range)*getScopeRangeBoost();
+    public float getRange() {
+        return calculateIncrementedValue(3, .25f, range)*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
     }
 
     @Override
@@ -116,13 +113,18 @@ public class IceTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayDamage() { return 0*getScrapMetalDamageBoost(); }
+    public float getDamage(boolean rollCritical) { return 0*getScrapMetalDamageBoost(); }
     @Override
     public String getDescription() { return "Slows down enemies within range.\nSlowness increases as level increases."; }
 
     @Override
     public boolean canEditSortType() {
         return false;
+    }
+
+    @Override
+    public Material[] getValidMaterials() {
+        return new Material[] { Material.CRYONITE, Material.QUARTZ };
     }
     
 }

@@ -2,6 +2,12 @@ package net.cmr.rtd.game.storage;
 
 import com.esotericsoftware.kryo.serializers.VersionFieldSerializer.Since;
 
+import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
+import net.cmr.rtd.game.world.entities.effects.StunEffect;
+import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.util.Sprites.SpriteType;
 
 /**
@@ -30,13 +36,13 @@ public class TeamInventory {
         TITANIUM(1, "Titanium", SpriteType.TITANIUM, MaterialType.RESOURCE), 
         
         DIAMONDS(2, "Diamond", SpriteType.DIAMOND, MaterialType.GEMSTONE, 
-            "The unmatched durability of the diamond enables it to pierce through enemies."    
+            "The unmatched durability of the diamond enables bullets to pierce through enemies."    
         ), 
         CRYONITE(3, "Cryonite", SpriteType.CRYONITE, MaterialType.GEMSTONE, 
             "Cryonite drastically slows down enemies through its arctic properties. It has a chance to stun enemies."
         ), 
         THORIUM(4, "Thorium", SpriteType.THORIUM, MaterialType.GEMSTONE, 
-            "Thorium supercharges towers by doubling their speed but halving their damage."
+            "Thorium supercharges towers by increasing speed by 125% but halving its damage and range."
         ), 
         RUBY(5, "Ruby", SpriteType.RUBY, MaterialType.GEMSTONE, 
             "Ruby towers have a chance to deal double damage to enemies."
@@ -45,7 +51,7 @@ public class TeamInventory {
             "The optical properties of quartz allows towers to see further and attack slightly faster."
         ), 
         TOPAZ(7, "Topaz", SpriteType.TOPAZ, MaterialType.GEMSTONE, 
-            "Topaz towers halve a towers attacking speed but doubles its damage. In addition, it has a chance to deal 150% damage to enemies."    
+            "Topaz halves a tower's attacking speed but doubles its damage. In addition, it has a chance to deal 50% more damage to enemies."    
         ), 
         ;
 
@@ -93,6 +99,86 @@ public class TeamInventory {
                 }
             }
             return null;
+        }
+
+        // Tower attribute modification
+
+        public static boolean isPiercing(Material material) {
+            return material == DIAMONDS;
+        }
+        public static float getDamageModifier(Material material, boolean rollCritical) {
+            if (material == null) return 1;
+            switch (material) {
+                case THORIUM: {
+                    return 0.5f;
+                }
+                case TOPAZ: {
+                    if (rollCritical) {
+                        float critChance = 0.1f;
+                        float critAmount = 1.5f;
+                        if (Math.random() < critChance) {
+                            return 2.0f * critAmount;
+                        }
+                    }
+                    return 2.0f;
+                }
+                case RUBY: {
+                    if (rollCritical) {
+                        float critChance = 0.2f;
+                        float critAmount = 2.0f;
+                        if (Math.random() < critChance) {
+                            return critAmount;
+                        }
+                    }
+                    return 1.0f;
+                }
+                default: return 1.0f;
+            }
+        }
+        public static float getAttackSpeedModifier(Material material) {
+            if (material == null) return 1;
+            switch (material) {
+                case THORIUM: {
+                    return 2.25f;
+                }
+                case TOPAZ: {
+                    return 0.5f;
+                }
+                case QUARTZ: {
+                    return 1.25f;
+                }
+                default: return 1.0f;
+            }
+        }
+        public static float getRangeModifier(Material material) {
+            if (material == null) return 1;
+            switch (material) {
+                case QUARTZ: {
+                    return 2.0f;
+                }
+                case THORIUM: {
+                    return 0.7f;
+                }
+                default: return 1.0f;
+            }
+        }
+        public static void attackEnemy(EnemyEntity entity, TowerEntity tower, UpdateData data) {
+            if (tower.getSelectedMaterial() == null) return;
+            switch (tower.getSelectedMaterial()) {
+                case CRYONITE: {
+                    float chance = 0.15f;
+                    if (tower instanceof IceTower) {
+                        chance = 0.05f;
+                    }
+                    if (Math.random() < chance) {
+                        new StunEffect(data, entity.getEffects(), 2, 1);
+                    }
+                    new SlownessEffect(data, entity.getEffects(), 5, 2);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
     public static enum MaterialType {

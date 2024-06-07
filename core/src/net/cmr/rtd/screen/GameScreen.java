@@ -522,24 +522,24 @@ public class GameScreen extends AbstractScreenEX {
         inventoryHelp.setAlignment(Align.center);
         inventoryTable.row();
 
-        String componentUsage = "- Can be applied to boost a tower's stats "+TowerEntity.MAX_COMPONENTS+" times.\n- Only one type of component can be applied to a tower at once.";
-        inventoryTable.add(getInventorySlot(SpriteType.LUBRICANT, inventory::getWd40, () -> {
+        String componentUsage = "- Can be applied to boost a tower's stats up to "+TowerEntity.MAX_COMPONENTS+" times.\n- Only one type of component can be applied to a tower at once.";
+        inventoryTable.add(getInventorySlot(SpriteType.LUBRICANT, () -> getTeamInventory().getWd40(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_LUBRICANT;
             enterComponentMode();
         }, "Lubricant", componentUsage, size)).size(size);
-        inventoryTable.add(getInventorySlot(SpriteType.SCOPE, inventory::getScopes, () -> {
+        inventoryTable.add(getInventorySlot(SpriteType.SCOPE, () -> getTeamInventory().getScopes(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_SCOPE;
             enterComponentMode();
         }, "Scopes", componentUsage, size)).size(size);
-        inventoryTable.add(getInventorySlot(SpriteType.SCRAP, inventory::getScraps, () -> {
+        inventoryTable.add(getInventorySlot(SpriteType.SCRAP, () -> getTeamInventory().getScopes(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_SCRAP_METAL;
             enterComponentMode();
         }, "Scrap Metal", componentUsage, size)).size(size);
         String resourceUsage = "- Resource to build and upgrade special towers.";
-        String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost on change.";
+        String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost if changed.";
 
         for (final Material material : Material.values()) {
             inventoryTable.add(getInventorySlot(material.image, () -> inventory.getMaterial(material), () -> {
@@ -557,98 +557,8 @@ public class GameScreen extends AbstractScreenEX {
 
         inventoryWindow.setSize(230, 200);
         inventoryWindow.setOrigin(Align.center);
-        //inventoryWindow.setScale(.5f);
         inventoryWindow.setPosition(320, 360/2, Align.center);
 
-
-        //inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).pad(imagePad).colspan(1);
-        /*TextButton lubricant = new TextButton("Lubricant x0", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                if (inventory == null) { return; }
-                setText("Lubricant x"+inventory.getWd40()+"");
-                super.act(delta);
-            }
-        };
-        lubricant.pad(0, pad, 0, pad);
-        lubricant.addListener(new ClickListener(Input.Buttons.LEFT) {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                componentAction = PurchaseAction.APPLY_LUBRICANT;
-                enterComponentMode();
-            }
-        });
-        inventoryTable.add(lubricant).pad(pad).growX().colspan(1);
-        inventoryTable.row();
-
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.SCOPE))).pad(imagePad).colspan(1);
-        TextButton scopes = new TextButton("Scopes x0", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                if (inventory == null) { return; }
-                setText("Scopes x"+inventory.getScopes()+"");
-                super.act(delta);
-            }
-        };
-        scopes.pad(0, pad, 0, pad);
-        scopes.addListener(new ClickListener(Input.Buttons.LEFT) {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                componentAction = PurchaseAction.APPLY_SCOPE;
-                enterComponentMode();
-            }
-        });
-        inventoryTable.add(scopes).pad(pad).growX().colspan(1);
-        inventoryTable.row();
-
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.SCRAP))).pad(imagePad).colspan(1);
-        TextButton scraps = new TextButton("Scraps x0", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                if (inventory == null) { return; }
-                setText("Scraps x"+inventory.getScraps()+"");
-                super.act(delta);
-            }
-        };
-        scraps.pad(0, pad, 0, pad);
-        scraps.addListener(new ClickListener(Input.Buttons.LEFT) {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                componentAction = PurchaseAction.APPLY_SCRAP_METAL;
-                enterComponentMode();
-            }
-        });
-        inventoryTable.add(scraps).pad(pad).growX().colspan(1);
-        inventoryTable.row();
-
-        for (Material material : Material.values()) {
-            inventoryTable.add(new Image(Sprites.drawable(material.image))).pad(imagePad).colspan(1);
-            TextButton materialButton = new TextButton(material.materialName+" x0", Sprites.skin(), "small") {
-                @Override
-                public void act(float delta) {
-                    if (inventory == null) { return; }
-                    setText(material.materialName+" x"+inventory.getMaterial(material)+"");
-                    super.act(delta);
-                }
-            };
-            materialButton.pad(0, pad, 0, pad);
-            materialButton.addListener(new ClickListener(Input.Buttons.LEFT) {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                    //componentAction = PurchaseAction.APPLY_MATERIAL;
-                    //enterComponentMode();
-                }
-            });
-            inventoryTable.add(materialButton).pad(pad).growX().colspan(1);
-            inventoryTable.row();
-        }
-        inventoryTable.layout();
-        inventoryTable.pack();
-        inventoryWindow.layout();*/
 
         ImageButtonStyle waveButtonStyles = new ImageButtonStyle();
         waveButtonStyles.down = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DOWN), patch, patch, patch, patch));
@@ -1408,7 +1318,7 @@ public class GameScreen extends AbstractScreenEX {
                     informationUpgradeWindow.setMovable(true);
                     informationUpgradeWindow.setVisible(true);
                     informationUpgradeWindow.setResizable(true);
-                    String componentPath = "None";
+                    /*String componentPath = "None";
                     String benefits = "None";
                     if (tower.getLubricantApplied() > 0) {
                         componentPath = "Lubricant";
@@ -1421,8 +1331,8 @@ public class GameScreen extends AbstractScreenEX {
                         benefits = "+"+tower.getScrapMetalDamageBoostPercent()+"% Damage";
                     }
                     String text = "Level: " + tower.getLevel();
-                    text += "\nDamage: " + tower.getDisplayDamage();
-                    text += "\nRange: " + tower.getDisplayRange();
+                    text += "\nDamage: " + tower.getDamage(false);
+                    text += "\nRange: " + tower.getRange();
                     text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
                     text += "\nDescription: "+tower.getDescription();
                     text += "\nComponent Path: " + componentPath;
@@ -1433,10 +1343,11 @@ public class GameScreen extends AbstractScreenEX {
                     if (materialPresent) {
                         text += "\nGemstone: " + tower.getSelectedMaterial().materialName;
                         text += "\n- "+tower.getSelectedMaterial().description;
-                    }
-                    Label label = new Label(text, Sprites.skin(), "small");
+                    }*/
+                    Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
                     label.setWrap(true);
-                    label.setFontScale(.25f);
+                    label.setFontScale(.2f);
+                    label.setSize(200, 200);
                     informationUpgradeWindow.add(label).grow().colspan(2).row();
 
                     if (materialPresent) {
@@ -2473,6 +2384,10 @@ public class GameScreen extends AbstractScreenEX {
         stack.add(label);
         stack.setSize(size, size);
         return stack;
+    }
+
+    public TeamInventory getTeamInventory() {
+        return inventory;
     }
 
 }

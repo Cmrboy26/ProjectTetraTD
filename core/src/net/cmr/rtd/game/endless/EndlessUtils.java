@@ -248,14 +248,14 @@ public class EndlessUtils {
                 continue;
             }
             if (tower instanceof FireTower) {
-                totalDPS += tower.getDisplayDamage();
+                totalDPS += tower.getDamage(false);
                 totalDPS += ((FireTower)tower).calculateApproximateFireballDPS(Math.min(10, previousRoundDensity));
                 continue;
             }
             if (tower.getAttackSpeed() == 0) {
                 continue;
             }
-            totalDPS += tower.getDisplayDamage() / tower.getAttackSpeed();
+            totalDPS += tower.getDamage(false) / tower.getAttackSpeed();
         }
         return totalDPS;
     }

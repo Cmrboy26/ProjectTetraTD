@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
@@ -36,13 +37,15 @@ public class ShooterTower extends TowerEntity {
     @Override
     public boolean attack(UpdateData data) {
         super.attack(data);
-        float damage = getDisplayDamage();
-        float range = getDisplayRange();
+        float damage = getDamage(true);
+        float range = getRange();
         ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data, getPreferedSortType());
         attacking = false;
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
+                Material.attackEnemy(enemy, this, data);
+                boolean piercing = Material.isPiercing(getSelectedMaterial());
                 ProjectileBuilder builder = new ProjectileBuilder()
                         .setEntity(enemy)
                         .setSprite(SpriteType.PROJECTILE)
@@ -51,7 +54,7 @@ public class ShooterTower extends TowerEntity {
                         .setDamage((int) damage)
                         .setTimeToReachTarget(getProjectileAirTime())
                         .setPrecision(1)
-                        .setAOE(0)
+                        .setAOE(piercing ? .25f : 0)
                         .setOnLaunchSound(GameSFX.SHOOT);
                 Projectile arrow = builder.build();
                 Projectile.launchProjectile(data, arrow);
@@ -68,11 +71,6 @@ public class ShooterTower extends TowerEntity {
     }
 
     @Override
-    public float getAttackSpeed() {
-        return Math.max((1 - ((getLevel() - 1) * .05f)) / getLubricantSpeedBoost(), 0.1f);
-    }
-
-    @Override
     protected void serializeTower(DataBuffer buffer) throws IOException {
 
     }
@@ -83,15 +81,20 @@ public class ShooterTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayDamage() {
-        float damage = calculateIncrementedValue(1, 1, 1);
-        damage *= damage * .5f;
-        return (float) Math.ceil(damage * getScrapMetalDamageBoost());
+    public float getAttackSpeed() {
+        return Math.max(((1 - ((getLevel() - 1) * .05f)) / getLubricantSpeedBoost()) / Material.getAttackSpeedModifier(getSelectedMaterial()), 0.1f);
     }
 
     @Override
-    public float getDisplayRange() {
-        return calculateIncrementedValue(3, .25f, 2f)*getScopeRangeBoost();
+    public float getDamage(boolean rollCritical) {
+        float damage = calculateIncrementedValue(1, 1, 1);
+        damage *= damage * .5f;
+        return (float) Math.ceil(damage * getScrapMetalDamageBoost() * Material.getDamageModifier(getSelectedMaterial(), rollCritical));
+    }
+
+    @Override
+    public float getRange() {
+        return calculateIncrementedValue(3, .25f, 2f)*getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial());
     }
 
     @Override
@@ -139,6 +142,11 @@ public class ShooterTower extends TowerEntity {
     public void onAttackClient(UpdateData data) {
         animationDelta = 0;
         attacking = true;
+    }
+
+    @Override
+    public Material[] getValidMaterials() {
+        return new Material[] { Material.DIAMONDS, Material.CRYONITE, Material.THORIUM, Material.RUBY, Material.QUARTZ, Material.TOPAZ };
     }
     
 }

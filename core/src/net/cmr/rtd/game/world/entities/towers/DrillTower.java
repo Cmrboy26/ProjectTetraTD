@@ -18,6 +18,7 @@ import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
+import net.cmr.util.StringUtils;
 
 public class DrillTower extends MiningTower {
 
@@ -100,6 +101,17 @@ public class DrillTower extends MiningTower {
     @Override
     public boolean validMiningTarget(TileType type) {
         return type == TileType.TITANIUM_VEIN || type == TileType.IRON_VEIN;
+    }
+
+    public String getTowerDescription() {
+        StringBuilder builder = new StringBuilder();
+
+        appendLine(builder, "Level " + getLevel());
+        appendLine(builder, "Mining Time: " + StringUtils.truncateFloatingPoint(getMiningTime(), 2) + "s");
+        appendLine(builder, "Collects: " + (under == TileType.TITANIUM_VEIN ? "Titanium" : "Steel"));
+        appendLine(builder, "Description: \n- " + getDescription());
+
+        return builder.toString();
     }
     
 }

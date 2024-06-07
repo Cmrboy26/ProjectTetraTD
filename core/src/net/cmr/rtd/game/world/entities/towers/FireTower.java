@@ -10,17 +10,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
 import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
 import net.cmr.rtd.game.world.entities.TowerEntity;
-import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
-import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
@@ -28,7 +27,6 @@ import net.cmr.util.Sprites.AnimationType;
 public class FireTower extends TowerEntity {
 
     float fireballDamage = 2;
-    float range = 2;
     float targetDPS = 1;
 
     boolean attacking = false;
@@ -46,9 +44,9 @@ public class FireTower extends TowerEntity {
     @Override
     public boolean attack(UpdateData data) {
         super.attack(data);
-        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data, getPreferedSortType());
+        ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(getRange(), data, getPreferedSortType());
         boolean launchedFireball = false;
-        if (fireballDelta < Math.max(2f, (6f - ((getLevel() - 1) * .5f)))) {
+        if (fireballDelta < (Math.max(2f, (6f - ((getLevel() - 1) * .5f)))/getLubricantSpeedBoost()) / Material.getAttackSpeedModifier(getSelectedMaterial())) {
             launchedFireball = true;
         } 
 
@@ -56,6 +54,7 @@ public class FireTower extends TowerEntity {
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
+                Material.attackEnemy(enemy, this, data);
                 int targetLevel = (int) Math.floor(targetDPS + ((getLevel() - 1) / 5f));
                 new FireEffect(data, enemy.getEffects(), getLevel(), targetLevel);
                 actionOccured = true;
@@ -82,7 +81,7 @@ public class FireTower extends TowerEntity {
                         .setAnimationSpeed(2f)
                         .setAreaSize(getFireballAOE())
                         .create());
-                    if (fireball.getVelocity().len() > (range + 1)*Tile.SIZE) {
+                    if (fireball.getVelocity().len() > (getRange() + 1)*Tile.SIZE) {
                         // dont launch it
                         continue;
                     }
@@ -104,6 +103,10 @@ public class FireTower extends TowerEntity {
         return .5f * getScopeRangeBoost();
     }
 
+    public int getFireballDamage(boolean rollCritical) {
+        return (int) (getLevel() * getLevel() * .75f * Material.getDamageModifier(getSelectedMaterial(), rollCritical));
+    }
+
     @Override
     protected void serializeTower(DataBuffer buffer) throws IOException {
         buffer.writeFloat(fireballDelta);
@@ -122,7 +125,7 @@ public class FireTower extends TowerEntity {
 
     public float calculateApproximateFireballDPS(float enemyDensity) {
         float damagePerFireball = getLevel() * getLevel();
-        float timeBetweenFireballs = Math.max(2f, (6f - ((getLevel() - 1) * .5f)))/getLubricantSpeedBoost();
+        float timeBetweenFireballs = (Math.max(2f, (6f - ((getLevel() - 1) * .5f)))/getLubricantSpeedBoost()) / Material.getAttackSpeedModifier(getSelectedMaterial());
         float fireballDPS = damagePerFireball / timeBetweenFireballs;
         float areaFactor = enemyDensity * getFireballAOE();
         return fireballDPS * areaFactor;
@@ -151,18 +154,23 @@ public class FireTower extends TowerEntity {
     }
 
     @Override
-    public float getDisplayRange() {
-        return (range + getLevel() / 6f)*getScopeRangeBoost();
+    public float getRange() {
+        return (2 + getLevel() / 6f)*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
     }
 
     @Override
-    public float getDisplayDamage() {
+    public float getDamage(boolean rollCritical) {
         return (targetDPS + (getLevel() - 1) * .5f)*getScrapMetalDamageBoost();
     }
 
     @Override
     public String getDescription() {
-        return "This tower sets enemies ablaze, dealing\ndamage over time. It also has a chance to launch\na fireball at enemies in range.";
+        return "This tower sets enemies ablaze, dealing damage over time. It also has a chance to launch a fireball at enemies in range.";
+    }
+
+    @Override
+    public Material[] getValidMaterials() {
+        return new Material[] { Material.THORIUM, Material.RUBY, Material.QUARTZ, Material.TOPAZ };
     }
     
 }

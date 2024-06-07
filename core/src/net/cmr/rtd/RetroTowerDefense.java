@@ -416,7 +416,7 @@ public class RetroTowerDefense extends CMRGame {
 		JSONParser parser = new JSONParser();
 		try {
 			JSONObject obj = (JSONObject) parser.parse(data);
-			int at = obj.get(saveFolder) == null ? 0 : (int) obj.get(saveFolder);
+			long at = obj.get(saveFolder) == null ? 0 : (Long) obj.get(saveFolder);
 			if (wave <= at) {
 				return;
 			}

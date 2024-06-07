@@ -3,6 +3,7 @@ package net.cmr.rtd.game.world.store;
 import java.util.function.Function;
 
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 
 public abstract class Cost implements Function<Integer, TeamInventory> {
 
@@ -23,14 +24,11 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
         canPurchase &= testInventory.getScraps() >= neededMaterials.getScraps();
         canPurchase &= testInventory.getWd40() >= neededMaterials.getWd40();
 
-        canPurchase &= testInventory.steel >= neededMaterials.steel;
-        canPurchase &= testInventory.titanium >= neededMaterials.titanium;
-        canPurchase &= testInventory.diamonds >= neededMaterials.diamonds;
-        canPurchase &= testInventory.cryonite >= neededMaterials.cryonite;
-        canPurchase &= testInventory.thorium >= neededMaterials.thorium;
-        canPurchase &= testInventory.ruby >= neededMaterials.ruby;
-        canPurchase &= testInventory.quartz >= neededMaterials.quartz;
-        canPurchase &= testInventory.topaz >= neededMaterials.topaz;
+        for (Material material : Material.values()) {
+            int needed = neededMaterials.getMaterial(material);
+            int current = testInventory.getMaterial(material);
+            canPurchase &= current >= needed;
+        }
 
         return canPurchase;
     }
@@ -45,14 +43,11 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
         inventory.removeScopes(neededMaterials.getScopes());
         inventory.removeScrapMetal(neededMaterials.getScraps());
         inventory.removeWd40(neededMaterials.getWd40());
-        inventory.steel -= neededMaterials.steel;
-        inventory.titanium -= neededMaterials.titanium;
-        inventory.diamonds -= neededMaterials.diamonds;
-        inventory.cryonite -= neededMaterials.cryonite;
-        inventory.thorium -= neededMaterials.thorium;
-        inventory.ruby -= neededMaterials.ruby;
-        inventory.quartz -= neededMaterials.quartz;
-        inventory.topaz -= neededMaterials.topaz;
+
+        for (Material material : Material.values()) {
+            int needed = neededMaterials.getMaterial(material);
+            inventory.removeMaterial(material, needed);
+        }
     }
 
     public static Cost money(Function<Integer, Long> costFunction) {
@@ -64,6 +59,18 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
                 return inventory;
             }
         };
+    }
+
+    public static Cost material(Material material, int count) {
+        return new Cost() {
+            @Override
+            public TeamInventory apply(Integer t) {
+                TeamInventory inventory = new TeamInventory();
+                inventory.setMaterial(material, count);
+                return inventory;
+            }
+        };
+    
     }
     
     public static Cost create(Function<Integer, TeamInventory> costFunction) {

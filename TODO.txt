@@ -15,7 +15,7 @@ ORDERED TODO LIST:
   - Quartz increases range of buildings
   - Topaz halves attack speed, but doubles range and damage
   - Thorium halves damage, but doubles attack speed and AOE
-  - Ruby inflicts flame debuffs on enemies
+  - Ruby has a chance to double the damage of towers (crit chance)
 - (Optionally) Create effect towers (similar to beacons in factorio)
   - Distributor that applies a fraction of a gemstone's power to towers in range
   - Magnetic Tower that increases the likelihood of an enemy dropping a component when killed within range

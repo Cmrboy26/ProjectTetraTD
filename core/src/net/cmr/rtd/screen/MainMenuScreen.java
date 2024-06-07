@@ -33,7 +33,7 @@ public class MainMenuScreen extends AbstractScreenEX {
     
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 0;
-	public static final int PATCHVERSION = 2;
+	public static final int PATCHVERSION = 3;
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);

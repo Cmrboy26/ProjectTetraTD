@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import com.badlogic.gdx.math.Vector2;
 
+import net.cmr.rtd.game.packets.ApplyMaterialPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
@@ -166,12 +167,21 @@ public class GamePlayer {
 
             player.setPosition(input.getPosition());
             player.updateInput(input.getInput(), input.isSprinting());
+            return;
         }
 
         if (packet instanceof PurchaseItemPacket) {
             // Purchase an item from the shop.
             PurchaseItemPacket purchase = (PurchaseItemPacket) packet;
             ShopManager.processPurchase(manager, this, purchase);
+            return;
+        }
+
+        if (packet instanceof ApplyMaterialPacket) {
+            // Apply a material to a tile.
+            ApplyMaterialPacket apply = (ApplyMaterialPacket) packet;
+            ShopManager.applyMaterial(apply.material, getManager(), getManager().getTeam(team).getInventory(), apply.x, apply.y, team);
+            return;
         }
 
         if (packet instanceof SortTypePacket) {
@@ -182,11 +192,13 @@ public class GamePlayer {
                 entity.setPreferedSortType(sort.type);
                 entity.updatePresenceOnClients(getManager());
             }
+            return;
         }
 
         if (packet instanceof SkipRequestPacket) {
             SkipRequestPacket request = (SkipRequestPacket) packet;
             getManager().getWorld().requestSkip(this);
+            return;
         }
 
         if (packet instanceof JumpPacket) {
@@ -194,6 +206,7 @@ public class GamePlayer {
             if (player != null) {
                 player.jump(manager.getUpdateData(), true);
             }
+            return;
         }
 
     }

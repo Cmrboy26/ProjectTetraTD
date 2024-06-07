@@ -21,6 +21,7 @@ public class PurchaseItemPacket extends Packet {
         APPLY_LUBRICANT(3),
         APPLY_SCOPE(4),
         APPLY_SCRAP_METAL(5),
+        APPLY_MATERIAL(6),
         ;
 
         private final int id;

@@ -38,7 +38,7 @@ public class DrillTower extends MiningTower {
     public void render(UpdateData data, Batch batch, float delta) {
         preRender(data, batch, delta);
 
-        if (getRemainingUpgradeTime() > 0) {
+        if (getRemainingUpgradeTime() <= 0) {
             animationDelta += delta;
         }
 

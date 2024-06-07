@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
+import net.cmr.rtd.game.storage.TeamInventory.MaterialType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
@@ -37,7 +39,7 @@ public class GemstoneExtractor extends MiningTower {
     public void render(UpdateData data, Batch batch, float delta) {
         preRender(data, batch, delta);
 
-        if (getRemainingUpgradeTime() > 0) {
+        if (getRemainingUpgradeTime() <= 0) {
             animationDelta += delta;
         }
 
@@ -71,39 +73,20 @@ public class GemstoneExtractor extends MiningTower {
 
     @Override
     public float getMiningTime() {
-        return (float) Math.max(40 - Math.sqrt((getLevel() - 1) * 15), 5);
+        return (float) Math.max(60 - Math.sqrt((getLevel() - 1) * 20), 5);
     }
 
     @Override
     public void onMiningComplete(UpdateData data) {
         TeamInventory inventory = getTeamInventory(data);
         TileType type = getTileBelow(data);
+        Material[] gemList = Material.getMaterialType(MaterialType.GEMSTONE);
         if (type == TileType.GEMSTONE_VEIN) {
             Random random = new Random();
-            int selection = random.nextInt(6);
+            int selection = random.nextInt(gemList.length);
             int amount = 1;
-            switch (selection) {
-                case 0:
-                    inventory.diamonds+=amount;
-                    break;
-                case 1:
-                    inventory.cryonite+=amount;
-                    break;
-                case 2:
-                    inventory.thorium+=amount;
-                    break;
-                case 3:
-                    inventory.ruby+=amount;
-                    break;
-                case 4:
-                    inventory.quartz+=amount;
-                    break;
-                case 5:
-                    inventory.topaz+=amount;
-                    break;
-                default:
-                    break;
-            }
+            Material gem = gemList[selection];
+            inventory.addMaterial(gem, amount);
         }
         updateInventoryOnClients(data);
     }

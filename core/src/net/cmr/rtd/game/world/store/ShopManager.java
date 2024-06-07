@@ -8,6 +8,8 @@ import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
+import net.cmr.rtd.game.storage.TeamInventory.MaterialType;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
@@ -19,6 +21,8 @@ import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -82,6 +86,9 @@ public class ShopManager {
         int y = packet.y;
         PurchaseAction action = packet.option;
         if (team == -1) { return; }
+
+        //player.getManager().getTeam(player.getTeam()).getInventory().setMaterial(Material.DIAMONDS, 1000);
+        //player.getManager().sendStatsUpdatePacket(player);
 
         TowerEntity towerAt = towerAt(manager, x, y);
         if (towerAt != null && towerAt.getTeam() != team) {
@@ -322,6 +329,37 @@ public class ShopManager {
         TileData tdata = world.getTileData(x, y, 1);
         //System.out.println("TileType: " + at + ", TileData: " + tdata);
         return at == TileType.WALL || tdata != null;
+    }
+
+    public static boolean canApplyMaterial(Material material, World world, TeamInventory testInventory, int x, int y, int team) {
+        if (testInventory == null || material == null) {
+            return false;
+        }
+        if (material.materialType == MaterialType.RESOURCE) {
+            return false;
+        }
+        TowerEntity at = towerAt(world, x, y);
+        if (at == null) {
+            return false;
+        }
+        if (at.getTeam() != team) {
+            return false;
+        }
+        if (!Cost.material(material, 1).canPurchase(testInventory)) {
+            return false;
+        }
+        return at.canApplyMaterial(material);
+    }
+
+    public static void applyMaterial(Material material, GameManager manager, TeamInventory inventory, int x, int y, int team) {
+        if (!canApplyMaterial(material, manager.getWorld(), inventory, x, y, team)) {
+            return;
+        }
+        TowerEntity at = towerAt(manager.getWorld(), x, y);
+        boolean appliedSuccessfully = at.applyMaterial(material);
+        System.out.println(appliedSuccessfully + " " + material.materialName);
+        inventory.removeMaterial(material, 1);
+        at.updatePresenceOnClients(manager);
     }
 
 }

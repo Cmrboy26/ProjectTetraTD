@@ -11,9 +11,11 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
+import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -41,12 +43,13 @@ public abstract class TowerEntity extends Entity {
 
     // TODO: Add other tower upgrades
     // NOTE: The player must select only ONE type of upgrade for the tower and must stick with that path.
-    static final int VERSION = 1;
+    static final int VERSION = 2;
     public static final int MAX_COMPONENTS = 4;
     protected int scrapsApplied = 0;
     protected int lubricantApplied = 0;
     protected int scopesApplied = 0;
     SortType preferedSortType = SortType.HIGHEST_HEALTH;
+    @Null Material selectedMaterial = null;
 
     public TowerEntity(GameType type, int team) {
         super(type);
@@ -101,6 +104,7 @@ public abstract class TowerEntity extends Entity {
         buffer.writeInt(lubricantApplied);
         buffer.writeInt(scopesApplied);
         buffer.writeInt(preferedSortType.getID());
+        buffer.writeInt(selectedMaterial == null ? -1 : selectedMaterial.id);
         serializeTower(buffer);
     }
 
@@ -119,6 +123,9 @@ public abstract class TowerEntity extends Entity {
         tower.scopesApplied = input.readInt();
         if (version >= 1) {
             tower.preferedSortType = SortType.fromID(input.readInt());
+        }
+        if (version >= 2) {
+            tower.selectedMaterial = Material.getMaterial(input.readInt());
         }
         deserializeTower(tower, input);
     }
@@ -567,6 +574,34 @@ public abstract class TowerEntity extends Entity {
 
     public boolean canEditSortType() {
         return true;
+    }
+
+    public boolean applyMaterial(Material material) {
+        if (canApplyMaterial(material)) {
+            selectedMaterial = material;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean canApplyMaterial(Material material) {
+        if (getValidMaterials() == null) {
+            return false;
+        }
+        for (Material mat : getValidMaterials()) {
+            if (mat == material) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public @Null Material getSelectedMaterial() {
+        return selectedMaterial;
+    }
+
+    public @Null Material[] getValidMaterials() {
+        return new Material[] {Material.CRYONITE, Material.DIAMONDS, Material.QUARTZ, Material.RUBY, Material.THORIUM, Material.TOPAZ};
     }
 
 }

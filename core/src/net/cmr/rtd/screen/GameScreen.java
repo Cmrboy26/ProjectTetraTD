@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -11,6 +12,7 @@ import javax.crypto.spec.IvParameterSpec;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,7 +24,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -55,6 +56,7 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
+import net.cmr.rtd.game.packets.ApplyMaterialPacket;
 import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
 import net.cmr.rtd.game.packets.EffectPacket;
@@ -77,6 +79,8 @@ import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
+import net.cmr.rtd.game.storage.TeamInventory.MaterialType;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.world.Entity;
@@ -136,7 +140,7 @@ public class GameScreen extends AbstractScreenEX {
     Entity entityToPlace;
     PlacementMode placementMode = PlacementMode.NONE;
     public enum PlacementMode {
-        NONE, PLACE, UPGRADE, COMPONENT
+        NONE, PLACE, UPGRADE, COMPONENT, GEMSTONE
     }
 
     ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
@@ -152,7 +156,8 @@ public class GameScreen extends AbstractScreenEX {
     int wave = 0;
     boolean areWavesPaused = false;
 
-    TeamInventory inventory = null;
+    boolean emptyInventory = true;
+    TeamInventory inventory = new TeamInventory();
     PurchaseAction componentAction = null;
 
     Joystick joystick;
@@ -497,8 +502,6 @@ public class GameScreen extends AbstractScreenEX {
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
         inventoryWindow.getTitleLabel().setAlignment(Align.center);
         inventoryWindow.padTop(30);
-        inventoryWindow.setSize(200, 200);
-        inventoryWindow.setPosition(320, 180, Align.center);
         inventoryWindow.setMovable(false);
         inventoryWindow.setVisible(false);
         
@@ -507,8 +510,59 @@ public class GameScreen extends AbstractScreenEX {
         int pad = 4;
         int imagePad = 0;
 
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).pad(imagePad).colspan(1);
-        TextButton lubricant = new TextButton("Lubricant x0", Sprites.skin(), "small") {
+        TextButtonStyle transparentBackground = new TextButtonStyle();
+        transparentBackground.font = Sprites.skin().get("small", LabelStyle.class).font;
+
+        float size = 40; 
+        int columns = 5;
+        
+        Label inventoryHelp = new Label("(Click and hover to view usage).", Sprites.skin(), "small");
+        inventoryTable.add(inventoryHelp).growX().pad(5).colspan(columns);
+        inventoryHelp.setFontScale(.35f);
+        inventoryHelp.setAlignment(Align.center);
+        inventoryTable.row();
+
+        String componentUsage = "- Can be applied to boost a tower's stats "+TowerEntity.MAX_COMPONENTS+" times.\n- Only one type of component can be applied to a tower at once.";
+        inventoryTable.add(getInventorySlot(SpriteType.LUBRICANT, inventory::getWd40, () -> {
+            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+            componentAction = PurchaseAction.APPLY_LUBRICANT;
+            enterComponentMode();
+        }, "Lubricant", componentUsage, size)).size(size);
+        inventoryTable.add(getInventorySlot(SpriteType.SCOPE, inventory::getScopes, () -> {
+            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+            componentAction = PurchaseAction.APPLY_SCOPE;
+            enterComponentMode();
+        }, "Scopes", componentUsage, size)).size(size);
+        inventoryTable.add(getInventorySlot(SpriteType.SCRAP, inventory::getScraps, () -> {
+            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+            componentAction = PurchaseAction.APPLY_SCRAP_METAL;
+            enterComponentMode();
+        }, "Scrap Metal", componentUsage, size)).size(size);
+        String resourceUsage = "- Resource to build and upgrade special towers.";
+        String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost on change.";
+
+        for (final Material material : Material.values()) {
+            inventoryTable.add(getInventorySlot(material.image, () -> inventory.getMaterial(material), () -> {
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                componentAction = PurchaseAction.APPLY_MATERIAL;
+                enterGemstoneMode(material);
+                //componentAction = PurchaseAction.APPLY_MATERIAL;
+                //enterComponentMode();
+            }, material.materialName, material.materialType == MaterialType.GEMSTONE ? gemstoneUsage : resourceUsage, size)).size(size);
+            // columns items per row
+            if ((inventoryTable.getCells().size - 1) % columns == 0) {
+                inventoryTable.row();
+            }
+        }
+
+        inventoryWindow.setSize(230, 200);
+        inventoryWindow.setOrigin(Align.center);
+        //inventoryWindow.setScale(.5f);
+        inventoryWindow.setPosition(320, 360/2, Align.center);
+
+
+        //inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).pad(imagePad).colspan(1);
+        /*TextButton lubricant = new TextButton("Lubricant x0", Sprites.skin(), "small") {
             @Override
             public void act(float delta) {
                 if (inventory == null) { return; }
@@ -569,6 +623,32 @@ public class GameScreen extends AbstractScreenEX {
         });
         inventoryTable.add(scraps).pad(pad).growX().colspan(1);
         inventoryTable.row();
+
+        for (Material material : Material.values()) {
+            inventoryTable.add(new Image(Sprites.drawable(material.image))).pad(imagePad).colspan(1);
+            TextButton materialButton = new TextButton(material.materialName+" x0", Sprites.skin(), "small") {
+                @Override
+                public void act(float delta) {
+                    if (inventory == null) { return; }
+                    setText(material.materialName+" x"+inventory.getMaterial(material)+"");
+                    super.act(delta);
+                }
+            };
+            materialButton.pad(0, pad, 0, pad);
+            materialButton.addListener(new ClickListener(Input.Buttons.LEFT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                    //componentAction = PurchaseAction.APPLY_MATERIAL;
+                    //enterComponentMode();
+                }
+            });
+            inventoryTable.add(materialButton).pad(pad).growX().colspan(1);
+            inventoryTable.row();
+        }
+        inventoryTable.layout();
+        inventoryTable.pack();
+        inventoryWindow.layout();*/
 
         ImageButtonStyle waveButtonStyles = new ImageButtonStyle();
         waveButtonStyles.down = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DOWN), patch, patch, patch, patch));
@@ -873,6 +953,7 @@ public class GameScreen extends AbstractScreenEX {
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
 
             inventory = statsPacket.getInventory();
+            emptyInventory = false;
             return;
         }
 
@@ -1087,7 +1168,7 @@ public class GameScreen extends AbstractScreenEX {
             waveLabel.setText(waveText);
         }
         
-        if (inventory != null) {
+        if (inventory != null && !emptyInventory) {
 
             int scopes = inventory.getScopes();
             int wd40 = inventory.getWd40();
@@ -1240,11 +1321,13 @@ public class GameScreen extends AbstractScreenEX {
         
         if (inPlacementMode()) {
             updatePlacementMode(tileX, tileY);
-            String action = placementMode == PlacementMode.UPGRADE ? "upgrade tower" : "place tower";
+            String action = placementMode == PlacementMode.UPGRADE ? "upgrade tower" : (placementMode == PlacementMode.PLACE ? "place tower" : "set gemstone");
             if (placementMode == PlacementMode.COMPONENT) {
                 action = "insert component";
             }
-            setTitleText("Click to " + (action) +"\n(Press ESC to cancel)");
+            if (placementMode != null) {
+                setTitleText("Click to " + (action) +"\n(Press ESC to cancel)");
+            }
         } else {
             setTitleText("");
             if (Gdx.input.isKeyPressed(Input.Keys.R)) {
@@ -1308,6 +1391,8 @@ public class GameScreen extends AbstractScreenEX {
                         removeInfoWindow();
                     }
                     TowerEntity.displayRange(tower);
+                    boolean materialPresent = tower.getSelectedMaterial() != null;
+
                     informationUpgradeWindow = new Window(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
                         @Override
                         public void act(float delta) {
@@ -1345,26 +1430,20 @@ public class GameScreen extends AbstractScreenEX {
                         text += "\n- Progress: "+tower.getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS;
                         text += "\n- Bonuses: "+benefits;
                     }
+                    if (materialPresent) {
+                        text += "\nGemstone: " + tower.getSelectedMaterial().materialName;
+                        text += "\n- "+tower.getSelectedMaterial().description;
+                    }
                     Label label = new Label(text, Sprites.skin(), "small");
                     label.setWrap(true);
                     label.setFontScale(.25f);
                     informationUpgradeWindow.add(label).grow().colspan(2).row();
 
-                    /*TextButton modifyTargetMethodButton = new TextButton("Targeting", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                    modifyTargetMethodButton.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                            Audio.getInstance().playSFX(GameSFX.SCARY_WARNING, 1f);
-                            removeInfoWindow();
-                            //targetingDialog(tower);
-                            // TODO: Implement targeting dialog
-                        }
-                    });
-                    informationUpgradeWindow.add(modifyTargetMethodButton).pad(3f).growX();*/
-
-                    //Label targetMethodLabel = new Label("Targeting: ", Sprites.skin(), "small");
-                    //informationUpgradeWindow.add(targetMethodLabel).pad(3f).growX().colspan(2).row();
+                    if (materialPresent) {
+                        Image materialImage = new Image(Sprites.drawable(tower.getSelectedMaterial().image));
+                        materialImage.setSize(24, 24);
+                        informationUpgradeWindow.add(materialImage).size(24).colspan(1).expand(0, 0);
+                    }
 
                     int buttonHeight = 20;
                     float pad = 3;
@@ -1435,7 +1514,7 @@ public class GameScreen extends AbstractScreenEX {
                             } 
                         });
 
-                        informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(2).growX().row();
+                        informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(1 + (materialPresent ? 0 : 1)).growX().row();
                     }
 
                     TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin(), "small");
@@ -1547,8 +1626,10 @@ public class GameScreen extends AbstractScreenEX {
                 Point mouseTile = getMouseTileCoordinate();
                 batch.setColor(1, 1, 1, .5f);
                 if (placementMode == PlacementMode.PLACE) {
-                    entityToPlace.setPosition((mouseTile.x + .5f) * Tile.SIZE, (mouseTile.y + .5f) * Tile.SIZE);
-                    entityToPlace.render(data, batch, delta);
+                    if (entityToPlace != null) {
+                        entityToPlace.setPosition((mouseTile.x + .5f) * Tile.SIZE, (mouseTile.y + .5f) * Tile.SIZE);
+                        entityToPlace.render(data, batch, delta);
+                    }
                 } else if (placementMode == PlacementMode.UPGRADE) {
 
                 }
@@ -1723,7 +1804,7 @@ public class GameScreen extends AbstractScreenEX {
         table.add(towerImage).padRight(sidepad).padLeft(sidepad).width(targetWidth).height(targetHeight).colspan(1).left();
         VerticalGroup group = new VerticalGroup();
         group.addActor(towerName);
-        group.addActor(getInventoryDisplay(cost.apply(0), false, 3));
+        group.addActor(getInventoryDisplay(cost.apply(0), false, 3, true));
         table.add(group).expandX().colspan(1);
         TextButton buyButton = new TextButton("Buy", Sprites.skin(), "small");
         buyButton.addListener(new ClickListener() {
@@ -1772,6 +1853,18 @@ public class GameScreen extends AbstractScreenEX {
         shopButton.setDisabled(true);
         inventoryButton.setDisabled(true);
         inventoryButton.setChecked(false);
+        upgradeButton.setDisabled(true);
+        shopWindow.setVisible(false);
+        inventoryWindow.setVisible(false);
+    }
+
+    Material gemstoneMaterial;
+
+    public void enterGemstoneMode(Material material) {
+        gemstoneMaterial = material;
+        placementMode = PlacementMode.GEMSTONE;
+        shopButton.setDisabled(true);
+        inventoryButton.setDisabled(true);
         upgradeButton.setDisabled(true);
         shopWindow.setVisible(false);
         inventoryWindow.setVisible(false);
@@ -2034,6 +2127,32 @@ public class GameScreen extends AbstractScreenEX {
                 
                 //dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
                 //worldStage.addActor(dialog);
+            } else if (placementMode == PlacementMode.GEMSTONE) {
+                TowerEntity towerAt = ShopManager.towerAt(world, tileX, tileY, team);
+                if (towerAt == null) {
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+                if (!towerAt.canApplyMaterial(gemstoneMaterial)) {
+                    notification(SpriteType.STRUCTURE, "Cannot apply this material\non this structure!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+                if (!Cost.material(gemstoneMaterial, 1).canPurchase(inventory)) {
+                    notification(SpriteType.CASH, "Not enough resources!");
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    if (!multiPlace || isMobile()) {
+                        exitPlacementMode();
+                    }
+                    return;
+                }
+                inventoryButton.setChecked(false);
+                gemstoneDialog(towerAt, gemstoneMaterial);
             }
         
             if (!multiPlace || isMobile()) {
@@ -2048,7 +2167,7 @@ public class GameScreen extends AbstractScreenEX {
         int tileY = Entity.getTileY(towerAt.getY());
         long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel()).getCash();
         if (multiplace) {
-            GameScreen.this.upgrade(towerAt.type, tileX, tileY);
+            GameScreen.this.upgrade(towerAt, tileX, tileY);
             return;
         }
 
@@ -2065,7 +2184,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
                 }
-                GameScreen.this.upgrade(towerAt.type, tileX, tileY);
+                GameScreen.this.upgrade(towerAt, tileX, tileY);
             }
         };
         dialog.getTitleLabel().setAlignment(Align.center);
@@ -2086,7 +2205,7 @@ public class GameScreen extends AbstractScreenEX {
         label.setAlignment(Align.center);
         label.setFontScale(.45f);
         dialog.text(label);
-        Table costTable = getInventoryDisplay(option.cost.apply(towerAt.getLevel()), false, 3);
+        Table costTable = getInventoryDisplay(option.cost.apply(towerAt.getLevel()), false, 3, false);
         dialog.getContentTable().row();
         dialog.getContentTable().add(costTable).center().grow().colspan(1).row();
         dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
@@ -2097,14 +2216,15 @@ public class GameScreen extends AbstractScreenEX {
         informationUpgradeWindow = dialog;
     }
 
-    private void upgrade(GameType typeToPurchase, int tileX, int tileY) {
-        TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
+    private void upgrade(TowerEntity entity, int tileX, int tileY) {
+        TowerOption option = ShopManager.towerCatalog.get(entity.type);
+        UpgradeOption upgradeOption = ShopManager.getUpgradeCatalog().get(entity.type);
         if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
             notification(SpriteType.STRUCTURE, "Cannot place here!");
             return;
         } else if (option != null) {
-            if (inventory.getCash() < option.cost.apply(0).getCash()) {
-                notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost.apply(0).getCash()).substring(1)+")");
+            if (inventory.getCash() < upgradeOption.cost.apply(entity.getLevel()).getCash()) {
+                notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(upgradeOption.cost.apply(entity.getLevel()).getCash()).substring(1)+")");
                 return;
             } else if (!option.cost.canPurchase(inventory)) {
                 notification(SpriteType.CASH, "Not enough resources!");
@@ -2116,6 +2236,85 @@ public class GameScreen extends AbstractScreenEX {
         ioStream.sendPacket(packet);
         Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1);
         informationUpgradeWindow = null;   
+    }
+    
+    public void gemstoneDialog(TowerEntity entityAt, Material material) {
+        int tileX = Entity.getTileX(entityAt.getX());
+        int tileY = Entity.getTileY(entityAt.getY());
+        
+        if (informationUpgradeWindow != null) {
+            informationUpgradeWindow.remove();
+            informationUpgradeWindow = null;
+        }
+        
+        Dialog dialog = new Dialog("Apply "+material.materialName+"?", Sprites.skin(), "small") {
+            @Override
+            protected void result(Object object) {
+                if (informationUpgradeWindow != null) {
+                    informationUpgradeWindow.remove();
+                    informationUpgradeWindow = null;
+                }
+                if (!ShopManager.canApplyMaterial(material, world, inventory, tileX, tileY, team)) {
+                    notification(SpriteType.CASH, "Can't apply the gemstone!\nTry again in a second!");
+                    Audio.getInstance().playSFX(GameSFX.WARNING, 1);
+                    return;
+                }
+
+                if (object.equals(false)) {
+                    Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
+                    return;
+                }
+                ApplyMaterialPacket packet = new ApplyMaterialPacket(tileX, tileY, material);
+                ioStream.sendPacket(packet);
+                // Play sound
+                Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
+                // Display completed particle
+                SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+                    .setParticle(AnimationType.SPARKLE)
+                    .setDuration(1.5f)
+                    .setEmissionRate(19)
+                    .setScale(.225f)
+                    .setParticleLife(.8f)
+                    .setAnimationSpeed(1.5f)
+                    .setAreaSize(1.2f)
+                    .create();
+                effect.setPosition(new Vector2(entityAt.getX(), entityAt.getY()));
+                data.getScreen().addEffect(effect);
+            }
+        };
+
+        dialog.getTitleLabel().setAlignment(Align.center);
+        dialog.getTitleLabel().setFontScale(.5f);
+        dialog.pad(Tile.SIZE/2f);
+        dialog.padTop(Tile.SIZE);
+        dialog.setSize(Tile.SIZE*4f, Tile.SIZE*2f);
+        dialog.setMovable(false);
+        dialog.setVisible(true);
+        dialog.setKeepWithinStage(false);
+        if (entityAt.getSelectedMaterial() != null) {
+            Label label = new Label("Will delete\nexisting gem!", Sprites.skin(), "small");
+            label.setAlignment(Align.center);
+            label.setFontScale(.4f);
+            dialog.getContentTable().add(label).row();
+        }
+
+        /*Label label = new Label("Apply "+material.materialName+"?", Sprites.skin(), "small");
+        label.setFontScale(.4f);
+        dialog.text(label);*/
+        Table costTable = getInventoryDisplay(new TeamInventory(), false, 3, false);
+        dialog.getContentTable().row();
+        dialog.getContentTable().add(costTable).center().grow().colspan(1).row();
+        TextButton yes = new TextButton("Yes", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        yes.pad(0, 5, 0, 5);
+        dialog.button(yes, true);
+        TextButton no = new TextButton("No", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+        no.pad(0, 5, 0, 5);
+        dialog.button(no, false);
+        dialog.pack();
+        dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
+        worldStage.addActor(dialog);
+
+        informationUpgradeWindow = dialog;
     }
 
     public void setTitleText(String string) {
@@ -2191,31 +2390,39 @@ public class GameScreen extends AbstractScreenEX {
     int tempColumns = 0;
     int targetColumns = 0;
 
-    public Table getInventoryDisplay(TeamInventory displayInventory, boolean displayAll, int columns) {
+    public Table getInventoryDisplay(TeamInventory displayInventory, boolean displayAll, int columns, boolean includeTooltips) {
         Table table = new Table();
         tempColumns = 0;
         targetColumns = columns;
-        if (displayAll || displayInventory.cash > 0) addInventorySection(SpriteType.CASH, displayInventory.cash, table);
-        if (displayAll || displayInventory.scopes > 0) addInventorySection(SpriteType.SCOPE, displayInventory.scopes, table);
-        if (displayAll || displayInventory.wd40 > 0) addInventorySection(SpriteType.LUBRICANT, displayInventory.wd40, table);
-        if (displayAll || displayInventory.scrapMetal > 0) addInventorySection(SpriteType.SCRAP, displayInventory.scrapMetal, table);
+        if (displayAll || displayInventory.cash > 0) addInventorySection("", SpriteType.CASH, displayInventory.cash, table, includeTooltips);
+        if (displayAll || displayInventory.scopes > 0) addInventorySection(" scopes", SpriteType.SCOPE, displayInventory.scopes, table, includeTooltips);
+        if (displayAll || displayInventory.wd40 > 0) addInventorySection(" lubricant", SpriteType.LUBRICANT, displayInventory.wd40, table, includeTooltips);
+        if (displayAll || displayInventory.scrapMetal > 0) addInventorySection(" scrap metal", SpriteType.SCRAP, displayInventory.scrapMetal, table, includeTooltips);
 
-        if (displayAll || displayInventory.steel > 0) addInventorySection(SpriteType.STEEL, displayInventory.steel, table);
-        if (displayAll || displayInventory.titanium > 0) addInventorySection(SpriteType.TITANIUM, displayInventory.titanium, table);
+        /*if (displayAll || displayInventory.steel > 0) addInventorySection(" steel", SpriteType.STEEL, displayInventory.steel, table, includeTooltips);
+        if (displayAll || displayInventory.titanium > 0) addInventorySection(" titanium", SpriteType.TITANIUM, displayInventory.titanium, table, includeTooltips);*/
+        for (Material material : Material.values()) {
+            if (displayAll || displayInventory.getMaterial(material) > 0) {
+                addInventorySection(" "+material.materialName.toLowerCase(), material.image, displayInventory.getMaterial(material), table, includeTooltips);
+            }
+        }
 
         table.padTop(0);
         table.padBottom(0);
         return table;
     }
 
-    private void addInventorySection(SpriteType type, long amount, Table table) {
+    private void addInventorySection(String name, SpriteType type, long amount, Table table, boolean includeTooltips) {
+
         Image image = new Image(Sprites.drawable(type));
+
         image.setSize(16, 16);
         table.add(image).width(16).height(16).pad(1);
         String prefix = "x";
         if (type == SpriteType.CASH) {
             prefix = "";
         }
+        
         Label label = new Label(prefix+ShopManager.costToString(amount).substring(1), Sprites.skin(), "small");
         label.setFontScale(.4f);
         table.add(label).pad(1).center();
@@ -2224,7 +2431,48 @@ public class GameScreen extends AbstractScreenEX {
             table.row();
             tempColumns = 0;
         }
-        //table.row();
+
+        TextTooltip tooltip = new TextTooltip((prefix.isEmpty() ? "$" : prefix)+ShopManager.costToString(amount).substring(1) + name, Sprites.skin(), "small");
+        tooltip.getContainer().pad(5);
+        tooltip.setInstant(true);
+        label.addListener(tooltip);
+        image.addListener(tooltip);
+    }
+
+    private Stack getInventorySlot(SpriteType type, final Supplier<Integer> amount, Runnable onClick, String name, String usage, float size) {
+        Stack stack = new Stack();
+        Image image = new Image(Sprites.drawable(type));
+        image.setFillParent(true);
+        image.setSize(size, size);
+        stack.add(image);
+        TextButtonStyle style = new TextButtonStyle();
+        style.font = Sprites.skin().get("small", TextButtonStyle.class).font;
+        
+        TextButton label = new TextButton(ShopManager.costToString(amount.get()).substring(1), style) {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                setText(ShopManager.costToString(amount.get()).substring(1));
+                super.draw(batch, parentAlpha);
+            }
+        };
+        label.getLabel().setFontScale(.35f);
+        label.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                onClick.run();
+            }
+        });
+        TextTooltip tooltip = new TextTooltip(name+"\n"+usage, Sprites.skin(), "small");
+        tooltip.getManager().animations = false;
+        tooltip.getContainer().pad(5);
+        tooltip.getActor().setFontScale(.4f);
+        tooltip.setInstant(true);
+        label.addListener(tooltip);
+        label.setFillParent(true);
+        label.setSize(size, size);
+        stack.add(label);
+        stack.setSize(size, size);
+        return stack;
     }
 
 }

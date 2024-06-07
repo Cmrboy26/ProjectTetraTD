@@ -13,6 +13,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
+import net.cmr.rtd.game.packets.ApplyMaterialPacket;
 import net.cmr.rtd.game.packets.AttackPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
@@ -37,6 +38,7 @@ import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
@@ -178,6 +180,21 @@ public class OnlineGameStream extends GameStream {
 
         kryo.register(GameOverPacket.class);
         kryo.register(GameResetPacket.class);
+        kryo.register(ApplyMaterialPacket.class);
+        kryo.register(Material.class, new Serializer<Material>(true) {
+            @Override
+            public void write(Kryo kryo, Output output, Material object) {
+                if (object == null) {
+                    output.writeInt(-1);
+                    return;
+                }
+                output.writeInt(object.id);
+            }
+            @Override
+            public Material read(Kryo kryo, Input input, Class<? extends Material> type) {
+                return Material.getMaterial(input.readInt());
+            }
+        });
     }
     
 }

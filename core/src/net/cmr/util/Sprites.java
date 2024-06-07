@@ -70,6 +70,13 @@ public class Sprites implements Disposable {
         SCRAP("scrap"),
         TITANIUM("titanium"),
         STEEL("steel"),
+        DIAMOND("diamond"),
+        CRYONITE("cryonite"),
+        THORIUM("thorium"),
+        RUBY("ruby"),
+        QUARTZ("quartz"),
+        TOPAZ("topaz"),
+        SMALL_CASH("smallCash"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),

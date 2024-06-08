@@ -239,6 +239,9 @@ public class SelectionScreen extends AbstractScreenEX {
         resume.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (resume.isDisabled()) {
+                    return;
+                }
                 showPlayTypeDialog((Boolean online) -> {
                     Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
                         @Override

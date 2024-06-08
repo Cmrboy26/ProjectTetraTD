@@ -19,14 +19,19 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
         TeamInventory neededMaterials = apply(level);
         boolean canPurchase = true;
         canPurchase &= testInventory.getCash() >= neededMaterials.getCash();
+        System.out.println(testInventory.getCash()+" >= "+neededMaterials.getCash() + " = " + (testInventory.getCash() >= neededMaterials.getCash()));
 
         canPurchase &= testInventory.getScopes() >= neededMaterials.getScopes();
+        //System.out.println(testInventory.getScopes()+" >= "+neededMaterials.getScopes() + " = " + (testInventory.getScopes() >= neededMaterials.getScopes()));
         canPurchase &= testInventory.getScraps() >= neededMaterials.getScraps();
+        //System.out.println(testInventory.getScraps()+" >= "+neededMaterials.getScraps() + " = " + (testInventory.getScraps() >= neededMaterials.getScraps()));
         canPurchase &= testInventory.getWd40() >= neededMaterials.getWd40();
+        //System.out.println(testInventory.getWd40()+" >= "+neededMaterials.getWd40() + " = " + (testInventory.getWd40() >= neededMaterials.getWd40()));
 
         for (Material material : Material.values()) {
             int needed = neededMaterials.getMaterial(material);
             int current = testInventory.getMaterial(material);
+            //System.out.println(current+" >= "+needed + " = " + (current >= needed));
             canPurchase &= current >= needed;
         }
 

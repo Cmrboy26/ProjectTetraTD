@@ -57,7 +57,6 @@ public class EndlessUtils {
     transient float previousRoundDensity = 1; // enemies / tile. used for calculating approximateDPS with fire towers
 
     public void generateWaveUnits(Wave wave, GameManager gameManager) {
-        // TODO: When there are no teams, the game makes targetDPS NAN. FIX THIS!!
         ArrayList<TeamData> teamData = new ArrayList<>();
         for (TeamData team : gameManager.getTeams()) {
             if (team.getHealth() > 0 && gameManager.doesTeamHavePlayers(team.team)) {

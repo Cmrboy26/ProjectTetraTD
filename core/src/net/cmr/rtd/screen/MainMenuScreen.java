@@ -6,6 +6,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -26,6 +27,7 @@ import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -34,6 +36,9 @@ public class MainMenuScreen extends AbstractScreenEX {
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 0;
 	public static final int PATCHVERSION = 3;
+
+	Dialog creditsDialog;
+	boolean easterEggRunning = false;
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
@@ -50,6 +55,53 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).padRight(iconPadding);
 
 		Label label = new Label("Retro Tower Defense", Sprites.skin(), "default");
+		label.setOrigin(Align.bottom);
+		label.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				float sizeBeforeX = label.getFontScaleX();
+				float sizeBeforeY = label.getFontScaleY();
+				float scaleX = 0.25f;
+				float scaleY = 1f;
+				if (easterEggRunning) return;
+				easterEggRunning = true;
+				Audio.getInstance().playSFX(GameSFX.FIREBALL_LAUNCH, 1f);
+				Action action = Actions.sequence(
+					new Action() {
+						float elapsedTime = 0;
+						float time = .15f / 2;
+						@Override
+						public boolean act(float delta) {
+							elapsedTime += delta;
+							label.setFontScaleX(label.getFontScaleX() + delta * scaleX / time);
+							label.setFontScaleY(label.getFontScaleY() + delta * scaleY / time);
+							return elapsedTime > time;
+						}
+					},
+					new Action() {
+						float elapsedTime = 0;
+						float time = .2f;
+						@Override
+						public boolean act(float delta) {
+							elapsedTime += delta;
+							label.setFontScaleX(label.getFontScaleX() - delta * scaleX / time);
+							label.setFontScaleY(label.getFontScaleY() - delta * scaleY / time);
+							return elapsedTime > time;
+						}
+					},
+					new Action() {
+						@Override
+						public boolean act(float delta) {
+							label.setFontScaleX(sizeBeforeX);
+							label.setFontScaleY(sizeBeforeY);
+							easterEggRunning = false;
+							return true;
+						}
+					}
+				);
+				label.addAction(action);
+			}
+		});
 		label.setAlignment(Align.center);
 		Interpolation interpolation = Interpolation.smooth;
 		float duration = 2.0f;
@@ -140,7 +192,11 @@ public class MainMenuScreen extends AbstractScreenEX {
 
 				LabelStyle small = Sprites.skin().get("small", LabelStyle.class);
 
-				Dialog creditsDialog = new Dialog("Credits", Sprites.skin());
+				if (creditsDialog != null) {
+					creditsDialog.remove();
+					creditsDialog = null;
+				}
+				creditsDialog = new Dialog("Credits", Sprites.skin());
 				creditsDialog.setKeepWithinStage(false);
 				creditsDialog.pad(20);
 				creditsDialog.padTop(50);

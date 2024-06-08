@@ -131,6 +131,7 @@ public class TeamData {
     
         float random = (float) Math.random();
         float chance = 1f / totalEnemies;
+        
         float desiredWavesPerDrop = wavesData.wavesPerComponentTarget;
         float threshold = chance / desiredWavesPerDrop;
 

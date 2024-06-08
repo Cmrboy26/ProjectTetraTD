@@ -566,7 +566,7 @@ public abstract class TowerEntity extends Entity {
         return Math.max(1, 1 + lubricantApplied * .1f);
     }
     public float getScopeRangeBoost() {
-        return Math.max(1, 1 + scopesApplied * .25f);
+        return Math.max(1, 1 + scopesApplied * .20f);
     }
 
     public boolean canApplyComponentScrapMetal() { return true; }

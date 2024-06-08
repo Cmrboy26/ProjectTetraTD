@@ -1,6 +1,6 @@
 {
 	"platform": "windows64",
-	"jdk": "C:/Program Files/Java/jdk-17.0.1",
+	"jdk": "C:/Program Files/Java/jdk-17",
 	"executable": "rtd",
 	"classpath": ["desktop/build/libs/desktop-1.0.jar"],
 	"removelibs": ["desktop/build/libs/desktop-1.0.jar"],
@@ -10,5 +10,5 @@
 	],
     "minimizejre": "soft",
 	"verbose": "true",
-	"output": "../RTDGame"
+	"output": "../RTDExported"
 }

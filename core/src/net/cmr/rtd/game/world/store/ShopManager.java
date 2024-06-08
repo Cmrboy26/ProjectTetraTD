@@ -40,11 +40,11 @@ public class ShopManager {
         registerTower(new TowerOption(0, GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, Cost.money(level -> 35L), "Shooter Tower", "Shoots pellets at enemies."));
         registerTower(new TowerOption(1, GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, Cost.money(level -> 70L), "Fire Tower", "Sets enemies on fire and\nshoots piercing fireballs."));
         registerTower(new TowerOption(2, GameType.ICE_TOWER, SpriteType.ICE_TOWER, Cost.money(level -> 40L), "Ice Tower", "Slows enemies."));
-        registerTower(new TowerOption(3, GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, Cost.money(level -> 50L), "Drill Tower", "Mines resources from ore veins."));
+        registerTower(new TowerOption(3, GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, Cost.money(level -> 90L), "Drill Tower", "Mines resources from ore veins."));
         registerTower(new TowerOption(4, GameType.GEMSTONE_EXTRACTOR, SpriteType.GEMSTONE_EXTRACTOR_ONE, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
             inventory.setCash(100L);
-            inventory.steel = 3;
+            inventory.steel = 5;
             return inventory;
         }), "Gemstone Extractor", "Extracts various gems from gem veins."));
 
@@ -60,8 +60,8 @@ public class ShopManager {
         registerUpgrade(new UpgradeOption(GameType.DRILL_TOWER, Cost.money(level -> level * level * 50L),                      level -> 10f + level * 2));
         registerUpgrade(new UpgradeOption(GameType.GEMSTONE_EXTRACTOR, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
-            inventory.setCash(level * level * 60L);
-            inventory.steel = level;
+            inventory.setCash(level * level * 150L);
+            inventory.steel = level + 2;
             return inventory;
         }), level -> 10f + level * 2));
     }
@@ -357,7 +357,6 @@ public class ShopManager {
         }
         TowerEntity at = towerAt(manager.getWorld(), x, y);
         boolean appliedSuccessfully = at.applyMaterial(material);
-        System.out.println(appliedSuccessfully + " " + material.materialName);
         inventory.removeMaterial(material, 1);
         at.updatePresenceOnClients(manager);
     }

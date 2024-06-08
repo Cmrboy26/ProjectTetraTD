@@ -1,3 +1,6 @@
+SCRAP ISNT UPDATED IN INVENTORY
+DONT ALLOW PEOPLE TO PRESS THE UPGRADE BUTTON WHEN THE TOWER IS UPGRADING
+
 ORDERED TODO LIST:
 ✓ Create a "Game Over" screen for multiplayer and singleplayer modes (don't further support players playing past the game's end)
   ✓ Implement a score system as well
@@ -62,3 +65,24 @@ IDEAS:
   -   Diamond=piercing bullets for shooter towers
   -   Ruby=sets every other enemy on fire
   -   Sapphire?=halves attack speed, doubles range and doubles damage
+
+Diamonds
+- Piercing (AOE)
+Cryonite
+- Freeze on hit
+- Chance to stun
+Thorium
+- +125% speed
+- -50% damage
+- -50% range
+Ruby
+- 20% crit chance
+- +100% crit damage
+Quartz
+- +100% range
+- +25% speed
+Topaz
+- -50% speed
+- +100% damage
+- +50% crit damage
+- 10% crit chance

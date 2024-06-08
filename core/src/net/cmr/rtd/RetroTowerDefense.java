@@ -13,6 +13,7 @@ import org.json.simple.parser.ParseException;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
@@ -68,23 +69,33 @@ public class RetroTowerDefense extends CMRGame {
 
 		FileHandle levelsFolder = gameDataFolder.child("levels/");
 		levelsFolder.mkdirs();
-		
+
+		Log.debug("Copying story levels to external folder...");
 		// Create story level folders from the assets
-		FileHandle storyLevelsHandle = Gdx.files.internal("storylevels/");
-		if (!storyLevelsHandle.exists()) {
-			storyLevelsHandle = Gdx.files.internal("assets/storylevels/");
-			return;
+		FileHandle storyLevelsHandle = Gdx.files.local("storylevels/");
+		boolean storyLevelsHandleExists = storyLevelsHandle.exists();
+		Log.debug("Story levels handle exists: " + storyLevelsHandleExists);
+		Log.debug("Local directory available: " + Gdx.files.isLocalStorageAvailable());
+		Log.debug("External directory available: " + Gdx.files.isExternalStorageAvailable());
+		if (!storyLevelsHandleExists) {
+			Log.debug("Handle not found, attempting to copy assets from \""+storyLevelsHandle.path()+"\" to \""+levelsFolder.path()+"\"...");
+			storyLevelsHandle = Gdx.files.local("assets/storylevels/");
 		}
+
+		Log.debug("Story level files: " + storyLevelsHandle.list().length);
 		for (FileHandle level : storyLevelsHandle.list()) {
 			// level is the folder containing the level data (waves folder, world.dat) in the assets folder
 			FileHandle internal = storyLevelsHandle.child(level.name());
 			FileHandle external = levelsFolder;
 			FileHandle externalLevelFolder = external.child(level.name());
+			Log.debug("Copying level \""+level.name()+"\" to external folder...");
 			if (externalLevelFolder.isDirectory() && externalLevelFolder.exists()) {
 				// Delete the directory so outdated story mode levels and waves are removed
+				Log.debug("Deleting outdated directory \""+externalLevelFolder.path()+"\"...");
 				externalLevelFolder.deleteDirectory();
 			}
 			internal.copyTo(external);
+			Log.debug("Copied level \""+level.name()+"\" to external folder.");
 		}
 		FileHandle editorFolder = gameDataFolder.child("editor/");
 		editorFolder.mkdirs();

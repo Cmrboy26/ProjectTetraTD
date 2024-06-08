@@ -543,11 +543,11 @@ public class GameScreen extends AbstractScreenEX {
 
         for (final Material material : Material.values()) {
             inventoryTable.add(getInventorySlot(material.image, () -> inventory.getMaterial(material), () -> {
-                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                componentAction = PurchaseAction.APPLY_MATERIAL;
-                enterGemstoneMode(material);
-                //componentAction = PurchaseAction.APPLY_MATERIAL;
-                //enterComponentMode();
+                if (material.materialType == MaterialType.GEMSTONE) {
+                    Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                    componentAction = PurchaseAction.APPLY_MATERIAL;
+                    enterGemstoneMode(material);
+                }
             }, material.materialName, material.materialType == MaterialType.GEMSTONE ? gemstoneUsage : resourceUsage, size)).size(size);
             // columns items per row
             if ((inventoryTable.getCells().size - 1) % columns == 0) {
@@ -1040,6 +1040,7 @@ public class GameScreen extends AbstractScreenEX {
                 gameOverDialog.button(close, null);
                 gameOverDialog.key(Input.Keys.ESCAPE, null);
             }
+            gameOverDialog.key(Input.Keys.ESCAPE, null);
 
             gameOverDialog.show(stages.get(Align.center));
             // If game over packet is received and player is still alive, they have won the game
@@ -1318,32 +1319,7 @@ public class GameScreen extends AbstractScreenEX {
                     informationUpgradeWindow.setMovable(true);
                     informationUpgradeWindow.setVisible(true);
                     informationUpgradeWindow.setResizable(true);
-                    /*String componentPath = "None";
-                    String benefits = "None";
-                    if (tower.getLubricantApplied() > 0) {
-                        componentPath = "Lubricant";
-                        benefits = "+"+tower.getLubricantSpeedBoostPercent()+"% Attack Speed";
-                    } else if (tower.getScopesApplied() > 0) {
-                        componentPath = "Scopes";
-                        benefits = "+"+tower.getScopeRangeBoostPercent()+"% Range";
-                    } else if (tower.getScrapMetalApplied() > 0) {
-                        componentPath = "Scrap Metal";
-                        benefits = "+"+tower.getScrapMetalDamageBoostPercent()+"% Damage";
-                    }
-                    String text = "Level: " + tower.getLevel();
-                    text += "\nDamage: " + tower.getDamage(false);
-                    text += "\nRange: " + tower.getRange();
-                    text += "\nAttack Speed: " + (1f/tower.getAttackSpeed());
-                    text += "\nDescription: "+tower.getDescription();
-                    text += "\nComponent Path: " + componentPath;
-                    if (!componentPath.equals("None")) {
-                        text += "\n- Progress: "+tower.getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS;
-                        text += "\n- Bonuses: "+benefits;
-                    }
-                    if (materialPresent) {
-                        text += "\nGemstone: " + tower.getSelectedMaterial().materialName;
-                        text += "\n- "+tower.getSelectedMaterial().description;
-                    }*/
+
                     Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
                     label.setWrap(true);
                     label.setFontScale(.2f);
@@ -1432,6 +1408,11 @@ public class GameScreen extends AbstractScreenEX {
                     upgradeButton.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
+                            if (tower.isBeingBuilt() || tower.getRemainingUpgradeTime() > 0) {
+                                notification(SpriteType.WARNING, "Tower is being upgraded!", 3);
+                                Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
+                                return;
+                            }
                             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
                             removeInfoWindow();
                             upgradeDialog(tower, false);
@@ -1470,8 +1451,6 @@ public class GameScreen extends AbstractScreenEX {
                     informationUpgradeWindow.layout();
 
                     
-                    //informationDialog.button("Close", false, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-                    //informationDialog.key(Input.Keys.ESCAPE, false);
                     stages.get(Align.center).addActor(informationUpgradeWindow);
                     if (infoWindowX != -1 && infoWindowY != -1) {
                         informationUpgradeWindow.setPosition(infoWindowX, infoWindowY);
@@ -1995,7 +1974,7 @@ public class GameScreen extends AbstractScreenEX {
                         // Play sound
                         Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
                         // Display completed particle
-                        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+                        /*SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
                             .setParticle(AnimationType.SPARKLE)
                             .setDuration(1.5f)
                             .setEmissionRate(19)
@@ -2003,8 +1982,9 @@ public class GameScreen extends AbstractScreenEX {
                             .setParticleLife(.8f)
                             .setAnimationSpeed(1.5f)
                             .setAreaSize(1.2f)
-                            .create();
-                        effect.setPosition(new Vector2(towerAt.getX(), towerAt.getY()));
+                            .create();*/
+                        ParticleEffect effect = createUpgradeEffect(towerAt);
+                        //effect.setPosition(new Vector2(towerAt.getX(), towerAt.getY()));
                         data.getScreen().addEffect(effect);
                     }
                 };
@@ -2135,9 +2115,11 @@ public class GameScreen extends AbstractScreenEX {
             return;
         } else if (option != null) {
             if (inventory.getCash() < upgradeOption.cost.apply(entity.getLevel()).getCash()) {
+                Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                 notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(upgradeOption.cost.apply(entity.getLevel()).getCash()).substring(1)+")");
                 return;
-            } else if (!option.cost.canPurchase(inventory)) {
+            } else if (!upgradeOption.cost.canPurchase(inventory)) {
+                Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                 notification(SpriteType.CASH, "Not enough resources!");
                 return;
             }
@@ -2388,6 +2370,34 @@ public class GameScreen extends AbstractScreenEX {
 
     public TeamInventory getTeamInventory() {
         return inventory;
+    }
+
+    public static ParticleEffect createFinishedEffect(TowerEntity tower, SpriteType type) {
+        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+            .setParticle(type)
+            .setDuration(1.5f)
+            .setEmissionRate(19)
+            .setScale(.225f)
+            .setParticleLife(.8f)
+            .setAnimationSpeed(1.5f)
+            .setAreaSize(1.2f)
+            .create();
+        effect.setPosition(new Vector2(tower.getX(), tower.getY()));
+        return effect;
+    }
+
+    public static ParticleEffect createUpgradeEffect(TowerEntity tower) {
+        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
+            .setParticle(AnimationType.SPARKLE)
+            .setDuration(1.5f)
+            .setEmissionRate(19)
+            .setScale(.225f)
+            .setParticleLife(.8f)
+            .setAnimationSpeed(1.5f)
+            .setAreaSize(1.2f)
+            .create();
+        effect.setPosition(new Vector2(tower.getX(), tower.getY()));
+        return effect;
     }
 
 }

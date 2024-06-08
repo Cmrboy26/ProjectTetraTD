@@ -136,6 +136,8 @@ public class Sprites implements Disposable {
         SHOOTER_TOWER_3("shooterTower3", PlayMode.NORMAL, .1f),
         SHOOTER_TOWER_4("shooterTower4", PlayMode.NORMAL, .1f),
         SHOOTER_TOWER_5("shooterTower5", PlayMode.NORMAL, .1f),
+        SHOOTER_TOWER_6("shooterTower6", PlayMode.NORMAL, .1f),
+        SHOOTER_TOWER_7("shooterTower7", PlayMode.NORMAL, .1f),
 
         DRILL("drill/drill", PlayMode.LOOP_PINGPONG, .1f),
 

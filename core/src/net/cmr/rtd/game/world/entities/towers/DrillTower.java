@@ -2,7 +2,6 @@ package net.cmr.rtd.game.world.entities.towers;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -10,11 +9,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.storage.TeamInventory;
+import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -83,19 +85,21 @@ public class DrillTower extends MiningTower {
 
     @Override
     public float getMiningTime() {
-        return (float) Math.max(15 - Math.sqrt((getLevel() - 1) * 10), 5) * (under == TileType.TITANIUM_VEIN ? 1.25f : 1);
+        return (float) Math.max(30 - Math.sqrt((getLevel() - 1) * 14), 5) * (under == TileType.TITANIUM_VEIN ? 1.25f : 1);
     }
 
     @Override
     public void onMiningComplete(UpdateData data) {
         TeamInventory inventory = getTeamInventory(data);
         TileType type = getTileBelow(data);
+        Material material = under == TileType.TITANIUM_VEIN ? Material.TITANIUM : Material.STEEL;
         if (type == TileType.IRON_VEIN) {
             inventory.steel++;
         } else if (type == TileType.TITANIUM_VEIN) {
             inventory.titanium++;
         }
         updateInventoryOnClients(data);
+        
     }
 
     @Override

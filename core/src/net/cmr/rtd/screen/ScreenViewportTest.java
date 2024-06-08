@@ -12,8 +12,6 @@ public class ScreenViewportTest extends AbstractScreenEX {
     ScreenViewport viewport;
     Stage uiStage;
 
-    // TODO: Test and see if this works. If it works, then make AbstractScreenEX use ScreenViewport
-    // instead of having seperate stages for every alignment.
     public ScreenViewportTest() {
         super();
         viewport = new ScreenViewport();

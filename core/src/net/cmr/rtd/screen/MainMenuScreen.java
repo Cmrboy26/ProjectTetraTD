@@ -26,8 +26,8 @@ import com.badlogic.gdx.utils.Align;
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
-import net.cmr.util.Sprites;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -121,7 +121,8 @@ public class MainMenuScreen extends AbstractScreenEX {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                game.setScreen(new SelectionScreen());
+				game.setScreen(new NewSelectionScreen());
+                //game.setScreen(new SelectionScreen());
 			}
 		});
 		table.add(creation).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();

@@ -80,6 +80,8 @@ public class Sprites implements Disposable {
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
+        
+        WORLD_LEVEL("worldLevel"),
         ;
 
         private String spriteName;

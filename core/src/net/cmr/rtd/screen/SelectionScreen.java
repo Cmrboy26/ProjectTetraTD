@@ -267,7 +267,7 @@ public class SelectionScreen extends AbstractScreenEX {
                         }
                     };
                     if (!online) {
-                        game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                        //game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
                     } else {
                         joinGameFunction.apply(0);
                     }
@@ -314,7 +314,7 @@ public class SelectionScreen extends AbstractScreenEX {
                                 }
                             };
                             if (!online) {
-                                game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
+                                //game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
                             } else {
                                 joinGameFunction.apply(0);
                             }

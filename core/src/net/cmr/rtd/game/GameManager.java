@@ -135,7 +135,15 @@ public class GameManager implements Disposable {
             public void packetReceived(Packet packet) {
                 if (packet instanceof GameInfoPacket) {
                     // Send the game info to the player.
-                    GameInfoPacket gameInfo = new GameInfoPacket(teams.size(), players.size(), details.getMaxPlayers());
+                    ArrayList<Integer> teams = new ArrayList<Integer>();
+                    for (TeamData team : GameManager.this.teams) {
+                        teams.add(team.team);
+                    }
+                    int[] teamsArray = new int[teams.size()];
+                    for (int i = 0; i < teams.size(); i++) {
+                        teamsArray[i] = teams.get(i);
+                    }
+                    GameInfoPacket gameInfo = new GameInfoPacket(teamsArray, players.size(), details.getMaxPlayers());
                     clientRecieverStream.sendPacket(gameInfo);
                     clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
                     remove = true;

@@ -148,7 +148,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         SINGLEPLAYER {
             @Override
             public void startGame(QuestFile quest, int team) {
-                GameConnector.startSingleplayerGame(quest, 0);
+                GameConnector.startSingleplayerGame(quest);
             }
         },
         HOST_ONLINE_GAME {

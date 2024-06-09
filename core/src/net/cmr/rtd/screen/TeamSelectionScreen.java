@@ -16,11 +16,11 @@ import net.cmr.util.Sprites;
 public class TeamSelectionScreen extends AbstractScreenEX {
     
     Function<Integer, Void> joinGameFunction;
-    int availableTeams;
+    int[] availableTeams;
     int selectedTeam = -1;
     float countdown = 0.0f;
 
-    public TeamSelectionScreen(Function<Integer, Void> joinGameFunction, int availableTeams) {
+    public TeamSelectionScreen(Function<Integer, Void> joinGameFunction, int[] availableTeams) {
         super(INITIALIZE_ALL);
         this.joinGameFunction = joinGameFunction;
         this.availableTeams = availableTeams;
@@ -29,9 +29,9 @@ public class TeamSelectionScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
-        System.out.println(availableTeams);
-        if (availableTeams == 1) {
-            joinGameFunction.apply(0);
+        System.out.println(availableTeams.length);
+        if (availableTeams.length == 1) {
+            joinGameFunction.apply(availableTeams[0]);
             return;
         }
 
@@ -40,13 +40,12 @@ public class TeamSelectionScreen extends AbstractScreenEX {
 
         Label label = new Label("Select a team", Sprites.skin(), "default");
         label.setAlignment(Align.center);
-        table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams).expandX().fillX().row();
+        table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams.length).expandX().fillX().row();
 
         ButtonGroup<TextButton> buttonGroup = new ButtonGroup<TextButton>();
         buttonGroup.setMaxCheckCount(1);
         buttonGroup.setMinCheckCount(0);
-        for (int i = 0; i < availableTeams; i++) {
-            int team = i;
+        for (int team : availableTeams) {
             TextButton button = new TextButton("Team " + (team + 1), Sprites.skin(), "small");
             buttonGroup.add(button);
             button.addListener(new ClickListener() {
@@ -57,7 +56,7 @@ public class TeamSelectionScreen extends AbstractScreenEX {
                         table.row();
                         Label label = new Label("Joining game...", Sprites.skin(), "small");
                         label.setAlignment(Align.center);
-                        table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams).expandX().fillX().row();
+                        table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams.length).expandX().fillX().row();
                         selectedTeam = team;
                     }
                 }

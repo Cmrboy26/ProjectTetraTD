@@ -192,7 +192,7 @@ public class HostScreen extends AbstractScreenEX {
                 return null;
             }
         };
-        game.setScreen(new TeamSelectionScreen(joinGameFunction, totalTeams));
+        //game.setScreen(new TeamSelectionScreen(joinGameFunction, totalTeams)); UNCOMMENT
     }
     
 }

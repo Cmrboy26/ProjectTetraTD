@@ -19,7 +19,6 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
         TeamInventory neededMaterials = apply(level);
         boolean canPurchase = true;
         canPurchase &= testInventory.getCash() >= neededMaterials.getCash();
-        System.out.println(testInventory.getCash()+" >= "+neededMaterials.getCash() + " = " + (testInventory.getCash() >= neededMaterials.getCash()));
 
         canPurchase &= testInventory.getScopes() >= neededMaterials.getScopes();
         canPurchase &= testInventory.getScraps() >= neededMaterials.getScraps();
@@ -28,7 +27,6 @@ public abstract class Cost implements Function<Integer, TeamInventory> {
         for (Material material : Material.values()) {
             int needed = neededMaterials.getMaterial(material);
             int current = testInventory.getMaterial(material);
-            //System.out.println(current+" >= "+needed + " = " + (current >= needed));
             canPurchase &= current >= needed;
         }
 

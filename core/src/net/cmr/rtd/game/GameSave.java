@@ -27,13 +27,19 @@ import net.cmr.rtd.waves.WavesData;
  *       mediumWave.json - stores wave data for the medium difficulty
  *       ... - stores wave data for the other difficulties
  **/
+@Deprecated
 public class GameSave {
     
     private static final String LOCATION = "retrotowerdefense/saves/"; 
     private final String saveName;
 
+    @Deprecated
     public GameSave(String saveName) {
         this.saveName = saveName;
+    }
+
+    public GameSave(String worldName, String levelName) {
+        this.saveName = worldName + "/" + levelName;
     }
 
     /**

@@ -23,6 +23,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.GameConnector;
+import net.cmr.rtd.game.files.LevelFolder;
+import net.cmr.rtd.game.files.QuestFile;
+import net.cmr.rtd.game.files.QuestTask;
+import net.cmr.rtd.game.files.WorldFolder;
 import net.cmr.util.Audio;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
@@ -78,8 +84,8 @@ public class NewSelectionScreen extends ScreenAdapter {
 
         // Add worlds selection
 
-        String[] validWorldNames = getValidWorldNames();
-        if (validWorldNames.length == 0) {
+        WorldFolder[] validWorlds = getValidWorlds();
+        if (validWorlds.length == 0) {
             Label noWorldsLabel = new Label("No worlds found :/", Sprites.skin(), "small");
             noWorldsLabel.setAlignment(Align.center);
             leftBottomUI.add(noWorldsLabel).align(Align.left).pad(10f).colspan(1);
@@ -103,8 +109,8 @@ public class NewSelectionScreen extends ScreenAdapter {
         style.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
         style.background.setLeftWidth(backgroundSelectSpacing);
         style.background.setRightWidth(backgroundSelectSpacing);
-        SelectBox<String> worldSelection = new SelectBox<>(style);
-        worldSelection.setItems(validWorldNames);
+        SelectBox<WorldFolder> worldSelection = new SelectBox<>(style);
+        worldSelection.setItems(validWorlds);
         worldSelection.setAlignment(Align.center);
         worldSelection.addListener(new ChangeListener() {
             @Override
@@ -115,8 +121,8 @@ public class NewSelectionScreen extends ScreenAdapter {
         leftBottomUI.add(worldSelection).align(Align.left).pad(10f).colspan(1);
 
         // Set the default selection and notify onWorldSelected
-        worldSelection.setSelected(validWorldNames[0]);
-        onWorldSelected(validWorldNames[0]);
+        worldSelection.setSelected(validWorlds[0]);
+        onWorldSelected(validWorlds[0]);
 
 
     }
@@ -139,8 +145,18 @@ public class NewSelectionScreen extends ScreenAdapter {
     }
 
     public enum PlayType {
-        SINGLEPLAYER,
-        HOST_ONLINE_GAME;
+        SINGLEPLAYER {
+            @Override
+            public void startGame(QuestFile quest, int team) {
+                GameConnector.startSingleplayerGame(quest, 0);
+            }
+        },
+        HOST_ONLINE_GAME {
+            @Override
+            public void startGame(QuestFile quest, int team) {
+                
+            }
+        };
 
         @Override
         public String toString() {
@@ -151,9 +167,11 @@ public class NewSelectionScreen extends ScreenAdapter {
             }
             return super.toString();
         }
+
+        public abstract void startGame(QuestFile quest, int team);
     }
 
-    public void onWorldSelected(final String world) {
+    public void onWorldSelected(final WorldFolder world) {
         Log.info("Selected world: " + world);
         levelsTable.clear();
 
@@ -161,23 +179,23 @@ public class NewSelectionScreen extends ScreenAdapter {
 
         int buttonSize = 50;
 
-        String[] levelNames = getValidLevelNames(world);
-        for (String levelName : levelNames) {
+        LevelFolder[] levels = world.readLevels();
+        for (LevelFolder level : levels) {
             Table levelTable = new Table();
             levelTable.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     super.clicked(event, x, y);
                     Audio.getInstance().playSFX(Audio.GameSFX.CLICK, 1f);
-                    Log.info("Clicked level: " + levelName);
-                    Dialog levelDialog = new Dialog("Level: "+levelName, Sprites.skin(), "small");
+                    Log.info("Clicked level: " + level);
+                    Dialog levelDialog = new Dialog("Level: "+level, Sprites.skin(), "small");
                     // TODO: Make a dialog that shows the information
-                    // - show all quests
-                    // - have a sidebar that shows tasks to be completed in the level (for story mode)
-                    // - have a button to start the level singleplayer OR host a multiplayer online game
+                    // - show all quests TODO: STILL WORK ON THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SHOW WHEN THE QUESTS ARE COMPLETED
+                    // - have a sidebar that shows tasks to be completed in the level (for story mode) DONE
+                    // - have a button to start the level singleplayer OR host a multiplayer online game DONE
 
 
-                    Label questTasksLabel = new Label("Quest Tasks:", Sprites.skin(), "small");
+                    Label questTasksLabel = new Label("Tasks:", Sprites.skin(), "small");
                     questTasksLabel.setAlignment(Align.left);
 
                     Label questTasks = new Label("", Sprites.skin(), "small");
@@ -188,24 +206,7 @@ public class NewSelectionScreen extends ScreenAdapter {
 
                     TextButton resumeGameButton = new TextButton("Resume", Sprites.skin(), "small");
                     Audio.addClickSFX(resumeGameButton);
-                    resumeGameButton.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            super.clicked(event, x, y);
-                            if (resumeGameButton.isDisabled()) return;
-                            Log.info("Resuming level: " + levelName);
-                            levelDialog.hide();
-                        }
-                    });
                     resumeGameButton.pad(0, 20, 0, 20);
-
-                    // TODO: If there is no existing save, disable the button
-                    boolean saveFileExists = true;
-                    if (saveFileExists) {
-                        resumeGameButton.setDisabled(true);
-                        resumeGameButton.setColor(Color.DARK_GRAY);
-                        resumeGameButton.getLabel().setColor(Color.GRAY);
-                    }
 
                     Label playTypeLabel = new Label("Play Type", Sprites.skin(), "small");
                     playTypeLabel.setAlignment(Align.center);
@@ -221,36 +222,51 @@ public class NewSelectionScreen extends ScreenAdapter {
                     style.scrollStyle.background.setLeftWidth(selectionBoxListSpacing);
                     style.scrollStyle.background.setRightWidth(selectionBoxListSpacing);
 
-                    SelectBox<String> questSelect = new SelectBox<>(style);
+                    SelectBox<QuestFile> questSelect = new SelectBox<>(style);
                     questSelect.getScrollPane().setScrollbarsVisible(false);
-                    String[] questNames = getValidQuestNames(world, levelName);
+                    QuestFile[] questNames = getValidQuests(level);
                     questSelect.setItems(questNames);
                     questSelect.setAlignment(Align.center);
                     questSelect.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                            setTasksList(questTasks, world, levelName, questSelect.getSelected());
+                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected());
                         }
                     });
-                    setTasksList(questTasks, world, levelName, questSelect.getSelected());
+                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected());
 
                     SelectBox<PlayType> playType = new SelectBox<>(style);
                     playType.getScrollPane().setScrollbarsVisible(false);
                     playType.setItems(PlayType.values());
                     playType.setAlignment(Align.center);
 
-                    TextButton startButton = new TextButton("Start", Sprites.skin(), "small");
+                    TextButton startButton = new TextButton("Start New", Sprites.skin(), "small");
                     Audio.addClickSFX(startButton);
                     startButton.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
                             super.clicked(event, x, y);
-                            Log.info("Starting level: " + levelName);
+                            Log.info("Starting level: " + level);
                             Log.info("- Quest: " + questSelect.getSelected());
                             Log.info("- Play Type: " + playType.getSelected().name());
+                            QuestFile quest = questSelect.getSelected();
+                            quest.createSave();
+
                             levelDialog.hide();
+                            playType.getSelected().startGame(quest, 0);
                         }
                     });
+                    resumeGameButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            super.clicked(event, x, y);
+                            if (resumeGameButton.isDisabled()) return;
+                            Log.info("Resuming level: " + level);
+                            levelDialog.hide();
+                            playType.getSelected().startGame(new QuestFile(level, questSelect.getSelected()), 0);
+                        }
+                    });
+
                     startButton.pad(0, 20, 0, 20);
 
                     levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(3).row();
@@ -273,7 +289,7 @@ public class NewSelectionScreen extends ScreenAdapter {
             });
             levelSelection.add(levelTable).align(Align.center).pad(10);
 
-            Label name = new Label(levelName, Sprites.skin(), "small");
+            Label name = new Label(level.toString(), Sprites.skin(), "small");
             name.setAlignment(Align.center);
             levelTable.add(name).align(Align.center).row();
 
@@ -290,24 +306,36 @@ public class NewSelectionScreen extends ScreenAdapter {
     }
 
 
-    public String[] getValidWorldNames() {
-        return new String[] {"World 1", "World 2", "World 3", "World 4", "World 5555555555555"};
+    public WorldFolder[] getValidWorlds() {
+        return WorldFolder.listWorlds();
     }
 
-    public String[] getValidLevelNames(String world) {
-        return new String[] {"1-1", "1-2", "1-3", "1-4", "1-5"};
+    public QuestFile[] getValidQuests(LevelFolder level) {
+        return level.readQuests();
     }
 
-    public String[] getValidQuestNames(String world, String level) {
-        return new String[] {"Quest 1", "Quest 2", "Quest 3", "Quest 4"};
+    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file) {
+        taskListLabel.setText(getTasksList(file));
+
+        boolean saveFileExists = file.questFileExists();
+        if (!saveFileExists) {
+            resumeGameButton.setDisabled(true);
+            resumeGameButton.setColor(Color.DARK_GRAY);
+            resumeGameButton.getLabel().setColor(Color.GRAY);
+        }
     }
 
-    public void setTasksList(Label taskListLabel, String world, String level, String quest) {
-        taskListLabel.setText(getTasksList(world, level, quest));
-    }
-
-    public String getTasksList(String world, String level, String quest) {
-        return world+"\n"+level+"\n"+quest+"\n1. Do this\n2. Do that\n3. Do this other thing";
+    public String getTasksList(QuestFile file) {
+        QuestTask[] tasks = file.getTasks();
+        if (tasks == null) {
+            return "- No tasks found! Have fun!";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (QuestTask task : tasks) {
+            builder.append("- ");
+            builder.append(task.toString()).append("\n");
+        }
+        return builder.toString();
     }
 
 }

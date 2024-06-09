@@ -1,6 +1,7 @@
 package net.cmr.rtd.game.world;
 
 import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.screen.GameScreen;
 
 public class UpdateData {
@@ -44,6 +45,14 @@ public class UpdateData {
     }
     public GameScreen getScreen() {
         return screen;
+    }
+
+    public TeamInventory getInventory(int team) {
+        if (isServer) {
+            return manager.getTeam(team).getInventory();
+        } else {
+            return screen.getTeamInventory();
+        }
     }
     
 }

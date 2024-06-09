@@ -703,7 +703,7 @@ public class GameScreen extends AbstractScreenEX {
             @Override
             protected void result(Object object) {
                 if (object.equals(true)) {
-                    gameManager.resetWorld(save);
+                    gameManager.resetWorld();
                 }
             }
         };
@@ -964,7 +964,7 @@ public class GameScreen extends AbstractScreenEX {
                         int life = Integer.parseInt(currentLife);
                         if (life > 0) {
                             Log.info("Level successfully cleared!");
-                            RetroTowerDefense.setLevelCleared(gameManager.getSave());
+                            RetroTowerDefense.setLevelCleared(gameManager.getQuest());
                         }
                     } catch (NumberFormatException e) {
                         // Do nothing
@@ -995,7 +995,7 @@ public class GameScreen extends AbstractScreenEX {
                     if (object instanceof Boolean && (Boolean) object) {
                         // Restart the game
                         if (gameManager == null) return;
-                        gameManager.resetWorld(save);
+                        gameManager.resetWorld();
                         return;
                     }
                     MainMenuScreen mainMenu = new MainMenuScreen();
@@ -1022,8 +1022,8 @@ public class GameScreen extends AbstractScreenEX {
             } else {
                 // Solo game. Set the high score if it is higher than the current high score.
                 if (gameManager != null) {
-                    RetroTowerDefense.setHighscore(gameManager.getSave(), gameOverPacket.score);
-                    RetroTowerDefense.setFarthestWave(gameManager.getSave(), gameOverPacket.endingWave);
+                    RetroTowerDefense.setHighscore(gameManager.getQuest(), gameOverPacket.score);
+                    RetroTowerDefense.setFarthestWave(gameManager.getQuest(), gameOverPacket.endingWave);
                 }
             }
 

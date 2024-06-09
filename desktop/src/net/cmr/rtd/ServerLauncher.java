@@ -26,7 +26,7 @@ public class ServerLauncher extends ApplicationAdapter {
         details.setUseConsole(true);
 
         manager = new GameManager(details);
-        manager.initialize(new GameSave("host"));
+        //manager.initialize(new GameSave("host"));
         manager.start();
 
         //Scanner scanner = new Scanner(System.in);

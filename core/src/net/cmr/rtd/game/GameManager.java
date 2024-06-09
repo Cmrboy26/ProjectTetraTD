@@ -1,13 +1,13 @@
 package net.cmr.rtd.game;
 
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -32,6 +32,7 @@ import com.esotericsoftware.kryonet.Server;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.commands.CommandHandler;
+import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;
@@ -78,7 +79,7 @@ public class GameManager implements Disposable {
     private final ArrayList<GameStream> connectingStreams = new ArrayList<GameStream>();
     private final Server server;
     private boolean running = false;
-    private GameSave save = null;
+    private QuestFile quest = null;
 
     private UpdateData data;
     private World world;
@@ -272,7 +273,7 @@ public class GameManager implements Disposable {
         if (running) {
             return;
         }
-        if (save == null) {
+        if (quest == null) {
             throw new IllegalStateException("The game manager has not been initialized.");
         }
         if (details.isHostedOnline()) {
@@ -375,12 +376,12 @@ public class GameManager implements Disposable {
      * Initialize the game manager.
      * @param save The save file to load from
      */
-    public void initialize(GameSave save) {
-        Objects.requireNonNull(save, "The save file cannot be null.");
-        this.save = save;
-        load(save);
+    public void initialize(QuestFile quest) {
+        Objects.requireNonNull(quest, "The save file cannot be null.");
+        this.quest = quest;
+        load(quest);
 
-        Log.info("Game \"" + save.getName() + "\" initialized.");
+        Log.info("Game \"" + quest.toString() + "\" initialized.");
     }
 
     /**
@@ -388,34 +389,11 @@ public class GameManager implements Disposable {
      */
     public void save() {
         // Save the game state.
-        FileHandle saveFolder = null;
-        if (RetroTowerDefense.instanceExists()) {
-            saveFolder = save.getSaveFolder(FileType.External);
-        } else {
-            saveFolder = save.getSaveFolder(FileType.Absolute);
+        try {
+            quest.saveGame(world);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        saveFolder.mkdirs();
-
-        // Save the world
-        if (world != null) {
-            byte[] data = GameObject.serializeGameObject(world);
-            FileHandle worldFile = saveFolder.child("world.dat");
-            worldFile.writeBytes(data, false);
-            Log.info("Saved world to " + worldFile.path());
-        }
-
-        // Save the players
-        if (world != null) {
-            try {
-                FileHandle playersFile = saveFolder.child("players.dat");
-                DataBuffer buffer = new DataBuffer();
-                world.serializePlayerData(buffer);
-                playersFile.writeBytes(buffer.toArray(), false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
     }
 
     /**
@@ -425,15 +403,9 @@ public class GameManager implements Disposable {
      * @param save The save file to load from.
      * @return true if a save was loaded, false if no save was loaded.
      */
-    public boolean load(GameSave save) {
+    public boolean load(QuestFile quest) {
         // Load the game state.
-        FileHandle saveFolder = null;
-        if (RetroTowerDefense.instanceExists()) {
-            saveFolder = save.getSaveFolder(FileType.External);
-        } else {
-            saveFolder = save.getSaveFolder(FileType.Absolute);
-        }
-
+        FileHandle saveFolder = quest.getSaveFolder();
         if (!saveFolder.exists()) {
             // Create a default game
             initializeNewGame();
@@ -441,32 +413,19 @@ public class GameManager implements Disposable {
             return false;
         }
 
-        // Load the game from the save
-        FileHandle worldFile = saveFolder.child("world.dat");
-        if (worldFile.exists()) {
-            byte[] data = worldFile.readBytes();
-            world = (World) GameObject.deserializeGameObject(data);
-            Log.info("Loaded world from " + worldFile.path());
-        } else {
+        World readWorld = quest.loadWorld();
+        if (readWorld == null) {
             initializeNewGame();
+        } else {
+            world = readWorld;
         }
 
-        // Load the wave data from the save
-        FileHandle wavesDataFile = saveFolder.child("wave.json");
-        if (wavesDataFile.exists()) {
-            // Load the waves
-            WavesData wavesData = WavesData.load(wavesDataFile);
-            world.setWavesData(wavesData);
-        } else {
+        WavesData wavesData = quest.loadWavesData();
+        if (wavesData == null) {
             throw new IllegalStateException("No waves data was found in the save.");
-        } 
-        /*else {
-            WavesData wavesData = new WavesData();
-            Wave wave = new Wave(1000);
-            wave.addWaveUnit(new WaveUnit(wave, EnemyType.BASIC_ONE, 1000));
-            wavesData.waves.put(1, wave);
-            world.setWavesData(wavesData);
-        }*/
+        }
+        world.setWavesData(wavesData);
+
         
         this.teams = new ArrayList<TeamData>(MAX_TEAMS);
         for (int i = 0; i < MAX_TEAMS; i++) {
@@ -782,20 +741,13 @@ public class GameManager implements Disposable {
 
     public boolean isRunning() { return running; }
     public GameManagerDetails getDetails() { return details; }
-    public FileHandle getSaveFolder() {
-        if (RetroTowerDefense.instanceExists()) {
-            return save.getSaveFolder(FileType.External);
-        } else {
-            return save.getSaveFolder(FileType.Absolute);
-        }
-    }
-    public GameSave getSave() { return save; }
+    public QuestFile getQuest() { return quest; }
 
-    public void resetWorld(LevelSave level) {
-        GameSave save = this.save.copySave(level);
+    public void resetWorld() {
+        quest.createSave(); // Resets the save file
         sendPacketToAll(new GameResetPacket());
         pauseWaves();
-        load(save);
+        load(quest);
     }
 
     /**

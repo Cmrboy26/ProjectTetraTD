@@ -52,7 +52,7 @@ public class ConsoleTest {
 		details.setMaxPlayers(4);
 		details.setPassword("passward");
 		GameManager manager = new GameManager(details);
-		manager.initialize(new GameSave("e"));
+		//manager.initialize(new GameSave("e"));
 		manager.start();
 		manager.resumeWaves();
 

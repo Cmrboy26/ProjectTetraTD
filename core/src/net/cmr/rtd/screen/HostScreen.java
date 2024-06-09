@@ -176,7 +176,7 @@ public class HostScreen extends AbstractScreenEX {
                 LocalGameStream[] pair = LocalGameStream.createStreamPair();
                 LocalGameStream clientsidestream = pair[0];
 
-                manager.initialize(save);
+                //manager.initialize(save); // TODO: UNCOMMENT THIS
                 manager.start();
                 GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave, team);
                 rtd.setScreen(screen);

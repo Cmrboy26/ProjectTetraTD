@@ -24,6 +24,7 @@ import com.esotericsoftware.kryonet.Client;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
+import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.packets.ConnectPacket;
@@ -67,26 +68,26 @@ public class RetroTowerDefense extends CMRGame {
 		FileHandle savesFolder = gameDataFolder.child("saves/");
 		savesFolder.mkdirs();
 
-		FileHandle levelsFolder = gameDataFolder.child("levels/");
-		levelsFolder.mkdirs();
+		FileHandle worldsFolder = gameDataFolder.child("worlds/");
+		worldsFolder.mkdirs();
 
 		Log.debug("Copying story levels to external folder...");
 		// Create story level folders from the assets
-		FileHandle storyLevelsHandle = Gdx.files.local("storylevels/");
-		boolean storyLevelsHandleExists = storyLevelsHandle.exists();
-		Log.debug("Story levels handle exists: " + storyLevelsHandleExists);
+		FileHandle defaultWorldsHandle = Gdx.files.local("defaultWorlds/");
+		boolean defaultWorldsHandleExists = defaultWorldsHandle.exists();
+		Log.debug("Story levels handle exists: " + defaultWorldsHandleExists);
 		Log.debug("Local directory available: " + Gdx.files.isLocalStorageAvailable());
 		Log.debug("External directory available: " + Gdx.files.isExternalStorageAvailable());
-		if (!storyLevelsHandleExists) {
-			Log.debug("Handle not found, attempting to copy assets from \""+storyLevelsHandle.path()+"\" to \""+levelsFolder.path()+"\"...");
-			storyLevelsHandle = Gdx.files.local("assets/storylevels/");
+		if (!defaultWorldsHandleExists) {
+			Log.debug("Handle not found, attempting to copy assets from \""+defaultWorldsHandle.path()+"\" to \""+worldsFolder.path()+"\"...");
+			defaultWorldsHandle = Gdx.files.local("assets/defaultWorlds/");
 		}
 
-		Log.debug("Story level files: " + storyLevelsHandle.list().length);
-		for (FileHandle level : storyLevelsHandle.list()) {
+		Log.debug("Story level files: " + defaultWorldsHandle.list().length);
+		for (FileHandle level : defaultWorldsHandle.list()) {
 			// level is the folder containing the level data (waves folder, world.dat) in the assets folder
-			FileHandle internal = storyLevelsHandle.child(level.name());
-			FileHandle external = levelsFolder;
+			FileHandle internal = defaultWorldsHandle.child(level.name());
+			FileHandle external = worldsFolder;
 			FileHandle externalLevelFolder = external.child(level.name());
 			Log.debug("Copying level \""+level.name()+"\" to external folder...");
 			if (externalLevelFolder.isDirectory() && externalLevelFolder.exists()) {
@@ -259,8 +260,8 @@ public class RetroTowerDefense extends CMRGame {
 		});
 
 		GameScreen screen = new GameScreen(clientsideStream, manager, null, lsave, team);
-		//manager.initialize(new GameSave("default")); 
-		manager.initialize(save);
+
+		//manager.initialize(save); // TODO: FIX
 		setScreen(screen);
 		manager.start();
 		manager.onNewConnection(serversideStream);
@@ -286,7 +287,7 @@ public class RetroTowerDefense extends CMRGame {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void setLevelCleared(GameSave save) {
+	public static void setLevelCleared(QuestFile save) {
 		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
@@ -300,7 +301,7 @@ public class RetroTowerDefense extends CMRGame {
 				completions = new JSONArray();
 				obj.put("clearedLevels", completions);
 			}
-			String name = save.getName();
+			String name = save.getSaveFolderName();
 			if (completions.contains(name)) {
 				return;
 			} else {
@@ -312,8 +313,8 @@ public class RetroTowerDefense extends CMRGame {
 		}
 	}	
 
-	public static boolean isLevelCleared(GameSave save) {
-		return isLevelCleared(save.getName());
+	public static boolean isLevelCleared(QuestFile quest) {
+		return isLevelCleared(quest.getSaveFolderName());
 	}
 
 	public static boolean isLevelCleared(String saveFolder) {
@@ -338,8 +339,8 @@ public class RetroTowerDefense extends CMRGame {
 		return false;
 	}
 
-	public static long getHighscore(GameSave save) {
-		return getHighscore(save.getName());
+	public static long getHighscore(QuestFile quest) {
+		return getHighscore(quest.getSaveFolderName());
 	}
 
 	public static long getHighscore(String saveFolder) {
@@ -363,8 +364,8 @@ public class RetroTowerDefense extends CMRGame {
 		return 0;
 	}
 
-	public static void setHighscore(GameSave save, long score) {
-		setHighscore(save.getName(), score);
+	public static void setHighscore(QuestFile quest, long score) {
+		setHighscore(quest.getSaveFolderName(), score);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -388,8 +389,8 @@ public class RetroTowerDefense extends CMRGame {
 		}
 	}
 
-	public static int getFarthestWave(GameSave save) {
-		return getFarthestWave(save.getName());
+	public static int getFarthestWave(QuestFile quest) {
+		return getFarthestWave(quest.getSaveFolderName());
 	}
 
 	public static int getFarthestWave(String saveFolder) {
@@ -413,8 +414,8 @@ public class RetroTowerDefense extends CMRGame {
 		return 0;
 	}
 
-	public static void setFarthestWave(GameSave save, int wave) {
-		setFarthestWave(save.getName(), wave);
+	public static void setFarthestWave(QuestFile quest, int wave) {
+		setFarthestWave(quest.getSaveFolderName(), wave);
 	}
 
 	@SuppressWarnings("unchecked")

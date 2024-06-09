@@ -1,0 +1,8 @@
+{
+	"name": "L2 - Open",
+	"quests": [
+		"quest_1.json",
+		"quest_2.json",
+		"quest_3.json"
+	]
+}

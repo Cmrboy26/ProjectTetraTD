@@ -205,10 +205,12 @@ public class RetroTowerDefense extends CMRGame {
 		}
 	}
 
+	@Deprecated
 	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int teams) {
 		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), levelSave, teams);
 	}
 
+	@Deprecated
 	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int teams) {
 		HostScreen screen = new HostScreen(details, save, lsave, teams);
 		setScreen(screen);

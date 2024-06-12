@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Settings;
@@ -69,7 +70,9 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                 Settings.getPreferences().putInteger(Settings.JOIN_PORT, port);
                 Settings.getPreferences().flush();
 
-                Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
+                GameConnector.joinMultiplayerGame(ip, port);
+
+                /*Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
                     @Override
                     public Void apply(Integer team) {
                         try {
@@ -95,7 +98,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
                     game.setScreen(screen);
                     SelectionScreen.displayErrorDialog(e, screen.stages);
                     e.printStackTrace();
-                }
+                }*/
             }
         });
         table.add(join).right().bottom().pad(5f).width(100).expandX().colspan(1);

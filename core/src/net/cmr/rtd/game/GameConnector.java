@@ -1,6 +1,5 @@
 package net.cmr.rtd.game;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -14,6 +13,7 @@ import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
+import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
@@ -24,6 +24,7 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.screen.TeamSelectionScreen;
+import net.cmr.rtd.screen.TeamSelectionScreen.ConnectionAttempt;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
 
@@ -36,9 +37,10 @@ public class GameConnector {
 		GameManagerDetails details = new GameManagerDetails();
 		details.setMaxPlayers(1);
 		details.setHostedOnline(false);
-		Function<Integer, Void> joinGameWithTeam = new Function<Integer, Void>() {
+		Consumer<ConnectionAttempt> joinGameWithTeam = new Consumer<ConnectionAttempt>() {
 			@Override
-			public Void apply(Integer team) {
+			public void accept(ConnectionAttempt attempt) {
+				int team = attempt.team;
 		
 				GameManager manager = new GameManager(details);
 				LocalGameStream[] streams = LocalGameStream.createStreamPair();
@@ -58,7 +60,7 @@ public class GameConnector {
 					}
 				});
 		
-				GameScreen screen = new GameScreen(clientsideStream, manager, null, null, team);
+				GameScreen screen = new GameScreen(clientsideStream, manager, details.getPassword(), null, team);
 		
 				manager.initialize(quest);
 				RetroTowerDefense.getInstance().setScreen(screen);
@@ -66,29 +68,30 @@ public class GameConnector {
 				manager.onNewConnection(serversideStream);
 				
 				clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
-				return null;
 			}
 		};
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams));
+				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
 			}
 		};
 		getGameInfo(quest, details.getMaxPlayers(), callback);
     }
 
-    public static void joinMultiplayerGame(QuestFile quest, String ip, int port) {
+    public static void joinMultiplayerGame(String ip, int port) {
 		
-		Function<Integer, Void> joinGameWithTeam = new Function<Integer, Void>() {
+		Consumer<ConnectionAttempt> joinGameWithTeam = new Consumer<ConnectionAttempt>() {
 			@Override
-			public Void apply(Integer team) {
+			public void accept(ConnectionAttempt attempt) {
 				try {
+					int team = attempt.team;
+					
 					RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
 					Client client = new Client(30000, 30000);
 					OnlineGameStream.registerPackets(client.getKryo());
 					OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
-			
+
 					Log.info("Connecting to " + ip + ":" + port + "...");
 					client.start();
 					try {
@@ -104,31 +107,72 @@ public class GameConnector {
 						}
 					});
 					Log.info("Connected.");
-					GameScreen screen = new GameScreen(stream, null, null, null, team);
+					GameScreen screen = new GameScreen(stream, null, attempt.passwordAttempt, null, team);
 					game.setScreen(screen);
-			
+
 					stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 				} catch (Exception e) {
 					e.printStackTrace();
 					RetroTowerDefense.getInstance().setScreen(new MainMenuScreen());
 				}
-				return null;
 			}
 		};
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams));
+				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
 			}
 		};
 
 		getGameInfo("localhost", 11265, callback);
     }
 
-    public static void hostMultiplayerGame(QuestFile quest, int port) {
-		// TODO: Implement this method
-		//HostScreen screen = new HostScreen(details, save, lsave, teams);
-		//setScreen(screen);
+    public static void hostMultiplayerGame(QuestFile quest, GameManagerDetails details) {
+		Consumer<ConnectionAttempt> joinGameWithTeam = new Consumer<ConnectionAttempt>() {
+			@Override
+			public void accept(ConnectionAttempt attempt) {
+				int team = attempt.team;
+                RetroTowerDefense rtd = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+
+                details.setHostedOnline(true);
+                GameManager manager = new GameManager(details);
+                LocalGameStream[] pair = LocalGameStream.createStreamPair();
+                LocalGameStream clientsidestream = pair[0];
+
+				manager.initialize(quest);
+                manager.start();
+                GameScreen screen = new GameScreen(clientsidestream, manager, details.getPassword(), null, team);
+                rtd.setScreen(screen);
+
+                clientsidestream.addListener(new PacketListener() {
+                    @Override
+                    public void packetReceived(Packet packet) {
+						if (packet instanceof PlayerPositionsPacket) {
+							return;
+						}
+                        Log.debug("Client received packet: " + packet);
+                    }
+                });
+				pair[1].addListener(new PacketListener() {
+
+					@Override
+					public void packetReceived(Packet packet) {
+						Log.debug("Server received packet: " + packet);
+					}
+				});
+                manager.onNewConnection(pair[1]);
+                clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+            }
+        };
+
+		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
+			@Override
+			public void accept(GameInfoPacket t) {
+				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+			}
+		};
+
+		getGameInfo(quest, details.getMaxPlayers(), callback);
     }
 
 	private static void getGameInfo(QuestFile file, int maxPlayers, Consumer<GameInfoPacket> callback) {
@@ -151,7 +195,7 @@ public class GameConnector {
 		for (int i = 0; i < availableTeams.size(); i++) {
 			teams[i] = availableTeams.get(i);
 		}
-		GameInfoPacket packet = new GameInfoPacket(teams, 0, maxPlayers);
+		GameInfoPacket packet = new GameInfoPacket(teams, 0, maxPlayers, false);
 		callback.accept(packet);
 	}
 
@@ -162,7 +206,6 @@ public class GameConnector {
 			OnlineGameStream.registerPackets(client.getKryo());
 			OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
 
-			Log.info("Connecting to " + ip + ":" + port + "...");
 			client.start();
 			try {
 				client.connect(5000, ip, port);
@@ -170,14 +213,13 @@ public class GameConnector {
 				Log.error("Failed to connect to server.", e);
 				throw e;
 			}
-			Log.info("Connected.");
 			stream.sendPacket(new GameInfoPacket());
 			stream.addListener(new PacketListener() {
 				@Override
 				public void packetReceived(Packet packet) {
 					if (packet instanceof GameInfoPacket) {
 						GameInfoPacket info = (GameInfoPacket) packet;
-						Log.info("Received game info: " + info.teams + " teams, " + info.players + " players, " + info.maxPlayers + " max players.");
+						Log.debug("Received game info: " + info.teams + " teams, " + info.players + " players, " + info.maxPlayers + " max players.");
 						callback.accept(info);
 						stream.onClose();
 					}

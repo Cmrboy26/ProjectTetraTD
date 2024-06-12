@@ -770,11 +770,12 @@ public class GameScreen extends AbstractScreenEX {
             ioStream.getEncryptor().setAESData(secretKey, iv);
 
             // Send AES data.
+            // TODO: According to some tests, sometimes the server does not receive the AES data packet, which causes connections to bug out on the client side
             AESEncryptionPacket aesPacket = new AESEncryptionPacket(secretKey, iv);
             ioStream.sendPacket(aesPacket);
 
             // If the server requires a password, send it.
-            if (password != null) {
+            if (password != null && !password.isEmpty()) {
                 ioStream.sendPacket(new PasswordPacket(password));
             }
 
@@ -946,7 +947,10 @@ public class GameScreen extends AbstractScreenEX {
             // The player was disconnected, set the screen to the main menu.
             DisconnectPacket disconnectPacket = (DisconnectPacket) packet;
             Log.info("Client disconnected: " + disconnectPacket.reason);
+            MainMenuScreen mainMenu = new MainMenuScreen();
             game.setScreen(new MainMenuScreen());
+            // TODO: Display why the player was disconnected with a dialog
+
             return;
         }
 

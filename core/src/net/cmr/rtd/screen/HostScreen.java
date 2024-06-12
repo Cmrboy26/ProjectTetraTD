@@ -1,7 +1,5 @@
 package net.cmr.rtd.screen;
 
-import java.util.function.Function;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -13,37 +11,34 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Null;
 
-import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
-import net.cmr.rtd.game.packets.ConnectPacket;
-import net.cmr.rtd.game.packets.Packet;
-import net.cmr.rtd.game.stream.GameStream.PacketListener;
-import net.cmr.rtd.game.stream.LocalGameStream;
+import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.util.AbstractScreenEX;
-import net.cmr.util.Log;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
 public class HostScreen extends AbstractScreenEX {
 
     GameManagerDetails details;
-    GameSave save; 
-    LevelSave lsave;
-    int totalTeams;
+    QuestFile file;
 
     TextField maxPlayersField, portField, passwordField;
     SelectBox<String> portForwardOptions;
 
-    public HostScreen(GameManagerDetails details, GameSave save, LevelSave lsave, int totalTeams) {
+    public HostScreen(GameManagerDetails details, GameSave save, LevelSave level, int totalTeams) {
+        throw new UnsupportedOperationException("This constructor is not supported in this version of the game.");
+    }
+
+    public HostScreen(@Null GameManagerDetails details, QuestFile file) {
         super(INITIALIZE_ALL);
+        if (details == null) details = new GameManagerDetails();
         this.details = details;
-        this.save = save;
-        this.lsave = lsave;
-        this.totalTeams = totalTeams;
+        this.file = file;
     }
 
     @Override
@@ -57,7 +52,7 @@ public class HostScreen extends AbstractScreenEX {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new SelectionScreen());
+                game.setScreen(new NewSelectionScreen());
             }
         });
         backButton.pad(0, 50, 0, 50);
@@ -100,17 +95,18 @@ public class HostScreen extends AbstractScreenEX {
 
         contentTable.row();
 
+        // TODO: Fix online passwords before reimplmenting
         Label passwordLabel = new Label("Password: ", Sprites.skin(), "small");
         passwordLabel.setAlignment(Align.center);
-        contentTable.add(passwordLabel).width(200).pad(5).center();
+        //contentTable.add(passwordLabel).width(200).pad(5).center();
         passwordField = new TextField("", Sprites.skin(), "small");
         passwordField.setMessageText("password123");
         passwordField.setAlignment(Align.center);
         passwordField.setPasswordCharacter('*');
         passwordField.setPasswordMode(true);
-        contentTable.add(passwordField).width(200).pad(5).center();
+        //contentTable.add(passwordField).width(200).pad(5).center();
 
-        contentTable.row();
+        //contentTable.row();
 
         Label portLabel = new Label("Port: ", Sprites.skin(), "small");
         portLabel.setAlignment(Align.center);
@@ -166,33 +162,7 @@ public class HostScreen extends AbstractScreenEX {
         Settings.getPreferences().flush();
 
         // Join the game
-        Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
-            @Override
-            public Void apply(Integer team) {
-                RetroTowerDefense rtd = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-
-                details.setHostedOnline(true);
-                GameManager manager = save.loadGame(details);
-                LocalGameStream[] pair = LocalGameStream.createStreamPair();
-                LocalGameStream clientsidestream = pair[0];
-
-                //manager.initialize(save); // TODO: UNCOMMENT THIS
-                manager.start();
-                GameScreen screen = new GameScreen(clientsidestream, manager, null, lsave, team);
-                rtd.setScreen(screen);
-
-                clientsidestream.addListener(new PacketListener() {
-                    @Override
-                    public void packetReceived(Packet packet) {
-                        Log.debug("Server received packet: " + packet);
-                    }
-                });
-                manager.onNewConnection(pair[1]);
-                clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
-                return null;
-            }
-        };
-        //game.setScreen(new TeamSelectionScreen(joinGameFunction, totalTeams)); UNCOMMENT
+        GameConnector.hostMultiplayerGame(file, details);
     }
     
 }

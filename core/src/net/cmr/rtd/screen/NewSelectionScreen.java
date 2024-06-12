@@ -23,7 +23,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.files.LevelFolder;
 import net.cmr.rtd.game.files.QuestFile;
@@ -60,7 +59,22 @@ public class NewSelectionScreen extends ScreenAdapter {
         stage.addActor(levelsTable);
 
         Table rightBottomUI = new Table();
+        rightBottomUI.setFillParent(true);
+        rightBottomUI.align(Align.bottomRight);
+        stage.addActor(rightBottomUI);
+
         // TODO: Put the join online game button here
+        TextButton joinOnlineGameButton = new TextButton("Join Online", Sprites.skin(), "small");
+        Audio.addClickSFX(joinOnlineGameButton);
+        joinOnlineGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+                CMRGame.getInstance().setScreen(new MultiplayerJoinScreen());
+            }
+        });
+        joinOnlineGameButton.pad(0, 20, 0, 20);
+        rightBottomUI.add(joinOnlineGameButton).align(Align.bottomRight).pad(10f);
 
         Table leftBottomUI = new Table();
         leftBottomUI.setFillParent(true);
@@ -154,7 +168,8 @@ public class NewSelectionScreen extends ScreenAdapter {
         HOST_ONLINE_GAME {
             @Override
             public void startGame(QuestFile quest, int team) {
-                
+                HostScreen screen = new HostScreen(null, quest);
+                CMRGame.getInstance().setScreen(screen);
             }
         };
 
@@ -279,6 +294,11 @@ public class NewSelectionScreen extends ScreenAdapter {
                     levelDialog.getContentTable().add(questSelect).align(Align.center).pad(10).padTop(labelTopPad).colspan(1);
                     levelDialog.getContentTable().add(playType).align(Align.center).pad(10).padTop(labelTopPad).colspan(1);
                     levelDialog.getContentTable().add(startButton).align(Align.center).pad(10).padTop(labelTopPad).growX().colspan(1);
+
+                    TextButton closeButton = new TextButton("Close", Sprites.skin(), "small");
+                    closeButton.pad(0, 20, 0, 20);
+                    Audio.addClickSFX(closeButton);
+                    levelDialog.button(closeButton, false);
 
                     levelDialog.pad(10);
                     levelDialog.padTop(30);

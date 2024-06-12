@@ -108,6 +108,7 @@ public class GameManager implements Disposable {
                 @Override
                 public void connected(Connection arg0) {
                     OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), arg0);
+                    arg0.setBufferPositionFix(true);
                     onNewConnection(stream);
                 }
             });
@@ -143,7 +144,7 @@ public class GameManager implements Disposable {
                     for (int i = 0; i < teams.size(); i++) {
                         teamsArray[i] = teams.get(i);
                     }
-                    GameInfoPacket gameInfo = new GameInfoPacket(teamsArray, players.size(), details.getMaxPlayers());
+                    GameInfoPacket gameInfo = new GameInfoPacket(teamsArray, players.size(), details.getMaxPlayers(), details.usePassword());
                     clientRecieverStream.sendPacket(gameInfo);
                     clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
                     remove = true;
@@ -219,10 +220,12 @@ public class GameManager implements Disposable {
                 if (packet instanceof PasswordPacket) {
                     // If the password is correct, then let the player join.
                     if (details.getPassword().equals(((PasswordPacket) packet).getPassword())) {
+                        Log.info("Password is CORRECT!");
                         onPlayerJoin(player);
                         remove = true;
                     } else {
                         // If the password is incorrect, send a disconnect packet.
+                        Log.info("Password is INCORRECT!");
                         player.kick(GamePlayer.PASSWORD_INCORRECT);
                         remove = true;
                     }

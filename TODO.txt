@@ -24,7 +24,7 @@ ORDERED TODO LIST:
   - Magnetic Tower that increases the likelihood of an enemy dropping a component when killed within range
   - Other towers that increase tower stats
 - Create worlds instead of levels
-  - Replace the current level selector with a system like Infinitode 2, New Super Mario Bros U, etc.
+  ✓ Replace the current level selector with a system like Infinitode 2, New Super Mario Bros U, etc.
   - Players must complete either X amounts of waves if the level is endless OR finish the predefined waves to move on
   - In the menu, have a button that allows you to toggle between "Online" and "Singleplayer"
   - Create a story world for the base game ALONG WITH a competitive world for multiplayer

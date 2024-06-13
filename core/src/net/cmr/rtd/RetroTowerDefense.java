@@ -2,10 +2,12 @@ package net.cmr.rtd;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.function.Consumer;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -13,7 +15,6 @@ import org.json.simple.parser.ParseException;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
@@ -24,9 +25,9 @@ import com.esotericsoftware.kryonet.Client;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
+import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.Packet;
@@ -174,7 +175,7 @@ public class RetroTowerDefense extends CMRGame {
 		OnlineGameStream.registerPackets(client.getKryo());
 		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
 
-		Log.info("Connecting to " + ip + ":" + port + "...");
+		Log.info("Connecting to w" + ip + ":" + port + "...");
 		client.start();
 		try {
 			client.connect(5000, ip, port);
@@ -288,7 +289,7 @@ public class RetroTowerDefense extends CMRGame {
 		return "Unknown";
 	}
 
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	public static void setLevelCleared(QuestFile save) {
 		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
 		if (!dataFile.exists()) {
@@ -436,6 +437,87 @@ public class RetroTowerDefense extends CMRGame {
 			}
 			obj.put(saveFolder, wave);
 			dataFile.writeString(obj.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}*/
+
+	public enum LevelValueKey {
+		HIGHSCORE, // Stored as a long
+		FARTHEST_WAVE, // Stored as a long
+		COMPLETED_TASKS, // stored as a long[], hashCode of each task
+		;
+
+		public String getKey() {
+			return name().toLowerCase();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getStoredLevelValue(QuestFile quest, LevelValueKey key, Class<T> type) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+			return null;
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			JSONObject levelData = (JSONObject) root.get(quest.getSaveFolderName());
+			if (levelData == null) {
+				return null;
+			}
+			Object value = levelData.get(key.getKey());
+			if (value == null) {
+				return null;
+			}
+			if (value instanceof JSONArray) {
+				JSONArray array = (JSONArray) value;
+				// If T is an array, convert the JSONArray to T
+				if (type.isArray()) {
+					Object arrayValue = Array.newInstance(type.getComponentType(), array.size());
+					for (int i = 0; i < array.size(); i++) {
+						Array.set(arrayValue, i, array.get(i));
+					}
+					return (T) arrayValue;
+				}
+			}
+			return type.cast(value);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("Stored value is not of type " + type.getSimpleName());
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void setStoredLevelValue(QuestFile quest, LevelValueKey key, Object value) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			JSONObject levelData = (JSONObject) root.get(quest.getSaveFolderName());
+			if (levelData == null) {
+				levelData = new JSONObject();
+				root.put(quest.getSaveFolderName(), levelData);
+			}
+			if (value != null && value.getClass().isArray()) {
+				JSONArray array = new JSONArray();
+				for (int i = 0; i < Array.getLength(value); i++) {
+					array.add(Array.get(value, i));
+				}
+				levelData.put(key.getKey(), array);
+			} else {
+				levelData.put(key.getKey(), value);
+			}
+			dataFile.writeString(root.toJSONString(), false);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

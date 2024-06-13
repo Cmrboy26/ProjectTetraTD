@@ -180,9 +180,9 @@ public class SelectionScreen extends AbstractScreenEX {
                 final WavesData data = WavesData.load(difficulty);
                 String name = data.name;
                 String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
-                if (RetroTowerDefense.isLevelCleared(fn)) {
+                /*if (RetroTowerDefense.isLevelCleared(fn)) {
                     name += " (Clear)";
-                }
+                }*/
                 TextButton button = new TextButton(name, Sprites.skin(), "toggle-small");
                 Audio.addClickSFX(button);
                 button.addListener(new ClickListener() {
@@ -221,13 +221,13 @@ public class SelectionScreen extends AbstractScreenEX {
             endless.setAlignment(Align.center);
             playOptions.add(endless).fillX().expandX().colspan(2).row();
 
-            long highscore = RetroTowerDefense.getHighscore(fn);
-            long farthestWave = RetroTowerDefense.getFarthestWave(fn);
-            if (highscore > 0) {
-                Label highscoreLabel = new Label("High Score: " + ShopManager.costToString(highscore).substring(1) + ", Farthest Wave: "+farthestWave, Sprites.skin(), "small");
-                highscoreLabel.setAlignment(Align.center);
-                playOptions.add(highscoreLabel).fillX().expandX().colspan(2).row();
-            }
+            //long highscore = RetroTowerDefense.getHighscore(fn);
+            //long farthestWave = RetroTowerDefense.getFarthestWave(fn);
+            //if (highscore > 0) {
+            //    Label highscoreLabel = new Label("High Score: " + ShopManager.costToString(highscore).substring(1) + ", Farthest Wave: "+farthestWave, Sprites.skin(), "small");
+            //    highscoreLabel.setAlignment(Align.center);
+            //    playOptions.add(highscoreLabel).fillX().expandX().colspan(2).row();
+            //}
         } else {   
             Label waveCount = new Label("Waves: " + data.size(), Sprites.skin(), "small");
             waveCount.setAlignment(Align.center);

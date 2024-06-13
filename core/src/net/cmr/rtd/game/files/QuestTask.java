@@ -1,5 +1,7 @@
 package net.cmr.rtd.game.files;
 
+import java.util.Objects;
+
 import org.json.simple.JSONObject;
 
 import net.cmr.rtd.game.storage.TeamInventory.Material;
@@ -47,9 +49,23 @@ public abstract class QuestTask {
     public abstract String getReadableTaskDescription(); // For example: "Reach Wave 10", "Collect 5 Steel", etc.
     public abstract boolean isTaskComplete(UpdateData data, int team); // Returns true if the task is complete given the current game state, false otherwise
 
+    public static QuestTask getTask(QuestFile file, long id) {
+        for (QuestTask task : file.getTasks()) {
+            if (task.hashCode() == id) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return getReadableTaskDescription();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof QuestTask && obj.hashCode() == hashCode();
     }
 
     private static class ReachWaveTask extends QuestTask {
@@ -67,7 +83,12 @@ public abstract class QuestTask {
 
         @Override
         public boolean isTaskComplete(UpdateData data, int team) {
-            return data.getWorld().getWave() >= wave;
+            return data.getWorld() != null && data.getWorld().getWave() >= wave;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(wave, type.name());
         }
     }
 
@@ -90,6 +111,11 @@ public abstract class QuestTask {
         public boolean isTaskComplete(UpdateData data, int team) {
             return data.getInventory(team).getMaterial(material) >= amount;
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(amount, type.name(), material.name());
+        }
     }
 
     private static class AmassMoneyTask extends QuestTask {
@@ -108,6 +134,11 @@ public abstract class QuestTask {
         @Override
         public boolean isTaskComplete(UpdateData data, int team) {
             return data.getInventory(team).getCash() >= amount;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(amount, type.name());
         }
     }
 

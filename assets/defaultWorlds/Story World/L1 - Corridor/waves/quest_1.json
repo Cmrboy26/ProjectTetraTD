@@ -4,11 +4,11 @@
 	"quests": [
 		{
 			"type": "REACH_WAVE",
-			"value": 10
+			"value": 1
 		},
 		{
 			"type": "AMASS_MONEY",
-			"value": 200
+			"value": 35
 		}
 	],
 	"endlessMode": false,

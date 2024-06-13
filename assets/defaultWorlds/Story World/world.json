@@ -2,7 +2,6 @@
 	"name": "Story",
 	"levels": [
 		"L1 - Corridor",
-		"L2 - Open",
-		"COMP 2s - Split"
+		"L2 - Open"
 	]
 }

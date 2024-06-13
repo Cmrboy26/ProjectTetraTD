@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -23,11 +24,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.files.LevelFolder;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.files.WorldFolder;
+import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.util.Audio;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
@@ -209,22 +213,24 @@ public class NewSelectionScreen extends ScreenAdapter {
                     // - have a sidebar that shows tasks to be completed in the level (for story mode) DONE
                     // - have a button to start the level singleplayer OR host a multiplayer online game DONE
 
-
                     Label questTasksLabel = new Label("Tasks:", Sprites.skin(), "small");
                     questTasksLabel.setAlignment(Align.left);
 
                     Label questTasks = new Label("", Sprites.skin(), "small");
                     questTasks.setAlignment(Align.left);
 
-                    Label questLabel = new Label("Quest", Sprites.skin(), "small");
+                    Label questLabel = new Label("Quest:", Sprites.skin(), "small");
                     questLabel.setAlignment(Align.center);
 
                     TextButton resumeGameButton = new TextButton("Resume", Sprites.skin(), "small");
                     Audio.addClickSFX(resumeGameButton);
                     resumeGameButton.pad(0, 20, 0, 20);
 
-                    Label playTypeLabel = new Label("Play Type", Sprites.skin(), "small");
+                    Label playTypeLabel = new Label("Play Type:", Sprites.skin(), "small");
                     playTypeLabel.setAlignment(Align.center);
+
+                    Label highScoreLabel = new Label("", Sprites.skin(), "small");
+                    highScoreLabel.setAlignment(Align.center);                    
 
                     float labelTopPad = 3;
 
@@ -244,11 +250,11 @@ public class NewSelectionScreen extends ScreenAdapter {
                     questSelect.setAlignment(Align.center);
                     questSelect.addListener(new ChangeListener() {
                         @Override
-                        public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected());
+                        public void changed(ChangeEvent event, Actor actor) {
+                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel);
                         }
                     });
-                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected());
+                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel);
 
                     SelectBox<PlayType> playType = new SelectBox<>(style);
                     playType.getScrollPane().setScrollbarsVisible(false);
@@ -284,7 +290,8 @@ public class NewSelectionScreen extends ScreenAdapter {
 
                     startButton.pad(0, 20, 0, 20);
 
-                    levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(3).row();
+                    levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(2);
+                    levelDialog.getContentTable().add(highScoreLabel).align(Align.right).row();
                     levelDialog.getContentTable().add(questTasks).align(Align.left).colspan(3).row();
 
                     levelDialog.getContentTable().add(questLabel).align(Align.center).colspan(1);
@@ -316,6 +323,22 @@ public class NewSelectionScreen extends ScreenAdapter {
             // TODO: If the level isn't unlocked yet, gray out the image
             // TODO: If the level is completed, make the image green or something
             Image slot = new Image(Sprites.sprite(SpriteType.WORLD_LEVEL));
+            boolean areAllTasksCompleted = true;
+            boolean noTasksPresent = true;
+            for (QuestFile quest : getValidQuests(level)) {
+                if (!quest.hasNoTasks()) {
+                    noTasksPresent = false;
+                }
+                if (!quest.areAllTasksCompleted()) {
+                    areAllTasksCompleted = false;
+                    break;
+                }
+            }
+            if (areAllTasksCompleted && !noTasksPresent) {
+                slot.setColor(Color.GREEN);
+            } else {
+                slot.setColor(Color.WHITE);
+            }
             levelTable.add(slot).size(buttonSize, buttonSize / 2).align(Align.center).pad(5);
         }
 
@@ -334,7 +357,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         return level.readQuests();
     }
 
-    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file) {
+    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel) {
         taskListLabel.setText(getTasksList(file));
 
         boolean saveFileExists = file.questFileExists();
@@ -342,6 +365,16 @@ public class NewSelectionScreen extends ScreenAdapter {
             resumeGameButton.setDisabled(true);
             resumeGameButton.setColor(Color.DARK_GRAY);
             resumeGameButton.getLabel().setColor(Color.GRAY);
+        }
+
+        Long highScore = RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.HIGHSCORE, Long.class);
+        if (highScore != null) {
+            String text = "High Score: " + ShopManager.costToString(highScore).substring(1);
+            text += "\n";
+            text += "Farthest Wave: " + RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.FARTHEST_WAVE, Long.class);
+            highScoreLabel.setText(text);
+        } else {
+            highScoreLabel.setText("");
         }
     }
 
@@ -351,9 +384,22 @@ public class NewSelectionScreen extends ScreenAdapter {
             return "- No tasks found! Have fun!";
         }
         StringBuilder builder = new StringBuilder();
+
+        Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.COMPLETED_TASKS, Long[].class);
+        if (completedTasks == null) {
+            completedTasks = new Long[0];
+        }
+
         for (QuestTask task : tasks) {
             builder.append("- ");
-            builder.append(task.toString()).append("\n");
+            builder.append(task.toString());
+            for (Long completedTask : completedTasks) {
+                if (completedTask == task.hashCode()) {
+                    builder.append(" (Completed)");
+                    break;
+                }
+            }
+            builder.append("\n");
         }
         return builder.toString();
     }

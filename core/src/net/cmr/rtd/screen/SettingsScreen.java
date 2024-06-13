@@ -8,10 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.github.tommyettinger.textra.TextraTooltip;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.util.AbstractScreenEX;
@@ -29,10 +29,10 @@ public class SettingsScreen extends AbstractScreenEX {
 		add(Align.center, getSettingsTable(() -> {
             RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
             game.setScreen(new MainMenuScreen());
-        }));
+        }, true));
     }
 
-    public static Table getSettingsTable(Runnable onBack) {
+    public static Table getSettingsTable(Runnable onBack, boolean allowUsernameChange) {
 
 		Table table = new Table();
 		table.setFillParent(true);
@@ -76,7 +76,11 @@ public class SettingsScreen extends AbstractScreenEX {
 
         settingsTable.row();
         
-        TextField username = new TextField("Username", Sprites.skin(), "small");
+        TextFieldStyle textFieldStyle = new TextFieldStyle(Sprites.skin().get("small",  TextField.TextFieldStyle.class));
+        textFieldStyle.disabledFontColor = Color.GRAY;
+
+        TextField username = new TextField("Username", textFieldStyle);
+        username.setDisabled(!allowUsernameChange);
         username.setMessageText("Username");
         username.setText(Settings.getPreferences().getString(Settings.USERNAME));
         username.setAlignment(Align.center);

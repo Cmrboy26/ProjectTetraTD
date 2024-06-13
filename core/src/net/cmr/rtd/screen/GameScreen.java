@@ -2,6 +2,7 @@ package net.cmr.rtd.screen;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -52,9 +53,12 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.kryo.util.Null;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.LevelSave;
+import net.cmr.rtd.game.files.QuestFile;
+import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ApplyMaterialPacket;
 import net.cmr.rtd.game.packets.AttackPacket;
@@ -723,7 +727,7 @@ public class GameScreen extends AbstractScreenEX {
         settings = new Window("", Sprites.skin(), "small");
         Table settingsTable = SettingsScreen.getSettingsTable(() -> {
             settings.setVisible(false);
-        });
+        }, false);
         settingsTable.row();
         TextButton leave = new TextButton("Leave Game", Sprites.skin(), "small");
         leave.addListener(new ClickListener() {
@@ -968,7 +972,8 @@ public class GameScreen extends AbstractScreenEX {
                         int life = Integer.parseInt(currentLife);
                         if (life > 0) {
                             Log.info("Level successfully cleared!");
-                            RetroTowerDefense.setLevelCleared(gameManager.getQuest());
+                            //RetroTowerDefense.setLevelCleared(gameManager.getQuest());
+                            //RetroTowerDefense.setStoredLevelValue(questFile, LevelValueKey., currentLife);
                         }
                     } catch (NumberFormatException e) {
                         // Do nothing
@@ -1026,8 +1031,12 @@ public class GameScreen extends AbstractScreenEX {
             } else {
                 // Solo game. Set the high score if it is higher than the current high score.
                 if (gameManager != null) {
-                    RetroTowerDefense.setHighscore(gameManager.getQuest(), gameOverPacket.score);
-                    RetroTowerDefense.setFarthestWave(gameManager.getQuest(), gameOverPacket.endingWave);
+                    if (gameOverPacket.score > RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class)) {
+                        RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, gameOverPacket.score);
+                    }
+                    if (gameOverPacket.endingWave > RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Integer.class)) {
+                        RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, gameOverPacket.endingWave);
+                    }
                 }
             }
 
@@ -1126,6 +1135,41 @@ public class GameScreen extends AbstractScreenEX {
         }
         
         updateCamera();
+
+        updateTasks();
+    }
+
+    /**
+     * To be used ONLY if the player is the host.
+     */
+
+    HashSet<Long> storedCompleted = new HashSet<Long>();
+    public void updateTasks() {
+        if (gameManager == null) return;
+        QuestFile quest = gameManager.getQuest();
+        if (quest == null) return;
+        QuestTask[] tasks = quest.getTasks();
+        if (tasks == null || tasks.length == 0) return;
+        HashSet<Long> calculatedCompleted = quest.calculateCompletedTasks(team, gameManager.getUpdateData());
+        HashSet<Long> justCompleted = quest.getJustCompletedTasks(storedCompleted, calculatedCompleted);
+
+        // Add newly completed tasks to the completed list
+        for (Long id : justCompleted) {
+            storedCompleted.add(id);
+        }
+
+        if (justCompleted.size() == 0) return;
+        for (Long id : justCompleted) {
+            QuestTask task = QuestTask.getTask(quest, id);
+            if (task == null) continue;
+            String message = task.getReadableTaskDescription();
+            if (message != null && !message.isEmpty()) {
+                notification(SpriteType.ICON, message, 5);
+            }
+        }
+
+        long[] completed = storedCompleted.stream().mapToLong(l -> l).toArray();
+        RetroTowerDefense.setStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, completed);
     }
 
     /**

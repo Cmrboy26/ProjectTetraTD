@@ -1,6 +1,7 @@
 package net.cmr.rtd.game.files;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,7 +11,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
 import net.cmr.rtd.game.world.GameObject;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
 
@@ -190,9 +194,69 @@ public class QuestFile {
         return wavesData;
     }
 
+    /**
+     * @return a hashset of tasks that have been completed with the provided game state.
+     * The new list can be compared with a previous list to determine which tasks have been completed since the last list update using {@link #getJustCompletedTasks(HashSet, HashSet)}
+     */
+    public HashSet<Long> calculateCompletedTasks(int team, UpdateData updateData) {
+        QuestTask[] tasks = getTasks();
+        HashSet<Long> completedTasks = new HashSet<>();
+        for (int i = 0; i < tasks.length; i++) {
+            QuestTask task = tasks[i];
+            boolean isComplete = task.isTaskComplete(updateData, team);
+            if (!isComplete) {
+                continue;
+            }
+            completedTasks.add((long) task.hashCode());
+        }
+        return completedTasks;
+    }
+
+    /**
+     * @return a hashset of tasks that are different between the previous and current task lists
+     * To be used in conjunction with {@link #calculateCompletedTasks(int, UpdateData)} in, for example, 
+     * one time UI notifications and saving completed tasks to file
+     */
+    public HashSet<Long> getJustCompletedTasks(HashSet<Long> previousTasks, HashSet<Long> currentTasks) {
+        HashSet<Long> justCompletedTasks = new HashSet<>();
+        for (Long task : currentTasks) {
+            if (!previousTasks.contains(task)) {
+                justCompletedTasks.add(task);
+            }
+        }
+        return justCompletedTasks;
+    }
+
+    public boolean hasNoTasks() {
+        return getTasks() == null || getTasks().length == 0;
+    }
+
+    public boolean areAllTasksCompleted() {
+        if (hasNoTasks()) {
+            return true;
+        }
+        Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(this, LevelValueKey.COMPLETED_TASKS, Long[].class);
+        if (completedTasks == null) {
+            return false;
+        }
+        HashSet<Long> completedTasksSet = new HashSet<>();
+        for (Long task : completedTasks) {
+            completedTasksSet.add(task);
+        }
+        HashSet<Long> allTasks = new HashSet<>();
+        for (QuestTask task : getTasks()) {
+            allTasks.add((long) task.hashCode());
+        }
+        if (!completedTasksSet.containsAll(allTasks)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return getDisplayName();
     }
+
     
 }

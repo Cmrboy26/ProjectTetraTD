@@ -30,7 +30,7 @@ ORDERED TODO LIST:
   - Add prerequisites to play more levels
   - Store the last viewed world and select that whenever the game loads (i.e. if the world when the game was exited was story, re-open the story world)
   - Create a story world for the base game ALONG WITH a competitive world for multiplayer
-  - Add a medal to the far right side of the tasks label (inline with the tasks label) for when everything task for that quest has been completed for that questfile
+  ✓ Add a medal to the far right side of the tasks label (inline with the tasks label) for when everything task for that quest has been completed for that questfile
 - Make ~5 good base game levels (try not to do endless) and ~2 player levels
 - Create a tutorial button in the play menu for new players
 - Add a bestiary for players to learn more about the enemies they encounter 

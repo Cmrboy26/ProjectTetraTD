@@ -232,6 +232,8 @@ public class NewSelectionScreen extends ScreenAdapter {
                     Label highScoreLabel = new Label("", Sprites.skin(), "small");
                     highScoreLabel.setAlignment(Align.center);                    
 
+                    Image trophy = new Image(Sprites.sprite(SpriteType.TROPHY));
+
                     float labelTopPad = 3;
 
                     SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
@@ -251,10 +253,10 @@ public class NewSelectionScreen extends ScreenAdapter {
                     questSelect.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel);
+                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
                         }
                     });
-                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel);
+                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
 
                     SelectBox<PlayType> playType = new SelectBox<>(style);
                     playType.getScrollPane().setScrollbarsVisible(false);
@@ -291,8 +293,9 @@ public class NewSelectionScreen extends ScreenAdapter {
                     startButton.pad(0, 20, 0, 20);
 
                     levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(2);
-                    levelDialog.getContentTable().add(highScoreLabel).align(Align.right).row();
-                    levelDialog.getContentTable().add(questTasks).align(Align.left).colspan(3).row();
+                    levelDialog.getContentTable().add(highScoreLabel).align(Align.right).colspan(1).row();
+                    levelDialog.getContentTable().add(questTasks).align(Align.left).colspan(2);
+                    levelDialog.getContentTable().add(trophy).size(64).align(Align.right).colspan(1).row();
 
                     levelDialog.getContentTable().add(questLabel).align(Align.center).colspan(1);
                     levelDialog.getContentTable().add(playTypeLabel).align(Align.center).colspan(1);
@@ -357,7 +360,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         return level.readQuests();
     }
 
-    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel) {
+    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel, Image trophy) {
         taskListLabel.setText(getTasksList(file));
 
         boolean saveFileExists = file.questFileExists();
@@ -375,6 +378,12 @@ public class NewSelectionScreen extends ScreenAdapter {
             highScoreLabel.setText(text);
         } else {
             highScoreLabel.setText("");
+        }
+
+        if (file.areAllTasksCompleted() && !file.hasNoTasks()) {
+            trophy.setVisible(true);
+        } else {
+            trophy.setVisible(false);
         }
     }
 

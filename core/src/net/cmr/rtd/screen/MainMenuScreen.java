@@ -1,5 +1,7 @@
 package net.cmr.rtd.screen;
 
+import java.util.Calendar;
+
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -205,30 +207,39 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.getContentTable().row();
 				creditsDialog.text("Beta Testing: SirPotato42, Andrew", small);
 				creditsDialog.getContentTable().row();
-				creditsDialog.text("Icon: Barnold Barnoldfanger Sr. (from Georgia)", small);
-				Image barnold = new Image(Sprites.drawable(SpriteType.BARNOLD2));
-				creditsDialog.getContentTable().add(barnold).size(48).pad(1);
-				creditsDialog.getContentTable().row();
-				creditsDialog.text("Thank you to the Barnoldfanger \nfamily for their generous \"donation\"", small);
+				creditsDialog.text("Copyright Cmrboy26 (C)", small);
 				creditsDialog.getContentTable().row();
 
-				Stack urlstack = new Stack();
-				Label underlines = new Label("__________________", small);
-				underlines.setColor(Color.BLUE);
-				urlstack.add(underlines);
-				Label label = new Label("In memory of Junior...", small);
-				label.addListener(new ClickListener() {
-					@Override
-					public void clicked(InputEvent event, float x, float y) {
-						Gdx.net.openURI("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-					}
-				});
-				urlstack.add(label);
-				label.setColor(Color.BLUE);
-				creditsDialog.getContentTable().add(urlstack);
-				barnold = new Image(Sprites.drawable(SpriteType.BARNOLD));
-				creditsDialog.getContentTable().add(barnold).size(48).pad(1);
-				creditsDialog.getContentTable().row();
+				// April fools joke
+				if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+					creditsDialog.text("Icon: Barnold Barnoldfanger Sr. (from Georgia)", small);
+					Image barnold = new Image(Sprites.drawable(SpriteType.BARNOLD2));
+					creditsDialog.getContentTable().add(barnold).size(48).pad(1);
+					creditsDialog.getContentTable().row();
+					creditsDialog.text("Thank you to the Barnoldfanger \nfamily for their generous \"donation\"", small);
+					creditsDialog.getContentTable().row();
+	
+					Stack urlstack = new Stack();
+					Label underlines = new Label("__________________", small);
+					underlines.setColor(Color.BLUE);
+					urlstack.add(underlines);
+					Label label = new Label("In memory of Junior...", small);
+					label.addListener(new ClickListener() {
+						@Override
+						public void clicked(InputEvent event, float x, float y) {
+							Gdx.net.openURI("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+							label.addAction(Actions.sequence(Actions.delay(3), Actions.run(() -> {
+								label.setText("April fools");
+							})));
+						}
+					});
+					urlstack.add(label);
+					label.setColor(Color.BLUE);
+					creditsDialog.getContentTable().add(urlstack);
+					barnold = new Image(Sprites.drawable(SpriteType.BARNOLD));
+					creditsDialog.getContentTable().add(barnold).size(48).pad(1);
+					creditsDialog.getContentTable().row();
+				}
 
 				TextButton button = new TextButton("Close", Sprites.skin(), "small");
 				button.pad(0, 15, 0, 15);

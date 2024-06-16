@@ -526,6 +526,7 @@ public class GameScreen extends AbstractScreenEX {
         inventoryHelp.setAlignment(Align.center);
         inventoryTable.row();
 
+        // NOTE: I noticed that if scrap was the last thing to be added to the inventory, it will NOT update until something else appears in the inventory
         String componentUsage = "- Can be applied to boost a tower's stats up to "+TowerEntity.MAX_COMPONENTS+" times.\n- Only one type of component can be applied to a tower at once.";
         inventoryTable.add(getInventorySlot(SpriteType.LUBRICANT, () -> getTeamInventory().getWd40(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
@@ -1031,10 +1032,12 @@ public class GameScreen extends AbstractScreenEX {
             } else {
                 // Solo game. Set the high score if it is higher than the current high score.
                 if (gameManager != null) {
-                    if (gameOverPacket.score > RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class)) {
+                    Long storedHighScore = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class);
+                    Integer storedFarthestWave = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Integer.class);
+                    if (storedHighScore != null && gameOverPacket.score > storedHighScore) {
                         RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, gameOverPacket.score);
                     }
-                    if (gameOverPacket.endingWave > RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Integer.class)) {
+                    if (storedFarthestWave != null && gameOverPacket.endingWave > storedFarthestWave) {
                         RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, gameOverPacket.endingWave);
                     }
                 }

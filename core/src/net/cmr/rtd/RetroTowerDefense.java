@@ -74,14 +74,14 @@ public class RetroTowerDefense extends CMRGame {
 
 		Log.debug("Copying story levels to external folder...");
 		// Create story level folders from the assets
-		FileHandle defaultWorldsHandle = Gdx.files.local("defaultWorlds/");
+		FileHandle defaultWorldsHandle = Gdx.files.internal("defaultWorlds/");
 		boolean defaultWorldsHandleExists = defaultWorldsHandle.exists();
 		Log.debug("Story levels handle exists: " + defaultWorldsHandleExists);
 		Log.debug("Local directory available: " + Gdx.files.isLocalStorageAvailable());
 		Log.debug("External directory available: " + Gdx.files.isExternalStorageAvailable());
 		if (!defaultWorldsHandleExists) {
 			Log.debug("Handle not found, attempting to copy assets from \""+defaultWorldsHandle.path()+"\" to \""+worldsFolder.path()+"\"...");
-			defaultWorldsHandle = Gdx.files.local("assets/defaultWorlds/");
+			defaultWorldsHandle = Gdx.files.internal("assets/defaultWorlds/");
 		}
 
 		Log.debug("Story level files: " + defaultWorldsHandle.list().length);

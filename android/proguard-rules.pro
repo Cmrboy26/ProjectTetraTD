@@ -37,3 +37,9 @@
    boolean reportFixture(long);
    float   reportRayFixture(long, float, float, float, float, float);
 }
+
+-keep class com.badlogic.**{
+   **[] $VALUES;
+    *;
+}
+-keep class com.badlogic.gdx.graphics.g2d.BitmapFont

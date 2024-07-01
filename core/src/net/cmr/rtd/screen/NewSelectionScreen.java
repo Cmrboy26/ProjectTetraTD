@@ -136,13 +136,22 @@ public class NewSelectionScreen extends ScreenAdapter {
                 onWorldSelected(worldSelection.getSelected());
             }
         });
-        Audio.addClickSFX(worldSelection);
         leftBottomUI.add(worldSelection).align(Align.left).pad(10f).colspan(1);
 
-        // Set the default selection and notify onWorldSelected
-        worldSelection.setSelected(validWorlds[0]);
-        onWorldSelected(validWorlds[0]);
+        String preferredWorld = RetroTowerDefense.getLastPlayedWorld();
+        WorldFolder selectedWorldFolder = validWorlds[0];
+        for (WorldFolder world : validWorlds) {
+            String worldName = world.getFolder().name();
+            if (worldName.equals(preferredWorld)) {
+                selectedWorldFolder = world;
+                break;
+            }
+        }
 
+        // Set the default selection and notify onWorldSelected
+        worldSelection.setSelected(selectedWorldFolder);
+        onWorldSelected(selectedWorldFolder);
+        Audio.addClickSFX(worldSelection);
 
     }
 
@@ -193,6 +202,7 @@ public class NewSelectionScreen extends ScreenAdapter {
 
     public void onWorldSelected(final WorldFolder world) {
         Log.info("Selected world: " + world);
+        RetroTowerDefense.setLastPlayedWorld(world.getFolder().name());
         levelsTable.clear();
 
         Table levelSelection = new Table();
@@ -202,17 +212,76 @@ public class NewSelectionScreen extends ScreenAdapter {
         LevelFolder[] levels = world.readLevels();
         for (LevelFolder level : levels) {
             Table levelTable = new Table();
+            boolean locked = level.isLevelLocked();
             levelTable.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     super.clicked(event, x, y);
+                    if (locked) {
+                        Audio.getInstance().playSFX(Audio.GameSFX.WARNING, 1f);
+                        // TODO: Display what is needed to unlock the level
+
+                        Dialog dialog = new Dialog("Level Locked", Sprites.skin(), "small");
+                        dialog.setMovable(false);
+                        dialog.getTitleLabel().setAlignment(Align.center);
+                        dialog.pad(20);
+                        dialog.padTop(40);
+
+                        Label text1 = new Label("This level is locked. Complete the requirements to unlock it:", Sprites.skin(), "small");
+                        dialog.text(text1);
+                        dialog.getContentTable().row();
+
+                        for (String requirement : level.getUnlockRequirements()) {
+                            Log.info("Requirement: " + requirement);
+                            String[] parts = requirement.split("/");
+                            if (parts.length != 4) {
+                                Log.warning("Invalid unlock requirement: " + requirement);
+                                continue;
+                            }
+
+                            WorldFolder world = new WorldFolder(parts[0]);
+                            LevelFolder level = new LevelFolder(world, parts[1]);
+                            QuestFile quest = new QuestFile(level, parts[2]);
+                            QuestTask task = QuestTask.getTask(quest, Long.parseLong(parts[3]));
+                            if (task == null) {
+                                Log.warning("Invalid task ID: " + parts[3] + " in " + requirement);
+                                continue;
+                            }
+                            boolean completed = false;
+                            Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
+                            if (completedTasks != null) {
+                                for (Long completedTask : completedTasks) {
+                                    if (completedTask == task.id) {
+                                        completed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (completed) {
+                                continue;
+                            }
+                            String taskDescription = task.getReadableTaskDescription();
+                            String location = world.getDisplayName() + " / " + level.getDisplayName() + " / " + quest.getDisplayName();
+                            Label text = new Label("- " + taskDescription + " in \""+location+"\"", Sprites.skin(), "small");
+                            dialog.getContentTable().add(text).align(Align.left).pad(5).row();
+                        }
+
+                        TextButton close = new TextButton("Close", Sprites.skin(), "small");
+                        close.pad(0, 20, 0, 20);
+                        dialog.button(close, false);
+
+                        dialog.key(Input.Keys.ESCAPE, false);
+                        dialog.setOrigin(Align.topLeft);
+                        dialog.setScale(.75f);
+                        dialog.pack();
+                        dialog.setPosition(10, 360 - 10, Align.topLeft);
+                        dialog.show(stage, Actions.alpha(1));
+
+                        return;
+                    }
                     Audio.getInstance().playSFX(Audio.GameSFX.CLICK, 1f);
                     Log.info("Clicked level: " + level);
                     Dialog levelDialog = new Dialog("Level: "+level, Sprites.skin(), "small");
-                    // TODO: Make a dialog that shows the information
-                    // - show all quests TODO: STILL WORK ON THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SHOW WHEN THE QUESTS ARE COMPLETED
-                    // - have a sidebar that shows tasks to be completed in the level (for story mode) DONE
-                    // - have a button to start the level singleplayer OR host a multiplayer online game DONE
 
                     Label questTasksLabel = new Label("Tasks:", Sprites.skin(), "small");
                     questTasksLabel.setAlignment(Align.left);
@@ -345,6 +414,9 @@ public class NewSelectionScreen extends ScreenAdapter {
             } else {
                 slot.setColor(Color.WHITE);
             }
+            if (locked) {
+                slot.setColor(Color.GRAY);
+            }
             levelTable.add(slot).size(buttonSize, buttonSize / 2).align(Align.center).pad(5);
         }
 
@@ -396,7 +468,7 @@ public class NewSelectionScreen extends ScreenAdapter {
 
     public String getTasksList(QuestFile file) {
         QuestTask[] tasks = file.getTasks();
-        if (tasks == null) {
+        if (tasks == null || tasks.length == 0) {
             return "- No tasks found! Have fun!";
         }
         StringBuilder builder = new StringBuilder();
@@ -410,7 +482,7 @@ public class NewSelectionScreen extends ScreenAdapter {
             builder.append("- ");
             builder.append(task.toString());
             for (Long completedTask : completedTasks) {
-                if (completedTask == task.hashCode()) {
+                if (completedTask == task.id) {
                     builder.append(" (Completed)");
                     break;
                 }

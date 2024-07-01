@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.function.Consumer;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -18,6 +17,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
+import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Client;
@@ -46,6 +46,10 @@ import net.cmr.util.Sprites;
 
 public class RetroTowerDefense extends CMRGame {
 	
+	public static final int MAJORVERSION = 1;
+	public static final int MINORVERSION = 0;
+	public static final int PATCHVERSION = 4;
+
 	public RetroTowerDefense(NativeFileChooser fileChooser) {
 		super(fileChooser);
 	}
@@ -292,7 +296,7 @@ public class RetroTowerDefense extends CMRGame {
 	public enum LevelValueKey {
 		HIGHSCORE, // Stored as a long
 		FARTHEST_WAVE, // Stored as a long
-		COMPLETED_TASKS, // stored as a long[], hashCode of each task
+		COMPLETED_TASKS, // stored as a long[], ID of each task
 		;
 
 		public String getKey() {
@@ -415,12 +419,16 @@ public class RetroTowerDefense extends CMRGame {
 	}
 
 	public boolean hasLastPlayedQuest() {
-		String[] lastPlayedQuest = getLastPlayedQuest();
-		if (lastPlayedQuest == null) {
+		try {
+			String[] lastPlayedQuest = getLastPlayedQuest();
+			if (lastPlayedQuest == null) {
+				return false;
+			}
+			QuestFile quest = QuestFile.deserialize(lastPlayedQuest);
+			return quest != null && quest.getSaveFolder().child("wave.json").exists();
+		} catch (Exception e) {
 			return false;
 		}
-		QuestFile quest = QuestFile.deserialize(lastPlayedQuest);
-		return quest != null && quest.getSaveFolder().child("wave.json").exists();
 	}
 
 	public void clearLastPlayedQuest() {
@@ -469,6 +477,42 @@ public class RetroTowerDefense extends CMRGame {
 		try {
 			JSONObject root = (JSONObject) parser.parse(data);
 			root.put("lastPlayedTeam", team);
+			dataFile.writeString(root.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static @Null String getLastPlayedWorld() {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			String world = (String) root.get("lastPlayedWorld");
+			if (world == null) {
+				return null;
+			}
+			return world;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static void setLastPlayedWorld(String world) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			root.put("lastPlayedWorld", world);
 			dataFile.writeString(root.toJSONString(), false);
 		} catch (ParseException e) {
 			e.printStackTrace();

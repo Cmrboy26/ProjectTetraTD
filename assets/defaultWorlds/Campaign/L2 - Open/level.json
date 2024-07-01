@@ -4,5 +4,8 @@
 		"quest_1.json",
 		"quest_2.json",
 		"quest_3.json"
+	],
+	"unlockRequirements": [
+		"Campaign/L1 - Corridor/quest_1.json/0",
 	]
 }

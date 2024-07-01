@@ -37,10 +37,6 @@ import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class MainMenuScreen extends AbstractScreenEX {
-    
-	public static final int MAJORVERSION = 1;
-	public static final int MINORVERSION = 0;
-	public static final int PATCHVERSION = 3;
 
 	Dialog creditsDialog;
 	boolean easterEggRunning = false;
@@ -204,7 +200,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table1.setFillParent(true);
 		Table leftBottomTable = new Table();
 		table1.add(leftBottomTable).expand().align(Align.bottomLeft);
-		String versionInfo = "RTD v"+MAJORVERSION+"."+MINORVERSION+"."+PATCHVERSION;
+		String versionInfo = "RTD v"+RetroTowerDefense.MAJORVERSION+"."+RetroTowerDefense.MINORVERSION+"."+RetroTowerDefense.PATCHVERSION;
 		if (Gdx.app.getType() == ApplicationType.Android) {
 			versionInfo += " (Android)";
 		}

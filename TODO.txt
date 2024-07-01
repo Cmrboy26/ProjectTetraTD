@@ -20,14 +20,14 @@ ORDERED TODO LIST:
   - Distributor that applies a fraction of a gemstone's power to towers in range
   - Magnetic Tower that increases the likelihood of an enemy dropping a component when killed within range
   - Other towers that increase tower stats
-- Create worlds instead of levels
+✓ Create worlds instead of levels
   ✓ Replace the current level selector with a system like Infinitode 2, New Super Mario Bros U, etc.
   ✓ Players must complete either X amounts of waves if the level is endless OR finish the predefined waves to complete the level
   ✓ In the menu, have a button that allows you to toggle between "Online" and "Singleplayer"
-  - Add prerequisites to play more levels. (Lock levels, unlock them if certain quests are completed).
+  ✓ Add prerequisites to play more levels. (Lock levels, unlock them if certain quests are completed).
   ✓ When players press resume, force them to join the team they originally selected
-  - Store the last viewed world and select that whenever the game loads (i.e. if the world when the game was exited was story, re-open the story world)
-  - Create a campaign world for the base game ALONG WITH a competitive world for multiplayer
+  ✓ Store the last viewed world and select that whenever the game loads (i.e. if the world when the game was exited was story, re-open the story world)
+  ✓ Create a campaign world for the base game ALONG WITH a competitive world for multiplayer
   ✓ Add a medal to the far right side of the tasks label (inline with the tasks label) for when everything task for that quest has been completed for that questfile
 - Make ~5 good base game levels (try not to do endless) and ~2 player levels
 ✓ Create a tutorial button in the play menu for new players
@@ -41,12 +41,10 @@ ORDERED TODO LIST:
 - Add a "No breaks" option, which disables all preperation time as a challenge option. It would give more currency as a reward.
 - Add "end with health greater than" quest task
 - Add "take no damage" quest task
-
-  REMEMBER TO:
-  - incorporate the time aspect of the game as much as possible (mining towers should produce after a certain amount of time, not just RNG)
-  - probably come up with a name
-
-Don't render 
+- Add "build no more than x towers" quest task
+- REMEMBER WHEN BUILDING FOR ANDROID, CHECK android/build/intermediates/assets/debug to make sure the worlds are in there correctly
+- Add an option to disable buying certain towers in the quest json file
+- Show ICONS in the tutorial instead of saying "in the right bottom corner" and whatnot
 
 - Bestiary
 - More (better) levels
@@ -56,7 +54,7 @@ Don't render
 
 - Make left shift force insert component instead of showing the dialog 
 - More music
-- Consider: should fire and ice deal more damage?
+- Consider: should fire and ice combined deal more damage?
 - Improve shop layout (ADD TABS)
 - ADD LOSE/WIN SCREEN (where you can reset or play again)
 - {

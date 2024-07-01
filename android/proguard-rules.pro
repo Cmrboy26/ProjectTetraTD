@@ -48,3 +48,5 @@
    **[] $VALUES;
     *;
 }
+
+-dontwarn net.cmr.rtd.screen.HostScreen$3

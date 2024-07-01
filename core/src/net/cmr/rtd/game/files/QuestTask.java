@@ -4,15 +4,22 @@ import java.util.Objects;
 
 import org.json.simple.JSONObject;
 
+import com.esotericsoftware.minlog.Log;
+
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.UpdateData;
 
 public abstract class QuestTask {
     
     public final TaskType type;
+    public final long id;
 
-    private QuestTask(TaskType type) {
+    private QuestTask(TaskType type, long id) {
         this.type = type;
+        if (id == -1) {
+            id = hashCode();
+        }
+        this.id = id;
     }
 
     public enum TaskType {
@@ -33,14 +40,16 @@ public abstract class QuestTask {
     public static QuestTask readTask(JSONObject object) {
         TaskType type = TaskType.valueOf((String) object.get("type"));
         long value = (long) object.get("value");
+        @SuppressWarnings("unchecked")
+        long id = (long) object.getOrDefault("id", -1L);
         switch (type) {
             case REACH_WAVE:
-                return new ReachWaveTask(value);
+                return new ReachWaveTask(id, value);
             case COLLECT_MATERIAL:
                 String material = (String) object.get("material");
-                return new CollectMaterialTask(material, value);
+                return new CollectMaterialTask(id, material, value);
             case AMASS_MONEY:
-                return new AmassMoneyTask(value);
+                return new AmassMoneyTask(id, value);
             default:
                 throw new IllegalArgumentException("Unsupported task type");
         }
@@ -51,7 +60,7 @@ public abstract class QuestTask {
 
     public static QuestTask getTask(QuestFile file, long id) {
         for (QuestTask task : file.getTasks()) {
-            if (task.hashCode() == id) {
+            if (task.id == id) {
                 return task;
             }
         }
@@ -65,14 +74,14 @@ public abstract class QuestTask {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof QuestTask && obj.hashCode() == hashCode();
+        return obj instanceof QuestTask && ((QuestTask) obj).id == id;
     }
 
     private static class ReachWaveTask extends QuestTask {
         private final long wave;
 
-        private ReachWaveTask(long wave) {
-            super(TaskType.REACH_WAVE);
+        private ReachWaveTask(long id, long wave) {
+            super(TaskType.REACH_WAVE, id);
             this.wave = wave;
         }
 
@@ -88,6 +97,7 @@ public abstract class QuestTask {
 
         @Override
         public int hashCode() {
+            Thread.dumpStack();
             return Objects.hash(wave, type.name());
         }
     }
@@ -96,8 +106,8 @@ public abstract class QuestTask {
         private final Material material;
         private final long amount;
 
-        private CollectMaterialTask(String material, long amount) {
-            super(TaskType.COLLECT_MATERIAL);
+        private CollectMaterialTask(long id, String material, long amount) {
+            super(TaskType.COLLECT_MATERIAL, id);
             this.material = Material.valueOf(material);
             this.amount = amount;
         }
@@ -121,8 +131,8 @@ public abstract class QuestTask {
     private static class AmassMoneyTask extends QuestTask {
         private final long amount;
 
-        private AmassMoneyTask(long amount) {
-            super(TaskType.AMASS_MONEY);
+        private AmassMoneyTask(long id, long amount) {
+            super(TaskType.AMASS_MONEY, id);
             this.amount = amount;
         }
 

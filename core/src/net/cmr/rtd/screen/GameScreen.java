@@ -494,17 +494,17 @@ public class GameScreen extends AbstractScreenEX {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_LUBRICANT;
             enterComponentMode();
-        }, "Lubricant", componentUsage, size)).size(size);
+        }, "Lubricant (Component)", componentUsage, size)).size(size);
         inventoryTable.add(getInventorySlot(SpriteType.SCOPE, () -> getTeamInventory().getScopes(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_SCOPE;
             enterComponentMode();
-        }, "Scopes", componentUsage, size)).size(size);
+        }, "Scopes (Component)", componentUsage, size)).size(size);
         inventoryTable.add(getInventorySlot(SpriteType.SCRAP, () -> getTeamInventory().getScraps(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_SCRAP_METAL;
             enterComponentMode();
-        }, "Scrap Metal", componentUsage, size)).size(size);
+        }, "Scrap Metal (Component)", componentUsage, size)).size(size);
         String resourceUsage = "- Resource to build and upgrade special towers.";
         String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost if changed.";
 
@@ -515,7 +515,7 @@ public class GameScreen extends AbstractScreenEX {
                     componentAction = PurchaseAction.APPLY_MATERIAL;
                     enterGemstoneMode(material);
                 }
-            }, material.materialName, material.materialType == MaterialType.GEMSTONE ? gemstoneUsage : resourceUsage, size)).size(size);
+            }, material.materialName + (material.materialType == MaterialType.GEMSTONE ? " (Gemstone)" : " (Resource)"), material.materialType == MaterialType.GEMSTONE ? gemstoneUsage : resourceUsage, size)).size(size);
             // columns items per row
             if ((inventoryTable.getCells().size - 1) % columns == 0) {
                 inventoryTable.row();
@@ -972,7 +972,7 @@ public class GameScreen extends AbstractScreenEX {
             } else {
                 notification(SpriteType.STRUCTURE, "Team " + (teamPacket.getTeamIndex()+1) + " won the game!", 10);
                 if (gameManager != null) {
-                    notification(SpriteType.STRUCTURE, "Game Over! Press ';' to restart the game.", 30);
+                    //notification(SpriteType.STRUCTURE, "Game Over! Press ';' to restart the game.", 30);
                     String currentLife = structureLifeLabel.getText().toString();
                     // if current life is greater than zero, set the level as cleared
                     try {

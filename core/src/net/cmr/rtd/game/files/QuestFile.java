@@ -17,6 +17,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
+import net.cmr.util.Log;
 
 /**
  * Represents a wave file for a level inside of a level folder
@@ -76,6 +77,8 @@ public class QuestFile {
                     JSONObject task = (JSONObject) taskList.get(i);
                     tasks[i] = QuestTask.readTask(task);
                 }
+            } else {
+                tasks = new QuestTask[0];
             }
 
             displayName = (String) object.get("name");
@@ -212,7 +215,7 @@ public class QuestFile {
             if (!isComplete) {
                 continue;
             }
-            completedTasks.add((long) task.hashCode());
+            completedTasks.add(task.id);
         }
         return completedTasks;
     }
@@ -250,7 +253,7 @@ public class QuestFile {
         }
         HashSet<Long> allTasks = new HashSet<>();
         for (QuestTask task : getTasks()) {
-            allTasks.add((long) task.hashCode());
+            allTasks.add((long) task.id);
         }
         if (!completedTasksSet.containsAll(allTasks)) {
             return false;

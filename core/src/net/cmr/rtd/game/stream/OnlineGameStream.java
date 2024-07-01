@@ -22,6 +22,7 @@ import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.GameOverPacket;
 import net.cmr.rtd.game.packets.GameResetPacket;
+import net.cmr.rtd.game.packets.GameSpeedChangePacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.Packet.PacketSerializer;
@@ -163,6 +164,7 @@ public class OnlineGameStream extends GameStream {
         kryo.register(UUID.class, new UUIDSerializer());
         kryo.register(HealerEnemy.HealerPacket.class);
         kryo.register(SortTypePacket.class);
+        kryo.register(GameSpeedChangePacket.class);
         kryo.register(SortType.class, new Serializer<SortType>(true) {
             @Override
             public void write(Kryo kryo, Output output, SortType object) {

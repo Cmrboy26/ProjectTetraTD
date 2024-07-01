@@ -3,10 +3,12 @@
 	"name": "Quest 1 (Intro)",
 	"quests": [
 		{
+			"id": 0,
 			"type": "REACH_WAVE",
 			"value": 12
 		},
 		{
+			"id": 1,
 			"type": "AMASS_MONEY",
 			"value": 200
 		}

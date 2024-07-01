@@ -34,14 +34,14 @@ import net.cmr.rtd.waves.WavesData;
 public class QuestFile {
 
     final LevelFolder level;
-    final FileHandle questFile;
+    final FileHandle waveFile;
 
     private String displayName;
     private QuestTask[] tasks;
 
     public QuestFile(LevelFolder level, String questFileName) {
         this.level = level;
-        this.questFile = level.getFolder().child("waves").child(questFileName);
+        this.waveFile = level.getFolder().child("waves").child(questFileName);
     }
 
     /**
@@ -49,18 +49,18 @@ public class QuestFile {
      */
     public QuestFile(LevelFolder untamperedLevel, FileHandle waveFile) {
         this.level = untamperedLevel;
-        this.questFile = waveFile;
+        this.waveFile = waveFile;
     }
     
     public QuestFile(LevelFolder untamperedLevel, QuestFile referenceFile) {
         FileHandle saveFile = referenceFile.getSaveFolder();
         FileHandle waveQuestFile = saveFile.child("wave.json");
         this.level = untamperedLevel;
-        this.questFile = waveQuestFile;
+        this.waveFile = waveQuestFile;
     }
 
     public FileHandle getFile() {
-        return questFile;
+        return waveFile;
     }
 
     public void read() {
@@ -132,9 +132,14 @@ public class QuestFile {
         return worldSaveFolder.child(getSaveFolderName());
     }
 
+    public void deleteSave() {
+        FileHandle saveFolder = getSaveFolder();
+        saveFolder.deleteDirectory();
+    }
+
     /**
      * Creates a save folder in the saves directory for the selected quest file.
-     * Will overwrite any existing files in that directory
+     * Will overwrite any existing files in that directory.
      */
     public void createSave() {
         // Create a folder for the new save
@@ -252,6 +257,36 @@ public class QuestFile {
         }
         return true;
     }
+
+    /**
+     * This method should be used to serialize SAVED files, not the original quest files. It is meant to be used when resuming the last played game.
+     */
+    public String[] serialize() {
+        WorldFolder world = level.getWorld();
+        String worldName = world.getFolder().name();
+        String levelName = level.getFolder().name();
+
+        String[] serialized = new String[3];
+        serialized[0] = worldName;
+        serialized[1] = levelName;
+        String savedWaveFileName = getSaveFolder().child("wave.json").file().getAbsolutePath();
+        serialized[2] = savedWaveFileName;
+
+        return serialized;
+    }
+
+    /**
+     * This method should be used to deserialize SAVED files, not the original quest files. It is meant to be used when resuming the last played game.
+     * @param serialized the serialized data from {@link #serialize()}
+     */
+    public static QuestFile deserialize(String[] serialized) {
+        WorldFolder world = new WorldFolder(serialized[0]);
+        LevelFolder level = new LevelFolder(world, serialized[1]);
+        FileHandle absoluteWaveFile = Gdx.files.absolute(serialized[2]);
+        QuestFile quest = new QuestFile(level, absoluteWaveFile);
+        return quest;
+    }
+
 
     @Override
     public String toString() {

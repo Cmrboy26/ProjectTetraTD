@@ -8,12 +8,15 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
 
-import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
@@ -362,6 +365,23 @@ public class Audio implements Disposable {
             }
         });
         return button;
+    }
+
+    @SuppressWarnings("rawtypes") 
+    public static SelectBox addClickSFX(SelectBox selectBox) {
+        selectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+            }
+        });
+        selectBox.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+            }
+        });
+        return selectBox;
     }
 
     /**

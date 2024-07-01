@@ -43,3 +43,8 @@
     *;
 }
 -keep class com.badlogic.gdx.graphics.g2d.BitmapFont
+
+-keep class net.cmr.rtd.**{
+   **[] $VALUES;
+    *;
+}

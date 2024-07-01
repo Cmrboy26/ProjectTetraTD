@@ -103,8 +103,11 @@ public class World extends GameObject {
         this.storedPlayerData = new HashMap<>();
     }
 
-    @Override
     public void update(float delta, UpdateData data) {
+        throw new UnsupportedOperationException("World cannot be updated without a speed.");
+    }
+
+    public void update(float speed, float delta, UpdateData data) {
         super.update(delta, data);
 
         // Segment the delta time into smaller chunks to prevent entities from moving too far.
@@ -113,12 +116,12 @@ public class World extends GameObject {
         float tempDelta = delta;
         while (tempDelta > 0) {
             float d = Math.min(tempDelta, segment);
-            updateWorld(d, data);
+            updateWorld(speed, d, data);
             tempDelta -= d;
         }
     }
 
-    private void updateWorld(float delta, UpdateData data) {
+    private void updateWorld(float speed, float delta, UpdateData data) {
         if (data.isServer() && !data.getManager().areWavesPaused()) {
             Wave waveObj = wavesData.getWave(this.wave);
             if (wavesData.endlessMode && waveObj == null && wave != 0) {
@@ -129,7 +132,7 @@ public class World extends GameObject {
 
             if (waveObj != null) {
                 float elapsedTime = waveObj.getWaveTime() - waveCountdown;
-                EnemyType[] entities = wavesData.getEntities(data, elapsedTime, delta, this.wave);
+                EnemyType[] entities = wavesData.getEntities(data, elapsedTime, delta * speed, this.wave);
                 for (EnemyType type : entities) {
                     for (TeamData teamData : data.getManager().getTeams()) {
                         teamData.spawnEnemy(type);
@@ -137,7 +140,7 @@ public class World extends GameObject {
                 }
             }
 
-            waveCountdown -= delta;
+            waveCountdown -= delta * speed;
             if (waveCountdown <= 0) {
                 wave++;
                 waveObj = wavesData.getNextWave(this.wave, data);
@@ -165,10 +168,14 @@ public class World extends GameObject {
 
         for (Point3D point : tileDataMap.keySet()) {
             TileData tileData = tileDataMap.get(point);
-            tileData.update(delta, point.x, point.y, data);
+            tileData.update(delta * speed, point.x, point.y, data);
         }
         for (Entity entity : entities.values()) {
-            entity.update(delta, data);
+            float calculatedDelta = delta * speed;
+            if (entity instanceof Player) {
+                calculatedDelta = delta;
+            }
+            entity.update(calculatedDelta, data);
         }
     }
     HashSet<GamePlayer> skipRequests = null;
@@ -425,10 +432,13 @@ public class World extends GameObject {
         kryoInput.close();
     }
 
-    @Override
     public void render(UpdateData udata, Batch batch, float delta) {
-        // TODO: Implement smarter tile rendering (with proper entity support)
+        throw new UnsupportedOperationException("World cannot be rendered without a game speed.");
+    }
+
+    public void render(UpdateData udata, Batch batch, float delta, float gameSpeed) {
         batch.setColor(worldColor);
+        float renderDelta = delta * gameSpeed;
         for (int x = 0; x < worldSize; x++) {
             for (int y = 0; y < worldSize; y++) {
                 for (int z = 0; z < LAYERS; z++) {
@@ -457,10 +467,10 @@ public class World extends GameObject {
                                 }
                             }
                         }
-                        tile.render(batch, delta, this, x, y, z);
+                        tile.render(batch, renderDelta, this, x, y, z);
                         batch.setColor(beforeColor);
                     } else {
-                        tile.render(batch, delta, this, x, y, z);
+                        tile.render(batch, renderDelta, this, x, y, z);
                     }
                     if (tileDataMap.containsKey(new Point3D(x, y, z))) {
                         TileData data = tileDataMap.get(new Point3D(x, y, z));
@@ -475,7 +485,11 @@ public class World extends GameObject {
         renderEntities.sort((a, b) -> Float.compare(b.position.y + b.getRenderOffset(), a.position.y + a.getRenderOffset()));
 
         for (Entity entity : renderEntities) {
-            entity.render(udata, batch, delta);
+            float entityDelta = delta * gameSpeed;
+            if (entity instanceof Player) {
+                entityDelta = delta;
+            }
+            entity.render(udata, batch, entityDelta);
         }
         super.render(udata, batch, delta);
     }

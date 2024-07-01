@@ -1,0 +1,6 @@
+{
+	"name": "Tutorial",
+	"quests": [
+		"tutorial.json"
+	]
+}

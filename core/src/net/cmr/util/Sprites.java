@@ -77,6 +77,8 @@ public class Sprites implements Disposable {
         QUARTZ("quartz"),
         TOPAZ("topaz"),
         SMALL_CASH("smallCash"),
+        SPEED_1("speed1"),
+        SPEED_2("speed2"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
@@ -96,6 +98,8 @@ public class Sprites implements Disposable {
     static final float enemySpeed = .125f;
 
     public enum AnimationType {
+        TARGET("target", PlayMode.LOOP, .1f),
+        
         BASIC_ONE_DOWN("basic1/down", PlayMode.LOOP, enemySpeed),
         BASIC_ONE_UP("basic1/up", PlayMode.LOOP, enemySpeed),
         BASIC_ONE_LEFT("basic1/left", PlayMode.LOOP, enemySpeed),

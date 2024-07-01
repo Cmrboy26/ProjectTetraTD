@@ -22,9 +22,7 @@ import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.bitlet.weupnp.PortMappingEntry;
 
-import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -40,6 +38,7 @@ import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.GameOverPacket;
 import net.cmr.rtd.game.packets.GameResetPacket;
+import net.cmr.rtd.game.packets.GameSpeedChangePacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.packets.PasswordPacket;
@@ -54,7 +53,6 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.Entity;
-import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
@@ -83,6 +81,7 @@ public class GameManager implements Disposable {
 
     private UpdateData data;
     private World world;
+    private float gameSpeed = 1.0f;
     private ArrayList<TeamData> teams;
     private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
     private Stack<TeamData> teamWinOrder = new Stack<TeamData>();  
@@ -399,12 +398,22 @@ public class GameManager implements Disposable {
      * Save the game state.
      */
     public void save() {
+        // If the game is a singleplayer game, add the resume button to the main menu.
+        if (RetroTowerDefense.instanceExists() && !details.isHostedOnline()) {
+            RetroTowerDefense instance = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+            String[] serializedQuestFile = quest.serialize();
+            instance.setLastPlayedQuest(serializedQuestFile);
+        }
         // Save the game state.
         try {
             quest.saveGame(world);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteSave() {
+        quest.deleteSave();
     }
 
     /**
@@ -499,6 +508,7 @@ public class GameManager implements Disposable {
         player.sendPackets(retrieveWorldSnapshot());
         sendStatsUpdatePacket(player);
         sendWaveData(player, world);
+        setGameSpeed(gameSpeed);
     }
 
     public GamePlayer getPlayer(Player player) {
@@ -606,7 +616,7 @@ public class GameManager implements Disposable {
 
         // Update the world
         if (world != null) {
-            world.update(delta, data);
+            world.update(gameSpeed, delta, data);
         }
     }
     float time = 0;
@@ -748,6 +758,16 @@ public class GameManager implements Disposable {
             }
         }
         return false;
+    }
+
+    public void setGameSpeed(float speed) {
+        if (speed > 0) {
+            this.gameSpeed = speed;
+            sendPacketToAll(new GameSpeedChangePacket(speed));
+        }
+    }
+    public float getGameSpeed() {
+        return gameSpeed;
     }
 
     public boolean isRunning() { return running; }

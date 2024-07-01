@@ -200,7 +200,7 @@ public class Projectile extends Entity {
             }
             if (data.isClient()) {
                 if (onHitSound != null) {
-                    Audio.getInstance().worldSFX(onHitSound, 1, 1, getPosition(), data.getScreen());
+                    Audio.getInstance().worldSFX(onHitSound, 1, 1f, getPosition(), data.getScreen());
                 }
             }
             // Display a particle?

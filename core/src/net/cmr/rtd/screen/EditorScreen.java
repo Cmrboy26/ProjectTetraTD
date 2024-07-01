@@ -119,7 +119,7 @@ public class EditorScreen extends AbstractScreenEX {
         teamLabel.setSize(size, size);
         teamLabel.setAlignment(Align.center);
 
-        TextButton add = new TextButton("+", Sprites.skin(), "toggle-small");
+        TextButton add = new TextButton("+", Sprites.skin(), "small");
         add.setSize(size, size);
         add.addListener(new ClickListener() {
             @Override
@@ -131,7 +131,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextButton sub = new TextButton("-", Sprites.skin(), "toggle-small");
+        TextButton sub = new TextButton("-", Sprites.skin(), "small");
         sub.setSize(size, size);
         sub.addListener(new ClickListener() {
             @Override
@@ -447,7 +447,7 @@ public class EditorScreen extends AbstractScreenEX {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
-            world.render(updatedata, batch, delta);
+            world.render(updatedata, batch, delta, 1);
             batch.end();
         }
 
@@ -477,38 +477,13 @@ public class EditorScreen extends AbstractScreenEX {
 
     private void processKeyboard() {
         float dzoom = 0;
-        dzoom += (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_EQUALS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_MULTIPLY)|| Gdx.input.isKeyPressed(Input.Keys.EQUALS)) ? 1 : 0;
-        dzoom -= (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_SUBTRACT)) ? 1 : 0;
+        dzoom -= (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_EQUALS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_MULTIPLY)|| Gdx.input.isKeyPressed(Input.Keys.EQUALS)) ? 1 : 0;
+        dzoom += (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.NUMPAD_SUBTRACT)) ? 1 : 0;
 
         if (dzoom != 0) {
             OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
             camera.zoom += dzoom * Gdx.graphics.getDeltaTime();
             camera.zoom = Math.max(.1f, Math.min(2, camera.zoom));
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)) {
-            selectedTile = 2; // wall
-            wall.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
-            selectedTile = 1; // floor
-            floor.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) {
-            selectedTile = 3; // path
-            path.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) {
-            selectedTile = 4; // start
-            start.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_5)) {
-            selectedTile = 5; // end
-            end.setChecked(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.GRAVE)) {
-            selectedTile = 0; // clear
-            clear.setChecked(true);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) ^ Gdx.input.isKeyJustPressed(Input.Keys.S)) {

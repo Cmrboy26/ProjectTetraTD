@@ -72,32 +72,31 @@ public class RetroTowerDefense extends CMRGame {
 		FileHandle worldsFolder = gameDataFolder.child("worlds/");
 		worldsFolder.mkdirs();
 
-		Log.debug("Copying story levels to external folder...");
+		Log.info("Copying story levels to external folder...");
 		// Create story level folders from the assets
 		FileHandle defaultWorldsHandle = Gdx.files.internal("defaultWorlds/");
-		boolean defaultWorldsHandleExists = defaultWorldsHandle.exists();
-		Log.debug("Story levels handle exists: " + defaultWorldsHandleExists);
-		Log.debug("Local directory available: " + Gdx.files.isLocalStorageAvailable());
-		Log.debug("External directory available: " + Gdx.files.isExternalStorageAvailable());
+		Log.info("Story levels handle: " + defaultWorldsHandle.file().getAbsolutePath());
+		boolean defaultWorldsHandleExists = defaultWorldsHandle.isDirectory();
+		Log.info("Story levels handle exists: " + defaultWorldsHandleExists);
 		if (!defaultWorldsHandleExists) {
-			Log.debug("Handle not found, attempting to copy assets from \""+defaultWorldsHandle.path()+"\" to \""+worldsFolder.path()+"\"...");
+			Log.info("Handle not found, attempting to copy assets from \""+defaultWorldsHandle.path()+"\" to \""+worldsFolder.path()+"\"...");
 			defaultWorldsHandle = Gdx.files.internal("assets/defaultWorlds/");
 		}
 
-		Log.debug("Story level files: " + defaultWorldsHandle.list().length);
+		Log.info("Story level files: " + defaultWorldsHandle.list().length);
 		for (FileHandle level : defaultWorldsHandle.list()) {
 			// level is the folder containing the level data (waves folder, world.dat) in the assets folder
 			FileHandle internal = defaultWorldsHandle.child(level.name());
 			FileHandle external = worldsFolder;
 			FileHandle externalLevelFolder = external.child(level.name());
-			Log.debug("Copying level \""+level.name()+"\" to external folder...");
+			Log.info("Copying level \""+level.name()+"\" to external folder...");
 			if (externalLevelFolder.isDirectory() && externalLevelFolder.exists()) {
 				// Delete the directory so outdated story mode levels and waves are removed
-				Log.debug("Deleting outdated directory \""+externalLevelFolder.path()+"\"...");
+				Log.info("Deleting outdated directory \""+externalLevelFolder.path()+"\"...");
 				externalLevelFolder.deleteDirectory();
 			}
 			internal.copyTo(external);
-			Log.debug("Copied level \""+level.name()+"\" to external folder.");
+			Log.info("Copied level \""+level.name()+"\" to external folder.");
 		}
 		FileHandle editorFolder = gameDataFolder.child("editor/");
 		editorFolder.mkdirs();
@@ -164,7 +163,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 		Log.info("Connected.");
-		GameScreen screen = new GameScreen(stream, null, null, null, team);
+		GameScreen screen = new GameScreen(stream, null, null, team);
 		setScreen(screen);
 
 		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
@@ -244,6 +243,7 @@ public class RetroTowerDefense extends CMRGame {
 	 * Starts and joins a local/singleplayer game on the client's machine
 	 * Should be called when LOADING a game.
 	 */
+	@Deprecated
 	public void joinSingleplayerGame(GameManagerDetails details, GameSave save, LevelSave lsave, int team) {
 		GameManager manager = save.loadGame(details);
 		LocalGameStream[] streams = LocalGameStream.createStreamPair();
@@ -262,7 +262,7 @@ public class RetroTowerDefense extends CMRGame {
 			}
 		});
 
-		GameScreen screen = new GameScreen(clientsideStream, manager, null, lsave, team);
+		GameScreen screen = new GameScreen(clientsideStream, manager, null, team);
 
 		//manager.initialize(save); // TODO: FIX
 		setScreen(screen);
@@ -288,159 +288,6 @@ public class RetroTowerDefense extends CMRGame {
 		}
 		return "Unknown";
 	}
-
-	/*@SuppressWarnings("unchecked")
-	public static void setLevelCleared(QuestFile save) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			JSONArray completions = (JSONArray) obj.get("clearedLevels");
-			if (completions == null) {
-				completions = new JSONArray();
-				obj.put("clearedLevels", completions);
-			}
-			String name = save.getSaveFolderName();
-			if (completions.contains(name)) {
-				return;
-			} else {
-				completions.add(name);
-				dataFile.writeString(obj.toJSONString(), false);
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-	}	
-
-	public static boolean isLevelCleared(QuestFile quest) {
-		return isLevelCleared(quest.getSaveFolderName());
-	}
-
-	public static boolean isLevelCleared(String saveFolder) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/completions.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{\"clearedLevels\": []}", false);
-			return false;
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			JSONArray completions = (JSONArray) obj.get("clearedLevels");
-			if (completions == null) {
-				return false;
-			}
-			String name = saveFolder;
-			return completions.contains(name);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	public static long getHighscore(QuestFile quest) {
-		return getHighscore(quest.getSaveFolderName());
-	}
-
-	public static long getHighscore(String saveFolder) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/highscores.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-			return 0;
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			Long score = (Long) obj.get(saveFolder);
-			if (score == null) {
-				return 0;
-			}
-			return score;
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
-
-	public static void setHighscore(QuestFile quest, long score) {
-		setHighscore(quest.getSaveFolderName(), score);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void setHighscore(String saveFolder, long score) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/highscores.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			long at = obj.get(saveFolder) == null ? 0 : (long) obj.get(saveFolder);
-			if (score <= at) {
-				return;
-			}
-			obj.put(saveFolder, score);
-			dataFile.writeString(obj.toJSONString(), false);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static int getFarthestWave(QuestFile quest) {
-		return getFarthestWave(quest.getSaveFolderName());
-	}
-
-	public static int getFarthestWave(String saveFolder) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/farthestwaves.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-			return 0;
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			Long wave = (Long) obj.get(saveFolder);
-			if (wave == null) {
-				return 0;
-			}
-			return wave.intValue();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
-
-	public static void setFarthestWave(QuestFile quest, int wave) {
-		setFarthestWave(quest.getSaveFolderName(), wave);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void setFarthestWave(String saveFolder, int wave) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/farthestwaves.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj = (JSONObject) parser.parse(data);
-			long at = obj.get(saveFolder) == null ? 0 : (Long) obj.get(saveFolder);
-			if (wave <= at) {
-				return;
-			}
-			obj.put(saveFolder, wave);
-			dataFile.writeString(obj.toJSONString(), false);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-	}*/
 
 	public enum LevelValueKey {
 		HIGHSCORE, // Stored as a long
@@ -522,5 +369,111 @@ public class RetroTowerDefense extends CMRGame {
 			e.printStackTrace();
 		}
 	}
+
+	public void setLastPlayedQuest(String[] serializedQuest) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			JSONArray lastPlayed = new JSONArray();
+			for (String s : serializedQuest) {
+				lastPlayed.add(s);
+			}
+			root.put("lastPlayed", lastPlayed);
+			dataFile.writeString(root.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String[] getLastPlayedQuest() {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			JSONArray lastPlayed = (JSONArray) root.get("lastPlayed");
+			if (lastPlayed == null) {
+				return null;
+			}
+			String[] quest = new String[lastPlayed.size()];
+			for (int i = 0; i < lastPlayed.size(); i++) {
+				quest[i] = (String) lastPlayed.get(i);
+			}
+			return quest;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public boolean hasLastPlayedQuest() {
+		String[] lastPlayedQuest = getLastPlayedQuest();
+		if (lastPlayedQuest == null) {
+			return false;
+		}
+		QuestFile quest = QuestFile.deserialize(lastPlayedQuest);
+		return quest != null && quest.getSaveFolder().child("wave.json").exists();
+	}
+
+	public void clearLastPlayedQuest() {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			root.remove("lastPlayed");
+			dataFile.writeString(root.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int getLastPlayedTeam() {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			Long team = (Long) root.get("lastPlayedTeam");
+			if (team == null) {
+				return -1;
+			}
+			return team.intValue();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void setLastPlayedTeam(int team) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			root.put("lastPlayedTeam", team);
+			dataFile.writeString(root.toJSONString(), false);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 }

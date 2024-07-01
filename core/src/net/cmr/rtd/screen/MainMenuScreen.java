@@ -26,6 +26,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.game.GameConnector;
+import net.cmr.rtd.game.files.QuestFile;
+import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
@@ -128,6 +131,36 @@ public class MainMenuScreen extends AbstractScreenEX {
 			}
 		});
 		table.add(creation).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+		table.row();
+
+		TextButton resume = new TextButton("Resume", Sprites.skin(), labelType);
+		Audio.addClickSFX(resume);
+		resume.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				String[] data = game.getLastPlayedQuest();
+				QuestFile file = QuestFile.deserialize(data);
+				int team = game.getLastPlayedTeam();
+				PlayType.SINGLEPLAYER.startGame(file, team);
+			}
+		});
+		boolean hasLastPlayed = RetroTowerDefense.getInstance(RetroTowerDefense.class).hasLastPlayedQuest();
+
+		if (hasLastPlayed) {
+			table.add(resume).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+			table.row();
+		}
+
+		TextButton tutorial = new TextButton("Tutorial", Sprites.skin(), labelType);
+		Audio.addClickSFX(tutorial);
+		tutorial.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				GameConnector.startTutorial();
+			}
+		});
+		table.add(tutorial).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
 		table.row();
 
 		if (!RetroTowerDefense.isMobile() && RetroTowerDefense.getInstance(RetroTowerDefense.class).getUsername().equals("Cmrboy26")) {

@@ -1,8 +1,8 @@
 package net.cmr.rtd.screen;
 
 import java.security.KeyPair;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -14,7 +14,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -56,7 +55,6 @@ import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
-import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
@@ -67,6 +65,7 @@ import net.cmr.rtd.game.packets.EffectPacket;
 import net.cmr.rtd.game.packets.GameObjectPacket;
 import net.cmr.rtd.game.packets.GameOverPacket;
 import net.cmr.rtd.game.packets.GameResetPacket;
+import net.cmr.rtd.game.packets.GameSpeedChangePacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
@@ -136,7 +135,7 @@ public class GameScreen extends AbstractScreenEX {
     Image life, structureLife, cash;
     ImageButton upgradeButton, shopButton, inventoryButton;
     ImageButton wavePauseButton;
-    ImageButton skipButton;
+    ImageButton settingsButton, skipButton, restartButton, speedButton;
     //TextButton skipWaveButton;
     Window shopWindow, inventoryWindow, settings;
 
@@ -166,15 +165,16 @@ public class GameScreen extends AbstractScreenEX {
 
     Joystick joystick;
 
-    LevelSave save;
     public static NinePatch upgradeProgress, upgradeProgressBackground;
     public final int team;
+    public float gameSpeed;
 
-    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, @Null LevelSave save, int team) {
+    boolean uiToggleFromKeybinds = true;
+
+    public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, int team) {
         super(INITIALIZE_ALL);
         this.ioStream = ioStream;
         this.gameManager = gameManager;
-        this.save = save;
         this.team = team;
         this.ioStream.addListener(new PacketListener() {
             @Override
@@ -189,6 +189,8 @@ public class GameScreen extends AbstractScreenEX {
         this.data = new UpdateData(this);
         if (gameManager != null) {
             this.password = gameManager.getDetails().getPassword();
+            RetroTowerDefense instance = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+            instance.setLastPlayedTeam(team);
         } else {
             this.password = password;
         }
@@ -355,46 +357,6 @@ public class GameScreen extends AbstractScreenEX {
         smallButton.disabled = style2.up;
         smallButton.imageUp = Sprites.drawable(SpriteType.CASH);
 
-
-        GlyphLayout layout = new GlyphLayout();
-        layout.setText(style2.font, "Voted");
-        /*skipWaveButton = new TextButton("Skip", style2) {
-            boolean preping = false;
-            boolean initialized = false;
-            @Override
-            public void act(float delta) {
-                float preptime = waveCountdown - waveDuration;
-                boolean lastPrep = preping;
-                preping = preptime > 0 && !areWavesPaused && wave != 0;
-                if (lastPrep != preping || !initialized) {
-                    initialized = true;
-                    skipWaveButton.setVisible(true);
-                    skipWaveButton.setDisabled(false);
-                    if (preping && !areWavesPaused) {
-                        skipWaveButton.setText("Skip");
-                        skipWaveButton.addAction(Actions.fadeIn(0.5f, Interpolation.linear));
-                    } else {
-                        skipWaveButton.addAction(Actions.fadeOut(0.5f, Interpolation.linear));
-                    }
-                }
-                super.act(delta);
-            }
-        };
-        skipWaveButton.setSize(layout.width + 20, iconSize);
-        skipWaveButton.setPosition(5, 5, Align.bottomLeft);
-        skipWaveButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (skipWaveButton.isDisabled()) { return; }
-                skipWaveButton.setDisabled(true);
-                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
-                skipWaveButton.setText("Voted");
-                ioStream.sendPacket(new SkipRequestPacket());
-            }
-        });*/
-
-        //add(Align.bottomLeft, skipWaveButton);
-
         // TODO: Add inventory menus and functionality
         shopWindow = new Window("Shop", Sprites.skin(), "small");
         shopWindow.getTitleLabel().setAlignment(Align.center);
@@ -421,7 +383,7 @@ public class GameScreen extends AbstractScreenEX {
         combativeTab.pad(0, 10, 0, 10);
         TextButton miningTab = new TextButton("Mining", Sprites.skin(), "toggle-small");
         miningTab.pad(0, 10, 0, 10);
-        TextButton effectTab = new TextButton("Effects", Sprites.skin(), "toggle-small");
+        TextButton effectTab = new TextButton("Deployables", Sprites.skin(), "toggle-small");
         effectTab.pad(0, 10, 0, 10);
         shopTabs.addActor(combativeTab);
         shopTabs.addActor(miningTab);
@@ -538,7 +500,7 @@ public class GameScreen extends AbstractScreenEX {
             componentAction = PurchaseAction.APPLY_SCOPE;
             enterComponentMode();
         }, "Scopes", componentUsage, size)).size(size);
-        inventoryTable.add(getInventorySlot(SpriteType.SCRAP, () -> getTeamInventory().getScopes(), () -> {
+        inventoryTable.add(getInventorySlot(SpriteType.SCRAP, () -> getTeamInventory().getScraps(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_SCRAP_METAL;
             enterComponentMode();
@@ -604,20 +566,23 @@ public class GameScreen extends AbstractScreenEX {
             }
         });
         add(Align.bottomRight, skipButton);
-
+            
         ImageButtonStyle style3 = new ImageButtonStyle(waveButtonStyles);
         style3.imageChecked = Sprites.drawable(SpriteType.PAUSE);
         style3.imageUp = Sprites.drawable(SpriteType.RESUME);
-        style3.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_SELECTED), patch, patch, patch, patch));
+        style3.checked = new NinePatchDrawable(
+            new NinePatch(Sprites.sprite(SpriteType.BORDER_SELECTED), patch, patch, patch, patch));
 
         wavePauseButton = new ImageButton(style3);
         wavePauseButton.setSize(iconSize, iconSize);
-        wavePauseButton.setPosition(640-10-iconSize*2, 5, Align.bottomRight);
+        wavePauseButton.setPosition(640 - 10 - iconSize * 2, 5, Align.bottomRight);
         wavePauseButton.setDisabled(gameManager == null);
         wavePauseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (wavePauseButton.isDisabled()) { return; }
+                if (wavePauseButton.isDisabled()) {
+                    return;
+                }
                 if (!wavePauseButton.isChecked()) {
                     gameManager.pauseWaves();
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1f);
@@ -627,31 +592,66 @@ public class GameScreen extends AbstractScreenEX {
                 }
             }
         });
-        add(Align.bottomRight, wavePauseButton);
-        
+
         ImageButtonStyle style4 = new ImageButtonStyle(waveButtonStyles);
         style4.imageUp = Sprites.drawable(SpriteType.RESTART);
-        ImageButton restartButton = new ImageButton(style4);
+        restartButton = new ImageButton(style4);
         if (gameManager == null) {
             restartButton.setDisabled(true);
         }
         restartButton.setSize(iconSize, iconSize);
-        restartButton.setPosition(640-5*3-iconSize*3, 5, Align.bottomRight);
+        restartButton.setPosition(640 - 5 * 3 - iconSize * 3, 5, Align.bottomRight);
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (restartButton.isDisabled()) { return; }
+                if (restartButton.isDisabled()) {
+                    return;
+                }
                 Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                 resetGameDialog.show(stages.get(Align.center));
             }
         });
-        add(Align.bottomRight, restartButton);
+
+        ImageButtonStyle speedStyle = new ImageButtonStyle(waveButtonStyles);
+        speedStyle.imageChecked = Sprites.drawable(SpriteType.SPEED_2);
+        speedStyle.imageUp = Sprites.drawable(SpriteType.SPEED_1);
+        speedStyle.checked = new NinePatchDrawable(
+                new NinePatch(Sprites.sprite(SpriteType.BORDER_SELECTED), patch, patch, patch, patch));
+
+        speedButton = new ImageButton(speedStyle) {
+            public void act(float delta) {
+                setChecked(gameSpeed > 1);
+                if (gameManager == null) {
+                    setDisabled(true);
+                }
+                super.act(delta);
+            };
+        };
+        speedButton.setSize(iconSize, iconSize);
+        speedButton.setPosition(640 - 5 * 4 - iconSize * 4, 5, Align.bottomRight);
+        speedButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                if (gameManager == null)
+                    return;
+                float currentSpeed = gameManager.getGameSpeed();
+                float newSpeed = currentSpeed == 1 ? 2 : currentSpeed == 2 ? 1 : 1;
+                gameManager.setGameSpeed(newSpeed);
+            }
+        });
+        
+        if (gameManager != null) {
+            add(Align.bottomRight, wavePauseButton);
+            add(Align.bottomRight, restartButton);
+            add(Align.bottomRight, speedButton);
+        }
 
         ImageButtonStyle settingsStyle = new ImageButtonStyle(waveButtonStyles);
         settingsStyle.imageUp = Sprites.drawable(SpriteType.SETTINGS);
         settingsStyle.checked = settingsStyle.up;
         settingsStyle.disabled = settingsStyle.up;
-        ImageButton settingsButton = new ImageButton(settingsStyle);
+        settingsButton = new ImageButton(settingsStyle);
         settingsButton.setSize(iconSize, iconSize);
         settingsButton.setPosition(5, 5, Align.bottomLeft);
         settingsButton.addListener(new ClickListener() {
@@ -664,43 +664,13 @@ public class GameScreen extends AbstractScreenEX {
         });
         add(Align.bottomLeft, settingsButton);
 
-        /*inventoryTable.defaults().pad(5);
-        inventoryTable.setFillParent(true);
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.LUBRICANT))).colspan(1);
-        inventoryTable.add(new Label("", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                setText("Lubricant ("+inventory.getWd40()+")");
-                super.act(delta);
-            }
-        }).colspan(1);
-        inventoryTable.row();
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.CASH))).colspan(1);
-        inventoryTable.add(new Label("", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                setText("Scopes ("+inventory.getScopes()+")");
-                super.act(delta);
-            }
-        }).colspan(1);
-        inventoryTable.row();
-        inventoryTable.add(new Image(Sprites.drawable(SpriteType.HEART))).colspan(1);
-        inventoryTable.add(new Label("", Sprites.skin(), "small") {
-            @Override
-            public void act(float delta) {
-                setText("Scraps ("+inventory.getScraps()+")");
-                super.act(delta);
-            }
-        }).colspan(1);
-        inventoryTable.row();*/
-
         inventoryWindow.add(inventoryTable).grow();
 
         add(Align.center, inventoryWindow);
 
         title = new Label("", Sprites.skin(), "small");
         title.setAlignment(Align.center);
-        title.setPosition(640/2, 58, Align.bottom);
+        title.setPosition(640/2, 58+5, Align.bottom);
         title.setFontScale(.4f);
         add(Align.bottom, title);
 
@@ -755,6 +725,35 @@ public class GameScreen extends AbstractScreenEX {
             joystick.setPosition(iconSize + 5, iconSize / 1.5f, Align.bottomLeft);
             add(Align.bottomLeft, joystick);
         }
+
+        /* Window testSpeedWindow = new Window("Test Speed", Sprites.skin(), "small");
+        testSpeedWindow.getTitleLabel().setAlignment(Align.center);
+        testSpeedWindow.padTop(30);
+        testSpeedWindow.setSize(220, 100);
+        testSpeedWindow.setPosition(220, 100, Align.center);
+        testSpeedWindow.setMovable(true);
+        testSpeedWindow.setVisible(true);
+        TextField testSpeedField = new TextField("", Sprites.skin(), "small");
+        testSpeedField.setAlignment(Align.center);
+        testSpeedField.setTextFieldFilter(new TextFieldFilter.DigitsOnlyFilter());
+        testSpeedField.setTextFieldListener(new TextFieldListener() {
+            @Override
+            public void keyTyped(TextField textField, char c) {
+                if (c == '\n') {
+                    try {
+                        float speed = Float.parseFloat(testSpeedField.getText());
+                        if (gameManager != null) {
+                            gameManager.setGameSpeed(speed);
+                        }
+                    } catch (NumberFormatException e) {
+
+                    }
+                }
+            }
+        });
+        testSpeedWindow.add(testSpeedField).growX().pad(5);
+        add(Align.center, testSpeedWindow); */
+
     }
 
     public void onRecievePacket(Packet packet) {
@@ -845,6 +844,13 @@ public class GameScreen extends AbstractScreenEX {
                 player.setPosition(inputPacket.getPosition());
             }
             return;
+        }
+
+        if (packet instanceof GameSpeedChangePacket) {
+            GameSpeedChangePacket speedPacket = (GameSpeedChangePacket) packet;
+            if (speedPacket.speed > 0) {
+                this.gameSpeed = speedPacket.speed;
+            }
         }
 
         if (packet instanceof AttackPacket) {
@@ -1008,6 +1014,14 @@ public class GameScreen extends AbstractScreenEX {
                         gameManager.resetWorld();
                         return;
                     }
+
+                    // Delete the save file (to remove the "resume" button)
+                    if (gameManager != null) {
+                        RetroTowerDefense game = (RetroTowerDefense) RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                        game.clearLastPlayedQuest();
+                        gameManager.deleteSave();
+                    }
+
                     MainMenuScreen mainMenu = new MainMenuScreen();
                     game.setScreen(mainMenu);
                 }
@@ -1033,11 +1047,11 @@ public class GameScreen extends AbstractScreenEX {
                 // Solo game. Set the high score if it is higher than the current high score.
                 if (gameManager != null) {
                     Long storedHighScore = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class);
-                    Integer storedFarthestWave = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Integer.class);
-                    if (storedHighScore != null && gameOverPacket.score > storedHighScore) {
+                    Long storedFarthestWave = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Long.class);
+                    if (storedHighScore == null || gameOverPacket.score > storedHighScore) {
                         RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, gameOverPacket.score);
                     }
-                    if (storedFarthestWave != null && gameOverPacket.endingWave > storedFarthestWave) {
+                    if (storedFarthestWave == null || gameOverPacket.endingWave > storedFarthestWave) {
                         RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, gameOverPacket.endingWave);
                     }
                 }
@@ -1069,19 +1083,20 @@ public class GameScreen extends AbstractScreenEX {
     public void update(float delta) {
         worldStage.act(delta);
         ioStream.update();
+        float speedDelta = delta * gameSpeed;
 
         if (areWavesPaused) {
             waveCountdownLabel.setText("(Paused)");
         } else if (waveCountdown != -1) {
 
             String waveText = "Wave " + wave;
-            waveCountdown -= delta;
+            waveCountdown -= speedDelta;
             if (waveCountdown < 0) {
                 waveCountdown = 0;
             }
 
-            float preparationTime = waveCountdown - waveDuration;
-            float displayCountdown = waveCountdown;
+            float preparationTime = (waveCountdown - waveDuration) / gameSpeed;
+            float displayCountdown = waveCountdown / gameSpeed;
             if (preparationTime > 0) {
                 displayCountdown = preparationTime;
                 if (wave == 0) {
@@ -1121,14 +1136,15 @@ public class GameScreen extends AbstractScreenEX {
 
         if (world != null) {
             // FIXME: When the window is frozen, new game objects are not added to the world. This causes newly added enemies to be bunched up after the window is unfrozen.
-            world.update(delta, data);
+            // TODO: Implement speed properly
+            world.update(gameSpeed, delta, data);
         }
         processInput(delta);
 
         ArrayList<ParticleEffect> toRemove = new ArrayList<ParticleEffect>();
         for (int i = 0; i < particleEffects.size(); i++) {
             ParticleEffect effect = particleEffects.get(i);
-            effect.update(this, delta);
+            effect.update(this, speedDelta);
             if (effect.isParticleFinished()) {
                 toRemove.add(effect);
             }
@@ -1178,7 +1194,7 @@ public class GameScreen extends AbstractScreenEX {
     /**
      * Updates the camera to center on the local player.
      */
-    private void updateCamera() {
+    public void updateCamera() {
         // Get the local player's position and center the camera on it.
         if (world != null) {
             Player player = getLocalPlayer();
@@ -1243,29 +1259,32 @@ public class GameScreen extends AbstractScreenEX {
 
         stages.actAll(delta);
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-            if (!inventoryButton.isDisabled()) {
-                inventoryButton.toggle();
-                shopWindow.setVisible(false);
-                inventoryWindow.setVisible(inventoryButton.isChecked());
-                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+        // If the player should be allowed to toggle the UI from keybinds, do so
+        if (uiToggleFromKeybinds) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.E) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+                if (!inventoryButton.isDisabled()) {
+                    inventoryButton.toggle();
+                    shopWindow.setVisible(false);
+                    inventoryWindow.setVisible(inventoryButton.isChecked());
+                    Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                }
             }
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-            if (!shopButton.isDisabled()) {
-                shopButton.toggle();
-                shopWindow.setVisible(shopButton.isChecked());
-                inventoryWindow.setVisible(false);
-                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+                if (!shopButton.isDisabled()) {
+                    shopButton.toggle();
+                    shopWindow.setVisible(shopButton.isChecked());
+                    inventoryWindow.setVisible(false);
+                    Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                }
             }
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.U) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-            if (!upgradeButton.isDisabled()) {
-                upgradeButton.toggle();
-                inventoryWindow.setVisible(false);
-                shopWindow.setVisible(false);
-                enterUpgradeMode();
-                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+            if (Gdx.input.isKeyJustPressed(Input.Keys.U) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+                if (!upgradeButton.isDisabled()) {
+                    upgradeButton.toggle();
+                    inventoryWindow.setVisible(false);
+                    shopWindow.setVisible(false);
+                    enterUpgradeMode();
+                    Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
+                }
             }
         }
 
@@ -1288,11 +1307,15 @@ public class GameScreen extends AbstractScreenEX {
                 action = "insert component";
             }
             if (placementMode != null) {
-                setTitleText("Click to " + (action) +"\n(Press ESC to cancel)");
+                String text = "Click to " + action;
+                if (!isMobile()) {
+                    text += "\n(Press ESC to cancel)";
+                }
+                setTitleText(text);
             }
         } else {
             setTitleText("");
-            if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.R) && uiToggleFromKeybinds) {
                 // Sell the tower at the mouse position if it's on the same team
                 setTitleText("Click to sell tower\n(Release R to cancel)");
                 if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
@@ -1513,7 +1536,7 @@ public class GameScreen extends AbstractScreenEX {
         }
     }
 
-    private void removeInfoWindow() {
+    void removeInfoWindow() {
         if (informationUpgradeWindow == null) {
             return;
         }
@@ -1561,7 +1584,7 @@ public class GameScreen extends AbstractScreenEX {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
-            world.render(data, batch, delta);
+            world.render(data, batch, delta, gameSpeed);
 
             if (inPlacementMode()) {
                 Point mouseTile = getMouseTileCoordinate();
@@ -1626,6 +1649,10 @@ public class GameScreen extends AbstractScreenEX {
         ioStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
         ioStream.onClose();
         if (gameManager != null) {
+            if (isMobile()) {
+                // Save the game if the player is on mobile and exits the game
+                gameManager.save();
+            }
             gameManager.stop();
         }
     }
@@ -1678,22 +1705,23 @@ public class GameScreen extends AbstractScreenEX {
         inventoryButton.setChecked(false);
         shopWindow.setVisible(false);
         inventoryWindow.setVisible(false);
-        if (informationUpgradeWindow != null) {
+        /*if (informationUpgradeWindow != null) {
             informationUpgradeWindow.remove();
             TowerEntity.displayRange = false;
             TowerEntity.displayRangeTower = null;
             informationUpgradeWindow = null;
-        }
+        }*/
+        removeInfoWindow();
         settings.setVisible(false);
     }
 
     HashSet<Integer> notificationsActive = new HashSet<Integer>();
 
-    private void notification(SpriteType icon, String message) {
+    public void notification(SpriteType icon, String message) {
         notification(icon, message, 3);
     }
 
-    private void notification(SpriteType icon, String message, int duration) {
+    public void notification(SpriteType icon, String message, int duration) {
         // display a message at the bottom right corner
         HorizontalGroup group = new HorizontalGroup();
 
@@ -1851,7 +1879,10 @@ public class GameScreen extends AbstractScreenEX {
                 TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
                 TowerEntity newTower = (TowerEntity) typeToPurchase.createEntity();
                 TileType below = data.getWorld().getTile(tileX, tileY, 0);
-                if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
+                if (!allowedToPlaceTowerAt(data, newTower, tileX, tileY)) {
+                    notification(SpriteType.STRUCTURE, "Cannot place here!");
+                    canPlace = false;
+                } else if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
                     notification(SpriteType.STRUCTURE, "Cannot place here!");
                     canPlace = false;
                 } else if (ShopManager.towerAt(world, tileX, tileY) != null) {
@@ -1899,10 +1930,7 @@ public class GameScreen extends AbstractScreenEX {
                     }
                     return;
                 }
-                if (informationUpgradeWindow != null) {
-                    informationUpgradeWindow.remove();
-                    informationUpgradeWindow = null;
-                }
+                removeInfoWindow();
 
                 // Open the upgrade dialog
                 upgradeDialog(towerAt, multiPlace);
@@ -2118,10 +2146,7 @@ public class GameScreen extends AbstractScreenEX {
         Dialog dialog = new Dialog("Upgrade?", Sprites.skin(), "small") {
             @Override
             protected void result(Object object) {
-                if (informationUpgradeWindow != null) {
-                    informationUpgradeWindow.remove();
-                    informationUpgradeWindow = null;
-                }
+                removeInfoWindow();
                 if (object.equals(false)) {
                     Audio.getInstance().playSFX(GameSFX.DESELECT, 1);
                     return;
@@ -2140,10 +2165,12 @@ public class GameScreen extends AbstractScreenEX {
 
         UpgradeOption option = ShopManager.getUpgradeCatalog().get(towerAt.type);
         float time = option.levelUpTime.apply(towerAt.getLevel()+1);
+        time /= gameSpeed;
+
+        String formatedTime = new DecimalFormat("#.#").format(time);
 
         Label label = new Label("LVL "+(towerAt.getLevel()+1)
-            //+"\nCost: "+ShopManager.costToString(cost)
-            +"\nTime: "+((int)time)+"s", Sprites.skin(), "small");
+            +"\nTime: "+formatedTime+"s", Sprites.skin(), "small");
         label.setAlignment(Align.center);
         label.setFontScale(.45f);
         dialog.text(label);
@@ -2156,6 +2183,12 @@ public class GameScreen extends AbstractScreenEX {
         dialog.setPosition((tileX + .5f) * Tile.SIZE, (tileY + 1.25f) * Tile.SIZE, Align.bottom);
         worldStage.addActor(dialog);
         informationUpgradeWindow = dialog;
+    }
+
+    // Returns true if the tower can be placed at the given tile
+    // Used by TutorialScreen
+    public boolean allowedToPlaceTowerAt(UpdateData data, Entity tower, int tileX, int tileY) {
+        return true;
     }
 
     private void upgrade(TowerEntity entity, int tileX, int tileY) {
@@ -2179,25 +2212,19 @@ public class GameScreen extends AbstractScreenEX {
         PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.UPGRADE, null, tileX, tileY);
         ioStream.sendPacket(packet);
         Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1);
-        informationUpgradeWindow = null;   
+        removeInfoWindow();
     }
     
     public void gemstoneDialog(TowerEntity entityAt, Material material) {
         int tileX = Entity.getTileX(entityAt.getX());
         int tileY = Entity.getTileY(entityAt.getY());
         
-        if (informationUpgradeWindow != null) {
-            informationUpgradeWindow.remove();
-            informationUpgradeWindow = null;
-        }
+        removeInfoWindow();
         
         Dialog dialog = new Dialog("Apply "+material.materialName+"?", Sprites.skin(), "small") {
             @Override
             protected void result(Object object) {
-                if (informationUpgradeWindow != null) {
-                    informationUpgradeWindow.remove();
-                    informationUpgradeWindow = null;
-                }
+                removeInfoWindow();
                 if (!ShopManager.canApplyMaterial(material, world, inventory, tileX, tileY, team)) {
                     notification(SpriteType.CASH, "Can't apply the gemstone!\nTry again in a second!");
                     Audio.getInstance().playSFX(GameSFX.WARNING, 1);
@@ -2285,6 +2312,10 @@ public class GameScreen extends AbstractScreenEX {
         return hitJoystick;
     }
 
+    public boolean overMenuIcons() {
+        return isOverActor(shopButton) || isOverActor(inventoryButton) || isOverActor(upgradeButton) || isOverActor(skipButton);
+    }
+
     public boolean isOverActor(Actor actor) {
         if (actor == null) {
             return false;
@@ -2311,7 +2342,7 @@ public class GameScreen extends AbstractScreenEX {
                         quitDialog = null;
                         return;
                     }
-                    if (gameManager != null) {
+                    if (gameManager != null && !(GameScreen.this instanceof TutorialScreen)) {
                         gameManager.save();
                     }
                     game.setScreen(new MainMenuScreen());

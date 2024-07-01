@@ -2,13 +2,14 @@ package net.cmr.rtd.game;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.esotericsoftware.kryonet.Client;
 
 import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
+import net.cmr.rtd.game.files.LevelFolder;
 import net.cmr.rtd.game.files.QuestFile;
+import net.cmr.rtd.game.files.WorldFolder;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.Packet;
@@ -25,6 +26,7 @@ import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.screen.TeamSelectionScreen;
 import net.cmr.rtd.screen.TeamSelectionScreen.ConnectionAttempt;
+import net.cmr.rtd.screen.TutorialScreen;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
 
@@ -33,7 +35,16 @@ import net.cmr.util.Settings;
  */
 public class GameConnector {
     
-    public static void startSingleplayerGame(QuestFile quest) {
+	public static void startSingleplayerGame(QuestFile quest) {
+		startSingleplayerGame(quest, -1);
+	}
+
+	/**
+	 * Starts a singleplayer game with the given quest and desired team.
+	 * @param quest The quest to play.
+	 * @param desiredTeam The team the player wants to join. If -1, the player will be prompted to choose a team.
+	 */
+    public static void startSingleplayerGame(QuestFile quest, final int desiredTeam) {
 		GameManagerDetails details = new GameManagerDetails();
 		details.setMaxPlayers(1);
 		details.setHostedOnline(false);
@@ -60,12 +71,16 @@ public class GameConnector {
 					}
 				});
 		
-				GameScreen screen = new GameScreen(clientsideStream, manager, details.getPassword(), null, team);
+				GameScreen screen = new GameScreen(clientsideStream, manager, details.getPassword(), team);
 		
 				manager.initialize(quest);
 				RetroTowerDefense.getInstance().setScreen(screen);
 				manager.start();
 				manager.onNewConnection(serversideStream);
+
+				if (desiredTeam != -1 && manager.areWavesPaused()) {
+					manager.resumeWaves();
+				}
 				
 				clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 			}
@@ -73,7 +88,12 @@ public class GameConnector {
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				if (desiredTeam == -1) {
+					RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				} else {
+					ConnectionAttempt attempt = new ConnectionAttempt("", desiredTeam);
+					joinGameWithTeam.accept(attempt);
+				}
 			}
 		};
 		getGameInfo(quest, details.getMaxPlayers(), callback);
@@ -107,7 +127,7 @@ public class GameConnector {
 						}
 					});
 					Log.info("Connected.");
-					GameScreen screen = new GameScreen(stream, null, attempt.passwordAttempt, null, team);
+					GameScreen screen = new GameScreen(stream, null, attempt.passwordAttempt, team);
 					game.setScreen(screen);
 
 					stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
@@ -141,7 +161,7 @@ public class GameConnector {
 
 				manager.initialize(quest);
                 manager.start();
-                GameScreen screen = new GameScreen(clientsidestream, manager, details.getPassword(), null, team);
+                GameScreen screen = new GameScreen(clientsidestream, manager, details.getPassword(), team);
                 rtd.setScreen(screen);
 
                 clientsidestream.addListener(new PacketListener() {
@@ -237,6 +257,32 @@ public class GameConnector {
 			e.printStackTrace();
 			game.setScreen(new MainMenuScreen());
 		}
+	}
+
+	public static void startTutorial() {
+		WorldFolder world = new WorldFolder("_Tutorial");
+		LevelFolder level = world.readLevels()[0];
+		QuestFile quest = level.readQuests()[0];
+		quest.createSave();
+		int team = 0;
+
+		GameManagerDetails details = new GameManagerDetails();
+		details.setMaxPlayers(1);
+		details.setHostedOnline(false);
+
+		GameManager manager = new GameManager(details);
+		LocalGameStream[] streams = LocalGameStream.createStreamPair();
+		GameStream clientsideStream = streams[0];
+		GameStream serversideStream = streams[1];
+		
+		GameScreen screen = new TutorialScreen(clientsideStream, manager);
+		
+		manager.initialize(quest);
+		RetroTowerDefense.getInstance().setScreen(screen);
+		manager.start();
+		manager.onNewConnection(serversideStream);
+				
+		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 	}
 
 }

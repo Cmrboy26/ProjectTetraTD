@@ -54,7 +54,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
-                game.setScreen(new SelectionScreen());
+                game.setScreen(new NewSelectionScreen());
             }
         });
         table.add(back).left().bottom().pad(5f).width(100).expandX().colspan(1);

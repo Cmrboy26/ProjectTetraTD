@@ -1,0 +1,10 @@
+{
+	"name": "Deposit - 4s",
+	"quests": [
+		"quest_endless_easy.json",
+		"quest_endless_medium.json",
+		"quest_endless_hard.json",
+		"quest_endless_insane.json",
+		"quest_endless_impossible.json"
+	]
+}

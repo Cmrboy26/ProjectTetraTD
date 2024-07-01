@@ -39,6 +39,11 @@ public class TeamSelectionScreen extends AbstractScreenEX {
             joinGameCallback.accept(new ConnectionAttempt("", availableTeams[0]));
             return;
         }
+        if (availableTeams.length == 0 && !usePassword) {
+            // Weird bug on mobile???
+            joinGameCallback.accept(new ConnectionAttempt("", 0));
+            return;
+        }
 
         Table table = new Table();
 		table.setFillParent(true);
@@ -99,7 +104,7 @@ public class TeamSelectionScreen extends AbstractScreenEX {
         joinButton.pad(0, 50, 0, 50);
 
         table.row();
-        table.add(joinButton).padTop(20.0f).padBottom(20.0f).space(10.0f).colspan(availableTeams.length);
+        table.add(joinButton).padTop(20.0f).padBottom(20.0f).space(10.0f).minWidth(100).colspan(availableTeams.length);
 
         add(Align.center, table);
     }

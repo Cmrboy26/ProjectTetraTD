@@ -136,6 +136,7 @@ public class NewSelectionScreen extends ScreenAdapter {
                 onWorldSelected(worldSelection.getSelected());
             }
         });
+        Audio.addClickSFX(worldSelection);
         leftBottomUI.add(worldSelection).align(Align.left).pad(10f).colspan(1);
 
         // Set the default selection and notify onWorldSelected
@@ -166,7 +167,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         SINGLEPLAYER {
             @Override
             public void startGame(QuestFile quest, int team) {
-                GameConnector.startSingleplayerGame(quest);
+                GameConnector.startSingleplayerGame(quest, team);
             }
         },
         HOST_ONLINE_GAME {
@@ -253,15 +254,17 @@ public class NewSelectionScreen extends ScreenAdapter {
                     questSelect.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
+                            setTasksList(levelDialog, questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
                         }
                     });
-                    setTasksList(questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
+                    setTasksList(levelDialog, questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
+                    Audio.addClickSFX(questSelect);
 
                     SelectBox<PlayType> playType = new SelectBox<>(style);
                     playType.getScrollPane().setScrollbarsVisible(false);
                     playType.setItems(PlayType.values());
                     playType.setAlignment(Align.center);
+                    Audio.addClickSFX(playType);
 
                     TextButton startButton = new TextButton("Start New", Sprites.skin(), "small");
                     Audio.addClickSFX(startButton);
@@ -276,7 +279,7 @@ public class NewSelectionScreen extends ScreenAdapter {
                             quest.createSave();
 
                             levelDialog.hide();
-                            playType.getSelected().startGame(quest, 0);
+                            playType.getSelected().startGame(quest, -1);
                         }
                     });
                     resumeGameButton.addListener(new ClickListener() {
@@ -286,14 +289,14 @@ public class NewSelectionScreen extends ScreenAdapter {
                             if (resumeGameButton.isDisabled()) return;
                             Log.info("Resuming level: " + level);
                             levelDialog.hide();
-                            playType.getSelected().startGame(new QuestFile(level, questSelect.getSelected()), 0);
+                            playType.getSelected().startGame(new QuestFile(level, questSelect.getSelected()), -1);
                         }
                     });
 
                     startButton.pad(0, 20, 0, 20);
 
                     levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(2);
-                    levelDialog.getContentTable().add(highScoreLabel).align(Align.right).colspan(1).row();
+                    levelDialog.getContentTable().add(highScoreLabel).align(Align.topRight).colspan(1).row();
                     levelDialog.getContentTable().add(questTasks).align(Align.left).colspan(2);
                     levelDialog.getContentTable().add(trophy).size(64).align(Align.right).colspan(1).row();
 
@@ -348,9 +351,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         ScrollPane worldView = new ScrollPane(levelSelection, Sprites.skin());
         worldView.setScrollbarsVisible(false);
         levelsTable.add(worldView).align(Align.center).height(360).width(640).colspan(1);
-
     }
-
 
     public WorldFolder[] getValidWorlds() {
         return WorldFolder.listWorlds();
@@ -360,7 +361,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         return level.readQuests();
     }
 
-    public void setTasksList(Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel, Image trophy) {
+    public void setTasksList(Dialog levelDialog, Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel, Image trophy) {
         taskListLabel.setText(getTasksList(file));
 
         boolean saveFileExists = file.questFileExists();
@@ -368,6 +369,10 @@ public class NewSelectionScreen extends ScreenAdapter {
             resumeGameButton.setDisabled(true);
             resumeGameButton.setColor(Color.DARK_GRAY);
             resumeGameButton.getLabel().setColor(Color.GRAY);
+        } else {
+            resumeGameButton.setDisabled(false);
+            resumeGameButton.setColor(Color.WHITE);
+            resumeGameButton.getLabel().setColor(Color.WHITE);
         }
 
         Long highScore = RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.HIGHSCORE, Long.class);
@@ -385,6 +390,8 @@ public class NewSelectionScreen extends ScreenAdapter {
         } else {
             trophy.setVisible(false);
         }
+
+        levelDialog.pack();
     }
 
     public String getTasksList(QuestFile file) {

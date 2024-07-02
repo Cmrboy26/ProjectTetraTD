@@ -34,17 +34,17 @@ ORDERED TODO LIST:
 - Add a bestiary for players to learn more about the enemies they encounter 
   - Keep it simple to understand with a lot of icons to signify immunities, health, money on death, other effects
 - Add achievements to the game (MAKE SURE THEY'RE UNIQUE AND NOT SOLELY USED TO INCREASE GAME TIME)
-- Add player customization options
+- Add player customization options.
   - Make a money system outside of inside of a level (like geobits!!!!) that are granted for completing achievements and playing levels
   - Allow them to color their avatar (might need to learn how to shift hues)
   - Custom nametag colors
 - Add a "No breaks" option, which disables all preperation time as a challenge option. It would give more currency as a reward.
-- Add "end with health greater than" quest task
-- Add "take no damage" quest task
-- Add "build no more than x towers" quest task
+✓ Add "end with health greater than" quest task
+✓ Add "take no damage" quest task
+✓ Add "build no more than x towers" quest task
 - REMEMBER WHEN BUILDING FOR ANDROID, CHECK android/build/intermediates/assets/debug to make sure the worlds are in there correctly
 - Add an option to disable buying certain towers in the quest json file
-- Show ICONS in the tutorial instead of saying "in the right bottom corner" and whatnot
+✓ Show ICONS in the tutorial instead of saying "in the right bottom corner" and whatnot
 
 - Bestiary
 - More (better) levels

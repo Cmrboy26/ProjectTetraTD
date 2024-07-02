@@ -1183,7 +1183,8 @@ public class GameScreen extends AbstractScreenEX {
             if (task == null) continue;
             String message = task.getReadableTaskDescription();
             if (message != null && !message.isEmpty()) {
-                notification(SpriteType.ICON, message, 5);
+                Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f, 1f);
+                notification(SpriteType.DIAMOND, "Task completed! "+message, 5);
             }
         }
 
@@ -1643,18 +1644,41 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     @Override
+    public void pause() {
+        super.pause();
+        saveGame();
+        if (isMobile()) {
+            exitGame();
+            stopGame();
+            Audio.getInstance().stopMusic();
+            MainMenuScreen mainMenu = new MainMenuScreen();
+            game.setScreen(mainMenu);
+        }
+    }
+    @Override
     public void hide() {
         super.hide();
+        saveGame();
+        exitGame();
+        stopGame();
         Audio.getInstance().stopMusic();
-        ioStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
-        ioStream.onClose();
+    }
+
+    private void saveGame() {
         if (gameManager != null) {
-            if (isMobile()) {
-                // Save the game if the player is on mobile and exits the game
-                gameManager.save();
-            }
+            gameManager.save();
+        }
+    }
+
+    private void stopGame() {
+        if (gameManager != null) {
             gameManager.stop();
         }
+    }
+
+    private void exitGame() {
+        ioStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
+        ioStream.onClose();
     }
 
     public @Null Player getLocalPlayer() {

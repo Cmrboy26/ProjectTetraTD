@@ -407,6 +407,7 @@ public class GameManager implements Disposable {
         // Save the game state.
         try {
             quest.saveGame(world);
+            Log.info("Saved game successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }

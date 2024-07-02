@@ -108,14 +108,14 @@ basic1/left
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 4
 basic1/left
   rotate: false
   xy: 1178, 437
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 2
 basic1/left
   rotate: false
   xy: 1528, 402
@@ -185,14 +185,14 @@ basic1/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic1/right
   rotate: false
   xy: 898, 367
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic1/right
   rotate: false
   xy: 1948, 332
@@ -332,14 +332,14 @@ basic2/left
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 4
 basic2/left
   rotate: false
   xy: 1038, 402
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 2
 basic2/left
   rotate: false
   xy: 1388, 437
@@ -556,14 +556,14 @@ basic3/left
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 0
 basic3/left
   rotate: false
   xy: 828, 402
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 2
 basic3/left
   rotate: false
   xy: 1423, 402
@@ -640,14 +640,14 @@ basic3/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic3/right
   rotate: false
   xy: 688, 367
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic3/right
   rotate: false
   xy: 1773, 332
@@ -843,14 +843,14 @@ basic4/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 6
 basic4/right
   rotate: false
   xy: 1213, 437
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 4
 basic4/right
   rotate: false
   xy: 1563, 402
@@ -1249,14 +1249,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 8
+  index: 13
 drill/drill
   rotate: false
   xy: 1003, 472
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 13
+  index: 8
 drill/drill
   rotate: false
   xy: 1003, 472
@@ -1277,7 +1277,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 9
+  index: 5
+drill/drill
+  rotate: false
+  xy: 1283, 402
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4
 drill/drill
   rotate: false
   xy: 1283, 402
@@ -1291,14 +1298,7 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
-drill/drill
-  rotate: false
-  xy: 1283, 402
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 4
+  index: 9
 drill/drill
   rotate: false
   xy: 1633, 472
@@ -1312,14 +1312,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 1
 drill/drill
   rotate: false
   xy: 1633, 472
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 1
+  index: 2
 drill/drill
   rotate: false
   xy: 1878, 367
@@ -1327,13 +1327,6 @@ drill/drill
   orig: 32, 32
   offset: 0, 0
   index: 10
-drill/drill
-  rotate: false
-  xy: 1878, 367
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 6
 drill/drill
   rotate: false
   xy: 1878, 367
@@ -1348,6 +1341,13 @@ drill/drill
   orig: 32, 32
   offset: 0, 0
   index: 12
+drill/drill
+  rotate: false
+  xy: 1878, 367
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 6
 drill/drillTower10
   rotate: false
   xy: 688, 472
@@ -1732,14 +1732,14 @@ healer1/left
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 2
 healer1/left
   rotate: false
   xy: 1108, 472
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 0
 healer1/left
   rotate: false
   xy: 1738, 402

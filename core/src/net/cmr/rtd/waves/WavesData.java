@@ -285,7 +285,7 @@ public class WavesData {
         IMPOSSIBLE(5)
         ;
 
-        int id;
+        public final int id;
         DifficultyRating(int id) {
             this.id = id;
         }

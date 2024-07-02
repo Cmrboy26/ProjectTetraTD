@@ -32,6 +32,7 @@ import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.IntroScreen;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -47,13 +48,12 @@ public class MainMenuScreen extends AbstractScreenEX {
 		Table table = new Table();
 		table.setFillParent(true);
 
-		/*Image icon = new Image(Sprites.drawable(SpriteType.ICON));
-		table.add(icon);
-		table.row();*/
-
 		float iconPadding = 10;
 
-		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).padRight(iconPadding);
+		int outsideSpan = 1;
+		int insideSpan = 2;
+
+		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).padRight(iconPadding).colspan(outsideSpan);
 
 		Label label = new Label("Retro Tower Defense", Sprites.skin(), "default");
 		label.setOrigin(Align.bottom);
@@ -109,16 +109,16 @@ public class MainMenuScreen extends AbstractScreenEX {
 		float offset = 3.0f;
 		label.setPosition(label.getX(), label.getY());
 		label.addAction(Actions.forever(Actions.sequence(Actions.moveBy(0, offset, duration, interpolation), Actions.moveBy(0, -offset, duration, interpolation))));
-		table.add(label);
+		table.add(label).colspan(insideSpan);
 
 		String labelType = "small";
 
 		table.add(new Image(Sprites.drawable(SpriteType.ICE_TOWER))).padLeft(iconPadding);
-		table.row();
+		table.row().colspan(outsideSpan);
 
-		TextButton creation = new TextButton("Play", Sprites.skin(), labelType);
-		Audio.addClickSFX(creation);
-		creation.addListener(new ClickListener() {
+		TextButton play = new TextButton("Play", Sprites.skin(), labelType);
+		Audio.addClickSFX(play);
+		play.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
@@ -126,8 +126,6 @@ public class MainMenuScreen extends AbstractScreenEX {
                 //game.setScreen(new SelectionScreen());
 			}
 		});
-		table.add(creation).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
-		table.row();
 
 		TextButton resume = new TextButton("Resume", Sprites.skin(), labelType);
 		Audio.addClickSFX(resume);
@@ -143,10 +141,18 @@ public class MainMenuScreen extends AbstractScreenEX {
 		});
 		boolean hasLastPlayed = RetroTowerDefense.getInstance(RetroTowerDefense.class).hasLastPlayedQuest();
 
+		int playSpan = insideSpan + 2 * outsideSpan;
+		int padInside = 100;
 		if (hasLastPlayed) {
-			table.add(resume).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
-			table.row();
+			playSpan /= 2;
+			padInside = 0;
 		}
+
+		table.add(play).padLeft(100.0f).padRight(padInside).space(10.0f).colspan(playSpan).fillX();
+		if (hasLastPlayed) {
+			table.add(resume).padLeft(padInside).padRight(100.0f).space(10.0f).colspan(playSpan).fillX();
+		}
+		table.row();
 
 		TextButton tutorial = new TextButton("Tutorial", Sprites.skin(), labelType);
 		Audio.addClickSFX(tutorial);
@@ -156,11 +162,11 @@ public class MainMenuScreen extends AbstractScreenEX {
 				GameConnector.startTutorial();
 			}
 		});
-		table.add(tutorial).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+		table.add(tutorial).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 		table.row();
 
 		if (!RetroTowerDefense.isMobile() && RetroTowerDefense.getInstance(RetroTowerDefense.class).getUsername().equals("Cmrboy26")) {
-			TextButton editor = new TextButton("Editor", Sprites.skin(), labelType);
+			TextButton editor = new TextButton("Editor (WIP)", Sprites.skin(), labelType);
 			Audio.addClickSFX(editor);
 			editor.addListener(new ClickListener() {
 				@Override
@@ -169,7 +175,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 					fadeToScreen(new EditorScreen(handle), .5f, Interpolation.linear, false);
 				}
 			});
-			table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+			table.add(editor).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 			table.row();	
 		}
 
@@ -182,7 +188,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				game.setScreen(new SettingsScreen());	
 			}
 		});
-		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 		table.row();
 
 		textButton = new TextButton("Exit", Sprites.skin(), labelType);
@@ -193,7 +199,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				Gdx.app.exit();
 			}
 		});
-		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(3).fillX();
+		table.add(textButton).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 		add(Align.center, table);
 
 		Table table1 = new Table();
@@ -296,6 +302,14 @@ public class MainMenuScreen extends AbstractScreenEX {
 
 		add(Align.bottomRight, table2);
     }
+
+	@Override
+	public void resume() {
+		super.resume();
+		stages.clear();
+		IntroScreen introScreen = new IntroScreen(new MainMenuScreen());
+		game.setScreen(introScreen);
+	}
 
     @Override
     public void render(float delta) {

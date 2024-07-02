@@ -17,6 +17,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
+import net.cmr.rtd.waves.WavesData.DifficultyRating;
 import net.cmr.util.Log;
 
 /**
@@ -39,6 +40,7 @@ public class QuestFile {
 
     private String displayName;
     private QuestTask[] tasks;
+    private int difficulty = -1;
 
     public QuestFile(LevelFolder level, String questFileName) {
         this.level = level;
@@ -58,6 +60,10 @@ public class QuestFile {
         FileHandle waveQuestFile = saveFile.child("wave.json");
         this.level = untamperedLevel;
         this.waveFile = waveQuestFile;
+    }
+
+    public LevelFolder getLevel() {
+        return level;
     }
 
     public FileHandle getFile() {
@@ -84,6 +90,13 @@ public class QuestFile {
             displayName = (String) object.get("name");
             if (displayName == null) {
                 displayName = getFile().nameWithoutExtension();
+            }
+
+            Long difficulty = (Long) object.get("difficulty");
+            if (difficulty != null) {
+                this.difficulty = difficulty.intValue();
+            } else {
+                this.difficulty = 0;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,6 +140,13 @@ public class QuestFile {
             read();
         }
         return tasks;
+    }
+
+    public DifficultyRating getDifficulty() {
+        if (difficulty == -1) {
+            read();
+        }
+        return DifficultyRating.deserialize(difficulty);
     }
 
     public FileHandle getSaveFolder() {

@@ -3,6 +3,7 @@ package net.cmr.rtd.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -16,6 +17,7 @@ import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.towers.ShooterTower;
+import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Point;
 import net.cmr.util.Sprites;
@@ -91,7 +93,9 @@ public class TutorialScreen extends GameScreen {
             case INTRO:
                 tableText("Welcome to Retro Tower Defense!");
                 tableText("This is an interactive tutorial to help you get started.");
-                tableText("Press 'Escape' at any time to exit the tutorial.");
+                if (!isMobile()) {
+                    tableText("Press 'Escape' at any time to exit the tutorial.");
+                }
                 tableText("Select the 'Continue' button to begin.");
                 promptContinueButton();
                 break;
@@ -174,10 +178,14 @@ public class TutorialScreen extends GameScreen {
                 tableText("Let's apply a component to your tower!");
                 tableText("Select the 'Inventory' button at the bottom of the screen.");
                 break;
-            case INVENTORY_SELECT:
+            case INVENTORY_SELECT: {
                 tableText("Select the left top item in the inventory.");
                 tableText("This is lubricant, one of the 3 types of components.");
+                Image wd40 = new Image(Sprites.sprite(SpriteType.LUBRICANT));
+                int size = 30;
+                tutorialTable.add(wd40).size(size).row();
                 break;
+            }
             case COMPONENT_APPLY:
                 tableText("Select the tower you wish to upgrade");
                 tableText("and apply the component to it.");
@@ -188,21 +196,30 @@ public class TutorialScreen extends GameScreen {
                 tableText("Scopes and scrap metal, the other two components,");
                 tableText("increase the tower's range and damage, respectively.");
                 break;
-            case INVENTORY_INTRO_4:
+            case INVENTORY_INTRO_4: {
                 tableText("The inventory also holds resource items, like");
                 tableText("steel and titanium, which can be obtained by");
                 tableText("creating mining towers on resource tiles.");
-                tableText("A steel deposit is highlighted, and a titanium deposit");
-                tableText("is right of the highlighted deposit. Resources are");
-                tableText("only used to construct unique towers.");
+                tableText("Resources are only used to construct unique towers.");
+                int size = 30;
+                Image ironVein = new Image(Sprites.sprite("ironVein"));
+                Image titaniumVein = new Image(Sprites.sprite("titaniumVein"));
+                tableText("Iron vein (produces steel): ", false);
+                tutorialTable.add(ironVein).size(size).row();
+                tableText("Titanium vein:", false);
+                tutorialTable.add(titaniumVein).size(size).row();
                 break;
-            case INVENTORY_INTRO_5:
+            }
+            case INVENTORY_INTRO_5: {
                 tableText("Lastly, the inventory holds gemstones.");
                 tableText("They are drilled from gemstone deposits.");
-                tableText("A gemstone deposit is highlighted.");
                 tableText("They can be applied to towers similar to components,");
                 tableText("but only one can be applied at a time.");
+                int size = 30;
+                Image gemstoneVein = new Image(Sprites.sprite("gemstoneVein"));
+                tutorialTable.add(gemstoneVein).size(size).colspan(2).row();
                 break;
+            }
             case INVENTORY_INTRO_6:
                 tableText("Gemstones can provide unique abilities to towers,");
                 tableText("such as stunning enemies, dealing piercing damage,");
@@ -221,19 +238,29 @@ public class TutorialScreen extends GameScreen {
                 tableText("BE WARNED! You will lose ALL components and gemstones.");
                 tableText("Please sell your tower.");
                 break;
-            case FINAL_INFO:
+            case FINAL_INFO: {
+                int size = 30;
+                Image speedIcon = new Image(Sprites.sprite(SpriteType.SPEED_1));
+                speedIcon.setSize(size, size);
+                Image restartIcon = new Image(Sprites.sprite(SpriteType.RESTART));
+                restartIcon.setSize(size, size);
+                Image skipIcon = new Image(Sprites.sprite(SpriteType.SKIP));
+                skipIcon.setSize(size, size);
+
                 tableText("Here are some final tips to get you started:");
-                tableText("- You can change the game speed using the buttons");
-                tableText("  in the bottom right corner.");
-                tableText("- You can restart the game at any time by selecting");
-                tableText("  the 'Restart' button in that corner.");
-                tableText("- If you want to skip the wait for the next wave,");
-                tableText("  you can select large skip button in the corner.");
+                tutorialTable.add(speedIcon).size(size).right().colspan(1);
+                tableText("<- Used to change the speed of the game", true, 1);
+                tutorialTable.add(restartIcon).size(size).right().colspan(1);
+                tableText("<- Used to restart the game at any time", true, 1);
+                tutorialTable.add(skipIcon).size(size).right().colspan(1);
+                tableText("<- Skips the waiting time between waves", true, 1);
                 tableText("- Unique enemies will spawn as you progress; some");
                 tableText("  will be immune to cold or fire, some will heal their");
                 tableText("  allies, and much more. Be prepared!");
+                tableText("");
                 tableText("Select the 'Continue' button to finish the tutorial.");
                 break;
+            }
             case FINISHED:
                 tableText("Congratulations! You have completed the tutorial.");
                 tableText("You are now ready to play Retro Tower Defense!");
@@ -328,7 +355,7 @@ public class TutorialScreen extends GameScreen {
                 return false;
             case FINISH_WAVE:
                 int currentWave = gameManager.getWorld().getWave();
-                if (currentWave == 2) {
+                if (currentWave >= 2) {
                     gameManager.pauseWaves();
                     return true;
                 }
@@ -499,7 +526,19 @@ public class TutorialScreen extends GameScreen {
     }
 
     private void tableText(String text) {
-        tutorialTable.add(text, "small").row();
+        tutorialTable.add(text, "small").colspan(2).row();
+    }
+    private void tableText(String text, boolean row) {
+        tutorialTable.add(text, "small").colspan(1 + (row ? 1 : 0));
+        if (row) {
+            tutorialTable.row();
+        }
+    }
+    private void tableText(String text, boolean row, int colspan) {
+        tutorialTable.add(text, "small").colspan(colspan);
+        if (row) {
+            tutorialTable.row();
+        }
     }
 
     @Override
@@ -536,6 +575,8 @@ public class TutorialScreen extends GameScreen {
         if (isTaskComplete()) {
             promptContinueButton();
         }
+        StructureTileData structureTile = gameManager.getTeam(0).structure;
+        structureTile.health = 50;
     }
 
     float targetElapsedTime = 0;

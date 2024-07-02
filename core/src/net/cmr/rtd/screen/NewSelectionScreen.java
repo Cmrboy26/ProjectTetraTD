@@ -281,7 +281,8 @@ public class NewSelectionScreen extends ScreenAdapter {
                     }
                     Audio.getInstance().playSFX(Audio.GameSFX.CLICK, 1f);
                     Log.info("Clicked level: " + level);
-                    Dialog levelDialog = new Dialog("Level: "+level, Sprites.skin(), "small");
+                    Dialog levelDialog = new Dialog(level.toString(), Sprites.skin(), "small");
+                    levelDialog.getTitleLabel().setAlignment(Align.center);
 
                     Label questTasksLabel = new Label("Tasks:", Sprites.skin(), "small");
                     questTasksLabel.setAlignment(Align.left);
@@ -435,6 +436,7 @@ public class NewSelectionScreen extends ScreenAdapter {
 
     public void setTasksList(Dialog levelDialog, Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel, Image trophy) {
         taskListLabel.setText(getTasksList(file));
+        levelDialog.getTitleLabel().setText(file.getLevel().getDisplayName() + " [" + file.getDisplayName() + " | " + file.getDifficulty().name() + "]");
 
         boolean saveFileExists = file.questFileExists();
         if (!saveFileExists) {

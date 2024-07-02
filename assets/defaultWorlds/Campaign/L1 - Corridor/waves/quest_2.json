@@ -1,5 +1,16 @@
 {
     "difficulty": 2,
+	"quests": [
+		{
+			"id": 0,
+			"type": "NO_DAMAGE"
+		},
+		{
+			"id": 1,
+			"type": "TOWER_LIMIT",
+			"value": 1
+		}
+	],
     "waves": [
         {
             "waveTime": 45,

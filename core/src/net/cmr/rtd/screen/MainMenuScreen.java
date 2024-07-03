@@ -54,7 +54,13 @@ public class MainMenuScreen extends AbstractScreenEX {
 		int outsideSpan = 1;
 		int insideSpan = 2;
 
-		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).size(32).padRight(iconPadding).colspan(outsideSpan);
+		float widthHeightRatio = 136.0f / 32.0f;
+		float height = 96.0f;
+		float width = height * widthHeightRatio;
+
+		table.add(new Image(Sprites.drawable(SpriteType.TITLE))).height(height).width(width).pad(0, 50, 0, 50).row();
+
+		/*table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).size(32).padRight(iconPadding).colspan(outsideSpan);
 
 		Label label = new Label(RetroTowerDefense.GAME_NAME, Sprites.skin(), "default");
 		label.setOrigin(Align.bottom);
@@ -112,10 +118,10 @@ public class MainMenuScreen extends AbstractScreenEX {
 		label.addAction(Actions.forever(Actions.sequence(Actions.moveBy(0, offset, duration, interpolation), Actions.moveBy(0, -offset, duration, interpolation))));
 		table.add(label).colspan(insideSpan);
 
-		String labelType = "small";
-
 		table.add(new Image(Sprites.drawable(SpriteType.ICE_TOWER))).size(32).padLeft(iconPadding);
-		table.row().colspan(outsideSpan);
+		table.row().colspan(outsideSpan);*/
+
+		String labelType = "small";
 
 		TextButton play = new TextButton("Play", Sprites.skin(), labelType);
 		Audio.addClickSFX(play);
@@ -251,7 +257,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.getContentTable().row();
 				creditsDialog.text("Beta Testing: SirPotato42, Andrew", small);
 				creditsDialog.getContentTable().row();
-				creditsDialog.text("Copyright Cmrboy26 (C)", small);
+				creditsDialog.text("Copyright Colten Reissmann (C)", small);
 				creditsDialog.getContentTable().row();
 
 				// April fools joke
@@ -292,6 +298,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				
 				creditsDialog.pack();
 				creditsDialog.setScale(.75f);
+				creditsDialog.setOrigin(Align.center);
 				creditsDialog.setPosition(640/2, 360/2, Align.center);
 
 				creditsDialog.show(stage);

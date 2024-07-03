@@ -79,6 +79,7 @@ public class Sprites implements Disposable {
         SMALL_CASH("smallCash"),
         SPEED_1("speed1"),
         SPEED_2("speed2"),
+        TITLE("title"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),

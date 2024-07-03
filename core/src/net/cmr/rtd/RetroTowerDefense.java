@@ -45,6 +45,13 @@ import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
 public class RetroTowerDefense extends CMRGame {
+
+	// Tetral TD?
+	// Retro Tetra TD?
+	// Tetra TD?
+	// Retro Tower Defense?
+	// Project Tetra TD?
+	public static final String GAME_NAME = "Project Tetra TD";
 	
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 0;

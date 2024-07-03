@@ -31,6 +31,7 @@ import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
+import net.cmr.util.CMRGame;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.IntroScreen;
 import net.cmr.util.Sprites;
@@ -53,9 +54,9 @@ public class MainMenuScreen extends AbstractScreenEX {
 		int outsideSpan = 1;
 		int insideSpan = 2;
 
-		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).padRight(iconPadding).colspan(outsideSpan);
+		table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).size(32).padRight(iconPadding).colspan(outsideSpan);
 
-		Label label = new Label("Retro Tower Defense", Sprites.skin(), "default");
+		Label label = new Label(RetroTowerDefense.GAME_NAME, Sprites.skin(), "default");
 		label.setOrigin(Align.bottom);
 		label.addListener(new ClickListener() {
 			@Override
@@ -113,7 +114,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 
 		String labelType = "small";
 
-		table.add(new Image(Sprites.drawable(SpriteType.ICE_TOWER))).padLeft(iconPadding);
+		table.add(new Image(Sprites.drawable(SpriteType.ICE_TOWER))).size(32).padLeft(iconPadding);
 		table.row().colspan(outsideSpan);
 
 		TextButton play = new TextButton("Play", Sprites.skin(), labelType);
@@ -206,7 +207,15 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table1.setFillParent(true);
 		Table leftBottomTable = new Table();
 		table1.add(leftBottomTable).expand().align(Align.bottomLeft);
-		String versionInfo = "RTD v"+RetroTowerDefense.MAJORVERSION+"."+RetroTowerDefense.MINORVERSION+"."+RetroTowerDefense.PATCHVERSION;
+		String shortenedTitle = "";
+		// Get all capital letters in the title
+		for (int i = 0; i < RetroTowerDefense.GAME_NAME.length(); i++) {
+			char c = RetroTowerDefense.GAME_NAME.charAt(i);
+			if (Character.isUpperCase(c)) {
+				shortenedTitle += c;
+			}
+		}
+		String versionInfo = shortenedTitle+" v"+RetroTowerDefense.MAJORVERSION+"."+RetroTowerDefense.MINORVERSION+"."+RetroTowerDefense.PATCHVERSION;
 		if (Gdx.app.getType() == ApplicationType.Android) {
 			versionInfo += " (Android)";
 		}

@@ -16,7 +16,7 @@ public class DesktopLauncher {
 
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
-		config.setTitle("Retro Tower Defense");
+		config.setTitle(RetroTowerDefense.GAME_NAME);
 		config.setWindowIcon("raw/icon.png");
 		NativeFileChooser chooser = new DesktopFileChooser();
 		new Lwjgl3Application(new RetroTowerDefense(chooser), config);

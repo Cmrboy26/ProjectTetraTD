@@ -15,6 +15,8 @@ import net.cmr.util.Sprites.SpriteType;
  */
 public class TeamInventory {
     
+    public static final int DIAMOND_MAX_AOE_TARGETS = 5;
+
     public long cash = 0;
     public int scopes = 0; // used to increase range of towers
     public int wd40 = 0; // used to increase speed of towers

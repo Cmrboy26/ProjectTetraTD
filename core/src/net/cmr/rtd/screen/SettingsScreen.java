@@ -99,6 +99,19 @@ public class SettingsScreen extends AbstractScreenEX {
 
         Slider fpsSlider = new Slider(-10.0f, 120.0f, 10.0f, false, Sprites.skin());
         fpsSlider.setValue(Settings.getPreferences().getInteger(Settings.FPS));
+        if (RetroTowerDefense.isMobile()) {
+            TextTooltip tooltip = new TextTooltip("FPS changes may not function on mobile devices.", Sprites.skin(), "small");
+            tooltip.getContainer().pad(5);
+            tooltip.getContainer().setScale(.25f);
+            tooltip.getActor().setFontScale(.25f);
+            tooltip.setInstant(true);
+            fpsSlider.addListener(tooltip);
+        }
+
+        CheckBox fullscreen = new CheckBox("", Sprites.skin());
+        Audio.addClickSFX(fullscreen);
+        fullscreen.setChecked(Settings.getPreferences().getBoolean(Settings.FULLSCREEN));
+
         Label fpsLabel = new Label("", Sprites.skin(), labelType) {
             @Override
             public void act(float delta) {
@@ -113,21 +126,15 @@ public class SettingsScreen extends AbstractScreenEX {
                 super.act(delta);
             }
         };
-
-        if (RetroTowerDefense.isMobile()) {
-            TextTooltip tooltip = new TextTooltip("FPS changes may not function on mobile devices.", Sprites.skin(), "small");
-            tooltip.getContainer().pad(5);
-            tooltip.getContainer().setScale(.25f);
-            tooltip.getActor().setFontScale(.25f);
-            tooltip.setInstant(true);
-            fpsSlider.addListener(tooltip);
-        }
+        Label fullscreenLabel = new Label("Fullscreen", Sprites.skin(), labelType);
 
         settingsTable.add(fpsLabel).left().padRight(10.0f).colspan(1);
+        settingsTable.add(fullscreenLabel).left().padRight(10.0f).colspan(1);
 
         settingsTable.row();
 
         settingsTable.add(fpsSlider).expandX().fillX().colspan(1).pad(3);
+        settingsTable.add(fullscreen).expandX().fillX().colspan(1).pad(3);
 
         // Settings End
 
@@ -159,6 +166,7 @@ public class SettingsScreen extends AbstractScreenEX {
                 Settings.getPreferences().putBoolean(Settings.SHOW_FPS, showFPS.isChecked());
                 Settings.getPreferences().putBoolean(Settings.SHOW_PLACEMENT_GRID, showPlacementGrid.isChecked());
                 Settings.getPreferences().putInteger(Settings.FPS, (int)fpsSlider.getValue());
+                Settings.getPreferences().putBoolean(Settings.FULLSCREEN, fullscreen.isChecked());
 
                 Settings.getPreferences().flush();
                 Settings.applySettings();

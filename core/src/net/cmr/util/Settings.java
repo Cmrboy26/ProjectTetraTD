@@ -2,6 +2,7 @@ package net.cmr.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Graphics.DisplayMode;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.stream.OnlineGameStream;
@@ -17,6 +18,7 @@ public class Settings {
     public static final String SHOW_FPS = "showFPS";
     public static final String FPS = "fps";
     public static final String SHOW_PLACEMENT_GRID = "showPlacementGrid";
+    public static final String FULLSCREEN = "fullscreen";
     // Host settings
     public static final String USE_NPNP = "useNPnP";
     public static final String PORT = "port";
@@ -45,6 +47,7 @@ public class Settings {
         defaultBoolean(SHOW_FPS, false, force, preferences);
         defaultBoolean(SHOW_PLACEMENT_GRID, false, force, preferences);
         defaultInt(FPS, -1, force, preferences);
+        defaultBoolean(FULLSCREEN, false, force, preferences);
 
         defaultBoolean(USE_NPNP, true, force, preferences);
         defaultInt(PORT, 11265, force, preferences);
@@ -102,6 +105,12 @@ public class Settings {
             Gdx.graphics.setVSync(false);
         }
         Gdx.graphics.setForegroundFPS(fps);
+
+        if (preferences.getBoolean(FULLSCREEN)) {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        } else {
+            Gdx.graphics.setWindowedMode(640, 480);
+        }
 
         Log.info("Applied settings.");
     }

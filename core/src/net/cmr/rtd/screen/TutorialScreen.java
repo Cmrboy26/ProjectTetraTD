@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
+import net.cmr.rtd.RetroTowerDefense;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.world.Entity;
@@ -91,7 +92,7 @@ public class TutorialScreen extends GameScreen {
 
         switch (state) {
             case INTRO:
-                tableText("Welcome to Retro Tower Defense!");
+                tableText("Welcome to " + RetroTowerDefense.GAME_NAME + "!");
                 tableText("This is an interactive tutorial to help you get started.");
                 if (!isMobile()) {
                     tableText("Press 'Escape' at any time to exit the tutorial.");
@@ -183,7 +184,7 @@ public class TutorialScreen extends GameScreen {
                 tableText("This is lubricant, one of the 3 types of components.");
                 Image wd40 = new Image(Sprites.sprite(SpriteType.LUBRICANT));
                 int size = 30;
-                tutorialTable.add(wd40).size(size).row();
+                tutorialTable.add(wd40).size(size).colspan(2).row();
                 break;
             }
             case COMPONENT_APPLY:
@@ -258,12 +259,11 @@ public class TutorialScreen extends GameScreen {
                 tableText("  will be immune to cold or fire, some will heal their");
                 tableText("  allies, and much more. Be prepared!");
                 tableText("");
-                tableText("Select the 'Continue' button to finish the tutorial.");
                 break;
             }
             case FINISHED:
                 tableText("Congratulations! You have completed the tutorial.");
-                tableText("You are now ready to play Retro Tower Defense!");
+                tableText("You are now ready to play " + RetroTowerDefense.GAME_NAME + "!");
                 tableText("Select the 'Continue' button to return to the main menu.");
                 break;
         }

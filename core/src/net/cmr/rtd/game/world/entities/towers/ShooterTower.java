@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
@@ -55,6 +56,7 @@ public class ShooterTower extends TowerEntity {
                         .setTimeToReachTarget(getProjectileAirTime())
                         .setPrecision(1)
                         .setAOE(piercing ? .25f : 0)
+                        .setMaxAOETargets(TeamInventory.DIAMOND_MAX_AOE_TARGETS)
                         .setOnLaunchSound(GameSFX.SHOOT);
                 Projectile arrow = builder.build();
                 Projectile.launchProjectile(data, arrow);

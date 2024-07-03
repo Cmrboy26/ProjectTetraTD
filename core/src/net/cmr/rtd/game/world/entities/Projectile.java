@@ -38,6 +38,7 @@ public class Projectile extends Entity {
      * In tiles
      */
     float AOE = 0;
+    int maxAOETargets;
     float scale = 1;
     Vector2 velocity = new Vector2();
     float precision;
@@ -55,6 +56,7 @@ public class Projectile extends Entity {
         private int damage;
         private float timeToReachTarget;
         private float AOE = 0;
+        private int maxAOETargets = 1;
         private float precision;
         private GameSFX onHitSound = null;
         private GameSFX onLaunchSound = null;
@@ -99,6 +101,11 @@ public class Projectile extends Entity {
             return this;
         }
 
+        public ProjectileBuilder setMaxAOETargets(int targets) {
+            this.maxAOETargets = targets;
+            return this;
+        }
+
         public ProjectileBuilder setPrecision(float precision) {
             this.precision = precision;
             return this;
@@ -115,7 +122,7 @@ public class Projectile extends Entity {
         }
 
         public Projectile build() {
-            return new Projectile(entity, sprite, animation, scale, position, damage, timeToReachTarget, AOE, precision, onHitSound, onLaunchSound);
+            return new Projectile(entity, sprite, animation, scale, position, damage, timeToReachTarget, AOE, maxAOETargets, precision, onHitSound, onLaunchSound);
         }
     }
 
@@ -123,7 +130,7 @@ public class Projectile extends Entity {
         super(GameType.PROJECTILE);
     }
 
-    public Projectile(EnemyEntity entity, SpriteType sprite, AnimationType animation, float scale, Vector2 position, int damage, float timeToReachTarget, float AOE, float precision, GameSFX onHitSound, GameSFX onLaunchSound) {
+    public Projectile(EnemyEntity entity, SpriteType sprite, AnimationType animation, float scale, Vector2 position, int damage, float timeToReachTarget, float AOE, int maxAOETargets, float precision, GameSFX onHitSound, GameSFX onLaunchSound) {
         super(GameType.PROJECTILE);
         this.animation = animation;
         this.sprite = sprite;
@@ -134,6 +141,7 @@ public class Projectile extends Entity {
         this.velocity.set(entity.launchProjectileAt(this, timeToReachTarget, precision));
         this.scale = scale;
         this.AOE = AOE;
+        this.maxAOETargets = maxAOETargets;
         this.precision = precision;
         this.onHitSound = onHitSound;
         this.onLaunchSound = onLaunchSound;
@@ -174,13 +182,17 @@ public class Projectile extends Entity {
             }
             if (entity != null && entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-
                 if (AOE > 0) {
+                    int enemiesAttacked = 0;
                     for (Entity e : world.getEntities()) {
+                        if (enemiesAttacked >= maxAOETargets) {
+                            break;
+                        }
                         if (e instanceof EnemyEntity) {
                             EnemyEntity enemyEntity = (EnemyEntity) e;
                             if (enemyEntity.getPosition().dst(getPosition()) < (AOE * Tile.SIZE)) {
                                 enemyEntity.damage(damage, data, DamageType.PHYSICAL);
+                                enemiesAttacked++;
                             }
                         }
                     }

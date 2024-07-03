@@ -96,6 +96,8 @@ public class EndlessUtils {
         targetDPS /= teams;
 
         boolean isStagnant = targetDPS <= maximumDPS * (1 + requiredDPSIncreasePercentageForStagnancy) && currentWave >= 2; // If DPS hasn't increased by stagnantIncreasePercentage, increase the stagnant counter
+        Log.info(targetDPS+" <= "+maximumDPS+" * (1 + "+requiredDPSIncreasePercentageForStagnancy+") && " + currentWave + " >= 2");
+        Log.info((targetDPS <= maximumDPS * (1 + requiredDPSIncreasePercentageForStagnancy))+" && "+(currentWave >= 2));
         if (isStagnant) {
             stagnation++;
             Log.info("Player was STAGNANT... current stagnant progress: "+stagnation);
@@ -117,7 +119,7 @@ public class EndlessUtils {
         double scale = (sinusoidalFunctionOutput + (max / sinusoidalGameDifficultyAmplitude) - 1d)*sinusoidalGameDifficultyAmplitude;
         if (stagnation >= stagnationThreshold) { // Punish players for not upgrading their towers
             Log.info("Player was STAGNANT for "+stagnation+" waves. Punishing...");
-            scale += stagnationDifficultyIncrease * (stagnation - stagnationThreshold + 1);
+            scale += stagnationDifficultyIncrease * ((stagnation * stagnation * .5f) - stagnationThreshold + 1);
         }
         // Don't fluctuate the difficulty during the beginning few waves
         if (currentWave <= 3) {

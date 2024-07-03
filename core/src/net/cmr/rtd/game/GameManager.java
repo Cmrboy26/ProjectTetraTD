@@ -60,6 +60,7 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.screen.TutorialScreen;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
@@ -402,7 +403,9 @@ public class GameManager implements Disposable {
         if (RetroTowerDefense.instanceExists() && !details.isHostedOnline()) {
             RetroTowerDefense instance = RetroTowerDefense.getInstance(RetroTowerDefense.class);
             String[] serializedQuestFile = quest.serialize();
-            instance.setLastPlayedQuest(serializedQuestFile);
+            if (!(instance.getScreen() instanceof TutorialScreen)) {
+                instance.setLastPlayedQuest(serializedQuestFile);
+            }
         }
         // Save the game state.
         try {
@@ -863,7 +866,7 @@ public class GameManager implements Disposable {
             if(!d.getSpecificPortMappingEntry(port, "TCP", entry)) {
                 Log.info("Port already forwarded: "+details.getTCPPort());
             } else {
-                boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
+                boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "RTD");
                 if (portMappingSuccessful) {
                     Log.info("Port forwarding successful: "+externalIPAddress+":"+details.getTCPPort());
                 } else {
@@ -871,7 +874,7 @@ public class GameManager implements Disposable {
                 }
                 return true;
             }
-            /*boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "Retro Tower Defense");
+            /*boolean portMappingSuccessful = d.addPortMapping(details.getTCPPort(), details.getTCPPort(), localAddress.getHostAddress(), "TCP", "RTD");
             if (portMappingSuccessful) {
                 Log.info("Port forwarding successful: "+externalIPAddress+":"+details.getTCPPort());
             }

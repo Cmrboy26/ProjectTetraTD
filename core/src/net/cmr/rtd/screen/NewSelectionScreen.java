@@ -469,6 +469,9 @@ public class NewSelectionScreen extends ScreenAdapter {
     }
 
     public String getTasksList(QuestFile file) {
+        if (file == null) {
+            return "No quests found!";
+        }
         QuestTask[] tasks = file.getTasks();
         if (tasks == null || tasks.length == 0) {
             return "- No tasks found! Have fun!";

@@ -309,7 +309,7 @@ public class WavesData {
     public void setRecommendedValuesForEndless(DifficultyRating difficulty) {
         int[] period = { 7, 7, 7, 7, 6 };
         float[] amplitude = { 1/21f, 1/21f, 1/21f, 1/18f, 1/14f };
-        float[] requiredDPSIncrease = { 0.7f, 0.8f, 0.10f, 0.12f, 0.14f };
+        float[] requiredDPSIncrease = { 0.07f, 0.08f, 0.10f, 0.12f, 0.14f };
         float[] dpsThreshold = { 1/4f, 1/4f, 1/4f, 1/4f, 1/4f };
         float[] centerValue = { 1.01f, 1.02f, 1.03f, 1.04f, 1.06f };
         float[] preparationTime = { 11, 10, 9, 8, 7 };

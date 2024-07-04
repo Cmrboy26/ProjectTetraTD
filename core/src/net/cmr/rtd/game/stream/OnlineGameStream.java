@@ -33,6 +33,7 @@ import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.SetPlayerShopPacket;
 import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.SortTypePacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
@@ -197,6 +198,8 @@ public class OnlineGameStream extends GameStream {
                 return Material.getMaterial(input.readInt());
             }
         });
+        kryo.register(SetPlayerShopPacket.class);
+        kryo.register(GameType[].class);
     }
     
 }

@@ -24,8 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
+import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.files.LevelFolder;
 import net.cmr.rtd.game.files.QuestFile;
@@ -138,7 +138,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         });
         leftBottomUI.add(worldSelection).align(Align.left).pad(10f).colspan(1);
 
-        String preferredWorld = RetroTowerDefense.getLastPlayedWorld();
+        String preferredWorld = ProjectTetraTD.getLastPlayedWorld();
         WorldFolder selectedWorldFolder = validWorlds[0];
         for (WorldFolder world : validWorlds) {
             String worldName = world.getFolder().name();
@@ -202,7 +202,7 @@ public class NewSelectionScreen extends ScreenAdapter {
 
     public void onWorldSelected(final WorldFolder world) {
         Log.info("Selected world: " + world);
-        RetroTowerDefense.setLastPlayedWorld(world.getFolder().name());
+        ProjectTetraTD.setLastPlayedWorld(world.getFolder().name());
         levelsTable.clear();
 
         Table levelSelection = new Table();
@@ -248,7 +248,7 @@ public class NewSelectionScreen extends ScreenAdapter {
                                 continue;
                             }
                             boolean completed = false;
-                            Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
+                            Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
                             if (completedTasks != null) {
                                 for (Long completedTask : completedTasks) {
                                     if (completedTask == task.id) {
@@ -449,11 +449,11 @@ public class NewSelectionScreen extends ScreenAdapter {
             resumeGameButton.getLabel().setColor(Color.WHITE);
         }
 
-        Long highScore = RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.HIGHSCORE, Long.class);
+        Long highScore = ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.HIGHSCORE, Long.class);
         if (highScore != null) {
             String text = "High Score: " + ShopManager.costToString(highScore).substring(1);
             text += "\n";
-            text += "Farthest Wave: " + RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.FARTHEST_WAVE, Long.class);
+            text += "Farthest Wave: " + ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.FARTHEST_WAVE, Long.class);
             highScoreLabel.setText(text);
         } else {
             highScoreLabel.setText("");
@@ -478,7 +478,7 @@ public class NewSelectionScreen extends ScreenAdapter {
         }
         StringBuilder builder = new StringBuilder();
 
-        Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(file, LevelValueKey.COMPLETED_TASKS, Long[].class);
+        Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.COMPLETED_TASKS, Long[].class);
         if (completedTasks == null) {
             completedTasks = new Long[0];
         }

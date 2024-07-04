@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.crypto.SecretKey;
@@ -12,6 +13,7 @@ import javax.crypto.spec.IvParameterSpec;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -51,8 +53,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.kryo.util.Null;
 
-import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
+import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.files.QuestFile;
@@ -76,6 +78,7 @@ import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
 import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.SetPlayerShopPacket;
 import net.cmr.rtd.game.packets.SkipRequestPacket;
 import net.cmr.rtd.game.packets.SortTypePacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
@@ -169,6 +172,8 @@ public class GameScreen extends AbstractScreenEX {
     public final int team;
     public float gameSpeed;
 
+    public Consumer<GameType[]> setShopContents;
+
     boolean uiToggleFromKeybinds = true;
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, int team) {
@@ -189,7 +194,7 @@ public class GameScreen extends AbstractScreenEX {
         this.data = new UpdateData(this);
         if (gameManager != null) {
             this.password = gameManager.getDetails().getPassword();
-            RetroTowerDefense instance = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+            ProjectTetraTD instance = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             instance.setLastPlayedTeam(team);
         } else {
             this.password = password;
@@ -362,7 +367,7 @@ public class GameScreen extends AbstractScreenEX {
         shopWindow.getTitleLabel().setAlignment(Align.center);
         shopWindow.padTop(30);
         shopWindow.setSize(300, 250);
-        shopWindow.setPosition(320, 180, Align.center);
+        shopWindow.setPosition(640 / 2, 360 / 2, Align.center);
         shopWindow.setMovable(false);
         shopWindow.setVisible(false);
         add(Align.center, shopWindow);
@@ -422,48 +427,68 @@ public class GameScreen extends AbstractScreenEX {
         
         ScrollPaneStyle scrollStyle = new ScrollPaneStyle(Sprites.skin().get(ScrollPaneStyle.class));
 
-        Table combativeShopTable = new Table();
-        //combativeShopTable.setFillParent(true);
-        ScrollPane combatScroll = new ScrollPane(combativeShopTable, scrollStyle);
-        combatScroll.setScrollingDisabled(true, false);
-        combatScroll.setScrollbarsVisible(false);
-        combatScroll.setOverscroll(false, false);
-        combativeTable.add(combatScroll).grow().pad(1).padTop(5);
-        
-        ArrayList<TowerOption> combativeOptions = new ArrayList<TowerOption>(ShopManager.getTowerCatalog().values());
-        combativeOptions.sort((a, b) -> a.order - b.order);
-        combativeOptions.removeIf(option -> MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
-        for (TowerOption option : combativeOptions) {
-            //if (!MiningTower.class.isAssignableFrom(option.type.getGameObjectClass())) {
-                GameType type = option.type;
-                Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-                Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
-                combativeShopTable.add(towerSection).pad(5).growX();
-                combativeShopTable.row();
-            //}
-        }
+        setShopContents = new Consumer<GameObject.GameType[]>() {
+            @Override
+            public void accept(GameType[] types) {
+                combativeTable.clear();
+                miningTable.clear();
+                effectTable.clear();
 
-        Table miningShopTable = new Table();
-        //miningShopTable.setFillParent(true);
-        ScrollPane miningScroll = new ScrollPane(miningShopTable, scrollStyle);
-        miningScroll.setScrollingDisabled(true, false);
-        miningScroll.setScrollbarsVisible(false);
-        miningScroll.setOverscroll(false, false);
-        miningTable.add(miningScroll).grow().pad(1).padTop(5);
+                Table combativeShopTable = new Table();
+                //combativeShopTable.setFillParent(true);
+                ScrollPane combatScroll = new ScrollPane(combativeShopTable, scrollStyle);
+                combatScroll.setScrollingDisabled(true, false);
+                combatScroll.setScrollbarsVisible(false);
+                combatScroll.setOverscroll(false, false);
+                combativeTable.add(combatScroll).grow().pad(1).padTop(5);
 
-        ArrayList<TowerOption> miningOptions = new ArrayList<TowerOption>(ShopManager.getTowerCatalog().values());
-        miningOptions.sort((a, b) -> a.order - b.order);
-        miningOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
-        for (TowerOption option : miningOptions) {
-            GameType type = option.type;
-            Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-            Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
-            miningShopTable.add(towerSection).pad(5).growX();
-            miningShopTable.row();
-        }
+                ArrayList<TowerOption> buyableTowers = new ArrayList<TowerOption>();
+                for (GameType type : types) {
+                    TowerOption option = ShopManager.getTowerCatalog().get(type);
+                    if (option != null) {
+                        buyableTowers.add(option);
+                    }
+                }
 
-        combatScroll.layout();
-        miningScroll.layout();
+                ArrayList<TowerOption> combativeOptions = new ArrayList<TowerOption>(buyableTowers);
+                combativeOptions.sort((a, b) -> a.order - b.order);
+                combativeOptions.removeIf(option -> MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
+                for (TowerOption option : combativeOptions) {
+                    GameType type = option.type;
+                    Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                    Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
+                    combativeShopTable.add(towerSection).pad(5).growX();
+                    combativeShopTable.row();
+                }
+
+                Table miningShopTable = new Table();
+                ScrollPane miningScroll = new ScrollPane(miningShopTable, scrollStyle);
+                miningScroll.setScrollingDisabled(true, false);
+                miningScroll.setScrollbarsVisible(false);
+                miningScroll.setOverscroll(false, false);
+                miningTable.add(miningScroll).grow().pad(1).padTop(5);
+
+                ArrayList<TowerOption> miningOptions = new ArrayList<TowerOption>(buyableTowers);
+                miningOptions.sort((a, b) -> a.order - b.order);
+                miningOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
+                for (TowerOption option : miningOptions) {
+                    GameType type = option.type;
+                    Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                    Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
+                    miningShopTable.add(towerSection).pad(5).growX();
+                    miningShopTable.row();
+                }
+
+                combativeTab.setDisabled(combativeOptions.size() < 0);
+                miningTab.setDisabled(miningOptions.size() < 0);
+                effectTab.setDisabled(true);
+
+                combatScroll.layout();
+                miningScroll.layout();
+                shopWindow.pack();
+                shopWindow.setPosition(640 / 2, 360 / 2, Align.center);
+            }
+        };
 
         inventoryWindow = new Window("Inventory", Sprites.skin(), "small");
         inventoryWindow.getTitleLabel().setAlignment(Align.center);
@@ -915,6 +940,7 @@ public class GameScreen extends AbstractScreenEX {
                     }
                 }
             }
+
             if (!playerPacket.isInitializingWorld()) {
                 // If it isn't initializing the world, then notify
                 // this screen that a player has joined or left.
@@ -952,6 +978,12 @@ public class GameScreen extends AbstractScreenEX {
                 player.jump(data, true);
             }
             return;
+        }
+
+        if (packet instanceof SetPlayerShopPacket) {
+            SetPlayerShopPacket shopPacket = (SetPlayerShopPacket) packet;
+            GameType[] buyableTypes = shopPacket.types;
+            setShopContents.accept(buyableTypes);
         }
 
         if (packet instanceof DisconnectPacket) {
@@ -1017,7 +1049,7 @@ public class GameScreen extends AbstractScreenEX {
 
                     // Delete the save file (to remove the "resume" button)
                     if (gameManager != null) {
-                        RetroTowerDefense game = (RetroTowerDefense) RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                        ProjectTetraTD game = (ProjectTetraTD) ProjectTetraTD.getInstance(ProjectTetraTD.class);
                         game.clearLastPlayedQuest();
                         gameManager.deleteSave();
                     }
@@ -1027,9 +1059,44 @@ public class GameScreen extends AbstractScreenEX {
                 }
             };
             gameOverDialog.getTitleLabel().setAlignment(Align.center);
-            gameOverDialog.pad(30, 5, 10, 5);
+            gameOverDialog.pad(30, 20, 10, 20);
             LabelStyle small = Sprites.skin().get("small", LabelStyle.class);
-            gameOverDialog.text("You made it to wave "+gameOverPacket.endingWave+" with a score of "+ShopManager.costToString(gameOverPacket.score).substring(1)+".", small);
+
+
+            Image trophy = new Image(Sprites.sprite(SpriteType.TROPHY));
+            gameOverDialog.getContentTable().add(trophy).size(64).pad(5);
+            gameOverDialog.getContentTable().row();
+
+            gameOverDialog.text("- You made it to wave "+gameOverPacket.endingWave+"! -", small);
+            gameOverDialog.getContentTable().row();
+            gameOverDialog.text("Score: "+ShopManager.costToString(gameOverPacket.score).substring(1), small);
+            gameOverDialog.getContentTable().row();
+            if (storedCompleted != null && gameManager != null) {
+                QuestTask[] tasks = gameManager.getQuest().getTasks();
+                
+                boolean taskCompleted = false;
+                for (Long id : storedCompleted) {
+                    for (QuestTask task : tasks) {
+                        if (task.id == id && !alreadyCompletedTasks.contains(task.id)) {
+                            gameOverDialog.text("Task \""+task.getReadableTaskDescription()+"\" Completed!", small);
+                            gameOverDialog.getContentTable().row();
+                            taskCompleted = true;
+                        }
+                    }
+                }
+
+                if (taskCompleted) {
+                    // TODO: Verify if this is the correct way to calculate the remaining tasks
+                    int completedTasks = storedCompleted.size();
+                    int remainingTasks = tasks.length - completedTasks;
+                    if (remainingTasks > 0) {
+                        gameOverDialog.text("Remaining Tasks: "+completedTasks+"/"+tasks.length, small);
+                    } else {
+                        gameOverDialog.text("All tasks completed!", small);
+                    }
+                    gameOverDialog.getContentTable().row();
+                }
+            }
 
             // If competitive game, display the team win order
             if (gameOverPacket.teamWinOrder.length > 1) {
@@ -1046,13 +1113,13 @@ public class GameScreen extends AbstractScreenEX {
             } else {
                 // Solo game. Set the high score if it is higher than the current high score.
                 if (gameManager != null) {
-                    Long storedHighScore = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class);
-                    Long storedFarthestWave = RetroTowerDefense.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Long.class);
+                    Long storedHighScore = ProjectTetraTD.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, Long.class);
+                    Long storedFarthestWave = ProjectTetraTD.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, Long.class);
                     if (storedHighScore == null || gameOverPacket.score > storedHighScore) {
-                        RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, gameOverPacket.score);
+                        ProjectTetraTD.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.HIGHSCORE, gameOverPacket.score);
                     }
                     if (storedFarthestWave == null || gameOverPacket.endingWave > storedFarthestWave) {
-                        RetroTowerDefense.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, gameOverPacket.endingWave);
+                        ProjectTetraTD.setStoredLevelValue(gameManager.getQuest(), LevelValueKey.FARTHEST_WAVE, gameOverPacket.endingWave);
                     }
                 }
             }
@@ -1118,13 +1185,13 @@ public class GameScreen extends AbstractScreenEX {
 
             if (scopes != lastScopes || wd40 != lastWD40 || scraps != lastScraps) {
                 if (scopes > lastScopes && lastScopes != -1) {
-                    notification(SpriteType.ICON, "Scope collected!", 3);
+                    notification(SpriteType.SCOPE, "Scope collected!", 3);
                 }
                 if (wd40 > lastWD40 && lastWD40 != -1) {
-                    notification(SpriteType.ICON, "Lubricant collected!", 3);
+                    notification(SpriteType.LUBRICANT, "Lubricant collected!", 3);
                 }
                 if (scraps > lastScraps && lastScraps != -1) {
-                    notification(SpriteType.ICON, "Scrap collected!", 3);
+                    notification(SpriteType.SCRAP, "Scrap collected!", 3);
                 }
 
                 lastScopes = scopes;
@@ -1162,9 +1229,23 @@ public class GameScreen extends AbstractScreenEX {
      * To be used ONLY if the player is the host.
      */
 
-    HashSet<Long> storedCompleted = new HashSet<Long>();
+    HashSet<Long> storedCompleted = null;
+    HashSet<Long> alreadyCompletedTasks = null;
     public void updateTasks() {
         if (gameManager == null) return;
+        if (storedCompleted == null) {
+            storedCompleted = new HashSet<Long>();
+            alreadyCompletedTasks = new HashSet<Long>();
+            long[] completed = ProjectTetraTD.getStoredLevelValue(gameManager.getQuest(), LevelValueKey.COMPLETED_TASKS, long[].class);
+            if (completed != null) {
+                for (long id : completed) {
+                    storedCompleted.add(id);
+                }
+                for (long id : completed) {
+                    alreadyCompletedTasks.add(id);
+                }
+            }
+        }
         QuestFile quest = gameManager.getQuest();
         if (quest == null) return;
         QuestTask[] tasks = quest.getTasks();
@@ -1189,7 +1270,7 @@ public class GameScreen extends AbstractScreenEX {
         }
 
         long[] completed = storedCompleted.stream().mapToLong(l -> l).toArray();
-        RetroTowerDefense.setStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, completed);
+        ProjectTetraTD.setStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, completed);
     }
 
     /**
@@ -1235,9 +1316,17 @@ public class GameScreen extends AbstractScreenEX {
         return new Point((int) Math.floor(mousePos.x/Tile.SIZE), (int) Math.floor(mousePos.y/Tile.SIZE));
     }
 
+    boolean hideUI = false;
+
     private void processInput(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON) && gameManager != null) {
             resetGameDialog.show(stages.get(Align.center));
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+            hideUI = !hideUI;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F9) && ProjectTetraTD.getInstance(ProjectTetraTD.class).getUsername().equals("Cmrboy26")) {
+            gameManager.setGameSpeed(4 * (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ? 2 : 1));
         }
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             boolean successful = getLocalPlayer().jump(data);
@@ -1578,9 +1667,14 @@ public class GameScreen extends AbstractScreenEX {
         getLocalPlayer().updateInput(new Vector2(vx, vy), sprinting);
     }
 
+    float elapsedTime = 0;
+    float alphaPulsePeriod = 2f;
+
     @Override
     public void render(float delta) {
         update(delta);
+        elapsedTime += delta;
+        elapsedTime %= alphaPulsePeriod;
         if (world != null) {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
@@ -1589,7 +1683,10 @@ public class GameScreen extends AbstractScreenEX {
 
             if (inPlacementMode()) {
                 Point mouseTile = getMouseTileCoordinate();
-                batch.setColor(1, 1, 1, .5f);
+                float factor = (float) (2f * Math.PI);
+                float alpha = (float) Math.sin(factor * elapsedTime / alphaPulsePeriod);
+                alpha = (1 / 4f) * (alpha + 2f);
+                batch.setColor(1, 1, 1, alpha);
                 if (placementMode == PlacementMode.PLACE) {
                     if (entityToPlace != null) {
                         entityToPlace.setPosition((mouseTile.x + .5f) * Tile.SIZE, (mouseTile.y + .5f) * Tile.SIZE);
@@ -1627,7 +1724,7 @@ public class GameScreen extends AbstractScreenEX {
             batch.end();
         }
 
-        stages.drawAll(batch);
+        if (!hideUI) stages.drawAll(batch);
     }
 
     @Override
@@ -1690,7 +1787,7 @@ public class GameScreen extends AbstractScreenEX {
         for (Entity entity : world.getEntities()) {
             if (entity instanceof Player) {
                 Player player = (Player) entity;
-                if (player.getName().equals(((RetroTowerDefense) game).getUsername())) {
+                if (player.getName().equals(((ProjectTetraTD) game).getUsername())) {
                     localPlayer = player;
                     return player;
                 }
@@ -2323,7 +2420,7 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public boolean isMobile() {
-        return RetroTowerDefense.isMobile();
+        return ProjectTetraTD.isMobile();
     }
 
     public boolean isOverJoystick() {

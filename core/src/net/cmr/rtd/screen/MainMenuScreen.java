@@ -25,7 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
@@ -58,7 +58,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		float height = 96.0f;
 		float width = height * widthHeightRatio;
 
-		table.add(new Image(Sprites.drawable(SpriteType.TITLE))).height(height).width(width).pad(0, 50, 0, 50).row();
+		table.add(new Image(Sprites.drawable(SpriteType.TITLE))).height(height).width(width).pad(0, 50, 0, 50).colspan(outsideSpan * 2 + insideSpan).row();
 
 		/*table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).size(32).padRight(iconPadding).colspan(outsideSpan);
 
@@ -128,7 +128,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		play.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 				game.setScreen(new NewSelectionScreen());
                 //game.setScreen(new SelectionScreen());
 			}
@@ -139,14 +139,14 @@ public class MainMenuScreen extends AbstractScreenEX {
 		resume.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 				String[] data = game.getLastPlayedQuest();
 				QuestFile file = QuestFile.deserialize(data);
 				int team = game.getLastPlayedTeam();
 				PlayType.SINGLEPLAYER.startGame(file, team);
 			}
 		});
-		boolean hasLastPlayed = RetroTowerDefense.getInstance(RetroTowerDefense.class).hasLastPlayedQuest();
+		boolean hasLastPlayed = ProjectTetraTD.getInstance(ProjectTetraTD.class).hasLastPlayedQuest();
 
 		int playSpan = insideSpan + 2 * outsideSpan;
 		int padInside = 100;
@@ -172,7 +172,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.add(tutorial).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 		table.row();
 
-		if (!RetroTowerDefense.isMobile() && RetroTowerDefense.getInstance(RetroTowerDefense.class).getUsername().equals("Cmrboy26")) {
+		if (!ProjectTetraTD.isMobile() && ProjectTetraTD.getInstance(ProjectTetraTD.class).getUsername().equals("Cmrboy26")) {
 			TextButton editor = new TextButton("Editor (WIP)", Sprites.skin(), labelType);
 			Audio.addClickSFX(editor);
 			editor.addListener(new ClickListener() {
@@ -191,7 +191,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		textButton.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 				game.setScreen(new SettingsScreen());	
 			}
 		});
@@ -215,13 +215,13 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table1.add(leftBottomTable).expand().align(Align.bottomLeft);
 		String shortenedTitle = "";
 		// Get all capital letters in the title
-		for (int i = 0; i < RetroTowerDefense.GAME_NAME.length(); i++) {
-			char c = RetroTowerDefense.GAME_NAME.charAt(i);
+		for (int i = 0; i < ProjectTetraTD.GAME_NAME.length(); i++) {
+			char c = ProjectTetraTD.GAME_NAME.charAt(i);
 			if (Character.isUpperCase(c)) {
 				shortenedTitle += c;
 			}
 		}
-		String versionInfo = shortenedTitle+" v"+RetroTowerDefense.MAJORVERSION+"."+RetroTowerDefense.MINORVERSION+"."+RetroTowerDefense.PATCHVERSION;
+		String versionInfo = shortenedTitle+" v"+ProjectTetraTD.MAJORVERSION+"."+ProjectTetraTD.MINORVERSION+"."+ProjectTetraTD.PATCHVERSION;
 		if (Gdx.app.getType() == ApplicationType.Android) {
 			versionInfo += " (Android)";
 		}
@@ -241,7 +241,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		credits.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 
 				LabelStyle small = Sprites.skin().get("small", LabelStyle.class);
 

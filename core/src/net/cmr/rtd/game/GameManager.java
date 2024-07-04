@@ -28,7 +28,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.commands.CommandHandler;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
@@ -45,6 +45,7 @@ import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
 import net.cmr.rtd.game.packets.PlayerPositionsPacket;
 import net.cmr.rtd.game.packets.RSAEncryptionPacket;
+import net.cmr.rtd.game.packets.SetPlayerShopPacket;
 import net.cmr.rtd.game.packets.StatsUpdatePacket;
 import net.cmr.rtd.game.packets.TeamUpdatePacket;
 import net.cmr.rtd.game.packets.WavePacket;
@@ -53,6 +54,7 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.game.world.Entity;
+import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.TeamData.NullTeamException;
 import net.cmr.rtd.game.world.UpdateData;
@@ -279,6 +281,11 @@ public class GameManager implements Disposable {
         }
     }
 
+    public GameType[] getBuyableTowers() {
+        WavesData data = world.getWavesData();
+        return data.getBuyableTowers();
+    }
+
     public void start() {
         // Start the game manager.
         if (running) {
@@ -400,8 +407,8 @@ public class GameManager implements Disposable {
      */
     public void save() {
         // If the game is a singleplayer game, add the resume button to the main menu.
-        if (RetroTowerDefense.instanceExists() && !details.isHostedOnline()) {
-            RetroTowerDefense instance = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+        if (ProjectTetraTD.instanceExists() && !details.isHostedOnline()) {
+            ProjectTetraTD instance = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             String[] serializedQuestFile = quest.serialize();
             if (!(instance.getScreen() instanceof TutorialScreen)) {
                 instance.setLastPlayedQuest(serializedQuestFile);
@@ -513,6 +520,8 @@ public class GameManager implements Disposable {
         sendStatsUpdatePacket(player);
         sendWaveData(player, world);
         setGameSpeed(gameSpeed);
+        SetPlayerShopPacket shopPacket = new SetPlayerShopPacket(getBuyableTowers());
+        player.sendPacket(shopPacket);
     }
 
     public GamePlayer getPlayer(Player player) {
@@ -693,7 +702,7 @@ public class GameManager implements Disposable {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
         }
 
-        for (TeamData data : winningTeams) {
+        /*for (TeamData data : winningTeams) {
             if (doesTeamHavePlayers(data.team)) {
                 teamWinOrder.push(data);
             }
@@ -703,10 +712,10 @@ public class GameManager implements Disposable {
         for (int i = 0; i < this.teamWinOrder.size(); i++) {
             teamWinOrder[i] = this.teamWinOrder.pop().team;
             System.out.println(teamWinOrder[i]);
-        }
+        }*/
 
         for (TeamData data : teams) {
-            GameOverPacket packet = new GameOverPacket(world.getWave(), data.getScore(), data.getHealth() > 0, teamWinOrder);
+            GameOverPacket packet = new GameOverPacket(world.getWave(), data.getScore(), data.getHealth() > 0, new int[0]);
             for (GamePlayer player : players.values()) {
                 if (player.getTeam() == data.team) {
                     player.sendPacket(packet);

@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.world.Entity;
@@ -92,7 +92,7 @@ public class TutorialScreen extends GameScreen {
 
         switch (state) {
             case INTRO:
-                tableText("Welcome to " + RetroTowerDefense.GAME_NAME + "!");
+                tableText("Welcome to " + ProjectTetraTD.GAME_NAME + "!");
                 tableText("This is an interactive tutorial to help you get started.");
                 if (!isMobile()) {
                     tableText("Press 'Escape' at any time to exit the tutorial.");
@@ -263,7 +263,7 @@ public class TutorialScreen extends GameScreen {
             }
             case FINISHED:
                 tableText("Congratulations! You have completed the tutorial.");
-                tableText("You are now ready to play " + RetroTowerDefense.GAME_NAME + "!");
+                tableText("You are now ready to play " + ProjectTetraTD.GAME_NAME + "!");
                 tableText("Select the 'Continue' button to return to the main menu.");
                 break;
         }

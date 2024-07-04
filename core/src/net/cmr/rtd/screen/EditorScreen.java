@@ -63,6 +63,7 @@ public class EditorScreen extends AbstractScreenEX {
     UpdateData updatedata;
 
     String saveName = "";
+    TextField color;
 
     boolean entered;
     int selectedTile = 2;
@@ -162,7 +163,7 @@ public class EditorScreen extends AbstractScreenEX {
             }
         });
 
-        TextField color = new TextField("6663ff", Sprites.skin(), "small") {
+        color = new TextField("6663ff", Sprites.skin(), "small") {
             @Override
             public void act(float delta) {
                 super.act(delta);
@@ -341,6 +342,7 @@ public class EditorScreen extends AbstractScreenEX {
         if (worldFile.exists()) {
             byte[] data = worldFile.readBytes();
             world = (World) GameObject.deserializeGameObject(data);
+            color.setText(world.worldColor.toString().substring(0, 6));
         }
 
         Label label = new Label("Opened " + saveName, Sprites.skin().get("small", Label.LabelStyle.class));

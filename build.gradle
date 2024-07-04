@@ -2,6 +2,7 @@ buildscript {
 
     repositories {
         mavenLocal()
+        jcenter()
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -9,6 +10,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.2'
+        classpath group: 'org.mini2Dx', name: 'butler', version: '2.1.0'
     }
 }
 
@@ -40,6 +42,7 @@ allprojects {
 
 project(":desktop") {
     apply plugin: "java-library"
+    apply plugin: "org.mini2Dx.butler"
 
     dependencies {
         implementation project(":core")
@@ -49,6 +52,16 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         implementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
+    }
+
+    butler {
+        user = "cmrboy26"
+        game = "project-tetra-td"
+    }
+
+    task butlerPush(type: org.mini2Dx.butler.task.PushTask) {
+        binDirectory = file("../../PTTDExported")
+        channel = "windows"
     }
 }
 

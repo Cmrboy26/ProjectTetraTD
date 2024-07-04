@@ -6,7 +6,7 @@ import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.waves.WavesData;
 
@@ -82,7 +82,7 @@ public class GameSave {
      *      * @return
      */
     public FileHandle getSaveFolder() {
-        if (RetroTowerDefense.instanceExists()) {
+        if (ProjectTetraTD.instanceExists()) {
             return getSaveFolder(FileType.External);
         } else {
             return getSaveFolder(FileType.Absolute);

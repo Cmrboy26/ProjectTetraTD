@@ -636,7 +636,7 @@ public abstract class TowerEntity extends Entity {
         if (componentPath.equals("None")) {
             amount = "";
         }
-        appendLine(builder, "Components: "+componentPath+amount);
+        appendLine(builder, "Component: "+componentPath+amount);
         if (getComponentsApplied() > 0) {
             appendLine(builder, "- Bonuses: "+benefits);
         }

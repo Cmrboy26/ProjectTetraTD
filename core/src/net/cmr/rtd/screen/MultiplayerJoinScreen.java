@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.util.AbstractScreenEX;
@@ -53,7 +53,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                 game.setScreen(new NewSelectionScreen());
             }
         });
@@ -62,7 +62,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
         join.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                 final String ip = ipField.getText();
                 final int port = portField.getText().isEmpty() ? 11265 : Integer.parseInt(portField.getText());
 

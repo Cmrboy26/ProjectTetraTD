@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Settings;
@@ -27,7 +27,7 @@ public class SettingsScreen extends AbstractScreenEX {
 
 
 		add(Align.center, getSettingsTable(() -> {
-            RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+            ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             game.setScreen(new MainMenuScreen());
         }, true));
     }
@@ -99,7 +99,7 @@ public class SettingsScreen extends AbstractScreenEX {
 
         Slider fpsSlider = new Slider(-10.0f, 120.0f, 10.0f, false, Sprites.skin());
         fpsSlider.setValue(Settings.getPreferences().getInteger(Settings.FPS));
-        if (RetroTowerDefense.isMobile()) {
+        if (ProjectTetraTD.isMobile()) {
             TextTooltip tooltip = new TextTooltip("FPS changes may not function on mobile devices.", Sprites.skin(), "small");
             tooltip.getContainer().pad(5);
             tooltip.getContainer().setScale(.25f);

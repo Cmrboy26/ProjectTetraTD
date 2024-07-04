@@ -84,7 +84,7 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public float getAttackSpeed() {
-        return Math.max(((1 - ((getLevel() - 1) * .05f)) / getLubricantSpeedBoost()) / Material.getAttackSpeedModifier(getSelectedMaterial()), 0.1f);
+        return Math.max(((1f / (0.1f * (getLevel() - 1f) + 1f)) / getLubricantSpeedBoost()) / Material.getAttackSpeedModifier(getSelectedMaterial()), 0.1f);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public float getRange() {
-        return calculateIncrementedValue(3, .25f, 2f)*getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial());
+        return calculateIncrementedValue(3, .25f, 2.25f)*getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial());
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.cmr.rtd.waves;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,9 +12,11 @@ import org.json.simple.parser.JSONParser;
 import com.badlogic.gdx.files.FileHandle;
 
 import net.cmr.rtd.game.endless.EndlessUtils;
-import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
-import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.GameObject.GameType;
+import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.store.ShopManager;
+import net.cmr.util.Log;
 
 /**
  * Stores the data for each of the waves in the game.
@@ -35,6 +38,7 @@ public class WavesData {
     public HashMap<Integer, Wave> waves;
     public int wavesPerComponentTarget;
     public EndlessUtils endlessUtils;
+    public GameType[] buyableTowers;
 
     public static int DEFAULT_STARTING_MONEY = 100;
     public static int DEFAULT_STARTING_HEALTH = 50;
@@ -104,6 +108,50 @@ public class WavesData {
             data.stagnationThreshold = main.containsKey("stagnationThreshold") ? ((Number) main.get("stagnationThreshold")).intValue() : data.stagnationThreshold;
             data.stagnationDifficultyIncrease = main.containsKey("stagnationDifficultyIncrease") ? ((Number) main.get("stagnationDifficultyIncrease")).floatValue() : data.stagnationDifficultyIncrease;
         }
+
+        boolean hasTowerWhitelist = main.containsKey("towerWhitelist");
+        boolean hasTowerBlacklist = main.containsKey("towerBlacklist");
+        if (hasTowerWhitelist && hasTowerBlacklist) {
+            throw new IOException("Cannot have both a tower whitelist and a tower blacklist.");
+        }
+
+        HashSet<GameType> towers = new HashSet<GameType>();
+        if (hasTowerBlacklist) {
+            for (GameType tower : ShopManager.getAllTowerTypes()) {
+                towers.add(tower);
+            }
+            JSONArray blacklist = (JSONArray) main.get("towerBlacklist");
+            for (Object tower : blacklist) {
+                try {
+                    towers.remove(GameType.valueOf((String) tower));
+                } catch (IllegalArgumentException e) {
+                    throw new IOException("Invalid tower type in blacklist: " + tower);
+                }
+            }
+        } else if (hasTowerWhitelist) {
+            JSONArray whitelist = (JSONArray) main.get("towerWhitelist");
+            for (Object tower : whitelist) {
+                try {
+                    towers.add(GameType.valueOf((String) tower));
+                } catch (IllegalArgumentException e) {
+                    throw new IOException("Invalid tower type in whitelist: " + tower);
+                }
+            }
+        } else {
+            // Add all towers
+            for (GameType tower : ShopManager.getAllTowerTypes()) {
+                towers.add(tower);
+            }
+        }
+
+        GameType[] towerArray = new GameType[towers.size()];
+        int i = 0;
+
+        for (GameType tower : towers) {
+            Log.info("Adding tower to buyable towers: " + tower);
+            towerArray[i++] = tower;
+        }
+        data.buyableTowers = towerArray;
         
         if (main.containsKey("preparationTime")) {
             data.preparationTime = ((Number) main.get("preparationTime")).floatValue();
@@ -183,6 +231,11 @@ public class WavesData {
             main.put("sinusoidalGameDifficultyPeriod", sinusoidalGameDifficultyPeriod);
             main.put("sinusoidalGameDifficultyAmplitude", sinusoidalGameDifficultyAmplitude);
             main.put("stagnationThreshold", stagnationThreshold);
+        }
+
+        JSONArray buyableTowers = new JSONArray();
+        for (GameType tower : this.buyableTowers) {
+            buyableTowers.add(tower.toString());
         }
 
         main.put("preparationTime", preparationTime);
@@ -331,5 +384,8 @@ public class WavesData {
     }
     public float getPreparationTime() {
         return preparationTime;
+    }
+    public GameType[] getBuyableTowers() {
+        return buyableTowers;
     }
 }

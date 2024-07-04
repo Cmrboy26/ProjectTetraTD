@@ -101,7 +101,7 @@ public abstract class QuestTask {
 
         @Override
         public String getReadableTaskDescription() {
-            return "Reach Wave " + wave;
+            return "Reach wave " + wave;
         }
 
         @Override
@@ -128,7 +128,7 @@ public abstract class QuestTask {
 
         @Override
         public String getReadableTaskDescription() {
-            return "Hold " + amount + " " + material + " at once";
+            return "Hold " + amount + " " + material.materialName.toLowerCase() + " at once";
         }
 
         @Override

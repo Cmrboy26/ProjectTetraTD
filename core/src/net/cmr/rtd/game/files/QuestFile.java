@@ -11,8 +11,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.DataBuffer;
 
-import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
+import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
@@ -169,7 +169,7 @@ public class QuestFile {
         FileHandle levelDataFolder = level.getFolder();
 
         FileHandle newSaveFolder = getSaveFolder();
-        newSaveFolder.deleteDirectory();
+        //newSaveFolder.deleteDirectory();
         newSaveFolder.mkdirs();
 
         // Copy "world.dat" and the quest file (renamed to "wave.json") from the levelDataFolder to the newSaveFolder
@@ -180,11 +180,24 @@ public class QuestFile {
         FileHandle newWaveFile = newSaveFolder.child("wave.json");
 
         worldFile.copyTo(newWorldFile);
+        if (waveFile.file().getAbsolutePath().equals(newWaveFile.file().getAbsolutePath())) {
+            return;
+        }
         waveFile.copyTo(newWaveFile);
     }
 
     public void saveGame(World world) throws IOException {
         FileHandle saveFolder = getSaveFolder();
+
+        FileHandle waveFile = saveFolder.child("wave.json");
+        if (!waveFile.exists()) {
+            waveFile.parent().mkdirs();
+            waveFile.file().createNewFile();
+            JSONObject waveData = new JSONObject();
+            world.getWavesData().serialize(waveData);
+            waveFile.writeString(waveData.toJSONString(), false);
+        }
+
         FileHandle worldFile = saveFolder.child("world.dat");
         byte[] worldData = GameObject.serializeGameObject(world);
         worldFile.writeBytes(worldData, false);
@@ -263,7 +276,7 @@ public class QuestFile {
         if (hasNoTasks()) {
             return true;
         }
-        Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(this, LevelValueKey.COMPLETED_TASKS, Long[].class);
+        Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(this, LevelValueKey.COMPLETED_TASKS, Long[].class);
         if (completedTasks == null) {
             return false;
         }

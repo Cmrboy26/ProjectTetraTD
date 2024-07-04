@@ -90,6 +90,8 @@ public class Settings {
         }
     }
 
+    static int lastSettings = -1;
+
     public static void applySettings() {
         // Set the default values if they don't exist
         setDefaults(false);
@@ -106,9 +108,13 @@ public class Settings {
         }
         Gdx.graphics.setForegroundFPS(fps);
 
-        if (preferences.getBoolean(FULLSCREEN)) {
+        int newSettings = preferences.getBoolean(FULLSCREEN) ? 1 : 0;
+        boolean changeScreen = lastSettings != newSettings;
+        lastSettings = newSettings;
+
+        if (lastSettings == 1 && changeScreen) {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-        } else {
+        } else if (lastSettings == 0 && changeScreen) {
             Gdx.graphics.setWindowedMode(640, 480);
         }
 

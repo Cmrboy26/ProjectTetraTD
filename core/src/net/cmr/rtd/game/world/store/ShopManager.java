@@ -52,7 +52,9 @@ public class ShopManager {
         //registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.money(level -> 30L + (level - 1) * level * 20L),         level -> 5f + (level)));
         registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
-            inventory.setCash(30L + (level - 1) * level * 20L);
+            //inventory.setCash(30L + (level - 1) * level * 20L);
+            level += 1;
+            inventory.setCash(5L * level * level * (level - 1));
             return inventory;
         }), level -> 5f + (level)));
         registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, Cost.money(level -> 50L + (level + 2) * level * level * 50L),    level -> 5f + level * 2f));
@@ -78,6 +80,10 @@ public class ShopManager {
     }
     public static HashMap<GameType, UpgradeOption> getUpgradeCatalog() {
         return upgradeCatalog;
+    }
+
+    public static GameType[] getAllTowerTypes() {
+        return towerCatalog.keySet().toArray(new GameType[0]);
     }
 
     public static void processPurchase(GameManager manager, GamePlayer player, PurchaseItemPacket packet) {
@@ -236,8 +242,7 @@ public class ShopManager {
             }
         }
         return null;
-    } 
-
+    }
     
     private static TowerEntity towerAt(GameManager manager, int x, int y) {
         return towerAt(manager.getWorld(), x, y);

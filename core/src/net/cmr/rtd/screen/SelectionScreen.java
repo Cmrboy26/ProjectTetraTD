@@ -16,7 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
@@ -91,7 +91,7 @@ public class SelectionScreen extends AbstractScreenEX {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                 game.setScreen(new MainMenuScreen());
             }
         });
@@ -103,7 +103,7 @@ public class SelectionScreen extends AbstractScreenEX {
         online.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                 game.setScreen(new MultiplayerJoinScreen());
             }
         });
@@ -249,7 +249,7 @@ public class SelectionScreen extends AbstractScreenEX {
                             try {
                                 GameManagerDetails details = new GameManagerDetails();
                                 GameSave save = new GameSave(fn);
-                                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                                 if (online) {
                                     game.hostOnlineGame(details, save, lsave, teams);
                                 } else {
@@ -258,7 +258,7 @@ public class SelectionScreen extends AbstractScreenEX {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 // Set screen to this screen
-                                RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                                 game.setScreen(SelectionScreen.this);
                                 
                                 displayErrorDialog(e, stages);
@@ -299,7 +299,7 @@ public class SelectionScreen extends AbstractScreenEX {
                                     try {
                                         GameManagerDetails details = new GameManagerDetails();
                                         LevelSave levelSave = new LevelSave(folderName);
-                                        RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                                        ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
                                         if (online) {
                                             game.hostOnlineGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, teams);
                                         } else {

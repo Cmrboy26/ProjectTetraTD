@@ -1,0 +1,57 @@
+{
+	"difficulty": 1,
+	"name": "Quest 1",
+	"endlessMode": false,
+	"preparationTime": 10,
+	"startingHealth": 25,
+	"startingMoney": 5000000000,
+	"towerWhitelist": [
+		"SHOOTER_TOWER",
+		"ICE_TOWER"
+	],
+	"quests": [
+		{
+			"id": 0,
+			"type": "AMASS_MONEY",
+			"value": 200
+		}
+	],
+	"waves": [
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 14]},
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 6]},
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {
+                    "type": "BASIC_TWO",
+                    "quantity": 9,
+                    "startTime": 0,
+                    "endTime": 15
+                },
+				{
+					"type": "BASIC_THREE",
+                    "quantity": 4,
+                    "startTime": 15,
+                    "endTime": 30
+				}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 9]},
+                {"distributedSpawn": ["BASIC_THREE", 7]}
+			]
+		},
+	]
+}

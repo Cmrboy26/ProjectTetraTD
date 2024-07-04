@@ -1,4 +1,4 @@
-# RetroTowerDefense
+# Project Tetra TD
 
 A simple, pixel-art-styled, endless tower defense game with online multiplayer support.
 

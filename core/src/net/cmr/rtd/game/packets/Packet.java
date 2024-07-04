@@ -54,6 +54,9 @@ public abstract class Packet {
     @Override
     public String toString() {
         String header = "[" +getClass().getSimpleName() + "]{";
+        if (packetVariables() == null) {
+            return header + "}";
+        }
         for (Object o : packetVariables()) {
             header += "\"" + o + "\", ";
         }

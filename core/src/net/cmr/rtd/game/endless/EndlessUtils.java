@@ -137,7 +137,7 @@ public class EndlessUtils {
         }
 
         float targetHealthPoints = targetDPS*wave.getWaveTime();
-        Log.info("Difficulty Scale: "+((scale-1)*100f)+"%, Target DPS: "+targetDPS+", Target HP: "+targetHealthPoints+", Wave Type: "+waveType);
+        //Log.info("Difficulty Scale: "+((scale-1)*100f)+"%, Target DPS: "+targetDPS+", Target HP: "+targetHealthPoints+", Wave Type: "+waveType);
 
         wave.addWaveUnit(new WaveUnit(0, EnemyType.BASIC_ONE, 0)); // To prevent a bug where this method is called repeatedly when no enemies are added
 

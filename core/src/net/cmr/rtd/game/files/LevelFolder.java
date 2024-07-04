@@ -9,8 +9,9 @@ import org.json.simple.parser.JSONParser;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Null;
 
-import net.cmr.rtd.RetroTowerDefense;
-import net.cmr.rtd.RetroTowerDefense.LevelValueKey;
+import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
+import net.cmr.util.Log;
 
 /** 
  * Level Data JSON Structure:
@@ -94,7 +95,7 @@ public class LevelFolder {
                 unlockRequirements = Arrays.stream(requirements.toArray()).map(levelName -> (String) levelName).toArray(String[]::new);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("Failed to read level folder: " + levelName + " in world: " + world.getDisplayName() + " from file: " + levelData.path(), e);
         }
     }
 
@@ -111,7 +112,7 @@ public class LevelFolder {
             QuestFile quest = new QuestFile(level, parts[2]);
             QuestTask task = QuestTask.getTask(quest, Long.parseLong(parts[3]));
             
-            @Null Long[] completedTasks = RetroTowerDefense.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
+            @Null Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
             if (completedTasks == null) {
                 // If no tasks are completed for the quest, then the target task could not have been completed, thus the level is locked
                 isLocked = true;

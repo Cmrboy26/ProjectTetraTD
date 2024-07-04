@@ -10,15 +10,15 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		if (arg.length >= 1) {
 			if (arg[0].equals("debug")) {
-				RetroTowerDefense.setDebug(true);
+				ProjectTetraTD.setDebug(true);
 			}
 		}
 
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
-		config.setTitle(RetroTowerDefense.GAME_NAME);
+		config.setTitle(ProjectTetraTD.GAME_NAME);
 		config.setWindowIcon("raw/icon.png");
 		NativeFileChooser chooser = new DesktopFileChooser();
-		new Lwjgl3Application(new RetroTowerDefense(chooser), config);
+		new Lwjgl3Application(new ProjectTetraTD(chooser), config);
 	}
 }

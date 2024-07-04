@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import com.esotericsoftware.kryonet.Client;
 
-import net.cmr.rtd.RetroTowerDefense;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.files.LevelFolder;
 import net.cmr.rtd.game.files.QuestFile;
@@ -74,7 +74,7 @@ public class GameConnector {
 				GameScreen screen = new GameScreen(clientsideStream, manager, details.getPassword(), team);
 		
 				manager.initialize(quest);
-				RetroTowerDefense.getInstance().setScreen(screen);
+				ProjectTetraTD.getInstance().setScreen(screen);
 				manager.start();
 				manager.onNewConnection(serversideStream);
 
@@ -89,7 +89,7 @@ public class GameConnector {
 			@Override
 			public void accept(GameInfoPacket t) {
 				if (desiredTeam == -1) {
-					RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+					ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
 				} else {
 					ConnectionAttempt attempt = new ConnectionAttempt("", desiredTeam);
 					joinGameWithTeam.accept(attempt);
@@ -107,7 +107,7 @@ public class GameConnector {
 				try {
 					int team = attempt.team;
 					
-					RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+					ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 					Client client = new Client(30000, 30000);
 					OnlineGameStream.registerPackets(client.getKryo());
 					OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
@@ -133,14 +133,14 @@ public class GameConnector {
 					stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 				} catch (Exception e) {
 					e.printStackTrace();
-					RetroTowerDefense.getInstance().setScreen(new MainMenuScreen());
+					ProjectTetraTD.getInstance().setScreen(new MainMenuScreen());
 				}
 			}
 		};
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
 			}
 		};
 
@@ -152,7 +152,7 @@ public class GameConnector {
 			@Override
 			public void accept(ConnectionAttempt attempt) {
 				int team = attempt.team;
-                RetroTowerDefense rtd = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+                ProjectTetraTD rtd = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 
                 details.setHostedOnline(true);
                 GameManager manager = new GameManager(details);
@@ -188,7 +188,7 @@ public class GameConnector {
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				RetroTowerDefense.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
 			}
 		};
 
@@ -196,7 +196,7 @@ public class GameConnector {
     }
 
 	private static void getGameInfo(QuestFile file, int maxPlayers, Consumer<GameInfoPacket> callback) {
-		RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+		ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 		World world = file.loadWorld();
 		
 		ArrayList<Integer> availableTeams = new ArrayList<Integer>();
@@ -220,7 +220,7 @@ public class GameConnector {
 	}
 
 	private static void getGameInfo(String ip, int port, Consumer<GameInfoPacket> callback) {
-		RetroTowerDefense game = RetroTowerDefense.getInstance(RetroTowerDefense.class);
+		ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 		try {
 			Client client = new Client();
 			OnlineGameStream.registerPackets(client.getKryo());
@@ -278,7 +278,7 @@ public class GameConnector {
 		GameScreen screen = new TutorialScreen(clientsideStream, manager);
 		
 		manager.initialize(quest);
-		RetroTowerDefense.getInstance().setScreen(screen);
+		ProjectTetraTD.getInstance().setScreen(screen);
 		manager.start();
 		manager.onNewConnection(serversideStream);
 				

@@ -1,6 +1,7 @@
 {
 	"name": "1.1",
 	"quests": [
-		"quest_1.json"
+		"quest_1.json",
+		"quest_challenge.json"
 	]
 }

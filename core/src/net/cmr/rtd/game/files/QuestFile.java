@@ -184,6 +184,11 @@ public class QuestFile {
             return;
         }
         waveFile.copyTo(newWaveFile);
+
+        FileHandle newPlayerData = newSaveFolder.child("players.dat");
+        if (newPlayerData.exists()) {
+            newPlayerData.delete();
+        }
     }
 
     public void saveGame(World world) throws IOException {

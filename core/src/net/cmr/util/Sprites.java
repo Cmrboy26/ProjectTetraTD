@@ -136,6 +136,11 @@ public class Sprites implements Disposable {
         PLAYER_LEFT("player/left", PlayMode.LOOP, enemySpeed),
         PLAYER_RIGHT("player/right", PlayMode.LOOP, enemySpeed),
 
+        ACCESSORY_TOPHAT_DOWN("accessories/tophat/AccDown", PlayMode.LOOP, enemySpeed),
+        ACCESSORY_TOPHAT_UP("accessories/tophat/AccUp", PlayMode.LOOP, enemySpeed),
+        ACCESSORY_TOPHAT_LEFT("accessories/tophat/AccLeft", PlayMode.LOOP, enemySpeed),
+        ACCESSORY_TOPHAT_RIGHT("accessories/tophat/AccRight", PlayMode.LOOP, enemySpeed),
+
         TESLA_TOWER("teslaTower", PlayMode.LOOP, .1f),
         FIRE_TOWER("fireTower", PlayMode.LOOP, .25f),
         SHOOTER_TOWER_1("shooterTower1", PlayMode.NORMAL, .1f),

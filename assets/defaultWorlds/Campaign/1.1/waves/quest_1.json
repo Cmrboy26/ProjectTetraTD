@@ -142,7 +142,7 @@
 			"additionalPrep": 5,
 			"waveUnits": [
                 {"distributedSpawn": ["BASIC_ONE", 40]},
-                {"distributedSpawn": ["BASIC_ONE", 7]},
+                {"distributedSpawn": ["BASIC_TWO", 7]},
                 {"distributedSpawn": ["BASIC_THREE", 15]}
 			]
 		}

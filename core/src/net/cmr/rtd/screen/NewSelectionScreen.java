@@ -4,8 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -206,8 +211,10 @@ public class NewSelectionScreen extends ScreenAdapter {
         levelsTable.clear();
 
         Table levelSelection = new Table();
+        
+        //levelSelection.setBackground(Sprites.drawable(SpriteType.BACKGROUND));
 
-        int buttonSize = 50;
+        int buttonSize = 65;
 
         LevelFolder[] levels = world.readLevels();
         for (LevelFolder level : levels) {
@@ -418,7 +425,8 @@ public class NewSelectionScreen extends ScreenAdapter {
             if (locked) {
                 slot.setColor(Color.GRAY);
             }
-            levelTable.add(slot).size(buttonSize, buttonSize / 2).align(Align.center).pad(5);
+            float ratio = 1.0f * slot.getHeight() / slot.getWidth();
+            levelTable.add(slot).size(buttonSize, buttonSize*ratio).align(Align.center).pad(5);
         }
 
         ScrollPane worldView = new ScrollPane(levelSelection, Sprites.skin());

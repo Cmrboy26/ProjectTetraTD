@@ -1039,6 +1039,10 @@ public class GameScreen extends AbstractScreenEX {
             gameOverDialog = new Dialog(gameOverPacket.stillAlive ? "YOU WON!" : "GAME OVER", Sprites.skin(), "small") {
                 @Override
                 protected void result(Object object) {
+                    if (gameOverDialog != null) {
+                        gameOverDialog.remove();
+                        gameOverDialog = null;
+                    }
                     if (object == null) return;
                     if (object instanceof Boolean && (Boolean) object) {
                         // Restart the game
@@ -1913,6 +1917,8 @@ public class GameScreen extends AbstractScreenEX {
         tooltip.getActor().setFontScale(.25f);
         tooltip.setInstant(true);
         towerImage.addListener(tooltip);
+        buyButton.addListener(tooltip);
+        towerName.addListener(tooltip);
 
         return table;
     }

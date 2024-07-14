@@ -105,6 +105,9 @@ public class Player extends Entity {
         TextureRegion sprite = Sprites.animation(getAnimationFromMovement(), movementCountdown);
         //TextureRegion sprite = /*Sprites.animation(AnimationType.TESLA_TOWER, animationDelta); //*/Sprites.sprite(Sprites.SpriteType.CMRBOY26);
         batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);
+        if (getAccessoryFromMovement() != null) {
+            batch.draw(Sprites.animation(getAccessoryFromMovement(), movementCountdown), getX() - Tile.SIZE * 1f/8f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);
+        }
         super.render(data, batch, delta);
     }
 
@@ -166,6 +169,15 @@ public class Player extends Entity {
         if (direction == 2) return AnimationType.PLAYER_LEFT;
         if (direction == 3) return AnimationType.PLAYER_RIGHT;
         return AnimationType.PLAYER_DOWN;
+    }
+
+    private AnimationType getAccessoryFromMovement() {
+        if (direction != 4) return null;
+        if (direction == 0) return AnimationType.ACCESSORY_TOPHAT_UP;
+        if (direction == 1) return AnimationType.ACCESSORY_TOPHAT_DOWN;
+        if (direction == 2) return AnimationType.ACCESSORY_TOPHAT_LEFT;
+        if (direction == 3) return AnimationType.ACCESSORY_TOPHAT_RIGHT;
+        return AnimationType.ACCESSORY_TOPHAT_DOWN;
     }
 
     @Override

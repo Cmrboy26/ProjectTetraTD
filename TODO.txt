@@ -61,7 +61,7 @@ ORDERED TODO LIST:
   Instead of having a level selector, create a world where levels can be selected (similar to the diner dash worlds or new super mario bros u).
   To progress in the world, you must either complete the predefined waves in a non-endless level OR get to a certain level in endless mode
 }
-- TOWER IDEA: Gas cloud emitter??? 
+- TOWER IDEA: Gas cloud emitter??? fart gun from minions
 
 IDEAS:
 - Resources can be obtained through mining/drilling in order to build/upgrade towers

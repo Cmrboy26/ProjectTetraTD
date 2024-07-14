@@ -67,6 +67,10 @@ public class WaveUnit {
             return null;
         }
 
+        if (quantity == 0) {
+            return null;
+        }
+
         // Single enemy test
         if (timeStart == timeEnd && isBetween(timeStart, elapsedTime, elapsedTime + delta)) {
             for (int i = 0; i < quantity; i++) {

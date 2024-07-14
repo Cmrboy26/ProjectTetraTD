@@ -117,6 +117,8 @@ public class IceTower extends TowerEntity {
     @Override
     public String getDescription() { return "Slows down enemies within range.\nSlowness increases as level increases."; }
 
+    
+
     @Override
     public boolean canEditSortType() {
         return false;

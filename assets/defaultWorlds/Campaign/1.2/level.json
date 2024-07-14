@@ -2,5 +2,8 @@
 	"name": "1.2",
 	"quests": [
 		"quest_1.json"
+	],
+	"unlockRequirements": [
+		"Campaign/1.1/quest_1.json/0"
 	]
 }

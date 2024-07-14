@@ -1,10 +1,10 @@
 {
-	"difficulty": 1,
+	"difficulty": 2,
 	"name": "Quest 1",
 	"endlessMode": false,
 	"preparationTime": 10,
 	"startingHealth": 25,
-	"startingMoney": 5000000000,
+	"startingMoney": 35,
 	"towerWhitelist": [
 		"SHOOTER_TOWER",
 		"ICE_TOWER"
@@ -27,6 +27,12 @@
 			"waveTime": 30,
 			"waveUnits": [
                 {"distributedSpawn": ["BASIC_TWO", 6]},
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 14]},
 			]
 		},
 		{

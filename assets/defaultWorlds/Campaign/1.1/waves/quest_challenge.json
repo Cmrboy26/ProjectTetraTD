@@ -12,7 +12,7 @@
 	"quests": [
 		{
 			"id": 0,
-			"type": "NO_DAMAGE",
+			"type": "NO_DAMAGE"
 		},
 		{
 			"id": 1,

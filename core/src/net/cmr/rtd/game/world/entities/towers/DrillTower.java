@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.DataBuffer;
 
@@ -52,7 +53,26 @@ public class DrillTower extends MiningTower {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         TextureRegion drill = Sprites.animation(AnimationType.DRILL, animationDelta);
         batch.draw(drill, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
+        if (color.a != 1) {
+            SpriteType type = null;
+            String text = null;
+            TileType actualUnder = getTileBelow(data);
+            if (actualUnder == TileType.IRON_VEIN) {
+                type = SpriteType.STEEL;
+                text = "Steel";
+            } else if (actualUnder == TileType.TITANIUM_VEIN) {
+                type = SpriteType.TITANIUM;
+                text = "Titanium";
+            }
+            if (type != null) {
+                GlyphLayout layout = new GlyphLayout(Sprites.getInstance().smallFont(), text);
+                batch.setColor(1, 1, 1, 1);
+                Sprites.getInstance().smallFont().draw(batch, layout, getX() - (layout.width / 2), getY() + Tile.SIZE);
+                batch.draw(Sprites.sprite(type), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
+            }
+        }
         batch.setColor(Color.WHITE);
+
         
         postRender(data, batch, delta);
         super.render(data, batch, delta);

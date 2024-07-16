@@ -115,7 +115,7 @@ public class ProjectTetraTD extends CMRGame {
 
 	@Override
 	public void render () {
-		if (Gdx.input.isKeyJustPressed(Input.Keys.F12) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
 			CMRGame.setDebug(!CMRGame.isDebug());
 		}
 
@@ -382,47 +382,11 @@ public class ProjectTetraTD extends CMRGame {
 	}
 
 	public void setLastPlayedQuest(String[] serializedQuest) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			JSONArray lastPlayed = new JSONArray();
-			for (String s : serializedQuest) {
-				lastPlayed.add(s);
-			}
-			root.put("lastPlayed", lastPlayed);
-			dataFile.writeString(root.toJSONString(), false);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		writeUserData("lastPlayed", serializedQuest);
 	}
 
 	public String[] getLastPlayedQuest() {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			JSONArray lastPlayed = (JSONArray) root.get("lastPlayed");
-			if (lastPlayed == null) {
-				return null;
-			}
-			String[] quest = new String[lastPlayed.size()];
-			for (int i = 0; i < lastPlayed.size(); i++) {
-				quest[i] = (String) lastPlayed.get(i);
-			}
-			return quest;
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return readUserData("lastPlayed", String[].class);
 	}
 
 	public boolean hasLastPlayedQuest() {
@@ -439,91 +403,89 @@ public class ProjectTetraTD extends CMRGame {
 	}
 
 	public void clearLastPlayedQuest() {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			root.remove("lastPlayed");
-			dataFile.writeString(root.toJSONString(), false);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		writeUserData("lastPlayed", null);
 	}
 
 	public int getLastPlayedTeam() {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			Long team = (Long) root.get("lastPlayedTeam");
-			if (team == null) {
-				return -1;
-			}
-			return team.intValue();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return -1;
+		return readUserData("lastPlayedTeam", Long.class, -1L).intValue();
 	}
 
 	public void setLastPlayedTeam(int team) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			root.put("lastPlayedTeam", team);
-			dataFile.writeString(root.toJSONString(), false);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		writeUserData("lastPlayedTeam", team);
 	}
 
 	public static @Null String getLastPlayedWorld() {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
-		if (!dataFile.exists()) {
-			dataFile.writeString("{}", false);
-		}
-		String data = dataFile.readString();
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			String world = (String) root.get("lastPlayedWorld");
-			if (world == null) {
-				return null;
-			}
-			return world;
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return readUserData("lastPlayedWorld", String.class);
 	}
 
 	public static void setLastPlayedWorld(String world) {
+		writeUserData("lastPlayedWorld", world);
+	}
+
+	private static void writeUserData(String key, Object value) {
+		Object writeValue = value;
+		if (value != null && value.getClass().isArray()) {
+			JSONArray array = new JSONArray();
+			for (int i = 0; i < Array.getLength(value); i++) {
+				array.add(Array.get(value, i));
+			}
+			writeValue = array;
+		}
 		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
 		}
-		String data = dataFile.readString();
 		JSONParser parser = new JSONParser();
 		try {
-			JSONObject root = (JSONObject) parser.parse(data);
-			root.put("lastPlayedWorld", world);
+			JSONObject root = (JSONObject) parser.parse(dataFile.readString());
+			if (writeValue == null) {
+				root.remove(key);
+				dataFile.writeString(root.toJSONString(), false);
+				return;
+			}
+			root.put(key, writeValue);
 			dataFile.writeString(root.toJSONString(), false);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static <T> T readUserData(String key, Class<T> clazz, T defaultValue) {
+		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		if (!dataFile.exists()) {
+			dataFile.writeString("{}", false);
+		}
+		String data = dataFile.readString();
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject root = (JSONObject) parser.parse(data);
+			Object value = root.get(key);
+			if (value == null) {
+				return null;
+			}
+			if (value instanceof JSONArray) {
+				JSONArray array = (JSONArray) value;
+				// If T is an array, convert the JSONArray to T
+				if (clazz.isArray()) {
+					Object arrayValue = Array.newInstance(clazz.getComponentType(), array.size());
+					for (int i = 0; i < array.size(); i++) {
+						Array.set(arrayValue, i, array.get(i));
+					}
+					return clazz.cast(arrayValue);
+				}
+			}
+			return clazz.cast(value);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("Stored value is not of type " + clazz.getSimpleName());
+		}
+		return defaultValue;
+	}
+
+	private static <T> T readUserData(String key, Class<T> clazz) {
+		return readUserData(key, clazz, null);
 	}
 
 

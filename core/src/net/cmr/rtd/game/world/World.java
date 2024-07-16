@@ -148,7 +148,7 @@ public class World extends GameObject {
                     // The game has ended!
                     //data.getManager().stop();
                     data.getManager().gameOver();
-                    if (wave > wavesData.size()) {
+                    if (wave > wavesData.getTotalWaves()) {
                         //wave = 0;
                         //waveObj = wavesData.getWave(wave);
                     }
@@ -183,7 +183,7 @@ public class World extends GameObject {
         this.wave = 0;
     }
     public boolean passedAllWaves() {
-        return wave > wavesData.size() && !wavesData.endlessMode;
+        return wave > wavesData.getTotalWaves() && !wavesData.endlessMode;
     }
     public void requestSkip(GamePlayer player) {
         Objects.requireNonNull(player);

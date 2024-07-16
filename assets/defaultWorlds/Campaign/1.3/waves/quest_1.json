@@ -1,0 +1,151 @@
+{
+	"difficulty": 2,
+	"name": "Quest 1",
+	"endlessMode": false,
+	"preparationTime": 10,
+	"startingHealth": 25,
+	"startingMoney": 35,
+	"towerWhitelist": [
+		"SHOOTER_TOWER",
+		"ICE_TOWER"
+	],
+	"quests": [
+		{
+			"id": 0,
+			"type": "REACH_WAVE",
+			"value": 15
+		},
+		{
+			"id": 1,
+			"type": "TOWER_LIMIT",
+			"value": 8
+		}
+	],
+	"waves": [
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 14]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 6]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 14]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {
+                    "type": "BASIC_TWO",
+                    "quantity": 9,
+                    "startTime": 0,
+                    "endTime": 15
+                },
+				{
+					"type": "BASIC_THREE",
+                    "quantity": 4,
+                    "startTime": 15,
+                    "endTime": 30
+				}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 9]},
+                {"distributedSpawn": ["BASIC_THREE", 7]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 10]},
+                {"distributedSpawn": ["BASIC_TWO", 10]},
+                {"distributedSpawn": ["BASIC_THREE", 9]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 17]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_THREE", 20]},
+                {"distributedSpawn": ["HEALER_ONE", 2]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 25]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_TWO", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 25]},
+                {"distributedSpawn": ["BASIC_FOUR", 4]}
+			]
+		},
+		{
+			"waveTime": 45,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_THREE", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 10]},
+                {"distributedSpawn": ["BASIC_FOUR", 5]}
+			]
+		},
+		{
+			"waveTime": 30,
+			"waveUnits": [
+                {"distributedSpawn": ["BASIC_ONE", 30]},
+                {"distributedSpawn": ["BASIC_TWO", 20]},
+                {"distributedSpawn": ["BASIC_THREE", 25]},
+                {"distributedSpawn": ["BASIC_FOUR", 5]},
+                {"distributedSpawn": ["HEALER_ONE", 5]}
+			]
+		},
+		{
+			"waveTime": 45,
+			"waveUnits": [
+				{
+					"type": "BASIC_FOUR",
+					"quantity": 15,
+					"startTime": 0,
+					"endTime": 30
+				},
+				{
+					"type": "HEALER_ONE",
+					"quantity": 10,
+					"startTime": 0,
+					"endTime": 30
+				}
+			]
+		},
+		{
+			"waveTime": 10,
+			"waveUnits": [
+				{
+					"type": "BASIC_FIVE",
+					"quantity": 1,
+					"startTime": 5,
+					"endTime": 5
+				}
+			]
+		}
+	]
+}

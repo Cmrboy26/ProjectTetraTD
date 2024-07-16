@@ -17,8 +17,8 @@
 		},
 		{
 			"id": 1,
-			"type": "AMASS_MONEY",
-			"value": 200
+			"type": "TOWER_LIMIT",
+			"value": 8
 		}
 	],
 	"waves": [

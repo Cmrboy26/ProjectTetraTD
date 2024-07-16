@@ -229,7 +229,7 @@ public class SelectionScreen extends AbstractScreenEX {
             //    playOptions.add(highscoreLabel).fillX().expandX().colspan(2).row();
             //}
         } else {   
-            Label waveCount = new Label("Waves: " + data.size(), Sprites.skin(), "small");
+            Label waveCount = new Label("Waves: " + data.getTotalWaves(), Sprites.skin(), "small");
             waveCount.setAlignment(Align.center);
             playOptions.add(waveCount).fillX().expandX().colspan(2).row();
         }

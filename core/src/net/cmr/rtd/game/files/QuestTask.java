@@ -69,7 +69,7 @@ public abstract class QuestTask {
     public abstract boolean isTaskComplete(UpdateData data, int team); // Returns true if the task is complete given the current game state, false otherwise
 
     boolean isGameOver(UpdateData data) {
-        return data.getWorld().getWave() > data.getWorld().getWavesData().size();
+        return data.getWorld().getWave() > data.getWorld().getWavesData().getTotalWaves();
     }
 
     public static QuestTask getTask(QuestFile file, long id) {

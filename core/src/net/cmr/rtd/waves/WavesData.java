@@ -379,7 +379,7 @@ public class WavesData {
         this.stagnationDifficultyIncrease = stagnationDifficultyIncrease[difficulty.id - 1];
     }
 
-    public int size() {
+    public int getTotalWaves() {
         return waves.size();
     }
     public float getPreparationTime() {

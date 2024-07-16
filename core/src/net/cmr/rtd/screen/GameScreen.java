@@ -204,7 +204,7 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
-        GameMusic random = GameMusic.random(GameMusic.GAME_1, GameMusic.GAME_2);
+        GameMusic random = GameMusic.random(GameMusic.GAME_1, GameMusic.GAME_2, GameMusic.GAME_3);
         Audio.getInstance().playMusic(random);
 
         float iconSize = 32;

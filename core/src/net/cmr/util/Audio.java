@@ -100,7 +100,8 @@ public class Audio implements Disposable {
      */
     public enum GameMusic {
         GAME_1("game1.mp3"),
-        GAME_2("game2.mp3")
+        GAME_2("game2.mp3"),
+        GAME_3("game3.mp3")
         ;
 
         private final String fileName;

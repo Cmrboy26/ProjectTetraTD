@@ -318,6 +318,24 @@ public abstract class TowerEntity extends Entity {
             return sortTypeMap.get(id);
         }
 
+        public static String getName(SortType type) {
+            switch (type) {
+                case ANY: return "Random";
+                case HIGHEST_HEALTH: return "Strongest";
+                case LOWEST_HEALTH: return "Weakest";
+                case TOWER_DISTANCE: return "Closest";
+                case TOWER_DISTANCE_REVERSE: return "Tower Closest";
+                case STRUCTURE_DISTANCE: return "First";
+                case STRUCTURE_DISTANCE_REVERSE: return "Last";
+                default: return "None";
+            }
+        }
+
+        @Override
+        public String toString() {
+            return getName(this);
+        }
+
 
         public abstract void sort(ArrayList<EnemyEntity> entities, TowerEntity tower, UpdateData data);
     }

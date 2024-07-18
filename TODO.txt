@@ -1,76 +1,38 @@
-ORDERED TODO LIST:
-✓ Create a "Game Over" screen for multiplayer and singleplayer modes (don't further support players playing past the game's end)
-  ✓ Implement a score system as well
-✓ Create tabs for shop menu to separate combative towers, mining towers, and effect towers
-✓ Add new tiles to prepare for mining towers to be implemented
-  ✓ Add ore veins (IRON, TITANIUM, URANIUM, ETC) for the material miner
-  ✓ Add ONE gemstone-rich tile for gemstone miners to use 
+1.0 TODO LIST: 
 - Create some mining towers and have them add items to team inventories
   - component escavator that discovers more burried components
   ✓ gemstone miner that uncovers gemstones (only one gemstone can be applied to a building and provides special abilities and perks)
   ✓ material miner that produces metals (DEPENDING ON WHERE THEY'RE PLACED) like steel, which can be used to construct/upgrade special towers
-✓ Add gemstone functionality
-  ✓ Diamonds adds piercing to towers
-  ✓ Cryonite inflicts slowness debuffs on enemies that are hit by it
-  ✓ Quartz increases range of buildings
-  ✓ Topaz halves attack speed, but doubles range and damage
-  ✓ Thorium halves damage, but doubles attack speed and AOE
-  ✓ Ruby has a chance to double the damage of towers (crit chance)
-- (Optionally) Create effect towers (similar to beacons in factorio)
+
+- Finish Campaign / 1.3
+- Add achievements to the game (MAKE SURE THEY'RE UNIQUE AND NOT SOLELY USED TO INCREASE GAME TIME)
+  - Add an achievement complete notification that appears at the top of the screen. (make it work in any menu)
+  - Add an achievement window in the main menu (overlay a checkmark over the icon of the achievement if it is completed)
+- Add a way to display if a tower is an enemy tower
+
+1.1 TODO LIST:
+- Bestiary
+  - Keep it simple to understand with a lot of icons to signify immunities, health, money on death, other effects
+  - A short description
+- Create effect towers (similar to beacons in factorio)
   - Distributor that applies a fraction of a gemstone's power to towers in range
   - Magnetic Tower that increases the likelihood of an enemy dropping a component when killed within range
   - Other towers that increase tower stats
-✓ Create worlds instead of levels
-  ✓ Replace the current level selector with a system like Infinitode 2, New Super Mario Bros U, etc.
-  ✓ Players must complete either X amounts of waves if the level is endless OR finish the predefined waves to complete the level
-  ✓ In the menu, have a button that allows you to toggle between "Online" and "Singleplayer"
-  ✓ Add prerequisites to play more levels. (Lock levels, unlock them if certain quests are completed).
-  ✓ When players press resume, force them to join the team they originally selected
-  ✓ Store the last viewed world and select that whenever the game loads (i.e. if the world when the game was exited was story, re-open the story world)
-  ✓ Create a campaign world for the base game ALONG WITH a competitive world for multiplayer
-  ✓ Add a medal to the far right side of the tasks label (inline with the tasks label) for when everything task for that quest has been completed for that questfile
-- Make ~5 good base game levels (try not to do endless) and ~2 multiplayer levels
-✓ Create a tutorial button in the play menu for new players
-- Add a bestiary for players to learn more about the enemies they encounter 
-  - Keep it simple to understand with a lot of icons to signify immunities, health, money on death, other effects
-- Add achievements to the game (MAKE SURE THEY'RE UNIQUE AND NOT SOLELY USED TO INCREASE GAME TIME)
+- More levels
+- Add a "No breaks" option, which disables all preperation time as a challenge option. It would give more currency as a reward.
 - Add player customization options.
   - Make a money system outside of inside of a level (like geobits!!!!) that are granted for completing achievements and playing levels
-  - Allow them to color their avatar (might need to learn how to shift hues)
+  - Allow them to color their avatar (might need to learn how to shift hues to do this)
+  - Accessories shop
   - Custom nametag colors
-- Add a "No breaks" option, which disables all preperation time as a challenge option. It would give more currency as a reward.
-✓ Add "end with health greater than" quest task
-✓ Add "take no damage" quest task
-✓ Add "build no more than x towers" quest task
-- REMEMBER WHEN BUILDING FOR ANDROID, CHECK android/build/intermediates/assets/debug to make sure the worlds are in there correctly
-- Add an option to disable buying certain towers in the quest json file
-✓ Show ICONS in the tutorial instead of saying "in the right bottom corner" and whatnot
+- Create a compact version of the shop (toggleable in the settings. it should be just icons and tabs, similar to necesse inventory?)
+- New competitive mode: Offensive
+  // All combative and mining towers are the same. Players will have access to an attacking window, 
+  // which allows them to send enemies over to the other team with money.
+  - Add a market tower, which passively generates money (this tower will be vital to the new offensive gamemode, as it will be how players initially generate money)
 
-- Bestiary
-- More (better) levels
-- Achievements
-- Mining/Automation Element of the game (buildings dedicated to mining)
-- In competitive modes, allow players to send enemies to the other side (even during cooldown periods) and decrease the endless mode impact on the game slightly
 
-- Make left shift force insert component instead of showing the dialog 
-- More music
-- Consider: should fire and ice combined deal more damage?
-- Improve shop layout (ADD TABS)
-- ADD LOSE/WIN SCREEN (where you can reset or play again)
-- {
-  Instead of having a level selector, create a world where levels can be selected (similar to the diner dash worlds or new super mario bros u).
-  To progress in the world, you must either complete the predefined waves in a non-endless level OR get to a certain level in endless mode
-}
-- TOWER IDEA: Gas cloud emitter??? fart gun from minions
-
-IDEAS:
-- Resources can be obtained through mining/drilling in order to build/upgrade towers
-- GEMS obtained from mining can be applied to structures to give them buffs (one gem per tower)
-  - examples of this: 
-  -   Diamond=piercing bullets for shooter towers
-  -   Ruby=sets every other enemy on fire
-  -   Sapphire?=halves attack speed, doubles range and doubles damage
-
+Materials Reference:
 Diamonds
 - Piercing (AOE)
 Cryonite

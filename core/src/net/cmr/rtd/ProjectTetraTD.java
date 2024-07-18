@@ -16,10 +16,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.kryonet.Client;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
@@ -27,6 +40,9 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
+import net.cmr.rtd.game.achievements.Achievement;
+import net.cmr.rtd.game.achievements.AchievementManager;
+import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
@@ -39,6 +55,10 @@ import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.HostScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
+import net.cmr.rtd.shader.ShaderManager;
+import net.cmr.rtd.shader.ShaderManager.CustomShader;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
@@ -61,11 +81,24 @@ public class ProjectTetraTD extends CMRGame {
 		super(fileChooser);
 	}
 
-	ScreenViewport viewport = new ScreenViewport();
+	Viewport screenViewport;
+	Viewport viewport;
+	Stage achievementNotificationStage;
+	public ShaderManager shaderManager;
+	Table actorTable;
 
 	@Override
 	public void create () {
 		super.create();
+
+		screenViewport = new ScreenViewport();
+		viewport = new ExtendViewport(640, 360);
+		achievementNotificationStage = new Stage(viewport);
+		actorTable = new Table();
+		actorTable.align(Align.top);
+		actorTable.setFillParent(true);
+		achievementNotificationStage.addActor(actorTable);
+
 		Settings.applySettings();
 		showIntroScreen(new MainMenuScreen());
 
@@ -73,6 +106,11 @@ public class ProjectTetraTD extends CMRGame {
 			// TODO: Find out why tooltips dont appear on mobile
 			TooltipManager.getInstance().instant();
 		}
+
+		AchievementManager.getInstance();
+		AchievementManager.save();
+
+		shaderManager = new ShaderManager();
 
 		FileHandle gameDataFolder = Gdx.files.external("retrotowerdefense/");
 		gameDataFolder.mkdirs();
@@ -118,29 +156,100 @@ public class ProjectTetraTD extends CMRGame {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
 			CMRGame.setDebug(!CMRGame.isDebug());
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+			onAchievementComplete(Achievement.createAchievementInstance(TutorialCompleteAchievement.class));
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
+			shaderManager.reloadShaders();
+			Log.info("Reloaded shaders.");
+		}
 
 		ScreenUtils.clear(0, 0, 0, 1);
+		shaderManager.update();
 		super.render();
 
+		viewport.apply(true);
+		batch().setProjectionMatrix(viewport.getCamera().combined);
+		achievementNotificationStage.act();
+		batch().begin();
+		batch().setColor(Color.WHITE);
+		achievementNotificationStage.draw();
+		batch().end();
+
 		if (Settings.getPreferences().getBoolean(Settings.SHOW_FPS)) {
-			viewport.apply(true);
-			batch().setProjectionMatrix(viewport.getCamera().combined);
+			screenViewport.apply(true);
+			batch().setProjectionMatrix(screenViewport.getCamera().combined);
 			batch().begin();
 			batch().setColor(Color.WHITE);
-			Sprites.skin().getFont("small-font").draw(batch(), "FPS: " + Gdx.graphics.getFramesPerSecond(), 5, Gdx.graphics.getHeight()-5);
+			BitmapFont font = Sprites.skin().getFont("small-font");
+			font.setColor(Color.WHITE);
+			font.draw(batch(), "FPS: " + Gdx.graphics.getFramesPerSecond(), 5, Gdx.graphics.getHeight() - 5);
 			batch().end();
 		}
 	}
 
+	public final int achievementHeight = 100;
+
+	public void onAchievementComplete(Achievement achievement) {
+		Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f, 1.5f);
+
+		Table achievementTable = new Table();
+		achievementTable.setWidth(200);
+		achievementTable.setHeight(achievementHeight);
+		actorTable.clear();
+		actorTable.add(achievementTable).row();
+		
+		Image achievementIcon = new Image(Sprites.sprite(achievement.getDisplayIcon()));
+		achievementTable.add(achievementIcon).size(50, 50).expand().center().fill();
+
+		VerticalGroup textGroup = new VerticalGroup();
+		achievementTable.add(textGroup).expand().center().fill().pad(10);
+
+		Label title = new Label("Achievement Complete!", Sprites.skin(), "small");
+		title.setColor(Color.WHITE);
+		title.setAlignment(Align.center);
+		textGroup.addActor(title);
+
+		Label subtitle = new Label("- " + achievement.getReadableName() + " -", Sprites.skin(), "small");
+		subtitle.setColor(Color.WHITE);
+		subtitle.setAlignment(Align.center);
+		subtitle.setFontScale(.45f);
+		textGroup.addActor(subtitle);
+		
+		Action actions = Actions.sequence(
+			Actions.moveBy(0, achievementHeight, 0),
+			Actions.moveBy(0, -achievementHeight, 0.25f, Interpolation.sineOut),
+			Actions.delay(3),
+			Actions.moveBy(0, achievementHeight, 0.5f, Interpolation.sineIn),
+			Actions.removeActor()
+		);
+		achievementTable.addAction(actions);
+	}
+
 	@Override
 	public void resize(int width, int height) {
-		viewport.update(width, height);
+		screenViewport.update(width, height, true);
+		viewport.update(width, height, true);
 		super.resize(width, height);
 	}
 	
 	@Override
+	public void pause() {
+		super.pause();
+		AchievementManager.save();
+	}
+
+	@Override
 	public void dispose () {
 		super.dispose();
+		shaderManager.dispose();
+	}
+
+	public void enableShader(Batch batch, CustomShader shader, float... inputs) {
+		shaderManager.enableShader(batch, shader, inputs);
+	}
+	public void disableShader(Batch batch) {
+		shaderManager.disableShader(batch);
 	}
 
 	public String getUsername() {
@@ -422,7 +531,7 @@ public class ProjectTetraTD extends CMRGame {
 		writeUserData("lastPlayedWorld", world);
 	}
 
-	private static void writeUserData(String key, Object value) {
+	public static void writeUserData(String key, Object value) {
 		Object writeValue = value;
 		if (value != null && value.getClass().isArray()) {
 			JSONArray array = new JSONArray();
@@ -450,7 +559,7 @@ public class ProjectTetraTD extends CMRGame {
 		}
 	}
 
-	private static <T> T readUserData(String key, Class<T> clazz, T defaultValue) {
+	public static <T> T readUserData(String key, Class<T> clazz, T defaultValue) {
 		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
@@ -484,7 +593,7 @@ public class ProjectTetraTD extends CMRGame {
 		return defaultValue;
 	}
 
-	private static <T> T readUserData(String key, Class<T> clazz) {
+	public static <T> T readUserData(String key, Class<T> clazz) {
 		return readUserData(key, clazz, null);
 	}
 

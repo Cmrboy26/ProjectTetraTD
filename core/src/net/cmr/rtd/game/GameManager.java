@@ -407,7 +407,8 @@ public class GameManager implements Disposable {
      */
     public void save() {
         // If the game is a singleplayer game, add the resume button to the main menu.
-        if (ProjectTetraTD.instanceExists() && !details.isHostedOnline() && getWorld().getWave() < getWorld().getWavesData().getTotalWaves()) {
+        Log.info("Wave: "+getWorld().getWave()+", Total Waves: "+getWorld().getWavesData().getTotalWaves());
+        if (ProjectTetraTD.instanceExists() && !details.isHostedOnline() && (getWorld().getWave() < getWorld().getWavesData().getTotalWaves() || getWorld().getWavesData().endlessMode)) {
             ProjectTetraTD instance = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             String[] serializedQuestFile = quest.serialize();
             if (!(instance.getScreen() instanceof TutorialScreen)) {

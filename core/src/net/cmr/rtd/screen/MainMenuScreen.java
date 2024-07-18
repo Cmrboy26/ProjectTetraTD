@@ -1,15 +1,17 @@
 package net.cmr.rtd.screen;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -21,21 +23,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
+import net.cmr.rtd.game.achievements.Achievement;
+import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
+import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
-import net.cmr.util.CMRGame;
-import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.IntroScreen;
 import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class MainMenuScreen extends AbstractScreenEX {
@@ -59,67 +62,6 @@ public class MainMenuScreen extends AbstractScreenEX {
 		float width = height * widthHeightRatio;
 
 		table.add(new Image(Sprites.drawable(SpriteType.TITLE))).height(height).width(width).pad(0, 50, 0, 50).colspan(outsideSpan * 2 + insideSpan).row();
-
-		/*table.add(new Image(Sprites.drawable(AnimationType.SHOOTER_TOWER_2, 0))).size(32).padRight(iconPadding).colspan(outsideSpan);
-
-		Label label = new Label(RetroTowerDefense.GAME_NAME, Sprites.skin(), "default");
-		label.setOrigin(Align.bottom);
-		label.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				float sizeBeforeX = label.getFontScaleX();
-				float sizeBeforeY = label.getFontScaleY();
-				float scaleX = 0.25f;
-				float scaleY = 1f;
-				if (easterEggRunning) return;
-				easterEggRunning = true;
-				Audio.getInstance().playSFX(GameSFX.FIREBALL_LAUNCH, 1f);
-				Action action = Actions.sequence(
-					new Action() {
-						float elapsedTime = 0;
-						float time = .15f / 2;
-						@Override
-						public boolean act(float delta) {
-							elapsedTime += delta;
-							label.setFontScaleX(label.getFontScaleX() + delta * scaleX / time);
-							label.setFontScaleY(label.getFontScaleY() + delta * scaleY / time);
-							return elapsedTime > time;
-						}
-					},
-					new Action() {
-						float elapsedTime = 0;
-						float time = .2f;
-						@Override
-						public boolean act(float delta) {
-							elapsedTime += delta;
-							label.setFontScaleX(label.getFontScaleX() - delta * scaleX / time);
-							label.setFontScaleY(label.getFontScaleY() - delta * scaleY / time);
-							return elapsedTime > time;
-						}
-					},
-					new Action() {
-						@Override
-						public boolean act(float delta) {
-							label.setFontScaleX(sizeBeforeX);
-							label.setFontScaleY(sizeBeforeY);
-							easterEggRunning = false;
-							return true;
-						}
-					}
-				);
-				label.addAction(action);
-			}
-		});
-		label.setAlignment(Align.center);
-		Interpolation interpolation = Interpolation.smooth;
-		float duration = 2.0f;
-		float offset = 3.0f;
-		label.setPosition(label.getX(), label.getY());
-		label.addAction(Actions.forever(Actions.sequence(Actions.moveBy(0, offset, duration, interpolation), Actions.moveBy(0, -offset, duration, interpolation))));
-		table.add(label).colspan(insideSpan);
-
-		table.add(new Image(Sprites.drawable(SpriteType.ICE_TOWER))).size(32).padLeft(iconPadding);
-		table.row().colspan(outsideSpan);*/
 
 		String labelType = "small";
 
@@ -314,7 +256,14 @@ public class MainMenuScreen extends AbstractScreenEX {
         style2.checked = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DEFAULT), patch, patch, patch, patch));
         style2.disabled = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DISABLED), patch, patch, patch, patch));
 		style2.imageUp = Sprites.drawable(SpriteType.TROPHY);
-		icongroup.add(new ImageButton(style2)).pad(5.0f).size(size);
+		ImageButton achievements = new ImageButton(style2);
+		achievements.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				openAchievementWindow();
+			}
+		});
+		icongroup.add(achievements).pad(5.0f).size(size);
 
 		add(Align.bottomRight, table2);
     }
@@ -337,5 +286,40 @@ public class MainMenuScreen extends AbstractScreenEX {
     public void hide() {
         super.hide();
     }
+
+	public void openAchievementWindow() {
+		Window window = new Window("Achievements", Sprites.skin(), "small");
+		window.setMovable(false);
+		window.pad(50, 5, 5, 5);
+		window.getTitleLabel().setAlignment(Align.center);
+		window.addListener(new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				if (keycode == Input.Keys.ESCAPE) {
+					window.remove();
+					return true;
+				}
+				return false;
+			}
+		});
+
+		Table achievementTable = new Table();
+		achievementTable.defaults().pad(5);
+
+		ArrayList<Achievement<?>> orderedAchievements = new ArrayList<>(AchievementManager.getInstance().getAchievements().values());
+		ArrayList<Class<? extends Achievement<?>>> order = Achievement.getAchievementRegisterOrder();
+		orderedAchievements.sort((a1, a2) -> {
+			return order.indexOf(a1.getClass()) - order.indexOf(a2.getClass());
+		});
+
+		for (Achievement<?> achievement : orderedAchievements) {
+			achievementTable.add(new AchievementDisplay((ProjectTetraTD) game, achievement)).row();
+		}
+
+		window.add(achievementTable).expand().fill();
+		stages.get(Align.center).addActor(window);
+		window.pack();
+		window.setPosition(640/2, 360/2, Align.center);
+	}
 
 }

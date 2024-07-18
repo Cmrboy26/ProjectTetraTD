@@ -124,32 +124,30 @@ import net.cmr.util.Sprites.SpriteType;
 public class GameScreen extends AbstractScreenEX {
     
     public GameStream ioStream;
+    final String password;
     @Null GameManager gameManager; // Will be null if the local player is not the host
     World world;
+    UpdateData data;
+    ArrayList<Entity> entityQueue = new ArrayList<Entity>();
+
+    public final int team;
+    public float gameSpeed;
+
+    public static NinePatch upgradeProgress, upgradeProgressBackground;
     Stage worldStage;
     Viewport viewport;
     ShapeRenderer shapeRenderer;
-    UpdateData data;
+    ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
     Player localPlayer = null;
-    final String password;
-    Label title;
 
+    Label actionBar;
     Label lifeLabel, structureLifeLabel, cashLabel, waveLabel, waveCountdownLabel;
     Image life, structureLife, cash;
     ImageButton upgradeButton, shopButton, inventoryButton;
     ImageButton wavePauseButton;
     ImageButton settingsButton, skipButton, restartButton, speedButton;
-    //TextButton skipWaveButton;
     Window shopWindow, inventoryWindow, settings;
-
-    GameType typeToPurchase;
-    Entity entityToPlace;
-    PlacementMode placementMode = PlacementMode.NONE;
-    public enum PlacementMode {
-        NONE, PLACE, UPGRADE, COMPONENT, GEMSTONE
-    }
-
-    ArrayList<ParticleEffect> particleEffects = new ArrayList<ParticleEffect>();
+    Joystick joystick;
 
     Dialog quitDialog;
     Window informationUpgradeWindow;
@@ -157,21 +155,23 @@ public class GameScreen extends AbstractScreenEX {
     Dialog componentDialog;
     Dialog gameOverDialog;
 
-    ArrayList<Entity> entityQueue = new ArrayList<Entity>();
+    SortType copiedSortType = null;
+    GameType typeToPurchase;
+    Entity entityToPlace;
+    PlacementMode placementMode = PlacementMode.NONE;
+    PurchaseAction componentAction = null;
+    public enum PlacementMode {
+        NONE, PLACE, UPGRADE, COMPONENT, GEMSTONE
+    }
+
     float waveCountdown = -1, waveDuration = 0;
     int wave = 0;
     boolean areWavesPaused = false;
 
-    boolean emptyInventory = true;
+    boolean inventoryInitialized = false;
     TeamInventory inventory = new TeamInventory();
-    PurchaseAction componentAction = null;
 
-    Joystick joystick;
-
-    public static NinePatch upgradeProgress, upgradeProgressBackground;
-    public final int team;
-    public float gameSpeed;
-
+    public Supplier<TeamInventory> getTeamInventory = () -> inventory;
     public Consumer<GameType[]> setShopContents;
 
     boolean uiToggleFromKeybinds = true;
@@ -375,10 +375,10 @@ public class GameScreen extends AbstractScreenEX {
         Stack content = new Stack();
 
         Table combativeTable = new Table();
-        Table miningTable = new Table();
+        Table productionTable = new Table();
         Table effectTable = new Table();
         content.add(combativeTable);
-        content.add(miningTable);
+        content.add(productionTable);
         content.add(effectTable);
 
         ButtonGroup<TextButton> tabGroup = new ButtonGroup<TextButton>();
@@ -386,15 +386,16 @@ public class GameScreen extends AbstractScreenEX {
         TextButton combativeTab = new TextButton("Combat", Sprites.skin(), "toggle-small");
         combativeTab.setChecked(true);
         combativeTab.pad(0, 10, 0, 10);
-        TextButton miningTab = new TextButton("Mining", Sprites.skin(), "toggle-small");
-        miningTab.pad(0, 10, 0, 10);
-        TextButton effectTab = new TextButton("Deployables", Sprites.skin(), "toggle-small");
+        TextButton productionTab = new TextButton("Production", Sprites.skin(), "toggle-small");
+        productionTab.pad(0, 10, 0, 10);
+        TextButton effectTab = new TextButton("Effects", Sprites.skin(), "toggle-small");
         effectTab.pad(0, 10, 0, 10);
         shopTabs.addActor(combativeTab);
-        shopTabs.addActor(miningTab);
+        shopTabs.addActor(productionTab);
         shopTabs.addActor(effectTab);
         shopTabs.space(5);
-        shopWindow.add(shopTabs).growX().center().padLeft(5);
+        shopTabs.align(Align.center);
+        shopWindow.add(shopTabs).growX().center().padLeft(5).padRight(5);
         shopWindow.row();
 
         Table contentTable = new Table();
@@ -406,19 +407,19 @@ public class GameScreen extends AbstractScreenEX {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 combativeTable.setVisible(combativeTab.isChecked());
-                miningTable.setVisible(miningTab.isChecked());
+                productionTable.setVisible(productionTab.isChecked());
                 effectTable.setVisible(effectTab.isChecked());
             }
         };
-        tabGroup.add(combativeTab, miningTab, effectTab);
+        tabGroup.add(combativeTab, productionTab, effectTab);
         combativeTab.addListener(tabListener);
-        miningTab.addListener(tabListener);
+        productionTab.addListener(tabListener);
         effectTab.addListener(tabListener);
         tabGroup.setMaxCheckCount(1);
         tabGroup.setMinCheckCount(1);
         
         combativeTable.setVisible(combativeTab.isChecked());
-        miningTable.setVisible(miningTab.isChecked());
+        productionTable.setVisible(productionTab.isChecked());
         effectTable.setVisible(effectTab.isChecked());
 
 
@@ -431,7 +432,7 @@ public class GameScreen extends AbstractScreenEX {
             @Override
             public void accept(GameType[] types) {
                 combativeTable.clear();
-                miningTable.clear();
+                productionTable.clear();
                 effectTable.clear();
 
                 Table combativeShopTable = new Table();
@@ -461,30 +462,30 @@ public class GameScreen extends AbstractScreenEX {
                     combativeShopTable.row();
                 }
 
-                Table miningShopTable = new Table();
-                ScrollPane miningScroll = new ScrollPane(miningShopTable, scrollStyle);
-                miningScroll.setScrollingDisabled(true, false);
-                miningScroll.setScrollbarsVisible(false);
-                miningScroll.setOverscroll(false, false);
-                miningTable.add(miningScroll).grow().pad(1).padTop(5);
+                Table productionShopTable = new Table();
+                ScrollPane productionScroll = new ScrollPane(productionShopTable, scrollStyle);
+                productionScroll.setScrollingDisabled(true, false);
+                productionScroll.setScrollbarsVisible(false);
+                productionScroll.setOverscroll(false, false);
+                productionTable.add(productionScroll).grow().pad(1).padTop(5);
 
-                ArrayList<TowerOption> miningOptions = new ArrayList<TowerOption>(buyableTowers);
-                miningOptions.sort((a, b) -> a.order - b.order);
-                miningOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
-                for (TowerOption option : miningOptions) {
+                ArrayList<TowerOption> productionOptions = new ArrayList<TowerOption>(buyableTowers);
+                productionOptions.sort((a, b) -> a.order - b.order);
+                productionOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
+                for (TowerOption option : productionOptions) {
                     GameType type = option.type;
                     Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
                     Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
-                    miningShopTable.add(towerSection).pad(5).growX();
-                    miningShopTable.row();
+                    productionShopTable.add(towerSection).pad(5).growX();
+                    productionShopTable.row();
                 }
 
                 combativeTab.setDisabled(combativeOptions.size() < 0);
-                miningTab.setDisabled(miningOptions.size() < 0);
+                productionTab.setDisabled(productionOptions.size() < 0);
                 effectTab.setDisabled(true);
 
                 combatScroll.layout();
-                miningScroll.layout();
+                productionScroll.layout();
                 shopWindow.pack();
                 shopWindow.setPosition(640 / 2, 360 / 2, Align.center);
             }
@@ -530,7 +531,7 @@ public class GameScreen extends AbstractScreenEX {
             componentAction = PurchaseAction.APPLY_SCRAP_METAL;
             enterComponentMode();
         }, "Scrap Metal (Component)", componentUsage, size)).size(size);
-        String resourceUsage = "- Resource to build and upgrade special towers.";
+        String resourceUsage = "- Used to build and upgrade special towers.";
         String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost if changed.";
 
         for (final Material material : Material.values()) {
@@ -693,11 +694,11 @@ public class GameScreen extends AbstractScreenEX {
 
         add(Align.center, inventoryWindow);
 
-        title = new Label("", Sprites.skin(), "small");
-        title.setAlignment(Align.center);
-        title.setPosition(640/2, 58+5, Align.bottom);
-        title.setFontScale(.4f);
-        add(Align.bottom, title);
+        actionBar = new Label("", Sprites.skin(), "small");
+        actionBar.setAlignment(Align.center);
+        actionBar.setPosition(640/2, 58+5, Align.bottom);
+        actionBar.setFontScale(.4f);
+        add(Align.bottom, actionBar);
 
         resetGameDialog = new Dialog("", Sprites.skin(), "small") {
             @Override
@@ -900,7 +901,7 @@ public class GameScreen extends AbstractScreenEX {
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
 
             inventory = statsPacket.getInventory();
-            emptyInventory = false;
+            inventoryInitialized = true;
             return;
         }
 
@@ -1181,7 +1182,7 @@ public class GameScreen extends AbstractScreenEX {
             waveLabel.setText(waveText);
         }
         
-        if (inventory != null && !emptyInventory) {
+        if (inventory != null && inventoryInitialized) {
 
             int scopes = inventory.getScopes();
             int wd40 = inventory.getWd40();
@@ -1350,6 +1351,23 @@ public class GameScreen extends AbstractScreenEX {
                 showQuitDialog();
             }
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            // Copy the current tower's sort type to the clipboard
+            TowerEntity tower = ShopManager.towerAt(world, getMouseTileCoordinate().x, getMouseTileCoordinate().y, team);
+            if (tower != null && tower.canEditSortType()) {
+                copiedSortType = tower.getPreferedSortType();
+                notification(SpriteType.COPY_ICON, "Copied targeting mode: "+copiedSortType, 2);
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.V)) {
+            // Paste the copied sort type to the current tower
+            TowerEntity tower = ShopManager.towerAt(world, getMouseTileCoordinate().x, getMouseTileCoordinate().y, team);
+            if (tower != null && tower.canEditSortType() && copiedSortType != null) {
+                SortTypePacket packet = new SortTypePacket(getMouseTileCoordinate().x, getMouseTileCoordinate().y, copiedSortType);
+                ioStream.sendPacket(packet);
+                notification(SpriteType.PASTE_ICON, "Pasted targeting mode: "+copiedSortType, 2);
+            }
+        }
 
         stages.actAll(delta);
 
@@ -1405,21 +1423,21 @@ public class GameScreen extends AbstractScreenEX {
                 if (!isMobile()) {
                     text += "\n(Press ESC to cancel)";
                 }
-                setTitleText(text);
+                setActionBarText(text);
             }
         } else {
-            setTitleText("");
+            setActionBarText("");
             if (Gdx.input.isKeyPressed(Input.Keys.R) && uiToggleFromKeybinds) {
                 // Sell the tower at the mouse position if it's on the same team
-                setTitleText("Click to sell tower\n(Release R to cancel)");
+                setActionBarText("Click to sell tower\n(Release R to cancel)");
                 if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                     PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
                     Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
                     ioStream.sendPacket(packet);
                 }
             } else {
-                if (title.getText().toString().equals("Click to sell tower\n(Release R to cancel)")) {
-                    setTitleText("");
+                if (actionBar.getText().toString().equals("Click to sell tower\n(Release R to cancel)")) {
+                    setActionBarText("");
                 }
             }
         }
@@ -1513,57 +1531,21 @@ public class GameScreen extends AbstractScreenEX {
                         style.scrollStyle.background.setLeftWidth(spacing / 2);
                         style.scrollStyle.background.setRightWidth(spacing / 2);
                         
-                        SelectBox<String> targetMethodSelectBox = new SelectBox<String>(style);
+                        SelectBox<SortType> targetMethodSelectBox = new SelectBox<SortType>(style);
                         targetMethodSelectBox.setScale(.8f);
                         targetMethodSelectBox.setAlignment(Align.center);
-                        targetMethodSelectBox.setItems("Strongest", "Weakest", "First", "Last", "Closest", "Random");
-                        switch (tower.getPreferedSortType()) {
-                            case HIGHEST_HEALTH:
-                                targetMethodSelectBox.setSelected("Strongest");
-                                break;
-                            case LOWEST_HEALTH:
-                                targetMethodSelectBox.setSelected("Weakest");
-                                break;
-                            case STRUCTURE_DISTANCE:
-                                targetMethodSelectBox.setSelected("First");
-                                break;
-                            case STRUCTURE_DISTANCE_REVERSE:
-                                targetMethodSelectBox.setSelected("Last");
-                                break;
-                            case TOWER_DISTANCE:
-                                targetMethodSelectBox.setSelected("Closest");
-                                break;
-                            case ANY:
-                                targetMethodSelectBox.setSelected("Random");
-                                break;
-                            default:
-                                break;
-                        }
+                        targetMethodSelectBox.setItems(SortType.HIGHEST_HEALTH,
+                            SortType.LOWEST_HEALTH,
+                            SortType.STRUCTURE_DISTANCE,
+                            SortType.STRUCTURE_DISTANCE_REVERSE,
+                            SortType.TOWER_DISTANCE,
+                            SortType.ANY);
+                        targetMethodSelectBox.setSelected(tower.getPreferedSortType());
                         targetMethodSelectBox.addListener(new ChangeListener() {
                             @Override
                             public void changed(ChangeEvent event, Actor actor) {
                                 Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                                SortType type = SortType.HIGHEST_HEALTH;
-                                switch (targetMethodSelectBox.getSelected()) {
-                                    case "Strongest":
-                                        type = SortType.HIGHEST_HEALTH;
-                                        break;
-                                    case "Weakest":
-                                        type = SortType.LOWEST_HEALTH;
-                                        break;
-                                    case "First":
-                                        type = SortType.STRUCTURE_DISTANCE;
-                                        break;
-                                    case "Last":
-                                        type = SortType.STRUCTURE_DISTANCE_REVERSE;
-                                        break;
-                                    case "Closest":
-                                        type = SortType.TOWER_DISTANCE;
-                                        break;
-                                    case "Random":
-                                        type = SortType.ANY;
-                                        break;
-                                }
+                                SortType type = targetMethodSelectBox.getSelected();
                                 SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
                                 ioStream.sendPacket(packet);
                             } 
@@ -1898,7 +1880,7 @@ public class GameScreen extends AbstractScreenEX {
         table.add(towerImage).padRight(sidepad).padLeft(sidepad).width(targetWidth).height(targetHeight).colspan(1).left();
         VerticalGroup group = new VerticalGroup();
         group.addActor(towerName);
-        group.addActor(getInventoryDisplay(cost.apply(0), false, 3, true));
+        group.addActor(getInventoryDisplay(cost.apply(0), false, 3, true, getTeamInventory));
         table.add(group).expandX().colspan(1);
         TextButton buyButton = new TextButton("Buy", Sprites.skin(), "small");
         buyButton.addListener(new ClickListener() {
@@ -2262,7 +2244,6 @@ public class GameScreen extends AbstractScreenEX {
         removeInfoWindow();
         int tileX = Entity.getTileX(towerAt.getX());
         int tileY = Entity.getTileY(towerAt.getY());
-        long cost = ShopManager.upgradeCatalog.get(towerAt.type).cost.apply(towerAt.getLevel()).getCash();
         if (multiplace) {
             GameScreen.this.upgrade(towerAt, tileX, tileY);
             return;
@@ -2301,7 +2282,7 @@ public class GameScreen extends AbstractScreenEX {
         label.setAlignment(Align.center);
         label.setFontScale(.45f);
         dialog.text(label);
-        Table costTable = getInventoryDisplay(option.cost.apply(towerAt.getLevel()), false, 3, false);
+        Table costTable = getInventoryDisplay(option.cost.apply(towerAt.getLevel()), false, 3, false, getTeamInventory);
         dialog.getContentTable().row();
         dialog.getContentTable().add(costTable).center().grow().colspan(1).row();
         dialog.button("Yes", true, Sprites.skin().get("small", TextButton.TextButtonStyle.class));
@@ -2415,8 +2396,8 @@ public class GameScreen extends AbstractScreenEX {
         informationUpgradeWindow = dialog;
     }
 
-    public void setTitleText(String string) {
-        title.setText(string);
+    public void setActionBarText(String string) {
+        actionBar.setText(string);
     }
 
     public void voteSkip() {
@@ -2492,20 +2473,62 @@ public class GameScreen extends AbstractScreenEX {
     int tempColumns = 0;
     int targetColumns = 0;
 
+    
     public Table getInventoryDisplay(TeamInventory displayInventory, boolean displayAll, int columns, boolean includeTooltips) {
+        return getInventoryDisplay(displayInventory, displayAll, columns, includeTooltips, null);
+    }
+
+    /**
+     * Should be used when displaying the cost of an item in the shop. Materials in the playerInventory with a quantity less than the 
+     * amount specified in displayInventory will appear red.
+     * @param playerInventorySupplier may return null.
+     */
+    public Table getInventoryDisplay(TeamInventory displayInventory, boolean displayAll, int columns, boolean includeTooltips, Supplier<TeamInventory> playerInventorySupplier) {
         Table table = new Table();
         tempColumns = 0;
         targetColumns = columns;
-        if (displayAll || displayInventory.cash > 0) addInventorySection("", SpriteType.CASH, displayInventory.cash, table, includeTooltips);
-        if (displayAll || displayInventory.scopes > 0) addInventorySection(" scopes", SpriteType.SCOPE, displayInventory.scopes, table, includeTooltips);
-        if (displayAll || displayInventory.wd40 > 0) addInventorySection(" lubricant", SpriteType.LUBRICANT, displayInventory.wd40, table, includeTooltips);
-        if (displayAll || displayInventory.scrapMetal > 0) addInventorySection(" scrap metal", SpriteType.SCRAP, displayInventory.scrapMetal, table, includeTooltips);
 
-        /*if (displayAll || displayInventory.steel > 0) addInventorySection(" steel", SpriteType.STEEL, displayInventory.steel, table, includeTooltips);
-        if (displayAll || displayInventory.titanium > 0) addInventorySection(" titanium", SpriteType.TITANIUM, displayInventory.titanium, table, includeTooltips);*/
+        Color canPurchaseColor = Color.WHITE;
+        Color cannotPurchaseColor = new Color(1f, .35f, .35f, 1);
+
+        if (displayAll || displayInventory.cash > 0) addInventorySection("", SpriteType.CASH, displayInventory.cash, table, includeTooltips, () -> {
+            if (playerInventorySupplier == null || playerInventorySupplier.get() == null) {
+                return canPurchaseColor;
+            }
+            return playerInventorySupplier.get().getCash() >= displayInventory.cash ? canPurchaseColor : cannotPurchaseColor;
+        });
+        if (displayAll || displayInventory.scopes > 0) addInventorySection(" scopes", SpriteType.SCOPE, displayInventory.scopes, table, includeTooltips, () -> {
+            if (playerInventorySupplier == null || playerInventorySupplier.get() == null) {
+                return canPurchaseColor;
+            }
+            return playerInventorySupplier.get().scopes >= displayInventory.scopes ? canPurchaseColor : cannotPurchaseColor;
+        });
+        if (displayAll || displayInventory.wd40 > 0) addInventorySection(" lubricant", SpriteType.LUBRICANT, displayInventory.wd40, table, includeTooltips, () -> {
+            if (playerInventorySupplier == null || playerInventorySupplier.get() == null) {
+                return canPurchaseColor;
+            }
+            return playerInventorySupplier.get().wd40 >= displayInventory.wd40 ? canPurchaseColor : cannotPurchaseColor;
+        });
+        if (displayAll || displayInventory.scrapMetal > 0) addInventorySection(" scrap metal", SpriteType.SCRAP, displayInventory.scrapMetal, table, includeTooltips, () -> {
+            if (playerInventorySupplier == null || playerInventorySupplier.get() == null) {
+                return canPurchaseColor;
+            }
+            return playerInventorySupplier.get().scrapMetal >= displayInventory.scrapMetal ? canPurchaseColor : cannotPurchaseColor;
+        });
+
         for (Material material : Material.values()) {
             if (displayAll || displayInventory.getMaterial(material) > 0) {
-                addInventorySection(" "+material.materialName.toLowerCase(), material.image, displayInventory.getMaterial(material), table, includeTooltips);
+                Supplier<Color> colorSupplier = () -> {
+                    if (playerInventorySupplier == null) {
+                        return canPurchaseColor;
+                    }
+                    TeamInventory playerInventory = playerInventorySupplier.get();
+                    if (playerInventory == null) {
+                        return canPurchaseColor;
+                    }
+                    return playerInventory.getMaterial(material) >= displayInventory.getMaterial(material) ? canPurchaseColor : cannotPurchaseColor;
+                };
+                addInventorySection(" "+material.materialName.toLowerCase(), material.image, displayInventory.getMaterial(material), table, includeTooltips, colorSupplier);
             }
         }
 
@@ -2515,30 +2538,40 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void addInventorySection(String name, SpriteType type, long amount, Table table, boolean includeTooltips) {
+        addInventorySection(name, type, amount, table, includeTooltips, () -> Color.WHITE);
+    }
 
-        Image image = new Image(Sprites.drawable(type));
+    private void addInventorySection(String name, SpriteType type, long amount, Table table, boolean includeTooltips, Supplier<Color> textColorSupplier) {
 
-        image.setSize(16, 16);
-        table.add(image).width(16).height(16).pad(1);
+        Image itemIcon = new Image(Sprites.drawable(type));
+
+        itemIcon.setSize(16, 16);
+        table.add(itemIcon).width(16).height(16).pad(1);
         String prefix = "x";
         if (type == SpriteType.CASH) {
             prefix = "";
         }
         
-        Label label = new Label(prefix+ShopManager.costToString(amount).substring(1), Sprites.skin(), "small");
-        label.setFontScale(.4f);
-        table.add(label).pad(1).center();
+        Label itemAmountLabel = new Label(prefix+ShopManager.costToString(amount).substring(1), Sprites.skin(), "small") {
+            public void act(float delta) {
+                setColor(textColorSupplier.get());
+            };
+        };
+        itemAmountLabel.setFontScale(.4f);
+        table.add(itemAmountLabel).pad(1).center();
         tempColumns++;
         if (tempColumns >= targetColumns) {
             table.row();
             tempColumns = 0;
         }
-
-        TextTooltip tooltip = new TextTooltip((prefix.isEmpty() ? "$" : prefix)+ShopManager.costToString(amount).substring(1) + name, Sprites.skin(), "small");
-        tooltip.getContainer().pad(5);
-        tooltip.setInstant(true);
-        label.addListener(tooltip);
-        image.addListener(tooltip);
+ 
+        if (includeTooltips) {
+            TextTooltip readableNameTooltip = new TextTooltip((prefix.isEmpty() ? "$" : prefix)+ShopManager.costToString(amount).substring(1) + name, Sprites.skin(), "small");
+            readableNameTooltip.getContainer().pad(5);
+            readableNameTooltip.setInstant(true);
+            itemAmountLabel.addListener(readableNameTooltip);
+            itemIcon.addListener(readableNameTooltip);
+        }
     }
 
     private Stack getInventorySlot(SpriteType type, final Supplier<Integer> amount, Runnable onClick, String name, String usage, float size) {

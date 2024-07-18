@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
+import net.cmr.rtd.game.achievements.AchievementManager;
+import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject.GameType;
@@ -614,8 +616,13 @@ public class TutorialScreen extends GameScreen {
             onNewTaskAssigned();
             setTableContent();
         } else {
-            game.setScreen(new MainMenuScreen());
+            onTutorialFinished();
         }
+    }
+
+    public void onTutorialFinished() {
+        game.setScreen(new MainMenuScreen());
+        AchievementManager.getInstance().setAchievementValue(TutorialCompleteAchievement.class, true);
     }
 
     int focusTileX = -1, focusTileY = -1;

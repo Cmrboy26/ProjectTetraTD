@@ -14,12 +14,16 @@ import javax.crypto.spec.IvParameterSpec;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -110,6 +114,8 @@ import net.cmr.rtd.game.world.store.UpgradeOption;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.mobile.Joystick;
+import net.cmr.rtd.shader.BatchSnapshot;
+import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -204,6 +210,8 @@ public class GameScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
+        updateFrameBuffer();
+
         GameMusic random = GameMusic.random(GameMusic.GAME_1, GameMusic.GAME_2, GameMusic.GAME_3);
         Audio.getInstance().playMusic(random);
 
@@ -1655,17 +1663,36 @@ public class GameScreen extends AbstractScreenEX {
 
     float elapsedTime = 0;
     float alphaPulsePeriod = 2f;
+    FrameBuffer fbo;
+    Matrix4 identity = new Matrix4();
 
     @Override
     public void render(float delta) {
         update(delta);
+        ProjectTetraTD game = (ProjectTetraTD) ProjectTetraTD.getInstance(ProjectTetraTD.class);
         elapsedTime += delta;
         elapsedTime %= alphaPulsePeriod;
         if (world != null) {
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
             batch.begin();
+
+            BatchSnapshot snapshot = BatchSnapshot.take(batch);
+
+            fbo.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 0);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             world.render(data, batch, delta, gameSpeed);
+            batch.flush();
+            fbo.end();
+
+            batch.setProjectionMatrix(identity);
+            //game.enableShader(batch, CustomShader.HEAT);
+            batch.draw(fbo.getColorBufferTexture(), -1, 1, 2, -2);
+            //game.disableShader(batch);
+            batch.flush();
+            
+            snapshot.restore(batch);
 
             if (inPlacementMode()) {
                 Point mouseTile = getMouseTileCoordinate();
@@ -1704,6 +1731,7 @@ public class GameScreen extends AbstractScreenEX {
             for (ParticleEffect effect : particleEffects) {
                 effect.render(batch);
             }
+
             batch.end();
             batch.begin();
             worldStage.draw();
@@ -1717,6 +1745,14 @@ public class GameScreen extends AbstractScreenEX {
     public void resize(int width, int height) {
         super.resize(width, height);
         viewport.update(width, height);
+        updateFrameBuffer();
+    }
+
+    private void updateFrameBuffer() {
+        if (fbo != null) {
+            fbo.dispose();
+        }
+        fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
     }
 
     @Override
@@ -1724,6 +1760,7 @@ public class GameScreen extends AbstractScreenEX {
         super.dispose();
         worldStage.dispose();
         shapeRenderer.dispose();
+        fbo.dispose();
     }
 
     @Override

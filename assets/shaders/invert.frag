@@ -8,6 +8,7 @@ uniform sampler2D u_texture;
 
 void main() {
   vec4 c = v_color * texture2D(u_texture, v_texCoords);
-  float grey = (c.r + c.g + c.b) / 3.0;
-  gl_FragColor = vec4(grey, grey, grey, c.a);
+  c = 1.0 - c;
+  c.a = 1.0 - c.a;
+  gl_FragColor = c;
 }

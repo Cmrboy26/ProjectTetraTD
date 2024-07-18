@@ -33,6 +33,7 @@ import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
 import net.cmr.rtd.game.achievements.AchievementManager;
+import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;

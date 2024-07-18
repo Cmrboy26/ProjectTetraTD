@@ -139,7 +139,7 @@ public abstract class Achievement<T> {
                 public void draw(Batch batch, float parentAlpha) {
                     boolean grayscale = !achievement.isAchievementComplete();
                     if (grayscale) {
-                        game.enableShader(batch, CustomShader.GRAYSCALE);
+                        game.enableShader(batch, CustomShader.OUTLINE);
                     }
                     super.draw(batch, parentAlpha);
                     if (grayscale) {

@@ -89,4 +89,17 @@ public class AchievementManager {
         return achievements;
     }
 
+    public <T> void setAchievementValue(Class<? extends Achievement<T>> clazz, T value) {
+        @SuppressWarnings("unchecked")
+        Achievement<T> achievement = (Achievement<T>) achievements.get(clazz);
+        if (achievement != null) {
+            achievement.setValue(value);
+            dirty = true;
+        }
+        if (achievement.isAchievementComplete()) {
+            game.onAchievementComplete(achievement);
+        }
+        saveAchievements();
+    }
+
 }

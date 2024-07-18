@@ -21,10 +21,13 @@ import net.cmr.rtd.ProjectTetraTD;
 public class ShaderManager implements Disposable {
    
     public enum CustomShader {
-        GRAYSCALE("grayscale.frag", "default.vert"),
-        RAINBOW("rainbow.frag", "default.vert"),
-        PLAYER("playerColorShader.frag", "default.vert"),
-
+        GRAYSCALE("grayscale.frag", "passthrough.vert"),
+        RAINBOW("rainbow.frag", "passthrough.vert"),
+        PLAYER("playerColorShader.frag", "passthrough.vert"),
+        INVERT("invert.frag", "passthrough.vert"),
+        HEAT("heat.frag", "passthrough.vert"),
+        BUBBLE("passthrough.frag", "bubble.vert"),
+        OUTLINE("outline.frag", "passthrough.vert"),
         ;
 
         public final String fragmentShaderLocation;
@@ -48,6 +51,7 @@ public class ShaderManager implements Disposable {
         dispose();
         loadShaders();
         shaderStack.clear();
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     public void loadShaders() {
@@ -77,6 +81,13 @@ public class ShaderManager implements Disposable {
         for (ShaderProgram shader : shaders.values()) {
             shader.bind();
             shader.setUniformf("u_time", elapsedTime);
+        }
+    }
+
+    public void resize(int width, int height) {
+        for (ShaderProgram shader : shaders.values()) {
+            shader.bind();
+            shader.setUniformf("u_resolution", width, height);
         }
     }
 

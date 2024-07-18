@@ -11,8 +11,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
@@ -30,7 +35,6 @@ import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
-import net.cmr.rtd.screen.EditorScreen;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
@@ -435,7 +439,7 @@ public class World extends GameObject {
     public void render(UpdateData udata, Batch batch, float delta) {
         throw new UnsupportedOperationException("World cannot be rendered without a game speed.");
     }
-
+    
     public void render(UpdateData udata, Batch batch, float delta, float gameSpeed) {
         batch.setColor(worldColor);
         float renderDelta = delta * gameSpeed;

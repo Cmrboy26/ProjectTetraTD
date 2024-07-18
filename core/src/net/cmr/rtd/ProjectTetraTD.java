@@ -230,6 +230,7 @@ public class ProjectTetraTD extends CMRGame {
 	public void resize(int width, int height) {
 		screenViewport.update(width, height, true);
 		viewport.update(width, height, true);
+		shaderManager.resize(width, height);
 		super.resize(width, height);
 	}
 	

@@ -4,8 +4,10 @@
 
 varying vec4 v_color;
 varying vec2 v_texCoords;
+
 uniform sampler2D u_texture;
 uniform float u_time;
+uniform vec2 u_resolution;
 
 vec3 rgb2hsv(vec3 c)
 {
@@ -27,10 +29,11 @@ vec3 hsv2rgb(vec3 c)
 
 void main() {
   vec4 c = v_color * texture2D(u_texture, v_texCoords);
+  vec2 onePixel = vec2(1.0) / u_resolution;
 
   float intensity = (c.r + c.g + c.b) / 3.0;
   float time = u_time * 0.25;
-  float hue = (sin(v_texCoords.x * 2.0) * .5 + .5) * 360.0;
+  float hue = (sin(v_texCoords.x / 10.) * .5 + .5) * 360.0;
   hue = mod(hue + time, 360.0);
 
   intensity = sqrt(intensity) * 1.5;

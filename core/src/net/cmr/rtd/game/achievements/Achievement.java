@@ -12,6 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
+import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
+import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
@@ -24,6 +27,7 @@ public abstract class Achievement<T> {
     static {
         achievementRegistry = new HashMap<>();
         initialize(TutorialCompleteAchievement.class);
+        initialize(FullBestiaryAchievement.class);
         initialize(DiamondMinerAchievement.class);
     }
     
@@ -147,7 +151,7 @@ public abstract class Achievement<T> {
                     }
                 }
             };
-            icon.setColor(Color.GRAY);
+            icon.setColor(Color.WHITE);
             add(icon).size(32);
             add(textGroup).expand().fill();
         }

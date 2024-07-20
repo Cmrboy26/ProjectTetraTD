@@ -3,7 +3,7 @@
 	"name": "Quest 1",
 	"endlessMode": false,
 	"preparationTime": 10,
-	"startingHealth": 25,
+	"startingHealth": 15,
 	"startingMoney": 35,
 	"towerWhitelist": [
 		"SHOOTER_TOWER"

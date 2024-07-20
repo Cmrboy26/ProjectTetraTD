@@ -95,11 +95,11 @@ public class EnemyFactory {
     }
 
     private BasicEnemy createBasicEnemy(String displayType, EnemyType type, float speed) {
-        BasicEnemy enemy = new BasicEnemy(team, displayType, type.health, speed);
+        BasicEnemy enemy = new BasicEnemy(team, displayType, type.health, speed, type);
         return enemy;
     }
     private HealerEnemy createHealerEnemy(String displayType, EnemyType type, float speed) {
-        HealerEnemy enemy = new HealerEnemy(team, displayType, type.health, speed);
+        HealerEnemy enemy = new HealerEnemy(team, displayType, type.health, speed, type);
         return enemy;
     }
 

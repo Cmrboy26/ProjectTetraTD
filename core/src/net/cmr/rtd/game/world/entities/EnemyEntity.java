@@ -13,6 +13,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.effects.Effect;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -24,12 +25,14 @@ public abstract class EnemyEntity extends Entity {
 
     public int team;
     public int health;
-    public static final int VERSION = 0;
+    public static final int VERSION = 1;
     public float distanceTraveled = 0;
+    public EnemyType enemyType;
 
-    protected EnemyEntity(int team, GameType type) {
+    protected EnemyEntity(int team, GameType type, EnemyType enemyType) {
         super(type);
         this.team = team;
+        this.enemyType = enemyType;
     }
 
     @Override
@@ -139,6 +142,7 @@ public abstract class EnemyEntity extends Entity {
         buffer.writeInt(team);
         buffer.writeInt(health);
         buffer.writeFloat(distanceTraveled);
+        buffer.writeInt(enemyType.ordinal());
         serializeEnemy(buffer);
     }
 
@@ -150,6 +154,9 @@ public abstract class EnemyEntity extends Entity {
         entity.health = input.readInt();
         if (version >= 0) {
             entity.distanceTraveled = input.readFloat();
+        }
+        if (version >= 1) {
+            entity.enemyType = EnemyType.values()[input.readInt()];
         }
         deserializeEnemy(object, input);
     }

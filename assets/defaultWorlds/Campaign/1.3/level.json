@@ -5,8 +5,6 @@
 		"quest_challenge.json"
 	],
 	"unlockRequirements": [
-		"Campaign/1.1/quest_challenge.json/2",
 		"Campaign/1.2/quest_1.json/0",
-		"Campaign/1.2/quest_1.json/1"
 	]
 }

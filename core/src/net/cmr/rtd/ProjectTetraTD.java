@@ -18,6 +18,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -42,7 +43,7 @@ import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.AchievementManager;
-import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
+import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
@@ -52,6 +53,7 @@ import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
+import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.HostScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
@@ -191,7 +193,7 @@ public class ProjectTetraTD extends CMRGame {
 	public final int achievementHeight = 100;
 
 	public void onAchievementComplete(Achievement achievement) {
-		Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f, 1.5f);
+		Audio.getInstance().playSFX(GameSFX.ACHIEVEMENT_GET, 1f, 1f);
 
 		Table achievementTable = new Table();
 		achievementTable.setWidth(200);
@@ -219,7 +221,7 @@ public class ProjectTetraTD extends CMRGame {
 		Action actions = Actions.sequence(
 			Actions.moveBy(0, achievementHeight, 0),
 			Actions.moveBy(0, -achievementHeight, 0.25f, Interpolation.sineOut),
-			Actions.delay(3),
+			Actions.delay(5),
 			Actions.moveBy(0, achievementHeight, 0.5f, Interpolation.sineIn),
 			Actions.removeActor()
 		);

@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.Pathfind;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -34,22 +35,25 @@ public class BasicEnemy extends EnemyEntity {
     public static final int DAMAGE = 1;
 
     public BasicEnemy() {
-        super(0, GameType.BASIC_ENEMY);
+        super(0, GameType.BASIC_ENEMY, null);
     }
-    public BasicEnemy(GameType type) {
-        super(0, type);
+    public BasicEnemy(EnemyType enemyType) {
+        super(0, GameType.BASIC_ENEMY, enemyType);
+    }
+    public BasicEnemy(GameType type, EnemyType enemyType) {
+        super(0, type, enemyType);
     }
 
-    public BasicEnemy(int team, String displayType, int maxHealth, float speed) {
-        super(team, GameType.BASIC_ENEMY);
+    public BasicEnemy(int team, String displayType, int maxHealth, float speed, EnemyType enemyType) {
+        super(team, GameType.BASIC_ENEMY, enemyType);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.displayType = displayType;
         this.speed = speed;
     }
 
-    public BasicEnemy(GameType type, int team, String displayType, int maxHealth, float speed) {
-        super(team, type);
+    public BasicEnemy(GameType type, int team, String displayType, int maxHealth, float speed, EnemyType enemyType) {
+        super(team, type, enemyType);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.displayType = displayType;

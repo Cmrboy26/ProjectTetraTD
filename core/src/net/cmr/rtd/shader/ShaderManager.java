@@ -58,6 +58,7 @@ public class ShaderManager implements Disposable {
         ShaderProgram.pedantic = false;
         for (CustomShader shader : CustomShader.values()) {
             try {
+                System.out.println(Gdx.files.internal(SHADER_PATH + shader.fragmentShaderLocation).file().getAbsolutePath());
                 String fragmentShader = Gdx.files.internal(SHADER_PATH + shader.fragmentShaderLocation).readString();
                 String vertexShader = Gdx.files.internal(SHADER_PATH + shader.vertexShaderLocation).readString();
                 ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader);

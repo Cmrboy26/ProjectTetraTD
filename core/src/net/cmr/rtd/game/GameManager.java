@@ -22,6 +22,7 @@ import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
 import org.bitlet.weupnp.PortMappingEntry;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Connection;
@@ -62,10 +63,12 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.TutorialScreen;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.Log;
+import net.cmr.util.Pair;
 
 /**
  * This class can act like a server for a multiplayer game or a handler for a single player game.
@@ -87,7 +90,7 @@ public class GameManager implements Disposable {
     private float gameSpeed = 1.0f;
     private ArrayList<TeamData> teams;
     private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
-    private Stack<TeamData> teamWinOrder = new Stack<TeamData>();  
+    private Stack<Pair<TeamData, Integer>> teamWinOrder = new Stack<Pair<TeamData, Integer>>();
     private boolean pauseWaves = true;
 
     public static final int WRITE_BUFFER_SIZE = 16384 * 4;
@@ -411,8 +414,21 @@ public class GameManager implements Disposable {
         if (ProjectTetraTD.instanceExists() && !details.isHostedOnline() && (getWorld().getWave() < getWorld().getWavesData().getTotalWaves() || getWorld().getWavesData().endlessMode)) {
             ProjectTetraTD instance = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             String[] serializedQuestFile = quest.serialize();
-            if (!(instance.getScreen() instanceof TutorialScreen)) {
-                instance.setLastPlayedQuest(serializedQuestFile);
+            Screen screen = instance.getScreen();
+            if (!(screen instanceof TutorialScreen)) {
+                if (screen instanceof GameScreen) {
+                    GameScreen gameScreen = (GameScreen) screen;
+                    if (gameScreen.getDisplayHealth() <= 0) {
+                        // The player lost the game.
+                        instance.setLastPlayedQuest(null);
+                    } else {
+                        // The player can resume the game.
+                        instance.setLastPlayedQuest(serializedQuestFile);
+                    }
+                } else {
+                    // The player can resume the game.
+                    instance.setLastPlayedQuest(serializedQuestFile);
+                }
             }
         } else {
             ProjectTetraTD instance = ProjectTetraTD.getInstance(ProjectTetraTD.class);
@@ -648,6 +664,11 @@ public class GameManager implements Disposable {
         sendWaveUpdateToAll();
     }
     public void resumeWaves() {
+        // If no teams have health, then don't resume the waves.
+        if (teams.stream().anyMatch(team -> team.getHealth() <= 0)) {
+            return;
+        }
+
         this.pauseWaves = false;
         if (world != null && world.passedAllWaves()) {
             world.resetWaveCounter();   
@@ -660,11 +681,6 @@ public class GameManager implements Disposable {
 
     public void teamLost(int team) {
         // TODO: If a player is playing a multiplayer map by themselves, they get a notification when the other team with no one loses. Fix this. 
-
-        if (winningTeams.size() == 0) {
-            // Allow the players to continue playing if they decide to resume the game
-            return;
-        }
 
         int teamsWithPlayers = 0;
         for (TeamData winningTeams : teams) {
@@ -682,7 +698,12 @@ public class GameManager implements Disposable {
 
         winningTeams.remove(teams.get(team));
         if (teamHasPlayers) {
-            teamWinOrder.push(teams.get(team));
+            if (!teamWinOrder.stream().anyMatch(pair -> pair.a.team == team)) {
+                int currentWave = world.getWave();
+                Pair<TeamData, Integer> teamData = new Pair<TeamData, Integer>(teams.get(team), currentWave);
+                teamWinOrder.push(teamData);
+                sendGameOverDisplay(teamData.a, false);
+            }
         }
 
         if (teamsWithPlayers > 1) {
@@ -704,30 +725,52 @@ public class GameManager implements Disposable {
         Log.info("GAME OVER!");
         for (TeamData data : winningTeams) {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
-        }
-
-        /*for (TeamData data : winningTeams) {
             if (doesTeamHavePlayers(data.team)) {
-                teamWinOrder.push(data);
+                Pair<TeamData, Integer> teamData = new Pair<TeamData, Integer>(data, world.getWave());
+                teamWinOrder.push(teamData);
             }
         }
-
-        int[] teamWinOrder = new int[this.teamWinOrder.size()];
-        for (int i = 0; i < this.teamWinOrder.size(); i++) {
-            teamWinOrder[i] = this.teamWinOrder.pop().team;
-            System.out.println(teamWinOrder[i]);
-        }*/
 
         for (TeamData data : teams) {
-            GameOverPacket packet = new GameOverPacket(world.getWave(), data.getScore(), data.getHealth() > 0, new int[0]);
-            for (GamePlayer player : players.values()) {
-                if (player.getTeam() == data.team) {
-                    player.sendPacket(packet);
-                }
+            if (doesTeamHavePlayers(data.team)) {
+                sendGameOverDisplay(data, true);
             }
         }
+
         winningTeams.clear();
         pauseWaves();
+    }
+
+    private void sendGameOverDisplay(TeamData data, boolean showWinOrder) {
+
+        int[] teamWinOrderArray = new int[teamWinOrder.size()];
+        int selectedTeamWave = -1;
+        for (int i = 0; i < teamWinOrder.size(); i++) {
+            Pair<TeamData, Integer> pair = teamWinOrder.get(teamWinOrder.size() - i - 1);
+            teamWinOrderArray[i] = pair.a.team;
+            if (teamWinOrderArray[i] == data.team) {
+                selectedTeamWave = pair.b;
+            }
+        }
+        if (selectedTeamWave == -1) {
+            // Team is not in the teamWinOrder.
+            throw new IllegalStateException("Team is not in the teamWinOrder.");
+        }
+
+        if (!showWinOrder) {
+            sendGameOverDisplay(data, new int[0], selectedTeamWave);
+            return;
+        }
+        sendGameOverDisplay(data, teamWinOrderArray, selectedTeamWave);
+    }
+
+    private void sendGameOverDisplay(TeamData data, int[] teamWinOrderArray, int displayWave) {
+        GameOverPacket packet = new GameOverPacket(displayWave, data.getScore(), data.getHealth() > 0, teamWinOrderArray);
+        for (GamePlayer player : players.values()) {
+            if (player.getTeam() == data.team) {
+                player.sendPacket(packet);
+            }
+        }
     }
 
     int autoSaveCounter = 0;

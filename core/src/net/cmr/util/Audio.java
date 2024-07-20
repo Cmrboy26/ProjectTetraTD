@@ -56,6 +56,7 @@ public class Audio implements Disposable {
         WARNING("warning.wav"),
         SCARY_WARNING("scary_warning.wav"),
         UPGRADE_COMPLETE("upgrade_complete.wav"),
+        ACHIEVEMENT_GET("achievement_get.wav"),
         ;
 
         private final String fileName;

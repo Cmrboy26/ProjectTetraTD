@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -33,7 +34,6 @@ import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
 import net.cmr.rtd.game.achievements.AchievementManager;
-import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
@@ -258,6 +258,7 @@ public class MainMenuScreen extends AbstractScreenEX {
         style2.disabled = new NinePatchDrawable(new NinePatch(Sprites.sprite(SpriteType.BORDER_DISABLED), patch, patch, patch, patch));
 		style2.imageUp = Sprites.drawable(SpriteType.TROPHY);
 		ImageButton achievements = new ImageButton(style2);
+		Audio.addClickSFX(achievements);
 		achievements.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -291,7 +292,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 	public void openAchievementWindow() {
 		Window window = new Window("Achievements", Sprites.skin(), "small");
 		window.setMovable(false);
-		window.pad(50, 5, 5, 5);
+		window.pad(50, 5, 0, 5);
 		window.getTitleLabel().setAlignment(Align.center);
 		window.addListener(new InputListener() {
 			@Override
@@ -317,7 +318,24 @@ public class MainMenuScreen extends AbstractScreenEX {
 			achievementTable.add(new AchievementDisplay((ProjectTetraTD) game, achievement)).row();
 		}
 
-		window.add(achievementTable).expand().fill();
+		ScrollPane scrollPane = new ScrollPane(achievementTable, Sprites.skin());
+		scrollPane.setFadeScrollBars(false);
+		scrollPane.setScrollingDisabled(true, false);
+		scrollPane.setScrollbarsOnTop(false);
+		scrollPane.setScrollbarsVisible(true);
+
+		window.add(scrollPane).width(300).height(260).expand().fill().row();;
+		
+		TextButton close = new TextButton("Close", Sprites.skin(), "small");
+		Audio.addClickSFX(close);
+		close.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				window.remove();
+			}
+		});
+		window.add(close).pad(5).growX().row();
+
 		stages.get(Align.center).addActor(window);
 		window.pack();
 		window.setPosition(640/2, 360/2, Align.center);

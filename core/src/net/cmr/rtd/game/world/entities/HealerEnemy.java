@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 
 public class HealerEnemy extends BasicEnemy {
 
@@ -21,10 +22,10 @@ public class HealerEnemy extends BasicEnemy {
     float specialCooldown = PERIOD;
 
     public HealerEnemy() {
-        super(GameType.HEALER_ENEMY);
+        super(GameType.HEALER_ENEMY, null);
     }
-    public HealerEnemy(int team, String displayType, int maxHealth, float speed) {
-        super(GameType.HEALER_ENEMY, team, displayType, maxHealth, speed);
+    public HealerEnemy(int team, String displayType, int maxHealth, float speed, EnemyType type) {
+        super(GameType.HEALER_ENEMY, team, displayType, maxHealth, speed, type);
     }
 
     @Override

@@ -1,0 +1,16 @@
+{
+	"difficulty": 2,
+	"recommendedEndlessSettingsDifficulty": 2,
+	"name": "Endless Quest",
+	"endlessMode": true,
+	"preparationTime": 10,
+	"startingHealth": 15,
+	"startingMoney": 35,
+	"quests": [
+		{
+			"id": 0,
+			"type": "REACH_WAVE",
+			"value": 25
+		}
+	]
+}

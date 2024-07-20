@@ -61,6 +61,9 @@ import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.achievements.AchievementManager;
+import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
+import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
@@ -98,6 +101,7 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.HealerEnemy.HealerPacket;
@@ -115,7 +119,6 @@ import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.mobile.Joystick;
 import net.cmr.rtd.shader.BatchSnapshot;
-import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -129,6 +132,8 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
     
+    ProjectTetraTD pttd;
+
     public GameStream ioStream;
     final String password;
     @Null GameManager gameManager; // Will be null if the local player is not the host
@@ -184,6 +189,7 @@ public class GameScreen extends AbstractScreenEX {
 
     public GameScreen(GameStream ioStream, @Null GameManager gameManager, @Null String password, int team) {
         super(INITIALIZE_ALL);
+        this.pttd = ProjectTetraTD.getInstance(ProjectTetraTD.class);
         this.ioStream = ioStream;
         this.gameManager = gameManager;
         this.team = team;
@@ -851,6 +857,7 @@ public class GameScreen extends AbstractScreenEX {
             }
             if (object instanceof Entity) {
                 Entity entity = (Entity) object;
+
                 if (world == null) {
                     entityQueue.add(entity);
                     return;
@@ -865,6 +872,13 @@ public class GameScreen extends AbstractScreenEX {
                     }
                 } else {
                     world.addEntity(entity);
+                    if (entity instanceof EnemyEntity) {
+                        // Perform bestiary calculations and achievement updates
+                        EnemyEntity enemy = (EnemyEntity) entity;
+                        String achievementValue = AchievementManager.getValue(FullBestiaryAchievement.class);
+                        String newValue = FullBestiaryAchievement.addEntity(achievementValue, enemy.enemyType);
+                        AchievementManager.setValue(FullBestiaryAchievement.class, newValue);
+                    }
                 }
             }
             return;
@@ -908,8 +922,16 @@ public class GameScreen extends AbstractScreenEX {
             cashLabel.setText(ShopManager.costToString(statsPacket.getInventory().getCash()).substring(1));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
 
+            TeamInventory previousInventory = inventory;
+            boolean inventoryWasInitialized = inventoryInitialized;
             inventory = statsPacket.getInventory();
             inventoryInitialized = true;
+
+            // Achievement Check
+            int addedDiamonds = Math.max(0, inventory.getMaterial(Material.DIAMONDS) - previousInventory.getMaterial(Material.DIAMONDS));
+            if (addedDiamonds == 0 || !inventoryWasInitialized) return;
+            AchievementManager.addValue(DiamondMinerAchievement.class, addedDiamonds);
+
             return;
         }
 
@@ -1144,12 +1166,11 @@ public class GameScreen extends AbstractScreenEX {
                 TextButton restart = new TextButton("Restart", Sprites.skin().get("small", TextButtonStyle.class));
                 restart.pad(0, 10, 0, 10);
                 gameOverDialog.button(restart, true);
-            } else {
-                TextButton close = new TextButton("Close", Sprites.skin().get("small", TextButtonStyle.class));
-                close.pad(0, 10, 0, 10);
-                gameOverDialog.button(close, null);
-                gameOverDialog.key(Input.Keys.ESCAPE, null);
             }
+            
+            TextButton close = new TextButton("Close", Sprites.skin().get("small", TextButtonStyle.class));
+            close.pad(0, 10, 0, 10);
+            gameOverDialog.button(close, null);
             gameOverDialog.key(Input.Keys.ESCAPE, null);
 
             gameOverDialog.show(stages.get(Align.center));
@@ -2677,6 +2698,10 @@ public class GameScreen extends AbstractScreenEX {
             .create();
         effect.setPosition(new Vector2(tower.getX(), tower.getY()));
         return effect;
+    }
+
+    public int getDisplayHealth() {
+        return Integer.parseInt(structureLifeLabel.getText().toString());
     }
 
 }

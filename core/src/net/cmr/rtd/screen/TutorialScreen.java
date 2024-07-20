@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Align;
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.achievements.AchievementManager;
-import net.cmr.rtd.game.achievements.TutorialCompleteAchievement;
+import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject.GameType;
@@ -312,7 +312,7 @@ public class TutorialScreen extends GameScreen {
                 if (isMobile()) {
                     return joystick.getInputX() != 0 || joystick.getInputY() != 0;
                 } else {
-                    return pressedW && pressedA && pressedS && pressedD;
+                    return pressedW || pressedA || pressedS || pressedD;
                 }
             case STRUCTURE:
                 return true;

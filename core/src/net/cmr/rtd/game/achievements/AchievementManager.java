@@ -89,9 +89,40 @@ public class AchievementManager {
         return achievements;
     }
 
+
+    public static <T> void setValue(Class<? extends Achievement<T>> clazz, T value) {
+        getInstance().setAchievementValue(clazz, value);
+    }
+    public static <T> T getValue(Class<? extends Achievement<T>> clazz) {
+        return getInstance().getAchievementValue(clazz);
+    }
+    @SuppressWarnings("unchecked")
+    public static <T> void addValue(Class<? extends Achievement<T>> clazz, T value) {
+        AchievementManager manager = getInstance();
+        Class<T> valueType = (Class<T>) manager.getAchievementValue(clazz).getClass();
+        if (valueType == Integer.class) {
+            Integer valueInteger = (Integer) manager.getAchievementValue(clazz);
+            Integer valueToAdd = (Integer) value;
+            manager.setAchievementValue(clazz, (T) (Integer) (valueInteger + valueToAdd));
+        } else if (valueType == Float.class) {
+            Float valueFloat = (Float) manager.getAchievementValue(clazz);
+            Float valueToAdd = (Float) value;
+            manager.setAchievementValue(clazz, (T) (Float) (valueFloat + valueToAdd));
+        } else if (valueType == Double.class) {
+            Double valueDouble = (Double) manager.getAchievementValue(clazz);
+            Double valueToAdd = (Double) value;
+            manager.setAchievementValue(clazz, (T) (Double) (valueDouble + valueToAdd));
+        } else {
+            throw new IllegalArgumentException("Unsupported value type for adding: " + valueType);
+        }
+    }
+
     public <T> void setAchievementValue(Class<? extends Achievement<T>> clazz, T value) {
         @SuppressWarnings("unchecked")
         Achievement<T> achievement = (Achievement<T>) achievements.get(clazz);
+        if (achievement.getValue().equals(value)) {
+            return;
+        }
         if (achievement != null) {
             achievement.setValue(value);
             dirty = true;
@@ -100,6 +131,15 @@ public class AchievementManager {
             game.onAchievementComplete(achievement);
         }
         saveAchievements();
+    }
+
+    public <T> T getAchievementValue(Class<? extends Achievement<T>> clazz) {
+        @SuppressWarnings("unchecked")
+        Achievement<T> achievement = (Achievement<T>) achievements.get(clazz);
+        if (achievement != null) {
+            return achievement.getValue();
+        }
+        return null;
     }
 
 }

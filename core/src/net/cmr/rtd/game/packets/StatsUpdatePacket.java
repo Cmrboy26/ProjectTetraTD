@@ -16,7 +16,7 @@ public class StatsUpdatePacket extends Packet {
     public StatsUpdatePacket(int health, TeamInventory inventory, int structureHealth) {
         super();
         this.health = health;
-        this.inventory = inventory;
+        this.inventory = new TeamInventory(inventory);
         this.structureHealth = structureHealth;
     }
     public int getHealth() {

@@ -63,7 +63,9 @@ import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
+import net.cmr.rtd.game.achievements.custom.FirstGemstoneExtractorAchievement;
 import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
+import net.cmr.rtd.game.achievements.custom.HighLevelTowerAchievement;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
@@ -101,7 +103,6 @@ import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
-import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.HealerEnemy.HealerPacket;
@@ -109,6 +110,7 @@ import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
+import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.Cost;
@@ -145,6 +147,7 @@ public class GameScreen extends AbstractScreenEX {
     public float gameSpeed;
 
     public static NinePatch upgradeProgress, upgradeProgressBackground;
+    public static final float OPPONENT_TEAM_ALPHA = .7f;
     Stage worldStage;
     Viewport viewport;
     ShapeRenderer shapeRenderer;
@@ -879,6 +882,19 @@ public class GameScreen extends AbstractScreenEX {
                         String newValue = FullBestiaryAchievement.addEntity(achievementValue, enemy.enemyType);
                         AchievementManager.setValue(FullBestiaryAchievement.class, newValue);
                     }
+                    if (entity instanceof TowerEntity) {
+                        TowerEntity tower = (TowerEntity) entity;
+                        if (tower.getTeam() == team) {
+                            if (tower instanceof GemstoneExtractor) {
+                                AchievementManager.setValue(FirstGemstoneExtractorAchievement.class, true);
+                            }
+                            long level = tower.getLevel();
+                            long storedLevel = AchievementManager.getValue(HighLevelTowerAchievement.class);
+                            if (level > storedLevel) {
+                                AchievementManager.setValue(HighLevelTowerAchievement.class, level);
+                            }
+                        }
+                    }
                 }
             }
             return;
@@ -922,13 +938,13 @@ public class GameScreen extends AbstractScreenEX {
             cashLabel.setText(ShopManager.costToString(statsPacket.getInventory().getCash()).substring(1));
             structureLifeLabel.setText(String.valueOf(statsPacket.getStructureHealth()));
 
-            TeamInventory previousInventory = inventory;
+            TeamInventory previousInventory = new TeamInventory(inventory);
             boolean inventoryWasInitialized = inventoryInitialized;
             inventory = statsPacket.getInventory();
             inventoryInitialized = true;
 
             // Achievement Check
-            int addedDiamonds = Math.max(0, inventory.getMaterial(Material.DIAMONDS) - previousInventory.getMaterial(Material.DIAMONDS));
+            long addedDiamonds = Math.max(0, inventory.getMaterial(Material.DIAMONDS) - previousInventory.getMaterial(Material.DIAMONDS));
             if (addedDiamonds == 0 || !inventoryWasInitialized) return;
             AchievementManager.addValue(DiamondMinerAchievement.class, addedDiamonds);
 
@@ -1370,6 +1386,11 @@ public class GameScreen extends AbstractScreenEX {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (!skipButton.isDisabled()) {voteSkip();}
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
+            if (gameManager != null) {
+                gameManager.getTeams().get(0).getInventory().setMaterial(Material.DIAMONDS, gameManager.getTeams().get(0).getInventory().getMaterial(Material.DIAMONDS) + 1);
+            }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {

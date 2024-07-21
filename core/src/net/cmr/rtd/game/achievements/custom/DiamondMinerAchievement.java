@@ -3,7 +3,7 @@ package net.cmr.rtd.game.achievements.custom;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.util.Sprites.SpriteType;
 
-public class DiamondMinerAchievement extends Achievement<Integer> {
+public class DiamondMinerAchievement extends Achievement<Long> {
 
     int amount = 2;
 
@@ -22,13 +22,13 @@ public class DiamondMinerAchievement extends Achievement<Integer> {
     }
 
     @Override
-    public Integer getDefaultValue() {
-        return 0;
+    public Long getDefaultValue() {
+        return 0L;
     }
 
     @Override
     public float getProgress() {
-        return (float) getValue() / amount;
+        return Math.min(1, (float) getValue() / amount);
     }
 
     @Override

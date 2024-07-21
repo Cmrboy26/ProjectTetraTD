@@ -13,7 +13,9 @@ import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
+import net.cmr.rtd.game.achievements.custom.FirstGemstoneExtractorAchievement;
 import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
+import net.cmr.rtd.game.achievements.custom.HighLevelTowerAchievement;
 import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.Sprites;
@@ -27,8 +29,10 @@ public abstract class Achievement<T> {
     static {
         achievementRegistry = new HashMap<>();
         initialize(TutorialCompleteAchievement.class);
-        initialize(FullBestiaryAchievement.class);
+        initialize(FirstGemstoneExtractorAchievement.class);
         initialize(DiamondMinerAchievement.class);
+        initialize(FullBestiaryAchievement.class);
+        initialize(HighLevelTowerAchievement.class);
     }
     
     private T value;
@@ -55,6 +59,15 @@ public abstract class Achievement<T> {
     }
 
     protected static void initialize(Class<? extends Achievement<?>> clazz) {
+        Achievement<?> instance = createAchievementInstance(clazz);
+        Class<?> valueClass = instance.getValueType();
+        if (valueClass == Integer.class) {
+            throw new IllegalArgumentException("Achievement \""+clazz.getSimpleName()+"\" value type cannot be Integer. Use Long instead.");
+        }
+        if (valueClass == Float.class) {
+            throw new IllegalArgumentException("Achievement \""+clazz.getSimpleName()+"\" value type cannot be Float. Use Double instead.");
+        }
+
         achievementRegistry.put(createAchievementInstance(clazz).getID(), clazz);
         achievementRegisterOrder.add(clazz);
     }

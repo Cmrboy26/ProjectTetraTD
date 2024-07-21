@@ -471,10 +471,10 @@ public class World extends GameObject {
                                 }
                             }
                         }
-                        tile.render(batch, renderDelta, this, x, y, z);
+                        tile.render(udata, batch, renderDelta, this, x, y, z);
                         batch.setColor(beforeColor);
                     } else {
-                        tile.render(batch, renderDelta, this, x, y, z);
+                        tile.render(udata, batch, renderDelta, this, x, y, z);
                     }
                     if (tileDataMap.containsKey(new Point3D(x, y, z))) {
                         TileData data = tileDataMap.get(new Point3D(x, y, z));

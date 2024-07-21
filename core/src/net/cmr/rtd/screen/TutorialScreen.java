@@ -514,6 +514,7 @@ public class TutorialScreen extends GameScreen {
                 break;
             case INVENTORY_SELECT:
                 gameManager.getTeam(0).getInventory().addWd40();
+                gameManager.updateTeamStats(0);
                 break;
             case FINAL_INFO:
                 skipButton.setVisible(true);

@@ -135,11 +135,17 @@ public abstract class TowerEntity extends Entity {
         if (getRemainingUpgradeTime() != -1f) {
             batch.draw(Sprites.sprite(SpriteType.UPGRADE_BACK), getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 2);
         }
+        Color batchColor = batch.getColor();
+        if (data.getScreen().team != team && batchColor.a == 1) {
+            batchColor.a *= GameScreen.OPPONENT_TEAM_ALPHA;
+        }
+        batch.setColor(batchColor);
     }
 
     float lastProgress = -1;
     boolean building = false, lastBuilding = false;
-    public void postRender(UpdateData data, Batch batch, float delta) {    
+    public void postRender(UpdateData data, Batch batch, float delta) {
+        batch.setColor(Color.WHITE); 
         float progress = 1 - getRemainingUpgradeTime() / getUpgradeTime();
         float buildProgress = 1 - getRemainingBuildTime() / 3;
 

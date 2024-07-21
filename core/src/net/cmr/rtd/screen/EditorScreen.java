@@ -459,7 +459,7 @@ public class EditorScreen extends AbstractScreenEX {
             Tile tile = type.getTile();
             batch.begin();
             if (world != null) {
-                tile.render(batch, delta, world, tileX, tileY, 1);
+                tile.render(null, batch, delta, world, tileX, tileY, 1);
             }
             batch.end();
         }

@@ -8,7 +8,7 @@ uniform sampler2D u_texture;
 uniform vec2 u_resolution;
 
 const float radius = 1.;
-const float increment = 1.;
+const float increment = .1;
 
 void main() {
     vec2 relativePosition = gl_FragCoord.xy / u_resolution - .5;

@@ -17,6 +17,7 @@ import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.TeamTileData;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.util.Sprites;
 
@@ -232,6 +233,9 @@ public class BasicEnemy extends EnemyEntity {
 
         Color color = new Color(getEffects().getDiscoloration());
         color.a = Math.min(1, alphaDecay);
+        if (team != data.getScreen().team) {
+            color.a *= GameScreen.OPPONENT_TEAM_ALPHA;
+        }
         batch.setColor(color);
         String directionString = "/";
         // Add "up", "down", "left", or "right" to the displayType to get the correct sprite

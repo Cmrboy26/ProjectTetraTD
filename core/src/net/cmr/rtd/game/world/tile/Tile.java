@@ -6,9 +6,12 @@ import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.world.Collidable;
+import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
@@ -134,7 +137,7 @@ public class Tile implements Collidable {
         this.type = type;
     }
 
-    public void render(Batch batch, float delta, World world, int x, int y, int z) {
+    public void render(@Null UpdateData udata, Batch batch, float delta, World world, int x, int y, int z) {
         final String spriteName = "hires-wallSprites";
         if (TileType.isFloor(type)) {
             batch.draw(Sprites.sprite(TileType.FLOOR.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
@@ -214,7 +217,17 @@ public class Tile implements Collidable {
                 if (CMRGame.isDebug()) {
                     batch.draw(Sprites.sprite(type.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE);
                 }
+                Color batchColor = batch.getColor();
+                Color newColor = new Color(batchColor);
+                StructureTileData data = (StructureTileData) world.getTileData(x, y, z);
+                if (udata != null) {
+                    if (data.team != udata.getScreen().team) {
+                        newColor.a = GameScreen.OPPONENT_TEAM_ALPHA;
+                    }
+                }
+                batch.setColor(newColor);
                 batch.draw(Sprites.sprite(SpriteType.STRUCTURE), x * SIZE, y * SIZE, SIZE, SIZE);
+                batch.setColor(batchColor);
                 break;
             case START:   
                 if (CMRGame.isDebug()) {

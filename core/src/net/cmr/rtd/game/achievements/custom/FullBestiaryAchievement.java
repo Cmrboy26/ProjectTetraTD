@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.util.Sprites.SpriteType;
 
 public class FullBestiaryAchievement extends Achievement<String> {
     
@@ -37,6 +38,11 @@ public class FullBestiaryAchievement extends Achievement<String> {
     @Override
     public String getReadableName() {
         return "Bestiary Master";
+    }
+
+    @Override
+    public SpriteType getDisplayIcon() {
+        return SpriteType.HEART;
     }
 
     @Override

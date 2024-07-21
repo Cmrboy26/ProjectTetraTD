@@ -665,7 +665,7 @@ public class GameManager implements Disposable {
     }
     public void resumeWaves() {
         // If no teams have health, then don't resume the waves.
-        if (teams.stream().anyMatch(team -> team.getHealth() <= 0)) {
+        if (teams.stream().allMatch(team -> team.getHealth() <= 0)) {
             return;
         }
 

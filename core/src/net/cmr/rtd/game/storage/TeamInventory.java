@@ -192,6 +192,16 @@ public class TeamInventory {
 
     }
 
+    public TeamInventory(TeamInventory clone) {
+        this.cash = clone.cash;
+        this.scopes = clone.scopes;
+        this.wd40 = clone.wd40;
+        this.scrapMetal = clone.scrapMetal;
+        for (Material material : Material.values()) {
+            setMaterial(material, clone.getMaterial(material));
+        }
+    }
+
     public void setCash(long amount) { cash = amount; }
     public long addCash(long amount) { cash += amount; return cash; }
     public void removeCash(long amount) { cash -= amount; }

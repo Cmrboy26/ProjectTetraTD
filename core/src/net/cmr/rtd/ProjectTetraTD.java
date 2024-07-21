@@ -76,8 +76,8 @@ public class ProjectTetraTD extends CMRGame {
 	public static final String GAME_NAME = "Project Tetra TD";
 	
 	public static final int MAJORVERSION = 1;
-	public static final int MINORVERSION = 0;
-	public static final int PATCHVERSION = 4;
+	public static final int MINORVERSION = 1;
+	public static final int PATCHVERSION = 0;
 
 	public ProjectTetraTD(NativeFileChooser fileChooser) {
 		super(fileChooser);

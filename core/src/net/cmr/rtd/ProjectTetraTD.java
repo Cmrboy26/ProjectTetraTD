@@ -68,11 +68,6 @@ import net.cmr.util.Sprites;
 
 public class ProjectTetraTD extends CMRGame {
 
-	// Tetral TD?
-	// Retro Tetra TD?
-	// Tetra TD?
-	// Retro Tower Defense?
-	// Project Tetra TD?
 	public static final String GAME_NAME = "Project Tetra TD";
 	
 	public static final int MAJORVERSION = 1;

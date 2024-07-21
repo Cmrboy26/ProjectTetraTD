@@ -260,7 +260,7 @@ public class GameConnector {
 	}
 
 	public static void startTutorial() {
-		WorldFolder world = new WorldFolder("_Tutorial");
+		WorldFolder world = new WorldFolder("Tutorial");
 		LevelFolder level = world.readLevels()[0];
 		QuestFile quest = level.readQuests()[0];
 		quest.createSave();

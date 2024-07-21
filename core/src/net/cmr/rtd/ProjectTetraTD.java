@@ -187,7 +187,7 @@ public class ProjectTetraTD extends CMRGame {
 
 	public final int achievementHeight = 100;
 
-	public void onAchievementComplete(Achievement achievement) {
+	public void onAchievementComplete(Achievement<?> achievement) {
 		Audio.getInstance().playSFX(GameSFX.ACHIEVEMENT_GET, 1f, 1f);
 
 		Table achievementTable = new Table();

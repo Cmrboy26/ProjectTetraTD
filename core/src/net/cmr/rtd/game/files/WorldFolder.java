@@ -86,7 +86,7 @@ public class WorldFolder {
 
     public static WorldFolder[] listWorlds() {
         FileHandle[] worldFolders = Gdx.files.external(WORLD_FOLDER).list();
-        return Arrays.stream(worldFolders).map(file -> new WorldFolder(file.name())).filter(worldfolder -> worldfolder.getFolder().name().charAt(0) != '_').toArray(WorldFolder[]::new);
+        return Arrays.stream(worldFolders).map(file -> new WorldFolder(file.name())).filter(worldfolder -> !worldfolder.getFolder().name().equals("Tutorial")).toArray(WorldFolder[]::new);
     }
 
     @Override

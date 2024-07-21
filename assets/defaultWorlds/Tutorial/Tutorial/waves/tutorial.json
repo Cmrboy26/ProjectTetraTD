@@ -5,6 +5,9 @@
 	"preparationTime": 1,
 	"startingHealth": 50,
 	"startingMoney": 65,
+	"towerWhitelist": [
+		"SHOOTER_TOWER"
+	],
 	"waves": [
 		{
 			"waveTime": 20,

@@ -72,7 +72,6 @@ public class NewSelectionScreen extends ScreenAdapter {
         rightBottomUI.align(Align.bottomRight);
         stage.addActor(rightBottomUI);
 
-        // TODO: Put the join online game button here
         TextButton joinOnlineGameButton = new TextButton("Join Online", Sprites.skin(), "small");
         Audio.addClickSFX(joinOnlineGameButton);
         joinOnlineGameButton.addListener(new ClickListener() {
@@ -226,7 +225,6 @@ public class NewSelectionScreen extends ScreenAdapter {
                     super.clicked(event, x, y);
                     if (locked) {
                         Audio.getInstance().playSFX(Audio.GameSFX.WARNING, 1f);
-                        // TODO: Display what is needed to unlock the level
 
                         Dialog dialog = new Dialog("Level Locked", Sprites.skin(), "small");
                         dialog.setMovable(false);

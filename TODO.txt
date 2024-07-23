@@ -11,6 +11,8 @@
 ✓ Add a way to display if a tower is an enemy tower
 
 - Polish
+  ✓ Gamma Bar (Mobile visibility is horrible)
+  - Minimize tutorial text (it is overexplaining everything)
 
 1.2 TODO LIST:
 - Bestiary

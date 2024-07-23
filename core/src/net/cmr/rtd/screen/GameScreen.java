@@ -121,6 +121,7 @@ import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.mobile.Joystick;
 import net.cmr.rtd.shader.BatchSnapshot;
+import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -1721,6 +1722,8 @@ public class GameScreen extends AbstractScreenEX {
 
             BatchSnapshot snapshot = BatchSnapshot.take(batch);
 
+            float gamma = Settings.getPreferences().getFloat(Settings.GAMMA);
+
             fbo.begin();
             Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -1729,9 +1732,9 @@ public class GameScreen extends AbstractScreenEX {
             fbo.end();
 
             batch.setProjectionMatrix(identity);
-            //game.enableShader(batch, CustomShader.HEAT);
+            game.enableShader(batch, CustomShader.GAMMA, gamma);
             batch.draw(fbo.getColorBufferTexture(), -1, 1, 2, -2);
-            //game.disableShader(batch);
+            game.disableShader(batch);
             batch.flush();
             
             snapshot.restore(batch);

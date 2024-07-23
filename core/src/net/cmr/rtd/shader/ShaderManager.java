@@ -23,19 +23,25 @@ public class ShaderManager implements Disposable {
     public enum CustomShader {
         GRAYSCALE("grayscale.frag", "passthrough.vert"),
         RAINBOW("rainbow.frag", "passthrough.vert"),
-        PLAYER("playerColorShader.frag", "passthrough.vert"),
+        PLAYER("playerColorShader.frag", "passthrough.vert", 3),
         INVERT("invert.frag", "passthrough.vert"),
         HEAT("heat.frag", "passthrough.vert"),
         BUBBLE("passthrough.frag", "bubble.vert"),
         OUTLINE("outline.frag", "passthrough.vert"),
+        GAMMA("gamma.frag", "passthrough.vert", 1),
         ;
 
         public final String fragmentShaderLocation;
         public final String vertexShaderLocation;
+        public final int requiredInputs;
 
-        CustomShader(String fragmentShaderLocation, String vertexShaderLocation) {
+        CustomShader(String fragmentShaderLocation, String vertexShaderLocation, int requiredInputs) {
             this.fragmentShaderLocation = fragmentShaderLocation;
             this.vertexShaderLocation = vertexShaderLocation;
+            this.requiredInputs = requiredInputs;
+        }
+        CustomShader(String fragmentShaderLocation, String vertexShaderLocation) {
+            this(fragmentShaderLocation, vertexShaderLocation, -1);
         }
     }
 
@@ -105,6 +111,9 @@ public class ShaderManager implements Disposable {
         batch.setShader(shaderProgram);
         shaderProgram.bind();
         if (inputs != null) {
+            if (inputs.length != shader.requiredInputs && shader.requiredInputs != -1) {
+                throw new IllegalArgumentException("Shader " + shader + " requires " + shader.requiredInputs + " inputs, but got " + inputs.length);
+            }
             for (int i = 0; i < inputs.length; i++) {
                 shaders.get(shader).setUniformf("u_input" + i, inputs[i]);
             }

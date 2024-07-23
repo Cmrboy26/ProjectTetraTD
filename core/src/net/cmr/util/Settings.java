@@ -19,6 +19,7 @@ public class Settings {
     public static final String FPS = "fps";
     public static final String SHOW_PLACEMENT_GRID = "showPlacementGrid";
     public static final String FULLSCREEN = "fullscreen";
+    public static final String GAMMA = "gamma";
     // Host settings
     public static final String USE_NPNP = "useNPnP";
     public static final String PORT = "port";
@@ -48,6 +49,7 @@ public class Settings {
         defaultBoolean(SHOW_PLACEMENT_GRID, false, force, preferences);
         defaultInt(FPS, -1, force, preferences);
         defaultBoolean(FULLSCREEN, false, force, preferences);
+        defaultFloat(GAMMA, 1.0f, force, preferences);
 
         defaultBoolean(USE_NPNP, true, force, preferences);
         defaultInt(PORT, 11265, force, preferences);

@@ -112,6 +112,17 @@ public class SettingsScreen extends AbstractScreenEX {
         Audio.addClickSFX(fullscreen);
         fullscreen.setChecked(Settings.getPreferences().getBoolean(Settings.FULLSCREEN));
 
+        Slider gammaSlider = new Slider(1f, 1.5f, 0.01f, false, Sprites.skin());
+        gammaSlider.setValue(Settings.getPreferences().getFloat(Settings.GAMMA));
+        if (!ProjectTetraTD.isMobile()) {
+            TextTooltip tooltip = new TextTooltip("Changing this slider is only recommended for mobile.\nFor PC, it's recommended to keep it at 0.", Sprites.skin(), "small");
+            tooltip.getContainer().pad(5);
+            tooltip.getContainer().setScale(.35f);
+            tooltip.getActor().setFontScale(.35f);
+            tooltip.setInstant(true);
+            gammaSlider.addListener(tooltip);
+        }
+
         Label fpsLabel = new Label("", Sprites.skin(), labelType) {
             @Override
             public void act(float delta) {
@@ -127,14 +138,17 @@ public class SettingsScreen extends AbstractScreenEX {
             }
         };
         Label fullscreenLabel = new Label("Fullscreen", Sprites.skin(), labelType);
+        Label gammaLabel = new Label("Gamma", Sprites.skin(), labelType);
 
         settingsTable.add(fpsLabel).left().padRight(10.0f).colspan(1);
         settingsTable.add(fullscreenLabel).left().padRight(10.0f).colspan(1);
+        settingsTable.add(gammaLabel).left().padRight(10.0f).colspan(1);
 
         settingsTable.row();
 
         settingsTable.add(fpsSlider).expandX().fillX().colspan(1).pad(3);
         settingsTable.add(fullscreen).expandX().fillX().colspan(1).pad(3);
+        settingsTable.add(gammaSlider).expandX().fillX().colspan(1).pad(3).row();
 
         // Settings End
 
@@ -167,6 +181,7 @@ public class SettingsScreen extends AbstractScreenEX {
                 Settings.getPreferences().putBoolean(Settings.SHOW_PLACEMENT_GRID, showPlacementGrid.isChecked());
                 Settings.getPreferences().putInteger(Settings.FPS, (int)fpsSlider.getValue());
                 Settings.getPreferences().putBoolean(Settings.FULLSCREEN, fullscreen.isChecked());
+                Settings.getPreferences().putFloat(Settings.GAMMA, gammaSlider.getValue());
 
                 Settings.getPreferences().flush();
                 Settings.applySettings();

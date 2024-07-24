@@ -112,7 +112,7 @@ public class SettingsScreen extends AbstractScreenEX {
         Audio.addClickSFX(fullscreen);
         fullscreen.setChecked(Settings.getPreferences().getBoolean(Settings.FULLSCREEN));
 
-        Slider gammaSlider = new Slider(1f, 1.5f, 0.01f, false, Sprites.skin());
+        Slider gammaSlider = new Slider(1f, 2f, 0.01f, false, Sprites.skin());
         gammaSlider.setValue(Settings.getPreferences().getFloat(Settings.GAMMA));
         if (!ProjectTetraTD.isMobile()) {
             TextTooltip tooltip = new TextTooltip("Changing this slider is only recommended for mobile.\nFor PC, it's recommended to keep it at 0.", Sprites.skin(), "small");

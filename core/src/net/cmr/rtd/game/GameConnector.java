@@ -35,6 +35,7 @@ import net.cmr.util.Settings;
  */
 public class GameConnector {
     
+
 	public static void startSingleplayerGame(QuestFile quest) {
 		startSingleplayerGame(quest, -1);
 	}
@@ -89,14 +90,14 @@ public class GameConnector {
 			@Override
 			public void accept(GameInfoPacket t) {
 				if (desiredTeam == -1) {
-					ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+					ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
 				} else {
 					ConnectionAttempt attempt = new ConnectionAttempt("", desiredTeam);
 					joinGameWithTeam.accept(attempt);
 				}
 			}
 		};
-		getGameInfo(quest, details.getMaxPlayers(), callback);
+		getGameInfoFromFile(quest, details.getMaxPlayers(), callback);
     }
 
     public static void joinMultiplayerGame(String ip, int port) {
@@ -140,11 +141,11 @@ public class GameConnector {
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
 			}
 		};
 
-		getGameInfo("localhost", 11265, callback);
+		getGameInfo(ip, port, callback);
     }
 
     public static void hostMultiplayerGame(QuestFile quest, GameManagerDetails details) {
@@ -188,14 +189,14 @@ public class GameConnector {
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.hasPassword));
+				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
 			}
 		};
 
-		getGameInfo(quest, details.getMaxPlayers(), callback);
+		getGameInfoFromFile(quest, details.getMaxPlayers(), callback);
     }
 
-	private static void getGameInfo(QuestFile file, int maxPlayers, Consumer<GameInfoPacket> callback) {
+	private static void getGameInfoFromFile(QuestFile file, int maxPlayers, Consumer<GameInfoPacket> callback) {
 		ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 		World world = file.loadWorld();
 		
@@ -212,10 +213,12 @@ public class GameConnector {
             }
         }
 		int[] teams = new int[availableTeams.size()];
+		int[] players = new int[availableTeams.size()];
 		for (int i = 0; i < availableTeams.size(); i++) {
 			teams[i] = availableTeams.get(i);
+			players[i] = 0;
 		}
-		GameInfoPacket packet = new GameInfoPacket(teams, 0, maxPlayers, false);
+		GameInfoPacket packet = new GameInfoPacket(teams, players, 0, maxPlayers, false);
 		callback.accept(packet);
 	}
 

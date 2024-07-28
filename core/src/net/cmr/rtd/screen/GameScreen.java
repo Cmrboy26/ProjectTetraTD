@@ -61,6 +61,8 @@ import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.Hotkeys;
+import net.cmr.rtd.game.Hotkeys.Key;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
 import net.cmr.rtd.game.achievements.custom.FirstGemstoneExtractorAchievement;
@@ -533,7 +535,10 @@ public class GameScreen extends AbstractScreenEX {
         inventoryTable.row();
 
         // NOTE: I noticed that if scrap was the last thing to be added to the inventory, it will NOT update until something else appears in the inventory
-        String componentUsage = "- Can be applied to boost a tower's stats up to "+TowerEntity.MAX_COMPONENTS+" times.\n- Only one type of component can be applied to a tower at once.";
+        String componentUsage = "- Can be applied to boost a tower's stats up to "+TowerEntity.MAX_COMPONENTS+" times.\n- One component type per tower.";
+        String resourceUsage = "- Used to construct and upgrade special towers.";
+        String gemstoneUsage = "- Used to specialize towers and add abilities. \n- One gemstone per tower.";
+
         inventoryTable.add(getInventorySlot(SpriteType.LUBRICANT, () -> getTeamInventory().getWd40(), () -> {
             Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
             componentAction = PurchaseAction.APPLY_LUBRICANT;
@@ -549,8 +554,6 @@ public class GameScreen extends AbstractScreenEX {
             componentAction = PurchaseAction.APPLY_SCRAP_METAL;
             enterComponentMode();
         }, "Scrap Metal (Component)", componentUsage, size)).size(size);
-        String resourceUsage = "- Used to build and upgrade special towers.";
-        String gemstoneUsage = "- Used to specialize the stats of tower. \n- One gemstone per tower, gemstone will be lost if changed.";
 
         for (final Material material : Material.values()) {
             inventoryTable.add(getInventorySlot(material.image, () -> inventory.getMaterial(material), () -> {
@@ -1023,7 +1026,9 @@ public class GameScreen extends AbstractScreenEX {
             Entity entity = getEntity(jumpPacket.getPlayerUUID());
             if (entity instanceof Player) {
                 Player player = (Player) entity;
-                player.jump(data, true);
+                if (!entity.equals(getLocalPlayer())) {
+                    player.jump(data, true);
+                }
             }
             return;
         }
@@ -1335,7 +1340,7 @@ public class GameScreen extends AbstractScreenEX {
                 OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
                 float x = player.getX() + player.getBounds().getWidth() / 2;
                 float y = player.getY() + player.getBounds().getHeight() / 2;
-                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                if (Hotkeys.pressed(Key.PAN)) {
                     int sw = Gdx.graphics.getWidth();
                     int sh = Gdx.graphics.getHeight();
                     int mx = Gdx.input.getX();
@@ -1370,28 +1375,20 @@ public class GameScreen extends AbstractScreenEX {
     boolean hideUI = false;
 
     private void processInput(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON) && gameManager != null) {
-            resetGameDialog.show(stages.get(Align.center));
-        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             hideUI = !hideUI;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F9) && ProjectTetraTD.getInstance(ProjectTetraTD.class).getUsername().equals("Cmrboy26")) {
             gameManager.setGameSpeed(4 * (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ? 2 : 1));
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        if (Hotkeys.pressed(Key.EMOTE)) {
             boolean successful = getLocalPlayer().jump(data);
             if (successful) {
                 ioStream.sendPacket(new JumpPacket());
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        if (Hotkeys.justPressed(Key.SKIP_WAVE)) {
             if (!skipButton.isDisabled()) {voteSkip();}
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
-            if (gameManager != null) {
-                gameManager.getTeams().get(0).getInventory().setMaterial(Material.DIAMONDS, gameManager.getTeams().get(0).getInventory().getMaterial(Material.DIAMONDS) + 1);
-            }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (inPlacementMode()) {
@@ -1402,29 +1399,49 @@ public class GameScreen extends AbstractScreenEX {
                 showQuitDialog();
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+
+        TowerEntity tower = ShopManager.towerAt(world, getMouseTileCoordinate().x, getMouseTileCoordinate().y, team);
+        if (Hotkeys.justPressed(Key.TARGETING_COPY)) {
             // Copy the current tower's sort type to the clipboard
-            TowerEntity tower = ShopManager.towerAt(world, getMouseTileCoordinate().x, getMouseTileCoordinate().y, team);
             if (tower != null && tower.canEditSortType()) {
                 copiedSortType = tower.getPreferedSortType();
                 notification(SpriteType.COPY_ICON, "Copied targeting mode: "+copiedSortType, 2);
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.V)) {
+        if (Hotkeys.justPressed(Key.TARGETING_PASTE)) {
             // Paste the copied sort type to the current tower
-            TowerEntity tower = ShopManager.towerAt(world, getMouseTileCoordinate().x, getMouseTileCoordinate().y, team);
             if (tower != null && tower.canEditSortType() && copiedSortType != null) {
                 SortTypePacket packet = new SortTypePacket(getMouseTileCoordinate().x, getMouseTileCoordinate().y, copiedSortType);
                 ioStream.sendPacket(packet);
                 notification(SpriteType.PASTE_ICON, "Pasted targeting mode: "+copiedSortType, 2);
             }
         }
+        if (Hotkeys.justPressed(Key.CLONE_TOWER)) {
+            if (tower != null) {
+                if (!inPlacementMode()) {
+                    closeMenu();
+                    exitPlacementMode();
+                    enterPlacementMode(tower.type);
+                } else {
+                    closeMenu();
+                    exitPlacementMode();
+                }
+            }
+        }
+        if (Hotkeys.justPressed(Key.QUICK_UPGRADE)) {
+            if (tower != null) {
+                closeMenu();
+                exitPlacementMode();
+                upgradeDialog(tower, false);
+            }
+        }
+        
 
         stages.actAll(delta);
 
         // If the player should be allowed to toggle the UI from keybinds, do so
         if (uiToggleFromKeybinds) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.E) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+            if (Hotkeys.justPressed(Key.INVENTORY) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
                 if (!inventoryButton.isDisabled()) {
                     inventoryButton.toggle();
                     shopWindow.setVisible(false);
@@ -1432,7 +1449,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                 }
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+            if (Hotkeys.justPressed(Key.SHOP) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
                 if (!shopButton.isDisabled()) {
                     shopButton.toggle();
                     shopWindow.setVisible(shopButton.isChecked());
@@ -1440,7 +1457,7 @@ public class GameScreen extends AbstractScreenEX {
                     Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
                 }
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.U) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+            if (Hotkeys.justPressed(Key.UPGRADE) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
                 if (!upgradeButton.isDisabled()) {
                     upgradeButton.toggle();
                     inventoryWindow.setVisible(false);
@@ -1478,10 +1495,10 @@ public class GameScreen extends AbstractScreenEX {
             }
         } else {
             setActionBarText("");
-            if (Gdx.input.isKeyPressed(Input.Keys.R) && uiToggleFromKeybinds) {
+            if (Hotkeys.pressed(Key.QUICK_SELL) && uiToggleFromKeybinds) {
                 // Sell the tower at the mouse position if it's on the same team
                 setActionBarText("Click to sell tower\n(Release R to cancel)");
-                if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                if (Hotkeys.justPressed(Key.SELECT)) {
                     PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
                     Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
                     ioStream.sendPacket(packet);
@@ -1493,14 +1510,10 @@ public class GameScreen extends AbstractScreenEX {
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-            TowerEntity.displayRange = !TowerEntity.displayRange;
-        }
-
         if (gameManager == null) {
             return;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+        if (Hotkeys.justPressed(Key.TOGGLE_PAUSE)) {
             boolean gamePaused = gameManager.areWavesPaused();
             if (gamePaused) {
                 gameManager.resumeWaves();
@@ -1516,13 +1529,13 @@ public class GameScreen extends AbstractScreenEX {
     private void processMouse(int tileX, int tileY) {
         //boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
         //if (isMobile()) {
-        boolean openMenu = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) 
+        boolean openMenu = Hotkeys.justPressed(Key.SELECT) 
                         && placementMode == PlacementMode.NONE 
                         && (!inMenu() || informationUpgradeWindow != null) 
                         && !isOverJoystick()
                         && !isOverActor(informationUpgradeWindow)
                         && componentDialog == null
-                        && !Gdx.input.isKeyPressed(Input.Keys.R);
+                        && !Hotkeys.pressed(Key.QUICK_SELL);
         //}
         if (openMenu) {
             TowerEntity tower = ShopManager.towerAt(world, tileX, tileY, team);
@@ -1683,9 +1696,10 @@ public class GameScreen extends AbstractScreenEX {
         if (getLocalPlayer() == null) {
             return;
         }
-        float vx = (Gdx.input.isKeyPressed(Input.Keys.D) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? 1 : 0);
-        float vy = (Gdx.input.isKeyPressed(Input.Keys.W) ? 1 : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? 1 : 0);
-        boolean sprinting = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+        float vx = (Hotkeys.pressed(Key.RIGHT) ? 1 : 0) - (Hotkeys.pressed(Key.LEFT) ? 1 : 0);
+        float vy = (Hotkeys.pressed(Key.UP) ? 1 : 0) - (Hotkeys.pressed(Key.DOWN) ? 1 : 0);
+
+        boolean sprinting = Hotkeys.pressed(Key.SPRINT);
         if (isMobile()) {
             vx = joystick.getInputX();
             vy = joystick.getInputY();
@@ -1797,7 +1811,9 @@ public class GameScreen extends AbstractScreenEX {
         if (fbo != null) {
             fbo.dispose();
         }
-        fbo = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        int width = Math.max(1, Gdx.graphics.getWidth());
+        int height = Math.max(1, Gdx.graphics.getHeight());
+        fbo = new FrameBuffer(Format.RGBA8888, width, height, false);
     }
 
     @Override
@@ -1894,12 +1910,6 @@ public class GameScreen extends AbstractScreenEX {
         inventoryButton.setChecked(false);
         shopWindow.setVisible(false);
         inventoryWindow.setVisible(false);
-        /*if (informationUpgradeWindow != null) {
-            informationUpgradeWindow.remove();
-            TowerEntity.displayRange = false;
-            TowerEntity.displayRangeTower = null;
-            informationUpgradeWindow = null;
-        }*/
         removeInfoWindow();
         settings.setVisible(false);
     }
@@ -1999,6 +2009,7 @@ public class GameScreen extends AbstractScreenEX {
     public void enterPlacementMode(GameType type) {
         typeToPurchase = type;
         entityToPlace = type.createEntity();
+        TowerEntity.displayRange((TowerEntity) entityToPlace);
         placementMode = PlacementMode.PLACE;
         shopButton.setDisabled(true);
         inventoryButton.setDisabled(true);
@@ -2050,16 +2061,16 @@ public class GameScreen extends AbstractScreenEX {
     boolean touchBeganOnJoystick = false;
 
     public void updatePlacementMode(int tileX, int tileY) {
-        boolean multiPlace = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
-        boolean placementConfirm = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        boolean multiPlace = Hotkeys.pressed(Key.MULTIPLACE);
+        boolean placementConfirm = Hotkeys.justPressed(Key.SELECT);
 
         if (isMobile()) {
             boolean hitJoystick = isOverJoystick();
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (Hotkeys.justPressed(Key.SELECT)) {
                 touchBeganOnJoystick = hitJoystick;
             }
-            placementConfirm = !hitJoystick && !Gdx.input.isButtonPressed(Input.Buttons.LEFT) && lastTouched && !touchBeganOnJoystick;
-            lastTouched = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            placementConfirm = !hitJoystick && !Hotkeys.pressed(Key.SELECT) && lastTouched && !touchBeganOnJoystick;
+            lastTouched = Hotkeys.pressed(Key.SELECT);
         }
 
         if (placementConfirm) {
@@ -2539,12 +2550,12 @@ public class GameScreen extends AbstractScreenEX {
                 }
             };
             dialog.text("Are you sure you want to quit?", Sprites.skin().get("small", LabelStyle.class));
-            TextButton button = new TextButton("Yes", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-            button.pad(0, 10, 0, 10);
-            dialog.button(button, true);
-            TextButton button2 = new TextButton("No", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
-            button2.pad(0, 10, 0, 10);
-            dialog.button(button2, false);
+            TextButton yes = new TextButton("Yes", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+            yes.pad(0, 5, 0, 5);
+            dialog.button(yes, true);
+            TextButton no = new TextButton("No", Sprites.skin().get("small", TextButton.TextButtonStyle.class));
+            no.pad(0, 5, 0, 5);
+            dialog.button(no, false);
             dialog.key(Input.Keys.ESCAPE, false);
             dialog.pad(5);
             dialog.show(stages.get(Align.center));
@@ -2682,7 +2693,7 @@ public class GameScreen extends AbstractScreenEX {
         TextTooltip tooltip = new TextTooltip(name+"\n"+usage, Sprites.skin(), "small");
         tooltip.getManager().animations = false;
         tooltip.getContainer().pad(5);
-        tooltip.getActor().setFontScale(.4f);
+        tooltip.getActor().setFontScale(.35f);
         tooltip.setInstant(true);
         label.addListener(tooltip);
         label.setFillParent(true);

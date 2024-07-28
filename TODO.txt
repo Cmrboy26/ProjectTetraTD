@@ -12,7 +12,22 @@
 
 - Polish
   ✓ Gamma Bar (Mobile visibility is horrible)
-  - Minimize tutorial text (it is overexplaining everything)
+  ✓ Jumping while ping is high will cause two jumps to occur and appear stuttery
+  ✓ opponent teams can see the material overlay of your towers (because of the alpha channel)
+  ✓ show tower range while placing
+  ✓ BUFFER OVERFLOW EXCPETION
+  ✓ minimizing on desktop restarts the game
+  ✓ middle click purchase additional tiles of selected type
+  - team order is not ordering correct
+  ✓ not repeating floor tiles
+  - maxwell 
+  - felipe monicle
+  ✓ show how many people are on a team in team selector
+  ✓ Minimize tutorial text (it is overexplaining everything)
+  - Keybind change screen
+
+  Feedback:
+  - a lot of moving between windows (try to make windows less intrusive)
 
 1.2 TODO LIST:
 - Bestiary
@@ -34,6 +49,8 @@
   // All combative and mining towers are the same. Players will have access to an attacking window, 
   // which allows them to send enemies over to the other team with money.
   - Add a market tower, which passively generates money (this tower will be vital to the new offensive gamemode, as it will be how players initially generate money)
+- Stock Market Tower!!!!
+- mining for money
 
 
 Materials Reference:

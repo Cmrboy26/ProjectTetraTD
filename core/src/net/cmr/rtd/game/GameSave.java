@@ -30,7 +30,7 @@ import net.cmr.rtd.waves.WavesData;
 @Deprecated
 public class GameSave {
     
-    private static final String LOCATION = "retrotowerdefense/saves/"; 
+    private static final String LOCATION = ProjectTetraTD.EXTERNAL_FILE_NAME+"saves/"; 
     private final String saveName;
 
     @Deprecated

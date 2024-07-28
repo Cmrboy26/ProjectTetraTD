@@ -112,6 +112,10 @@ public class AchievementManager {
             Double valueDouble = (Double) manager.getAchievementValue(clazz);
             Double valueToAdd = (Double) value;
             manager.setAchievementValue(clazz, (T) (Double) (valueDouble + valueToAdd));
+        } else if (valueType == Long.class) {
+            Long valueLong = (Long) manager.getAchievementValue(clazz);
+            Long valueToAdd = (Long) value;
+            manager.setAchievementValue(clazz, (T) (Long) (valueLong + valueToAdd));
         } else {
             throw new IllegalArgumentException("Unsupported value type for adding: " + valueType);
         }

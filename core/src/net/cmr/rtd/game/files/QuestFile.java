@@ -48,7 +48,7 @@ public class QuestFile {
     }
 
     /**
-     * Constructor for a quest file for a game that has already been started (will be typically located in retrotowerdefense/saves/[worldname]/...)
+     * Constructor for a quest file for a game that has already been started (will be typically located in ProjectTetraTD.EXTERNAL_FILE_NAME/saves/[worldname]/...)
      */
     public QuestFile(LevelFolder untamperedLevel, FileHandle waveFile) {
         this.level = untamperedLevel;
@@ -150,7 +150,7 @@ public class QuestFile {
     }
 
     public FileHandle getSaveFolder() {
-        FileHandle savesFolder = Gdx.files.external("retrotowerdefense/saves/");
+        FileHandle savesFolder = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"saves/");
         FileHandle worldSaveFolder = savesFolder.child(level.getWorld().getFolder().name());
         return worldSaveFolder.child(getSaveFolderName());
     }

@@ -19,15 +19,17 @@ public class TeamSelectionScreen extends AbstractScreenEX {
     
     Consumer<ConnectionAttempt> joinGameCallback;
     int[] availableTeams;
+    int[] playersOnTeams;
     int selectedTeam = -1;
     float countdown = 0.0f;
     boolean usePassword = false;
     TextField passwordField;
 
-    public TeamSelectionScreen(Consumer<ConnectionAttempt> joinGameCallback, int[] availableTeams, boolean usePassword) {
+    public TeamSelectionScreen(Consumer<ConnectionAttempt> joinGameCallback, int[] availableTeams, int[] playersOnTeams, boolean usePassword) {
         super(INITIALIZE_ALL);
         this.joinGameCallback = joinGameCallback;
         this.availableTeams = availableTeams;
+        this.playersOnTeams = playersOnTeams;
         this.usePassword = usePassword;
     }
 
@@ -57,22 +59,20 @@ public class TeamSelectionScreen extends AbstractScreenEX {
         buttonGroup.setMaxCheckCount(1);
         buttonGroup.setMinCheckCount(0);
         if (availableTeams.length > 1) {
+            int totalPlaying = 0;
+            for (int i = 0; i < playersOnTeams.length; i++) {
+                totalPlaying += playersOnTeams[i];
+            }
             for (int team : availableTeams) {
-                TextButton button = new TextButton("Team " + (team + 1), Sprites.skin(), "toggle-small");
+                String buttonText = "Team " + (team + 1);
+                if (totalPlaying > 0) {
+                    String s = playersOnTeams[team] == 1 ? "" : "s";
+                    buttonText += "\n(" + playersOnTeams[team] + " player" + s + ")";
+                }
+                TextButton button = new TextButton(buttonText, Sprites.skin(), "toggle-small");
+                // Show how many players are on the team
                 buttonGroup.add(button);
                 indexToTeam[buttonGroup.getButtons().size - 1] = team;
-                /*button.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        if (team != -1 && selectedTeam == -1) {
-                            table.row();
-                            Label label = new Label("Joining game...", Sprites.skin(), "small");
-                            label.setAlignment(Align.center);
-                            table.add(label).padTop(20.0f).padBottom(20.0f).colspan(availableTeams.length).expandX().fillX().row();
-                            selectedTeam = team;
-                        }
-                    }
-                });*/
                 int sidePad = 0;
                 table.add(button).pad(sidePad).padTop(20.0f).padBottom(20.0f).space(10.0f).growX();
             }

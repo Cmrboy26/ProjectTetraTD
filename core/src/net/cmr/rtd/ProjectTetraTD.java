@@ -1,6 +1,7 @@
 package net.cmr.rtd;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -37,9 +38,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.kryonet.Client;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import net.cmr.rtd.game.EasterEgg;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.GameSave;
+import net.cmr.rtd.game.Hotkeys;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.AchievementManager;
@@ -62,6 +65,7 @@ import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.CMRGame;
+import net.cmr.util.IntroScreen;
 import net.cmr.util.Log;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
@@ -69,6 +73,7 @@ import net.cmr.util.Sprites;
 public class ProjectTetraTD extends CMRGame {
 
 	public static final String GAME_NAME = "Project Tetra TD";
+	public static final String EXTERNAL_FILE_NAME = "pttd/";
 	
 	public static final int MAJORVERSION = 1;
 	public static final int MINORVERSION = 1;
@@ -107,9 +112,12 @@ public class ProjectTetraTD extends CMRGame {
 		AchievementManager.getInstance();
 		AchievementManager.save();
 
+		Hotkeys.load();
+		Hotkeys.save();
+
 		shaderManager = new ShaderManager();
 
-		FileHandle gameDataFolder = Gdx.files.external("retrotowerdefense/");
+		FileHandle gameDataFolder = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME);
 		gameDataFolder.mkdirs();
 
 		FileHandle savesFolder = gameDataFolder.child("saves/");
@@ -153,7 +161,7 @@ public class ProjectTetraTD extends CMRGame {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
 			CMRGame.setDebug(!CMRGame.isDebug());
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.Q) && EasterEgg.isFelipe()) {
 			onAchievementComplete(Achievement.createAchievementInstance(TutorialCompleteAchievement.class));
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
@@ -235,6 +243,15 @@ public class ProjectTetraTD extends CMRGame {
 	public void pause() {
 		super.pause();
 		AchievementManager.save();
+	}
+
+	@Override
+	public void resume() {
+		super.resume();
+		if (isMobile()) {
+			IntroScreen introScreen = new IntroScreen(new MainMenuScreen());
+			setScreen(introScreen);
+		}
 	}
 
 	@Override
@@ -420,7 +437,7 @@ public class ProjectTetraTD extends CMRGame {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getStoredLevelValue(QuestFile quest, LevelValueKey key, Class<T> type) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		FileHandle dataFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
 			return null;
@@ -460,7 +477,7 @@ public class ProjectTetraTD extends CMRGame {
 
 	@SuppressWarnings("unchecked")
 	public static void setStoredLevelValue(QuestFile quest, LevelValueKey key, Object value) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		FileHandle dataFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
 		}
@@ -538,7 +555,7 @@ public class ProjectTetraTD extends CMRGame {
 			}
 			writeValue = array;
 		}
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		FileHandle dataFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
 		}
@@ -558,7 +575,7 @@ public class ProjectTetraTD extends CMRGame {
 	}
 
 	public static <T> T readUserData(String key, Class<T> clazz, T defaultValue) {
-		FileHandle dataFile = Gdx.files.external("retrotowerdefense/userdata.json");
+		FileHandle dataFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"userdata.json");
 		if (!dataFile.exists()) {
 			dataFile.writeString("{}", false);
 		}

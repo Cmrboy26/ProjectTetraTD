@@ -49,7 +49,7 @@ public abstract class TowerEntity extends Entity {
     protected int scrapsApplied = 0;
     protected int lubricantApplied = 0;
     protected int scopesApplied = 0;
-    SortType preferedSortType = SortType.HIGHEST_HEALTH;
+    SortType preferedSortType = SortType.STRUCTURE_DISTANCE;
     @Null Material selectedMaterial = null;
 
     public TowerEntity(GameType type, int team) {
@@ -330,7 +330,7 @@ public abstract class TowerEntity extends Entity {
                 case HIGHEST_HEALTH: return "Strongest";
                 case LOWEST_HEALTH: return "Weakest";
                 case TOWER_DISTANCE: return "Closest";
-                case TOWER_DISTANCE_REVERSE: return "Tower Closest";
+                case TOWER_DISTANCE_REVERSE: return "Farthest";
                 case STRUCTURE_DISTANCE: return "First";
                 case STRUCTURE_DISTANCE_REVERSE: return "Last";
                 default: return "None";
@@ -399,6 +399,12 @@ public abstract class TowerEntity extends Entity {
     public abstract float getDamage(boolean rollCritical);
     public abstract float getRange();
     public abstract String getDescription();
+    public float getCritChance() {
+        return Material.getCritChance(getSelectedMaterial());
+    }
+    public float getCritDamagePercent() {
+        return Material.getCritDamagePercent(getSelectedMaterial());
+    }
 
     public SortType getPreferedSortType() {
         return preferedSortType;

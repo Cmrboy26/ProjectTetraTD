@@ -53,7 +53,7 @@ public class DrillTower extends MiningTower {
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         TextureRegion drill = Sprites.animation(AnimationType.DRILL, animationDelta);
         batch.draw(drill, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
-        if (color.a != 1) {
+        if (color.a != 1 && getTeam() == data.getScreen().team) {
             SpriteType type = null;
             String text = null;
             TileType actualUnder = getTileBelow(data);

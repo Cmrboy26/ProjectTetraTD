@@ -93,8 +93,8 @@ public class GameManager implements Disposable {
     private Stack<Pair<TeamData, Integer>> teamWinOrder = new Stack<Pair<TeamData, Integer>>();
     private boolean pauseWaves = true;
 
-    public static final int WRITE_BUFFER_SIZE = 16384 * 4;
-    public static final int READ_BUFFER_SIZE = 2048 * 4;
+    public static final int WRITE_BUFFER_SIZE = 16384 * 64;
+    public static final int READ_BUFFER_SIZE = 2048 * 64;
 
     /**
      * Create a new game manager.
@@ -146,10 +146,13 @@ public class GameManager implements Disposable {
                         teams.add(team.team);
                     }
                     int[] teamsArray = new int[teams.size()];
+                    int[] playersOnTeam = new int[teams.size()];
                     for (int i = 0; i < teams.size(); i++) {
-                        teamsArray[i] = teams.get(i);
+                        final int team = teams.get(i);
+                        teamsArray[i] = team;
+                        playersOnTeam[i] = players.values().stream().filter(p -> p.getTeam() == team).toArray().length;
                     }
-                    GameInfoPacket gameInfo = new GameInfoPacket(teamsArray, players.size(), details.getMaxPlayers(), details.usePassword());
+                    GameInfoPacket gameInfo = new GameInfoPacket(teamsArray, playersOnTeam, players.size(), details.getMaxPlayers(), details.usePassword());
                     clientRecieverStream.sendPacket(gameInfo);
                     clientRecieverStream.sendPacket(new DisconnectPacket(GamePlayer.QUIT));
                     remove = true;

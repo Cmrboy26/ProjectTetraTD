@@ -4,12 +4,13 @@ import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.waves.WavesData.DifficultyRating;
 
 @Deprecated
 public class LevelSave {
 
-    private static final String LOCATION = "retrotowerdefense/levels/"; 
+    private static final String LOCATION = ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/"; 
     private final String levelName;
 
     public LevelSave(String levelName) {

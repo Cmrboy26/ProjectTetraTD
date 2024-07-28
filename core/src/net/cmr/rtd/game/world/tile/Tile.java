@@ -140,7 +140,9 @@ public class Tile implements Collidable {
     public void render(@Null UpdateData udata, Batch batch, float delta, World world, int x, int y, int z) {
         final String spriteName = "hires-wallSprites";
         if (TileType.isFloor(type)) {
-            batch.draw(Sprites.sprite(TileType.FLOOR.getSpriteName()), x * SIZE, y * SIZE, SIZE, SIZE); 
+            int totalFloors = 3;
+            int floorType = (x % 5 + y * 2) % totalFloors;
+            batch.draw(Sprites.sprite(TileType.FLOOR.getSpriteName()+"t"+floorType), x * SIZE, y * SIZE, SIZE, SIZE); 
         }
         switch (type) {
             case WALL:

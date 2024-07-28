@@ -30,6 +30,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.game.EasterEgg;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
@@ -204,7 +205,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.getContentTable().row();
 
 				// April fools joke
-				if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+				if (EasterEgg.isAprilFools() || EasterEgg.isMaxwell()) {
 					creditsDialog.text("Icon: Barnold Barnoldfanger Sr. (from Georgia)", small);
 					Image barnold = new Image(Sprites.drawable(SpriteType.BARNOLD2));
 					creditsDialog.getContentTable().add(barnold).size(48).pad(1);
@@ -274,8 +275,6 @@ public class MainMenuScreen extends AbstractScreenEX {
 	public void resume() {
 		super.resume();
 		stages.clear();
-		IntroScreen introScreen = new IntroScreen(new MainMenuScreen());
-		game.setScreen(introScreen);
 	}
 
     @Override

@@ -58,7 +58,7 @@ public class SelectionScreen extends AbstractScreenEX {
         group.setMaxCheckCount(1);
         group.setMinCheckCount(0);
         // Load all available levels from the levels directory
-        FileHandle[] levels = Gdx.files.external("retrotowerdefense/levels").list();
+        FileHandle[] levels = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels").list();
         for (FileHandle level : levels) {
             TextButton button = new TextButton(level.nameWithoutExtension(), Sprites.skin(), "toggle-small");
             Audio.addClickSFX(button);
@@ -125,8 +125,8 @@ public class SelectionScreen extends AbstractScreenEX {
 
     public void fillDetails(TextButton pressed) {
         String folderName = pressed.getText().toString();
-        FileHandle level = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/world.dat");
-        FileHandle[] difficulties = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/waves/").list();
+        FileHandle level = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/world.dat");
+        FileHandle[] difficulties = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/waves/").list();
 
         details.clear();
         
@@ -135,7 +135,7 @@ public class SelectionScreen extends AbstractScreenEX {
         title.setAlignment(Align.center);
         details.add(title).fillX().expandX().colspan(2).row();
 
-        FileHandle worldFile = Gdx.files.external("retrotowerdefense/levels/" + folderName + "/world.dat");
+        FileHandle worldFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/world.dat");
         World world;
         try {
             world = (World) GameObject.deserializeGameObject(worldFile.readBytes());

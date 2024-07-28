@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.game.EasterEgg;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.packets.JumpPacket;
@@ -176,7 +177,7 @@ public class Player extends Entity {
     }
 
     private AnimationType getAccessoryFromMovement() {
-        if (!getName().equalsIgnoreCase("sirpotato42")) {
+        if (!EasterEgg.isFelipe()) {
             return null;
         }
         if (direction == 0) return AnimationType.ACCESSORY_TOPHAT_UP;

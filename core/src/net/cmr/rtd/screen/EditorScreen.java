@@ -34,6 +34,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
@@ -259,7 +260,7 @@ public class EditorScreen extends AbstractScreenEX {
         add(Align.bottomRight, label);
     }
     public void exportFile(String name) {
-        FileHandle editorFolder = Gdx.files.external("retrotowerdefense/editor/");
+        FileHandle editorFolder = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"editor/");
         editorFolder.mkdirs();
         exportFile(editorFolder.child(name));
     }
@@ -286,7 +287,7 @@ public class EditorScreen extends AbstractScreenEX {
                     if (result) {
                         // Open file dialog
                         NativeFileChooserConfiguration conf = new NativeFileChooserConfiguration();
-                        conf.directory = Gdx.files.absolute(System.getProperty("user.home")+"/retrotowerdefense/editor/");
+                        conf.directory = Gdx.files.absolute(System.getProperty("user.home")+"/"+ProjectTetraTD.EXTERNAL_FILE_NAME+"editor/");
                         conf.nameFilter = new FilenameFilter() {
                             @Override
                             public boolean accept(File dir, String name) {
@@ -334,7 +335,7 @@ public class EditorScreen extends AbstractScreenEX {
     }
     
     public void importFile(String name) {
-        FileHandle editorFolder = Gdx.files.external("retrotowerdefense/editor/");
+        FileHandle editorFolder = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"editor/");
         editorFolder.mkdirs();
         importFile(editorFolder.child(name));
     }
@@ -382,7 +383,7 @@ public class EditorScreen extends AbstractScreenEX {
                     if (result) {
                         // Open file dialog
                         NativeFileChooserConfiguration conf = new NativeFileChooserConfiguration();
-                        conf.directory = Gdx.files.absolute(System.getProperty("user.home")+"/retrotowerdefense/editor/");
+                        conf.directory = Gdx.files.absolute(System.getProperty("user.home")+"/"+ProjectTetraTD.EXTERNAL_FILE_NAME+"/editor/");
                         conf.nameFilter = new FilenameFilter() {
                             @Override
                             public boolean accept(File dir, String name) {

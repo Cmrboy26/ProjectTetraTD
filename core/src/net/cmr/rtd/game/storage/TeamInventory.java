@@ -108,6 +108,22 @@ public class TeamInventory {
         public static boolean isPiercing(Material material) {
             return material == DIAMONDS;
         }
+        public static float getCritChance(Material material) {
+            if (material == null) return 0;
+            switch (material) {
+                case TOPAZ: return 0.1f;
+                case RUBY: return 0.2f;
+                default: return 0;
+            }
+        }
+        public static float getCritDamagePercent(Material material) {
+            if (material == null) return 1;
+            switch (material) {
+                case TOPAZ: return 1.5f;
+                case RUBY: return 2.0f;
+                default: return 1;
+            }
+        }
         public static float getDamageModifier(Material material, boolean rollCritical) {
             if (material == null) return 1;
             switch (material) {
@@ -116,20 +132,16 @@ public class TeamInventory {
                 }
                 case TOPAZ: {
                     if (rollCritical) {
-                        float critChance = 0.1f;
-                        float critAmount = 1.5f;
-                        if (Math.random() < critChance) {
-                            return 2.0f * critAmount;
+                        if (Math.random() < getCritChance(material)) {
+                            return 2.0f * getCritDamagePercent(material);
                         }
                     }
                     return 2.0f;
                 }
                 case RUBY: {
                     if (rollCritical) {
-                        float critChance = 0.2f;
-                        float critAmount = 2.0f;
-                        if (Math.random() < critChance) {
-                            return critAmount;
+                        if (Math.random() < getCritChance(material)) {
+                            return getCritDamagePercent(material);
                         }
                     }
                     return 1.0f;

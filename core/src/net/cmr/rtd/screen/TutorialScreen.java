@@ -92,6 +92,7 @@ public class TutorialScreen extends GameScreen {
         tutorialTable.clear();
         continueButton.setVisible(false);
 
+        int size = 30;
         switch (state) {
             case INTRO:
                 tableText("Welcome to " + ProjectTetraTD.GAME_NAME + "!");
@@ -103,7 +104,7 @@ public class TutorialScreen extends GameScreen {
                 promptContinueButton();
                 break;
             case CONTROLS:
-                tableText("To move around in this world, use the");
+                tableText("To move around in the world, use the");
                 if (isMobile()) {
                     tableText("joystick in the bottom left corner of the screen.");
                 } else {
@@ -112,51 +113,61 @@ public class TutorialScreen extends GameScreen {
                 break;
             case STRUCTURE:
                 tableText("See this structure? Your goal is to");
-                tableText("defend it from the incoming enemies.");
-                tableText("The structure's life is displayed in");
-                tableText("the top left corner. Once life reaches");
-                tableText("0, the game is over.");
+                tableText("defend it from enemies for as long as possible.");
+                tableText("When the structure's life (displayed in the left top)");
+                tableText("reaches 0, you will lose the game.");
                 promptContinueButton();
                 break;
             case SPAWN_POINT:
-                tableText("Enemies will spawn from this point.");
-                tableText("They will follow the path towards your structure.");
-                tableText("To protect your structure, you must place");
-                tableText("towers along the path to defeat the enemies.");
+                tableText("Enemies will spawn from this point and");
+                tableText("follow the path towards your structure.");
+                tableText("To protect your structure, you must");
+                tableText("construct towers to defeat the enemies.");
                 promptContinueButton();
                 break;
             case SHOW_MONEY:
                 tableText("You can purchase towers using money, which is");
                 tableText("displayed in the top left corner.");
-                tableText("To construct towers, select the 'Shop' button");
+                tableText("To construct towers, tap the 'Shop' button");
                 tableText("at the bottom of the screen.");
+                Image image = new Image(Sprites.sprite(SpriteType.SHOP_ICON));
+                Image money = new Image(Sprites.sprite(SpriteType.CASH));
+                tutorialTable.add(money).size(size).colspan(1);
+                tutorialTable.add(image).size(size).colspan(1).row();
                 break;
             case BUY_TOWER:
                 tableText("Purchase the 'Shooter Tower', the most basic tower.");
+                Image shooterTower = new Image(Sprites.animation(AnimationType.SHOOTER_TOWER_1, 0));
+                tutorialTable.add(shooterTower).size(size).colspan(2).row();
                 break;
             case PLACE_TOWER:
-                tableText("Place the tower on the map by selecting a tile.");
-                tableText("Please place the tower on the targeted tile.");
+                tableText("Place the tower on the map by taping a tile.");
+                tableText("Please place the tower on the highlighted tile.");
                 break;
             case UNPAUSE_WAVE:
                 tableText("Excellent! The tower will be finished ");
                 tableText("constructing in just a moment.");
-                tableText("Once it is finished, select the resume button in the");
-                tableText("right bottom corner to allow enemies to spawn.");
+                tableText("Once it is finished, tap the resume button");
+                tableText("(right bottom) to summon a wave of enemies.");
+                Image resume = new Image(Sprites.sprite(SpriteType.RESUME));
+                tutorialTable.add(resume).size(size).colspan(2).row();
                 break;
             case FINISH_WAVE:
-                tableText("The enemies will begin to spawn!");
-                tableText("Each kill will reward you with money");
-                tableText("to construct more towers.");
-                tableText("Survive this wave!");
+                tableText("Each kill will reward you with");
+                tableText("money to construct more defenses.");
+                tableText("Please wait for the wave to finish.");
+                tableText("(You can see how long a wave will last");
+                tableText("in the right top corner.)");
                 break;
             case UPGRADE_TOWER:
                 tableText("Congratulations! You have survived your first wave!");
                 tableText("With this extra money, you can upgrade your tower.");
-                tableText("Select the 'Upgrade' button at the bottom of the screen.");
+                tableText("Tap the 'Upgrade' button at the bottom of the screen.");
+                Image upgrade = new Image(Sprites.sprite(SpriteType.UPGRADE));
+                tutorialTable.add(upgrade).size(size).colspan(2).row();
                 break;
             case SELECT_TOWER_FOR_UPGRADE:
-                tableText("Select the tower you wish to upgrade");
+                tableText("Tap the tower we just constructed");
                 tableText("and wait for it to finish upgrading.");
                 break;
             case UPGRADE_SUCCESS:
@@ -164,85 +175,103 @@ public class TutorialScreen extends GameScreen {
                 tableText("Upgraded towers are much more powerful.");
                 break;
             case INVENTORY_INTRO_1:
-                tableText("You have an inventory that stores");
-                tableText("a variety of items, which can be used to");
+                tableText("Your inventory is a key part of the game.");
+                tableText("It holds a variety of items, which can be used to");
                 tableText("add abilities to towers, upgrade stats,");
-                tableText("or even construct unique towers.");
-                tableText("Let's explain what each item does.");
+                tableText("or construct unique towers.");
+                Image inventory = new Image(Sprites.sprite(SpriteType.INVENTORY_ICON));
+                tutorialTable.add(inventory).size(size).colspan(2).row();
                 break;
-            case INVENTORY_INTRO_2:
-                tableText("Components are items that can boost the");
-                tableText("general stats of towers. Only one component");
-                tableText("TYPE can be applied to a tower at a time, and");
-                tableText("a max of "+ShooterTower.MAX_COMPONENTS+" components can be applied.");
-                tableText("They are obtained by killing enemies.");
+            case INVENTORY_INTRO_2: {
+                tableText("Components are items that can boost", 3);
+                tableText("the general stats of towers.", 3);
+                tableText("Only one type of component can be applied to a tower.", 3);
+                tableText("They are obtained by killing enemies.", 3);
+                Image lubricant = new Image(Sprites.sprite(SpriteType.LUBRICANT));
+                tutorialTable.add(lubricant).size(size).colspan(1);
+                Image scrapMetal = new Image(Sprites.sprite(SpriteType.SCRAP));
+                tutorialTable.add(scrapMetal).size(size).colspan(1);
+                Image scope = new Image(Sprites.sprite(SpriteType.SCOPE));
+                tutorialTable.add(scope).size(size).colspan(1).row();
                 break;
+            }
             case INVENTORY_OPEN:
-                tableText("Let's apply a component to your tower!");
-                tableText("Select the 'Inventory' button at the bottom of the screen.");
+                tableText("Let's apply a component to your tower.");
+                tableText("Tap the 'Inventory' button at the bottom of the screen.");
                 break;
             case INVENTORY_SELECT: {
-                tableText("Select the left top item in the inventory.");
+                tableText("Tap the left top item in the inventory.");
                 tableText("This is lubricant, one of the 3 types of components.");
                 Image wd40 = new Image(Sprites.sprite(SpriteType.LUBRICANT));
-                int size = 30;
                 tutorialTable.add(wd40).size(size).colspan(2).row();
                 break;
             }
             case COMPONENT_APPLY:
-                tableText("Select the tower you wish to upgrade");
-                tableText("and apply the component to it.");
+                tableText("Tap the tower we constructed earlier");
+                tableText("to apply the component to it.");
                 break;
             case INVENTORY_INTRO_3:
-                tableText("Great job! Your tower has been lubricated,");
-                tableText("which increases the tower's attack speed.");
-                tableText("Scopes and scrap metal, the other two components,");
-                tableText("increase the tower's range and damage, respectively.");
+                tableText("Great job! Your tower has been lubricated,", 3);
+                tableText("increasing the tower's attack speed.", 3);
+                tableText("Scopes and scrap metal, the other two components,", 3);
+                tableText("increase the tower's range and damage, respectively.", 3);
+                Image lubricant = new Image(Sprites.sprite(SpriteType.LUBRICANT));
+                tutorialTable.add(lubricant).size(size).colspan(1);
+                Image scope = new Image(Sprites.sprite(SpriteType.SCOPE));
+                tutorialTable.add(scope).size(size).colspan(1);
+                Image scrapMetal = new Image(Sprites.sprite(SpriteType.SCRAP));
+                tutorialTable.add(scrapMetal).size(size).colspan(1).row();
                 break;
             case INVENTORY_INTRO_4: {
                 tableText("The inventory also holds resource items, like");
-                tableText("steel and titanium, which can be obtained by");
-                tableText("creating mining towers on resource tiles.");
-                tableText("Resources are only used to construct unique towers.");
-                int size = 30;
+                tableText("steel and titanium. Obtained by constructing production");
+                tableText("towers, resources are used to construct unique towers.");
+                Image steel = new Image(Sprites.sprite(SpriteType.STEEL));
+                Image titanium = new Image(Sprites.sprite(SpriteType.TITANIUM));
+                tutorialTable.add(steel).size(size).colspan(1);
+                tutorialTable.add(titanium).size(size).colspan(1).row();
                 Image ironVein = new Image(Sprites.sprite("ironVein"));
                 Image titaniumVein = new Image(Sprites.sprite("titaniumVein"));
-                tableText("Iron vein (produces steel): ", false);
-                tutorialTable.add(ironVein).size(size).row();
-                tableText("Titanium vein:", false);
-                tutorialTable.add(titaniumVein).size(size).row();
+                tutorialTable.add(ironVein).size(size).colspan(1);
+                tutorialTable.add(titaniumVein).size(size).colspan(1).row();
                 break;
             }
             case INVENTORY_INTRO_5: {
-                tableText("Lastly, the inventory holds gemstones.");
-                tableText("They are drilled from gemstone deposits.");
-                tableText("They can be applied to towers similar to components,");
-                tableText("but only one can be applied at a time.");
-                int size = 30;
-                Image gemstoneVein = new Image(Sprites.sprite("gemstoneVein"));
-                tutorialTable.add(gemstoneVein).size(size).colspan(2).row();
+                tableText("Lastly, the inventory holds gemstones.", 3);
+                tableText("They are drilled from gemstone deposits, like this one.", 3);
+                tableText("Only one gemstone can be applied to a tower at a time.", 3);
+                Image topaz = new Image(Sprites.sprite(SpriteType.TOPAZ));
+                Image quartz = new Image(Sprites.sprite(SpriteType.QUARTZ));
+                Image ruby = new Image(Sprites.sprite(SpriteType.RUBY));
+                tutorialTable.add(topaz).size(size).colspan(1);
+                tutorialTable.add(quartz).size(size).colspan(1);
+                tutorialTable.add(ruby).size(size).colspan(1).row();
                 break;
             }
             case INVENTORY_INTRO_6:
-                tableText("Gemstones can provide unique abilities to towers,");
-                tableText("such as stunning enemies, dealing piercing damage,");
-                tableText("or trading damage for massive speed boosts.");
-                tableText("Experiement to find the unique benefits of each gemstone!");
+                tableText("Gemstones can provide unique abilities to towers,", 3);
+                tableText("such as stunning enemies, dealing piercing damage,", 3);
+                tableText("or trading damage for speed boosts.", 3);
+                tableText("Experiement to find the unique benefits of each gemstone!", 3);
+                Image cryonite = new Image(Sprites.sprite(SpriteType.CRYONITE));
+                Image diamond = new Image(Sprites.sprite(SpriteType.DIAMOND));
+                Image thorium = new Image(Sprites.sprite(SpriteType.THORIUM));
+                tutorialTable.add(cryonite).size(size).colspan(1);
+                tutorialTable.add(diamond).size(size).colspan(1);
+                tutorialTable.add(thorium).size(size).colspan(1).row();
                 break;
             case SELL_INTRO:
-                tableText("Finally, to view a tower's stats, you can select it,");
-                tableText("and a menu will appear on the right side of the screen.");
+                tableText("Finally, to view a tower's stats, you can tap it.");
                 break;
             case SELL:
-                tableText("Here, you can see what components and gemstones");
-                tableText("are applied to the tower, as well as the tower's stats.");
-                tableText("In addition to these stats, you can also sell the tower.");
-                tableText("Selling towers will refund all of the base cost, but");
-                tableText("BE WARNED! You will lose ALL components and gemstones.");
-                tableText("Please sell your tower.");
+                tableText("Here, you can view what components and gemstones");
+                tableText("are applied to the tower along with the tower's stats.");
+                tableText("You can also modify the tower's targeting method");
+                tableText("or sell the tower for a refund here.");
+                tableText("Please sell your tower by taping 'Sell'.");
+                tableText("(Components and gemstones will be lost on sell.)");
                 break;
             case FINAL_INFO: {
-                int size = 30;
                 Image speedIcon = new Image(Sprites.sprite(SpriteType.SPEED_1));
                 speedIcon.setSize(size, size);
                 Image restartIcon = new Image(Sprites.sprite(SpriteType.RESTART));
@@ -405,8 +434,8 @@ public class TutorialScreen extends GameScreen {
             case INVENTORY_INTRO_3:
                 return true;
             case INVENTORY_INTRO_4:
-                focusTileX = steelDepositX;
-                focusTileY = steelDepositY;
+                //focusTileX = steelDepositX;
+                //focusTileY = steelDepositY;
                 return true;
             case INVENTORY_INTRO_5:
                 focusTileX = gemstoneDepositX;
@@ -530,6 +559,9 @@ public class TutorialScreen extends GameScreen {
 
     private void tableText(String text) {
         tutorialTable.add(text, "small").colspan(2).row();
+    }
+    private void tableText(String text, int colspan) {
+        tutorialTable.add(text, "small").colspan(colspan).row();
     }
     private void tableText(String text, boolean row) {
         tutorialTable.add(text, "small").colspan(1 + (row ? 1 : 0));

@@ -9,6 +9,8 @@ import org.json.simple.parser.JSONParser;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import net.cmr.rtd.ProjectTetraTD;
+
 /**
  * Represents the world directory for a set of levels.
  * The folder should contain a folder for each level along with a file for the world data.
@@ -25,7 +27,7 @@ import com.badlogic.gdx.files.FileHandle;
  */
 public class WorldFolder {
 
-    public static final String WORLD_FOLDER = "retrotowerdefense/worlds/";
+    public static final String WORLD_FOLDER = ProjectTetraTD.EXTERNAL_FILE_NAME+"worlds/";
     public static final String WORLD_FILE = "world.json";
 
     private final String worldName;

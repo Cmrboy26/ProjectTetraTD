@@ -19,6 +19,7 @@ import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
@@ -163,6 +164,11 @@ public class HostScreen extends AbstractScreenEX {
 
         // Join the game
         GameConnector.hostMultiplayerGame(file, details);
+    }
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
     }
     
 }

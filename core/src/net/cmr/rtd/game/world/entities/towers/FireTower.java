@@ -145,7 +145,7 @@ public class FireTower extends TowerEntity {
         Color color = new Color(Color.RED);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.animation(AnimationType.FIRE_TOWER, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        TextureRegion sprite = Sprites.animation(AnimationType.FIRE_TOWER, animationDelta);
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE * 1.5f);
         batch.setColor(Color.WHITE);
 

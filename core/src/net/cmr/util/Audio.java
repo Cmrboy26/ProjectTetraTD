@@ -141,6 +141,10 @@ public class Audio implements Disposable {
         public static GameMusic random(GameMusic... music) {
             return music[(int) (Math.random() * music.length)];
         }
+
+        public static GameMusic menuMusic() {
+            return null;
+        }
     }
 
     private HashMap<Integer, Sound> sfxMap;

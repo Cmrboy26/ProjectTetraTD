@@ -104,7 +104,7 @@ public class IceTower extends TowerEntity {
         Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.sprite(SpriteType.ICE_TOWER); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        TextureRegion sprite = Sprites.sprite(SpriteType.ICE_TOWER);
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
         

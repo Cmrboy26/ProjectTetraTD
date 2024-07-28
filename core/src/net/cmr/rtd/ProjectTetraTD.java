@@ -1,7 +1,6 @@
 package net.cmr.rtd;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -15,11 +14,11 @@ import org.json.simple.parser.ParseException;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -56,13 +55,14 @@ import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
-import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.HostScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.shader.ShaderManager;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
+import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.CMRGame;
 import net.cmr.util.IntroScreen;
@@ -610,6 +610,26 @@ public class ProjectTetraTD extends CMRGame {
 
 	public static <T> T readUserData(String key, Class<T> clazz) {
 		return readUserData(key, clazz, null);
+	}
+
+	@Override
+	public void setScreen(Screen screen) {
+		Screen previousScreen = getScreen();
+		super.setScreen(screen);
+		GameMusic previousMusic = null;
+		GameMusic newMusic = null;
+		if (previousScreen instanceof AbstractScreenEX) {
+			previousMusic = ((AbstractScreenEX) previousScreen).getScreenMusic();
+		}
+		if (screen instanceof AbstractScreenEX) {
+			newMusic = ((AbstractScreenEX) screen).getScreenMusic();
+		}
+
+		if (newMusic == null) {
+			Audio.getInstance().stopMusic();
+		} else if (previousMusic != newMusic) {
+			Audio.getInstance().playMusic(newMusic);
+		}
 	}
 
 

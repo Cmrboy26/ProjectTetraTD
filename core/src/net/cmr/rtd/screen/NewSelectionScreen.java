@@ -2,13 +2,9 @@ package net.cmr.rtd.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -24,8 +20,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -37,13 +31,15 @@ import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.files.WorldFolder;
 import net.cmr.rtd.game.world.store.ShopManager;
+import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 
-public class NewSelectionScreen extends ScreenAdapter {
+public class NewSelectionScreen extends AbstractScreenEX {
 
     ExtendViewport viewport;
     Stage stage;
@@ -501,6 +497,11 @@ public class NewSelectionScreen extends ScreenAdapter {
             builder.append("\n");
         }
         return builder.toString();
+    }
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
     }
 
 }

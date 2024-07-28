@@ -134,7 +134,7 @@ public class ShooterTower extends TowerEntity {
                 1, 2, 3, 4, 5, 6, 7
             }
         );
-        TextureRegion sprite = Sprites.animation(animation, animationDelta); //Sprites.sprite(Sprites.SpriteType.CMRBOY26)
+        TextureRegion sprite = Sprites.animation(animation, animationDelta);
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
 

@@ -59,6 +59,7 @@ import com.esotericsoftware.kryo.util.Null;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
+import net.cmr.rtd.game.EasterEgg;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.Hotkeys;
@@ -220,12 +221,15 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     @Override
+    public GameMusic getScreenMusic() {
+        GameMusic random = GameMusic.random(GameMusic.GAME_1, GameMusic.GAME_2, GameMusic.GAME_3);
+        return random;
+    }
+
+    @Override
     public void show() {
         super.show();
         updateFrameBuffer();
-
-        GameMusic random = GameMusic.random(GameMusic.GAME_1, GameMusic.GAME_2, GameMusic.GAME_3);
-        Audio.getInstance().playMusic(random);
 
         float iconSize = 32;
         if (isMobile()) {
@@ -1378,7 +1382,7 @@ public class GameScreen extends AbstractScreenEX {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             hideUI = !hideUI;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F9) && ProjectTetraTD.getInstance(ProjectTetraTD.class).getUsername().equals("Cmrboy26")) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F9) && EasterEgg.isColten()) {
             gameManager.setGameSpeed(4 * (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ? 2 : 1));
         }
         if (Hotkeys.pressed(Key.EMOTE)) {

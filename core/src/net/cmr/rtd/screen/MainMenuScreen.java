@@ -39,6 +39,7 @@ import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.IntroScreen;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
@@ -116,7 +117,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		table.add(tutorial).padLeft(100.0f).padRight(100.0f).space(10.0f).colspan(insideSpan + 2 * outsideSpan).fillX();
 		table.row();
 
-		if (!ProjectTetraTD.isMobile() && ProjectTetraTD.getInstance(ProjectTetraTD.class).getUsername().equals("Cmrboy26")) {
+		if (!ProjectTetraTD.isMobile() && EasterEgg.isColten()) {
 			TextButton editor = new TextButton("Editor (WIP)", Sprites.skin(), labelType);
 			Audio.addClickSFX(editor);
 			editor.addListener(new ClickListener() {
@@ -339,5 +340,10 @@ public class MainMenuScreen extends AbstractScreenEX {
 		window.pack();
 		window.setPosition(640/2, 360/2, Align.center);
 	}
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
+    }
 
 }

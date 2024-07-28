@@ -18,6 +18,7 @@ import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
+import net.cmr.util.Audio.GameMusic;
 
 public class SettingsScreen extends AbstractScreenEX {
 
@@ -203,5 +204,10 @@ public class SettingsScreen extends AbstractScreenEX {
     @Override
     public void hide() {
         super.hide();
+    }
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
     }
 }

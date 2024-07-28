@@ -15,6 +15,7 @@ import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.util.AbstractScreenEX;
+import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
 
@@ -102,6 +103,11 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
             }
         });
         table.add(join).right().bottom().pad(5f).width(100).expandX().colspan(1);
+    }
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
     }
 
 }

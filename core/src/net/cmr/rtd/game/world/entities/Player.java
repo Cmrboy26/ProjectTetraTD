@@ -177,7 +177,7 @@ public class Player extends Entity {
     }
 
     private AnimationType getAccessoryFromMovement() {
-        if (!EasterEgg.isFelipe()) {
+        if (!EasterEgg.isFelipe(getName())) {
             return null;
         }
         if (direction == 0) return AnimationType.ACCESSORY_TOPHAT_UP;

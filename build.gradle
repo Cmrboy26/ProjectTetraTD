@@ -72,7 +72,7 @@ project(":core") {
         api (group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0') {
             exclude group: "com.esotericsoftware", module: "minlog"
         }
-        api (group: 'kryonet', name: 'kryonet', version: '2.21')
+        api 'com.github.crykn:kryonet:2.22.9'
         api group: 'org.bitlet', name: 'weupnp', version: '0.1.2'
         api 'commons-io:commons-io:2.15.1'
         api ('com.googlecode.json-simple:json-simple:1.1.1') {
@@ -129,7 +129,7 @@ project(":tests") {
 
         testImplementation 'commons-io:commons-io:2.15.1'
         testImplementation group: 'com.esotericsoftware', name: 'kryo', version: '5.4.0'
-        testImplementation group: 'kryonet', name: 'kryonet', version: '2.21'
+        testImplementation 'com.github.crykn:kryonet:2.22.9'
         testImplementation 'com.esotericsoftware:kryo:5.4.0:sources'
         testImplementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
 

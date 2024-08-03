@@ -33,6 +33,7 @@ project.xcworkspace/
 xcuserdata/
 xcode/native/
 .gradle/
+.gradle
 build/
 bin/
 target/

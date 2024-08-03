@@ -13,7 +13,7 @@ public class DesktopLauncher {
 				ProjectTetraTD.setDebug(true);
 			}
 		}
-
+		
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle(ProjectTetraTD.GAME_NAME);

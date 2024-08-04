@@ -7,6 +7,8 @@ import java.util.Random;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.storage.TeamInventory;
@@ -98,14 +100,21 @@ public class GemstoneExtractor extends MiningTower {
         return type == TileType.GEMSTONE_VEIN;
     }
 
-    public String getTowerDescription() {
+    public Table getTowerDescription() {
+        Table table = new Table();
+        Label label = new Label("", Sprites.skin(), "small");
+        label.setWrap(true);
+        label.setFontScale(.2f);
+        label.setSize(200, 200);
+        table.add(label).grow();
         StringBuilder builder = new StringBuilder();
 
         appendLine(builder, "Level " + getLevel());
         appendLine(builder, "Mining Time: " + StringUtils.truncateFloatingPoint(getMiningTime(), 2) + "s");
         appendLine(builder, "Description: \n- " + getDescription());
 
-        return builder.toString();
+        label.setText(builder.toString());
+        return table;
     }
     
 }

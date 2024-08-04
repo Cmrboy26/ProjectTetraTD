@@ -13,6 +13,7 @@
   ✓ show how many people are on a team in team selector
   ✓ Minimize tutorial text (it is overexplaining everything)
   - Keybind change screen
+  - Critical hit particle effect
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)

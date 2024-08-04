@@ -10,6 +10,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Null;
 
@@ -636,8 +639,115 @@ public abstract class TowerEntity extends Entity {
         //return new Material[] {Material.CRYONITE, Material.DIAMONDS, Material.QUARTZ, Material.RUBY, Material.THORIUM, Material.TOPAZ};
     }
 
-    public String getTowerDescription() {
-        StringBuilder builder = new StringBuilder();
+    private Label descriptionLabel(String text) {
+        return descriptionLabel(text, true);
+    }
+
+    private Label descriptionLabel(String text, boolean wrap) {
+        Label label = new Label(text, Sprites.skin(), "small");
+        label.setWrap(wrap);
+        label.setFontScale(.25f);
+        return label;
+    }
+
+    public Table getTowerDescription() {
+        Table table = new Table(Sprites.skin());
+        table.setSize(200, 200);
+        //Label label = new Label("", Sprites.skin(), "small");
+        //label.setWrap(true);
+        //label.setFontScale(.2f);
+        //label.setSize(200, 200);
+        //table.add(label).grow();
+
+        table.add(new Image(Sprites.sprite(SpriteType.LEVEL_ICON))).colspan(1).left();
+        table.add(descriptionLabel("Level: "+getLevel())).colspan(1).padLeft(3).left().growX().row();
+        
+        Table generalStatsTable = new Table();
+        Table rangeTable = new Table();
+        rangeTable.add(new Image(Sprites.sprite(SpriteType.RANGE_ICON))).colspan(1).left();
+        String range = StringUtils.truncateFloatingPoint(getRange(), 2);
+        rangeTable.add(descriptionLabel("Range: "+range)).colspan(1).padLeft(3).left().growX().row();
+
+        Table dpsTable = new Table();
+        dpsTable.add(new Image(Sprites.sprite(SpriteType.DPS_ICON))).colspan(1).left();
+        dpsTable.add(descriptionLabel("DPS: "+StringUtils.truncateFloatingPoint(getDamage(false)/getAttackSpeed(), 2))).colspan(1).padLeft(3).left().growX().row();
+
+        generalStatsTable.add(dpsTable).growX();
+        generalStatsTable.add(rangeTable).growX();
+        table.add(generalStatsTable).colspan(2).growX().row();
+
+        Table dpsComponentsTable = new Table();
+        Table damageTable = new Table();
+        damageTable.add(new Image(Sprites.sprite(SpriteType.DAMAGE_ICON))).colspan(1).left();
+        String damage = StringUtils.truncateFloatingPoint(getDamage(false), 2);
+        damageTable.add(descriptionLabel("Damage: "+damage)).colspan(1).padLeft(3).left().growX().row();
+
+        Table speedTable = new Table();
+        speedTable.add(new Image(Sprites.sprite(SpriteType.ATTACK_SPEED_ICON))).colspan(1).left();
+        String speed = StringUtils.truncateFloatingPoint(1f/getAttackSpeed(), 2);
+        speedTable.add(descriptionLabel("Speed: "+speed)).colspan(1).padLeft(3).left().growX().row();
+
+        dpsComponentsTable.add(damageTable).growX();
+        dpsComponentsTable.add(speedTable).growX();
+        table.add(dpsComponentsTable).colspan(2).growX().row();
+
+        if (getCritDamagePercent() != 1) {
+            Table critTable = new Table();
+            Table critDamageTable = new Table();
+            critDamageTable.add(new Image(Sprites.sprite(SpriteType.CRITICAL_ICON))).colspan(1).left();
+            String critDamage = StringUtils.truncateFloatingPoint(getDamage(false) * getCritDamagePercent(), 2);
+            String multiplierText = "Crit Multiplier: x"+StringUtils.truncateFloatingPoint(getCritDamagePercent(), 2);
+            critDamageTable.add(descriptionLabel(multiplierText)).colspan(1).padLeft(3).left().growX().row();
+            Table critChanceTable = new Table();
+            critChanceTable.add(new Image(Sprites.sprite(SpriteType.CRITICAL_CHANCE_ICON))).colspan(1).left();
+            critChanceTable.add(descriptionLabel("Crit Chance: "+StringUtils.truncateFloatingPoint(getCritChance()*100, 2)+"%")).colspan(1).padLeft(3).left().growX().row();
+
+            critTable.add(critDamageTable).growX();
+            critTable.add(critChanceTable).growX();
+            table.add(critTable).colspan(2).growX().row();
+        }
+
+        table.add(new Image(Sprites.sprite(SpriteType.DESCRIPTION_ICON))).colspan(1).left();
+        table.add(descriptionLabel(getDescription())).colspan(1).padLeft(3).left().growX().row();
+        
+        SpriteType component = null;
+        SpriteType benefitIcon = null;
+        String componentInfo = "";
+        componentInfo = getComponentsApplied()+"/"+TowerEntity.MAX_COMPONENTS+" ";
+        if (getLubricantApplied() > 0) {
+            component = SpriteType.LUBRICANT;
+            componentInfo += "Lubricant (+"+getLubricantSpeedBoostPercent()+"%";
+            benefitIcon = SpriteType.ATTACK_SPEED_ICON;
+        } else if (getScopesApplied() > 0) {
+            component = SpriteType.SCOPE;
+            componentInfo += "Scope (+"+getScopeRangeBoostPercent()+"%";
+            benefitIcon = SpriteType.RANGE_ICON;
+        } else if (getScrapMetalApplied() > 0) {
+            component = SpriteType.SCRAP;
+            componentInfo += "Scrap Metal (+"+getScrapMetalDamageBoostPercent()+"%";
+            benefitIcon = SpriteType.DAMAGE_ICON;
+        }
+
+        if (component != null) {
+            table.add(new Image(Sprites.sprite(component))).size(11, 11).colspan(1).left();
+            Table text = new Table();
+            text.add(descriptionLabel(componentInfo, false)).colspan(1).padLeft(3).fillX().left();
+            text.add(new Image(Sprites.sprite(benefitIcon))).size(9, 9).colspan(1).padLeft(3).left();
+            text.add(descriptionLabel(")", false)).colspan(1).padLeft(1).left().growX().row();
+            table.add(text).colspan(1).left().growX().row();
+        }
+
+        Material selectedMaterial = getSelectedMaterial();\\
+        if (selectedMaterial != null) {
+            SpriteType gemSprite = selectedMaterial.image;
+            String desc = selectedMaterial.description;
+            String name = selectedMaterial.materialName;
+            table.add(new Image(Sprites.sprite(gemSprite))).size(11, 11).colspan(1).left();
+            String gemContent = name+": "+desc;
+            table.add(descriptionLabel(gemContent)).colspan(1).padLeft(3).left().growX().row();
+        }
+
+        /*StringBuilder builder = new StringBuilder();
 
         appendLine(builder, "Level " + getLevel());
         appendLine(builder, "Range: " + StringUtils.truncateFloatingPoint(getRange(), 2) + " tiles");
@@ -677,9 +787,11 @@ public abstract class TowerEntity extends Entity {
         } else {
             appendLine(builder, "Gem: "+getSelectedMaterial().materialName);
             appendLine(builder, "- "+getSelectedMaterial().description);
-        }
+        }*/
 
-        return builder.toString();
+        
+        //label.setText(builder.toString());
+        return table;
     }
 
     protected void appendLine(StringBuilder builder, String info) {

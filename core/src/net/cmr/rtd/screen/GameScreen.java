@@ -1574,11 +1574,9 @@ public class GameScreen extends AbstractScreenEX {
                     informationUpgradeWindow.setVisible(true);
                     informationUpgradeWindow.setResizable(true);
 
-                    Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
-                    label.setWrap(true);
-                    label.setFontScale(.2f);
-                    label.setSize(200, 200);
-                    informationUpgradeWindow.add(label).grow().colspan(2).row();
+                    Table towerInformation = tower.getTowerDescription();
+                    //Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
+                    informationUpgradeWindow.add(towerInformation).grow().colspan(2).row();
 
                     if (materialPresent) {
                         Image materialImage = new Image(Sprites.drawable(tower.getSelectedMaterial().image));

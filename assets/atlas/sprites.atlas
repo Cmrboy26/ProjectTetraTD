@@ -24,14 +24,14 @@ accessories/tophat/AccUp
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
+  index: 1
 accessories/tophat/AccUp
   rotate: false
   xy: 867, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 1
+  index: 5
 accessories/tophat/AccDown
   rotate: false
   xy: 1952, 408
@@ -87,6 +87,13 @@ accessories/tophat/AccLeft
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+  index: 4
+accessories/tophat/AccLeft
+  rotate: false
+  xy: 1602, 478
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
   index: 6
 accessories/tophat/AccLeft
   rotate: false
@@ -95,13 +102,6 @@ accessories/tophat/AccLeft
   orig: 32, 32
   offset: 0, 0
   index: 0
-accessories/tophat/AccLeft
-  rotate: false
-  xy: 1602, 478
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 4
 accessories/tophat/AccLeft
   rotate: false
   xy: 762, 373
@@ -129,14 +129,14 @@ accessories/tophat/AccRight
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 accessories/tophat/AccRight
   rotate: false
   xy: 692, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 accessories/tophat/AccRight
   rotate: false
   xy: 692, 408
@@ -185,6 +185,13 @@ accessories/tophat/AccDown
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+  index: 2
+accessories/tophat/AccDown
+  rotate: false
+  xy: 937, 478
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
   index: 4
 accessories/tophat/AccDown
   rotate: false
@@ -192,7 +199,7 @@ accessories/tophat/AccDown
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 6
 accessories/tophat/AccDown
   rotate: false
   xy: 937, 478
@@ -200,7 +207,14 @@ accessories/tophat/AccDown
   orig: 32, 32
   offset: 0, 0
   index: 0
-accessories/tophat/AccDown
+accessories/tophat/AccUp
+  rotate: false
+  xy: 937, 478
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 0
+accessories/tophat/AccUp
   rotate: false
   xy: 937, 478
   size: 32, 32
@@ -214,25 +228,18 @@ accessories/tophat/AccUp
   orig: 32, 32
   offset: 0, 0
   index: 2
-accessories/tophat/AccUp
-  rotate: false
-  xy: 937, 478
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 6
-accessories/tophat/AccUp
-  rotate: false
-  xy: 937, 478
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 0
 area
   rotate: false
   xy: 1, 180
   size: 330, 330
   orig: 330, 330
+  offset: 0, 0
+  index: -1
+attack_speed
+  rotate: false
+  xy: 847, 186
+  size: 9, 9
+  orig: 9, 9
   offset: 0, 0
   index: -1
 barnold
@@ -342,14 +349,14 @@ basic1/left
   index: 4
 basic1/left
   rotate: false
-  xy: 1707, 443
+  xy: 1672, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 basic1/left
   rotate: false
-  xy: 1707, 443
+  xy: 1672, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -391,7 +398,7 @@ basic1/right
   index: 2
 basic1/right
   rotate: false
-  xy: 1672, 408
+  xy: 1707, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -409,14 +416,14 @@ basic1/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic1/right
   rotate: false
   xy: 1637, 373
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic1/right
   rotate: false
   xy: 521, 124
@@ -629,14 +636,14 @@ basic2/right
   index: 4
 basic2/right
   rotate: false
-  xy: 1777, 408
+  xy: 1812, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 5
 basic2/right
   rotate: false
-  xy: 1777, 408
+  xy: 1812, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -846,7 +853,7 @@ basic3/right
   index: 2
 basic3/right
   rotate: false
-  xy: 1707, 478
+  xy: 1742, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -864,14 +871,14 @@ basic3/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic3/right
   rotate: false
   xy: 1427, 373
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic3/right
   rotate: false
   xy: 583, 140
@@ -1312,14 +1319,14 @@ basic5/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic5/right
   rotate: false
   xy: 1392, 373
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic5/right
   rotate: false
   xy: 618, 210
@@ -1350,7 +1357,7 @@ basic5/up
   index: 6
 basic5/up
   rotate: false
-  xy: 1777, 443
+  xy: 1742, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -1441,9 +1448,16 @@ copyIcon
   index: -1
 critical
   rotate: false
-  xy: 68, 50
+  xy: 863, 202
   size: 9, 9
   orig: 9, 9
+  offset: 0, 0
+  index: -1
+critical_chance
+  rotate: false
+  xy: 68, 47
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
 cryonite
@@ -1455,16 +1469,23 @@ cryonite
   index: -1
 damage
   rotate: false
-  xy: 564, 304
+  xy: 898, 238
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 darkened
   rotate: false
-  xy: 564, 299
+  xy: 311, 113
   size: 2, 2
   orig: 2, 2
+  offset: 0, 0
+  index: -1
+description
+  rotate: false
+  xy: 828, 166
+  size: 9, 10
+  orig: 9, 10
   offset: 0, 0
   index: -1
 diamond
@@ -1472,6 +1493,13 @@ diamond
   xy: 2022, 494
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+dps
+  rotate: false
+  xy: 564, 300
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
 drill/drill
@@ -1494,13 +1522,6 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 13
-drill/drill
-  rotate: false
-  xy: 1077, 408
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
   index: 8
 drill/drill
   rotate: false
@@ -1509,6 +1530,13 @@ drill/drill
   orig: 32, 32
   offset: 0, 0
   index: 15
+drill/drill
+  rotate: false
+  xy: 1077, 408
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 13
 drill/drill
   rotate: false
   xy: 1427, 408
@@ -1522,14 +1550,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
+  index: 9
 drill/drill
   rotate: false
   xy: 1427, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 7
+  index: 5
 drill/drill
   rotate: false
   xy: 1427, 408
@@ -1543,24 +1571,24 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 9
+  index: 7
 drill/drill
   rotate: false
-  xy: 1742, 408
+  xy: 1812, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 0
 drill/drill
   rotate: false
-  xy: 1742, 408
+  xy: 1812, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 1
 drill/drill
   rotate: false
-  xy: 1742, 408
+  xy: 1812, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -1578,6 +1606,13 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
+  index: 6
+drill/drill
+  rotate: false
+  xy: 548, 229
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
   index: 12
 drill/drill
   rotate: false
@@ -1586,13 +1621,6 @@ drill/drill
   orig: 32, 32
   offset: 0, 0
   index: 14
-drill/drill
-  rotate: false
-  xy: 548, 229
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 6
 drill/drillTower10
   rotate: false
   xy: 727, 408
@@ -1630,28 +1658,28 @@ drill/drillTower8
   index: -1
 drill/drillTower12
   rotate: false
-  xy: 1812, 443
+  xy: 1777, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 drill/drillTower14
   rotate: false
-  xy: 1812, 443
+  xy: 1777, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 drill/drillTower16
   rotate: false
-  xy: 1812, 443
+  xy: 1777, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 drill/drillTower9
   rotate: false
-  xy: 1812, 443
+  xy: 1777, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -1777,35 +1805,35 @@ effects/sparkle
   index: 10
 effects/sparkle
   rotate: false
-  xy: 669, 328
+  xy: 933, 271
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 2
 effects/sparkle
   rotate: false
-  xy: 828, 169
+  xy: 1142, 309
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 7
 effects/sparkle
   rotate: false
-  xy: 847, 188
+  xy: 1161, 328
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 12
 effects/sparkle
   rotate: false
-  xy: 863, 204
+  xy: 83, 52
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 4
 effects/sparkle
   rotate: false
-  xy: 882, 223
+  xy: 93, 52
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
@@ -1896,7 +1924,7 @@ fireTower
   index: 1
 frozen
   rotate: false
-  xy: 688, 152
+  xy: 917, 257
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
@@ -2040,14 +2068,14 @@ healer1/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 healer1/right
   rotate: false
   xy: 1462, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 healer1/right
   rotate: false
   xy: 1112, 373
@@ -2274,7 +2302,7 @@ hires-wallSprites23
   index: -1
 hires-wallSprites3
   rotate: false
-  xy: 1882, 443
+  xy: 1847, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -2341,14 +2369,14 @@ shooterTower4
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 3
 shooterTower4
   rotate: false
   xy: 937, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 3
+  index: 0
 inventoryIcon
   rotate: false
   xy: 1602, 338
@@ -2377,6 +2405,13 @@ joystickBackground
   orig: 64, 64
   offset: 0, 0
   index: -1
+level
+  rotate: false
+  xy: 688, 150
+  size: 9, 10
+  orig: 9, 10
+  offset: 0, 0
+  index: -1
 lubricant
   rotate: false
   xy: 1047, 300
@@ -2400,7 +2435,7 @@ pathDebug
   index: -1
 pause
   rotate: false
-  xy: 1672, 478
+  xy: 1637, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -2435,7 +2470,7 @@ player/down
   index: 1
 player/down
   rotate: false
-  xy: 1847, 443
+  xy: 1882, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -2603,7 +2638,7 @@ player/up
   index: 1
 player/up
   rotate: false
-  xy: 1847, 408
+  xy: 1882, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -2664,6 +2699,13 @@ quartz
   orig: 16, 16
   offset: 0, 0
   index: -1
+range
+  rotate: false
+  xy: 882, 221
+  size: 9, 9
+  orig: 9, 9
+  offset: 0, 0
+  index: -1
 restart
   rotate: false
   xy: 622, 360
@@ -2722,14 +2764,14 @@ shooterTower
   index: 1
 shooterTower
   rotate: false
-  xy: 1637, 443
+  xy: 1672, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: 3
 shooterTower
   rotate: false
-  xy: 1637, 443
+  xy: 1672, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -3037,7 +3079,7 @@ target
   index: 10
 target
   rotate: false
-  xy: 1882, 478
+  xy: 1847, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -3135,7 +3177,7 @@ teslaTower
   index: 2
 teslaTower
   rotate: false
-  xy: 1742, 478
+  xy: 1707, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -3278,6 +3320,13 @@ upgradeProgressBackground
   xy: 2041, 505
   size: 5, 5
   orig: 5, 5
+  offset: 0, 0
+  index: -1
+upgrade_icon
+  rotate: false
+  xy: 669, 325
+  size: 9, 10
+  orig: 9, 10
   offset: 0, 0
   index: -1
 wallSprites1
@@ -3443,7 +3492,7 @@ wallSprites9
   index: -1
 warning
   rotate: false
-  xy: 1812, 478
+  xy: 1777, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

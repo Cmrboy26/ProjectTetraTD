@@ -128,12 +128,19 @@ public class TeamData {
                 totalEnemies += unit.getQuantity();
             }
         }
+
+        if (totalEnemies == 0) {
+            // When reloading a save between rounds, totalEnemies is 0, which results in all enemies giving components.
+            return;
+        }
     
         float random = (float) Math.random();
         float chance = 1f / totalEnemies;
         
         float desiredWavesPerDrop = wavesData.wavesPerComponentTarget;
         float threshold = chance / desiredWavesPerDrop;
+
+        System.out.println("Random: "+random+", Chance: "+chance+", Threshold: "+threshold);
 
         if (random <= threshold) {
             int randomItem = (int) Math.floor(Math.random() * 3);

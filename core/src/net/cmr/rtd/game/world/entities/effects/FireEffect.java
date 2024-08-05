@@ -31,6 +31,10 @@ public class FireEffect extends Effect {
         }
     }
 
+    public static int getDPS(int level) {
+        return level * level;
+    }
+
     @Override
     public void update(float delta, UpdateData data) {
         super.update(delta, data);
@@ -48,7 +52,7 @@ public class FireEffect extends Effect {
 
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
-                enemy.damage(getLevel() * getLevel(), data, DamageType.FIRE);
+                enemy.damage(getDPS(level), data, DamageType.FIRE);
             }
         }
     }

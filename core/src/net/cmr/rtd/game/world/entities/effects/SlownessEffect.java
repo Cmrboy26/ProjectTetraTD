@@ -35,6 +35,10 @@ public class SlownessEffect extends Effect {
         }
     }
 
+    public static float getSlowdownMultiplier(int level) {
+        return 1f - .45f * (float) Math.log10(level + 1);
+    }
+
     @Override
     public float getStatModifier(EntityStat stat) {
         //float m = .9f;
@@ -42,7 +46,7 @@ public class SlownessEffect extends Effect {
 
         if (stat == EntityStat.SPEED) {
             //return (1.5f/(getLevel()+1f));
-            return (float) (1f - .45f * Math.log10(getLevel() + 1));
+            return getSlowdownMultiplier(getLevel());
         }
         return NOTHING;
     }

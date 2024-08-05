@@ -38,22 +38,22 @@ public class TeamInventory {
         TITANIUM(1, "Titanium", SpriteType.TITANIUM, MaterialType.RESOURCE), 
         
         DIAMONDS(2, "Diamond", SpriteType.DIAMOND, MaterialType.GEMSTONE, 
-            "The unmatched durability of the diamond enables bullets to pierce through enemies."    
+            "The unmatched durability of the diamond enables bullets to pierce through a maximum of "+DIAMOND_MAX_AOE_TARGETS+" enemies."    
         ), 
         CRYONITE(3, "Cryonite", SpriteType.CRYONITE, MaterialType.GEMSTONE, 
-            "Cryonite drastically slows down enemies through its arctic properties. It has a chance to stun enemies."
+            "Cryonite inflicts a slowness debuff through its arctic properties. It also has a chance to freeze enemies in place."
         ), 
         THORIUM(4, "Thorium", SpriteType.THORIUM, MaterialType.GEMSTONE, 
             "Thorium supercharges towers by increasing speed by 125% but halving its damage and range."
         ), 
         RUBY(5, "Ruby", SpriteType.RUBY, MaterialType.GEMSTONE, 
-            "Ruby towers have a chance to deal double damage to enemies."
+            "Rubies provide towers with a chance to deal double damage to enemies."
         ), 
         QUARTZ(6, "Quartz", SpriteType.QUARTZ, MaterialType.GEMSTONE, 
             "The optical properties of quartz allows towers to see further and attack slightly faster."
         ), 
         TOPAZ(7, "Topaz", SpriteType.TOPAZ, MaterialType.GEMSTONE, 
-            "Topaz halves a tower's attacking speed but doubles its damage. In addition, it has a chance to deal 50% more damage to enemies."    
+            "Topaz nearly halves a tower's attacking speed but doubles its damage. In addition, it has a chance to deal 50% more damage to enemies."    
         ), 
         ;
 
@@ -156,7 +156,7 @@ public class TeamInventory {
                     return 2.25f;
                 }
                 case TOPAZ: {
-                    return 0.5f;
+                    return 0.6f;
                 }
                 case QUARTZ: {
                     return 1.25f;

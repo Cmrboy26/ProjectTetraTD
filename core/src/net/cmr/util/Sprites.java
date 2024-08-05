@@ -91,6 +91,7 @@ public class Sprites implements Disposable {
         DPS_ICON("dps"),
         DESCRIPTION_ICON("description"),
         RANGE_ICON("range"),
+        MINING_SPEED_ICON("mining_speed"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
@@ -199,6 +200,8 @@ public class Sprites implements Disposable {
         this.skin = new Skin(Gdx.files.internal("skin/uiskin.json"), skinAtlas);
         this.skin.getFont("small-font").getData().setScale(.5f, .5f);
         this.skin.getFont("small-font").getData().setScale(.5f);
+        font().setUseIntegerPositions(false);
+        smallFont().setUseIntegerPositions(false);
         this.sprites = new HashMap<String, Sprite>();
         this.spriteAtlas = new TextureAtlas(Gdx.files.internal("atlas/sprites.atlas"));
         for(TextureAtlas.AtlasRegion region : spriteAtlas.getRegions()) {

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.DataBuffer;
 
@@ -15,11 +15,10 @@ import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.MiningTower;
+import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.TowerEntity;
-import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
-import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -130,21 +129,23 @@ public class DrillTower extends MiningTower {
     }
 
     public Table getTowerDescription() {
-        Table table = new Table();
-        Label label = new Label("", Sprites.skin(), "small");
-        label.setWrap(true);
-        label.setFontScale(.2f);
-        label.setSize(200, 200);
-        table.add(label).grow();
-        StringBuilder builder = new StringBuilder();
+        TowerDescription description = TowerDescription.getMinimalDescription();
 
-        appendLine(builder, "Level " + getLevel());
-        appendLine(builder, "Mining Time: " + StringUtils.truncateFloatingPoint(getMiningTime(), 2) + "s");
-        appendLine(builder, "Collects: " + (under == TileType.TITANIUM_VEIN ? "Titanium" : "Steel"));
-        appendLine(builder, "Description: \n- " + getDescription());
+        Table miningTable = new Table();
+        Table miningTimeTable = new Table();
+        miningTimeTable.add(new Image(Sprites.sprite(SpriteType.MINING_SPEED_ICON))).colspan(1).left();
+        miningTimeTable.add(description.descriptionLabel("Mining Time: " + StringUtils.truncateFloatingPoint(getMiningTime(), 2) + "s")).colspan(1).padLeft(3).left().growX().row();
+        Table collectsTable = new Table();
+        SpriteType collectType = under == TileType.TITANIUM_VEIN ? SpriteType.TITANIUM : SpriteType.STEEL;
+        String collects = under == TileType.TITANIUM_VEIN ? "Titanium" : "Steel";
+        collectsTable.add(new Image(Sprites.sprite(collectType))).colspan(1).left();
+        collectsTable.add(description.descriptionLabel("Collects: " + collects)).colspan(1).padLeft(3).left().growX().row();
 
-        label.setText(builder.toString());
-        return table;
+        miningTable.add(miningTimeTable).growX();
+        miningTable.add(collectsTable).growX();
+        description.addCustomSection(miningTable);
+
+        return description.create(this);
     }
     
 }

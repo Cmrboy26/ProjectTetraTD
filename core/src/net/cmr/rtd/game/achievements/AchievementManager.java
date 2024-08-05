@@ -124,6 +124,7 @@ public class AchievementManager {
     public <T> void setAchievementValue(Class<? extends Achievement<T>> clazz, T value) {
         @SuppressWarnings("unchecked")
         Achievement<T> achievement = (Achievement<T>) achievements.get(clazz);
+        boolean preiouslyIncomplete = achievement != null && !achievement.isAchievementComplete();
         if (achievement.getValue().equals(value)) {
             return;
         }
@@ -131,7 +132,7 @@ public class AchievementManager {
             achievement.setValue(value);
             dirty = true;
         }
-        if (achievement.isAchievementComplete()) {
+        if (achievement.isAchievementComplete() && preiouslyIncomplete) {
             game.onAchievementComplete(achievement);
         }
         saveAchievements();

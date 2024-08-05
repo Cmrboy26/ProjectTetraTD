@@ -24,14 +24,14 @@ accessories/tophat/AccUp
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 1
+  index: 5
 accessories/tophat/AccUp
   rotate: false
   xy: 867, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
+  index: 1
 accessories/tophat/AccDown
   rotate: false
   xy: 1952, 408
@@ -52,14 +52,14 @@ accessories/tophat/AccUp
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 3
+  index: 7
 accessories/tophat/AccUp
   rotate: false
   xy: 1952, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 7
+  index: 3
 accessories/tophat/AccLeft
   rotate: false
   xy: 972, 443
@@ -87,14 +87,14 @@ accessories/tophat/AccLeft
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 6
 accessories/tophat/AccLeft
   rotate: false
   xy: 1602, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 4
 accessories/tophat/AccLeft
   rotate: false
   xy: 1602, 478
@@ -129,7 +129,7 @@ accessories/tophat/AccRight
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 4
 accessories/tophat/AccRight
   rotate: false
   xy: 692, 408
@@ -143,7 +143,7 @@ accessories/tophat/AccRight
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 0
 accessories/tophat/AccRight
   rotate: false
   xy: 1112, 443
@@ -185,14 +185,14 @@ accessories/tophat/AccDown
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 0
 accessories/tophat/AccDown
   rotate: false
   xy: 937, 478
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 2
 accessories/tophat/AccDown
   rotate: false
   xy: 937, 478
@@ -206,7 +206,7 @@ accessories/tophat/AccDown
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 4
 accessories/tophat/AccUp
   rotate: false
   xy: 937, 478
@@ -339,14 +339,14 @@ basic1/left
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 4
 basic1/left
   rotate: false
   xy: 1287, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 2
 basic1/left
   rotate: false
   xy: 1672, 408
@@ -416,14 +416,14 @@ basic1/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 basic1/right
   rotate: false
   xy: 1637, 373
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 basic1/right
   rotate: false
   xy: 521, 124
@@ -1074,14 +1074,14 @@ basic4/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 4
 basic4/right
   rotate: false
   xy: 1322, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 4
+  index: 6
 basic4/right
   rotate: false
   xy: 1742, 443
@@ -1469,7 +1469,7 @@ cryonite
   index: -1
 damage
   rotate: false
-  xy: 898, 238
+  xy: 917, 257
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
@@ -1522,14 +1522,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 8
+  index: 15
 drill/drill
   rotate: false
   xy: 1077, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 15
+  index: 8
 drill/drill
   rotate: false
   xy: 1077, 408
@@ -1550,14 +1550,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 9
+  index: 5
 drill/drill
   rotate: false
   xy: 1427, 408
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 5
+  index: 7
 drill/drill
   rotate: false
   xy: 1427, 408
@@ -1571,7 +1571,7 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 7
+  index: 9
 drill/drill
   rotate: false
   xy: 1812, 443
@@ -1585,14 +1585,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 1
+  index: 2
 drill/drill
   rotate: false
   xy: 1812, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 2
+  index: 1
 drill/drill
   rotate: false
   xy: 548, 229
@@ -1613,14 +1613,14 @@ drill/drill
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 12
+  index: 14
 drill/drill
   rotate: false
   xy: 548, 229
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 14
+  index: 12
 drill/drillTower10
   rotate: false
   xy: 727, 408
@@ -1805,35 +1805,35 @@ effects/sparkle
   index: 10
 effects/sparkle
   rotate: false
-  xy: 933, 271
+  xy: 1142, 309
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 2
 effects/sparkle
   rotate: false
-  xy: 1142, 309
+  xy: 1161, 328
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 7
 effects/sparkle
   rotate: false
-  xy: 1161, 328
+  xy: 83, 52
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 12
 effects/sparkle
   rotate: false
-  xy: 83, 52
+  xy: 93, 52
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
   index: 4
 effects/sparkle
   rotate: false
-  xy: 93, 52
+  xy: 700, 153
   size: 7, 7
   orig: 7, 7
   offset: 0, 0
@@ -1924,7 +1924,7 @@ fireTower
   index: 1
 frozen
   rotate: false
-  xy: 917, 257
+  xy: 933, 270
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
@@ -2068,14 +2068,14 @@ healer1/right
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 0
+  index: 6
 healer1/right
   rotate: false
   xy: 1462, 443
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
-  index: 6
+  index: 0
 healer1/right
   rotate: false
   xy: 1112, 373
@@ -2417,6 +2417,13 @@ lubricant
   xy: 1047, 300
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+mining_speed
+  rotate: false
+  xy: 898, 238
+  size: 8, 8
+  orig: 8, 8
   offset: 0, 0
   index: -1
 pasteIcon

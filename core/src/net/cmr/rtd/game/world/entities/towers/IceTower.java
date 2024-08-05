@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.TowerDescription.TowerDescriptors;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
@@ -117,7 +120,22 @@ public class IceTower extends TowerEntity {
     @Override
     public String getDescription() { return "Slows down enemies within range.\nSlowness increases as level increases."; }
 
-    
+    @Override
+    public Table getTowerDescription() {
+        TowerDescription description = TowerDescription.getFullDescription();
+        description.removeDescriptor(TowerDescriptors.DPS);
+        description.removeDescriptor(TowerDescriptors.DPS_EXTENDED);
+
+        float speedMultiplier = SlownessEffect.getSlowdownMultiplier(getLevel());
+        String speedReductionPercent = ((int)((1f-speedMultiplier)*100f))+"%";
+        String slowdownPercent = "Speed Reduction: "+speedReductionPercent;
+        description.createCustomSection(Sprites.drawable(SpriteType.ICE_TOWER), slowdownPercent);
+        if (getSelectedMaterial() == Material.CRYONITE) {
+            String cryoniteSpecialAbility = "Special Ability: Enemies in range of the tower have a chance to be temporarily stunned.";
+            description.createCustomSection(Sprites.drawable(SpriteType.CRYONITE), cryoniteSpecialAbility);
+        }
+        return description.create(this);
+    }
 
     @Override
     public boolean canEditSortType() {

@@ -13,7 +13,11 @@
   ✓ show how many people are on a team in team selector
   ✓ Minimize tutorial text (it is overexplaining everything)
   - Keybind change screen
-  - Critical hit particle effect
+  - Critical hit particle effect (+ sound)
+  - Reduce particle effects when many are on the screen at once
+  - Balance mining tower speeds/timings and upgrade costs
+  - Balance the Ice Tower slowdown
+  - Find out why the ice tower description icon won't display (it has something to do with the createCustomSection function I believe)
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)
@@ -40,6 +44,8 @@
   - Add a market tower, which passively generates money (this tower will be vital to the new offensive gamemode, as it will be how players initially generate money)
 - Stock Market Tower!!!!
 - mining for money
+- New Tower: Sniper Tower (large damage, slow attack speed. past a certain level, you should unlock the ability to target specific enemies with this tower).
+
 
 
 Materials Reference:

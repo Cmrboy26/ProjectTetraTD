@@ -23,6 +23,8 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.TowerDescription.TowerDescriptors;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
@@ -177,16 +179,7 @@ public abstract class TowerEntity extends Entity {
             // Play sound
             Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, .5f);
             // Display completed particle
-            SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
-                .setParticle(AnimationType.SPARKLE)
-                .setDuration(1.5f)
-                .setEmissionRate(15)
-                .setScale(.2f)
-                .setParticleLife(.5f)
-                .setAnimationSpeed(1.5f)
-                .setAreaSize(1.2f)
-                .create();
-            effect.setPosition(new Vector2(getX(), getY()));
+            ParticleEffect effect = ParticleCatalog.upgradeEffect(this);
             data.getScreen().addEffect(effect);
         }
         lastProgress = getRemainingUpgradeTime();

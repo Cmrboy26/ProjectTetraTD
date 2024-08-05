@@ -6,7 +6,6 @@ import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
 import net.cmr.util.Log;
 
 public class ServerLauncher extends ApplicationAdapter {

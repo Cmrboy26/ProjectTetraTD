@@ -18,6 +18,7 @@
   - Balance mining tower speeds/timings and upgrade costs
   - Balance the Ice Tower slowdown
   - Find out why the ice tower description icon won't display (it has something to do with the createCustomSection function I believe)
+  - First time playing set username screen
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)

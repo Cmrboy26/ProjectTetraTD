@@ -75,7 +75,6 @@ public class Hotkeys {
         for (Entry<Key, Hotkey> entry : hotkeys.entrySet()) {
             Key key = entry.getKey();
             Hotkey hotkey = entry.getValue();
-            System.out.println(key.name() + " " + hotkey.type.name() + " " + hotkey.key);
         }
     }
     /**

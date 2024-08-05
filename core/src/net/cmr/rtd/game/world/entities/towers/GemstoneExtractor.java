@@ -93,6 +93,7 @@ public class GemstoneExtractor extends MiningTower {
             int amount = 1;
             Material gem = gemList[selection];
             inventory.addMaterial(gem, amount);
+            displayCollectedEffect(data, gem.image);
         }
         updateInventoryOnClients(data);
     }

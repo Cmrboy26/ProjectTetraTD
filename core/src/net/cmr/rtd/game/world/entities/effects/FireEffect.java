@@ -7,6 +7,7 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.util.Sprites.AnimationType;
@@ -58,16 +59,7 @@ public class FireEffect extends Effect {
     }
 
     private ParticleEffect getEffect() {
-        return SpreadEmitterEffect.factory()
-                .setEntity(getEntity())
-                .setParticle(AnimationType.FIRE)
-                .setDuration(1)
-                .setEmissionRate(2)
-                .setScale(.25f)
-                .setParticleLife(.5f)
-                .setFollowEntity(true)
-                .setAnimationSpeed(2f)
-                .create();
+        return ParticleCatalog.fireEffect(getEntity());
     }
 
     @Override

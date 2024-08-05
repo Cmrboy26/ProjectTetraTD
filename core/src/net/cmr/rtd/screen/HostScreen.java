@@ -15,8 +15,6 @@ import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
-import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio.GameMusic;
@@ -30,10 +28,6 @@ public class HostScreen extends AbstractScreenEX {
 
     TextField maxPlayersField, portField, passwordField;
     SelectBox<String> portForwardOptions;
-
-    public HostScreen(GameManagerDetails details, GameSave save, LevelSave level, int totalTeams) {
-        throw new UnsupportedOperationException("This constructor is not supported in this version of the game.");
-    }
 
     public HostScreen(@Null GameManagerDetails details, QuestFile file) {
         super(INITIALIZE_ALL);
@@ -53,7 +47,7 @@ public class HostScreen extends AbstractScreenEX {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new NewSelectionScreen());
+                game.setScreen(new SelectionScreen());
             }
         });
         backButton.pad(0, 50, 0, 50);
@@ -128,7 +122,7 @@ public class HostScreen extends AbstractScreenEX {
         portForwardOptions = new SelectBox<String>(Sprites.skin(), "small");
         portForwardOptions.setAlignment(Align.center);
         portForwardOptions.setItems("Automatic (UPnP)", "Manual (Port Forwarding)");
-        if (Settings.getPreferences().getBoolean(Settings.USE_NPNP)) {
+        if (Settings.getPreferences().getBoolean(Settings.USE_UPNP)) {
             portForwardOptions.setSelected("Automatic (UPnP)");
         } else {
             portForwardOptions.setSelected("Manual (Port Forwarding)");
@@ -159,7 +153,7 @@ public class HostScreen extends AbstractScreenEX {
 
         Settings.getPreferences().putInteger(Settings.PORT, details.getTCPPort());
         Settings.getPreferences().putInteger(Settings.MAX_PLAYERS, details.getMaxPlayers());
-        Settings.getPreferences().putBoolean(Settings.USE_NPNP, details.useUPNP());
+        Settings.getPreferences().putBoolean(Settings.USE_UPNP, details.useUPNP());
         Settings.getPreferences().flush();
 
         // Join the game

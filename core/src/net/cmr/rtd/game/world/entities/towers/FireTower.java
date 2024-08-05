@@ -21,6 +21,7 @@ import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Audio.GameSFX;
@@ -74,16 +75,7 @@ public class FireTower extends TowerEntity {
                         .setOnHitSound(GameSFX.FIREBALL_HIT)
                         .setOnLaunchSound(GameSFX.FIREBALL_LAUNCH);
                     Projectile fireball = builder.build();
-                    fireball.setParticleOnHit(SpreadEmitterEffect.factory()
-                        .setParticle(AnimationType.FIRE)
-                        .setDuration(1)
-                        .setEmissionRate(20)
-                        .setScale(.45f)
-                        .setParticleLife(.5f)
-                        .setFollowEntity(true)
-                        .setAnimationSpeed(2f)
-                        .setAreaSize(getFireballAOE())
-                        .create());
+                    fireball.setParticleOnHit(ParticleCatalog.fireballHitEffect(this));
                     if (fireball.getVelocity().len() > (getRange() + 1)*Tile.SIZE) {
                         // dont launch it
                         continue;

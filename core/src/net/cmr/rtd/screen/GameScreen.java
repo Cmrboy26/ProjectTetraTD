@@ -83,6 +83,7 @@ import net.cmr.rtd.game.packets.GameSpeedChangePacket;
 import net.cmr.rtd.game.packets.JumpPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
+import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.packets.PasswordPacket;
 import net.cmr.rtd.game.packets.PlayerInputPacket;
 import net.cmr.rtd.game.packets.PlayerPacket;
@@ -114,6 +115,7 @@ import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.Cost;
@@ -918,6 +920,15 @@ public class GameScreen extends AbstractScreenEX {
             return;
         }
 
+        if (packet instanceof ParticlePacket) {
+            ParticlePacket particlePacket = (ParticlePacket) packet;
+            ParticleEffect effect = particlePacket.getParticleEffect();
+            if (effect != null) {
+                addEffect(effect);
+            }
+            return;
+        }
+
         if (packet instanceof GameSpeedChangePacket) {
             GameSpeedChangePacket speedPacket = (GameSpeedChangePacket) packet;
             if (speedPacket.speed > 0) {
@@ -1009,17 +1020,7 @@ public class GameScreen extends AbstractScreenEX {
             Entity entity = getEntity(healerPacket.healerId);
             if (entity instanceof HealerEnemy) {
                 HealerEnemy healer = (HealerEnemy) entity;
-                ParticleEffect effect = SpreadEmitterEffect.factory()
-                    .setParticle(AnimationType.SPARKLE)
-                    .setDuration(1.5f)
-                    .setEmissionRate(15)
-                    .setScale(.2f)
-                    .setParticleLife(.5f)
-                    .setAnimationSpeed(1.5f)
-                    .setAreaSize(HealerEnemy.EFFECT_RADIUS * 2)
-                    .setFollowEntity(true)
-                    .setEntity(healer)
-                    .create();
+                ParticleEffect effect = ParticleCatalog.healEffect(healer);
                 particleEffects.add(effect);
                 Audio.getInstance().worldSFX(GameSFX.UPGRADE_COMPLETE, .5f, 1.5f, healer.getPosition(), this);
             }
@@ -2266,7 +2267,7 @@ public class GameScreen extends AbstractScreenEX {
                             .setAnimationSpeed(1.5f)
                             .setAreaSize(1.2f)
                             .create();*/
-                        ParticleEffect effect = createUpgradeEffect(towerAt);
+                        ParticleEffect effect = ParticleCatalog.upgradeEffect(towerAt);
                         //effect.setPosition(new Vector2(towerAt.getX(), towerAt.getY()));
                         data.getScreen().addEffect(effect);
                     }
@@ -2443,16 +2444,7 @@ public class GameScreen extends AbstractScreenEX {
                 // Play sound
                 Audio.getInstance().playSFX(GameSFX.UPGRADE_COMPLETE, 1f);
                 // Display completed particle
-                SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
-                    .setParticle(AnimationType.SPARKLE)
-                    .setDuration(1.5f)
-                    .setEmissionRate(19)
-                    .setScale(.225f)
-                    .setParticleLife(.8f)
-                    .setAnimationSpeed(1.5f)
-                    .setAreaSize(1.2f)
-                    .create();
-                effect.setPosition(new Vector2(entityAt.getX(), entityAt.getY()));
+                ParticleEffect effect = ParticleCatalog.upgradeEffect(entityAt);
                 data.getScreen().addEffect(effect);
             }
         };
@@ -2707,34 +2699,6 @@ public class GameScreen extends AbstractScreenEX {
 
     public TeamInventory getTeamInventory() {
         return inventory;
-    }
-
-    public static ParticleEffect createFinishedEffect(TowerEntity tower, SpriteType type) {
-        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
-            .setParticle(type)
-            .setDuration(1.5f)
-            .setEmissionRate(19)
-            .setScale(.225f)
-            .setParticleLife(.8f)
-            .setAnimationSpeed(1.5f)
-            .setAreaSize(1.2f)
-            .create();
-        effect.setPosition(new Vector2(tower.getX(), tower.getY()));
-        return effect;
-    }
-
-    public static ParticleEffect createUpgradeEffect(TowerEntity tower) {
-        SpreadEmitterEffect effect = SpreadEmitterEffect.factory()
-            .setParticle(AnimationType.SPARKLE)
-            .setDuration(1.5f)
-            .setEmissionRate(19)
-            .setScale(.225f)
-            .setParticleLife(.8f)
-            .setAnimationSpeed(1.5f)
-            .setAreaSize(1.2f)
-            .create();
-        effect.setPosition(new Vector2(tower.getX(), tower.getY()));
-        return effect;
     }
 
     public int getDisplayHealth() {

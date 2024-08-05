@@ -18,6 +18,7 @@ import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
 import net.cmr.rtd.game.achievements.custom.HighLevelTowerAchievement;
 import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
+import net.cmr.util.Log;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -51,8 +52,11 @@ public abstract class Achievement<T> {
 
     public static Achievement<?> createAchievementInstance(Class<? extends Achievement<?>> clazz) {
         try {
-            return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return clazz.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            Log.error("Achievement "+clazz.getSimpleName()+" must have an empty constructor.", e);
+            return null;
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

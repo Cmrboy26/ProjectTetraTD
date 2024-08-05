@@ -1,16 +1,21 @@
 package net.cmr.rtd.game.world;
 
-import net.cmr.util.Point;
+import java.io.IOException;
 
+import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.StartTileData;
 import net.cmr.rtd.game.world.tile.StructureTileData;
 import net.cmr.rtd.game.world.tile.TileData;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WaveUnit;
 import net.cmr.rtd.waves.WavesData;
+import net.cmr.util.Point;
+import net.cmr.util.Sprites.SpriteType;
 
 public class TeamData {
 
@@ -31,7 +36,6 @@ public class TeamData {
                 if (data instanceof StructureTileData) {
                     StructureTileData tile = (StructureTileData) data;
                     if (tile.team == team) {
-                        //System.out.println("Team "+team+" has a structure at "+x+", "+y);
                         if (structurePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple end structures");
                         }
@@ -46,7 +50,6 @@ public class TeamData {
                 if (data instanceof StartTileData) {
                     StartTileData tile = (StartTileData) data;
                     if (tile.team == team) {
-                        //System.out.println("Team "+team+" has a start tile at "+x+", "+y);
                         if (startTilePosition != null) {
                             throw new NullTeamException("Team "+team+" has multiple start tiles");
                         }
@@ -115,7 +118,7 @@ public class TeamData {
 
     int totalEnemies = 0;
 
-    public void rollRandomItem(UpdateData data) {
+    public void rollRandomItem(Entity entity, UpdateData data) {
         Wave wave = data.getManager().getWorld().getCurrentWave();
         if (wave == null) {
             return;
@@ -140,21 +143,30 @@ public class TeamData {
         float desiredWavesPerDrop = wavesData.wavesPerComponentTarget;
         float threshold = chance / desiredWavesPerDrop;
 
-        System.out.println("Random: "+random+", Chance: "+chance+", Threshold: "+threshold);
-
         if (random <= threshold) {
             int randomItem = (int) Math.floor(Math.random() * 3);
             randomItem++;
+            SpriteType type = null;
             switch (randomItem) {
                 case 1:
                     structure.inventory.addScope();
+                    type = SpriteType.SCOPE;
                     break;
                 case 2:
                     structure.inventory.addWd40();
+                    type = SpriteType.LUBRICANT;
                     break;
                 case 3:
                     structure.inventory.addScrapMetal();
+                    type = SpriteType.SCRAP;
                     break;
+            }
+            ParticleEffect effect = ParticleCatalog.resourceCollectedEffect(entity.getPosition(), type);
+            try {
+                ParticlePacket packet = new ParticlePacket(effect);
+                data.getManager().sendPacketToAll(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

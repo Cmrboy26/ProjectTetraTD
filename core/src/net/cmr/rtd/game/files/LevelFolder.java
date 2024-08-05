@@ -111,7 +111,6 @@ public class LevelFolder {
             LevelFolder level = new LevelFolder(world, parts[1]);
             QuestFile quest = new QuestFile(level, parts[2]);
             QuestTask task = QuestTask.getTask(quest, Long.parseLong(parts[3]));
-            System.out.println(requirement);
             
             @Null Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
             if (completedTasks == null) {

@@ -37,7 +37,7 @@ public class DrillTower extends MiningTower {
         super(GameType.DRILL_TOWER, team);
     }
 
-    float animationDelta;
+    float animationDelta = (float) (Math.random() * 20f);
 
     @Override
     public void render(UpdateData data, Batch batch, float delta) {
@@ -120,7 +120,7 @@ public class DrillTower extends MiningTower {
             inventory.titanium++;
         }
         updateInventoryOnClients(data);
-        
+        displayCollectedEffect(data, material.image);
     }
 
     @Override

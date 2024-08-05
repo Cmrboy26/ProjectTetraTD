@@ -17,11 +17,13 @@ import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
-public class SpreadEmitterEffect extends ParticleEffect{
+public class SpreadEmitterEffect extends ParticleEffect {
+
+    public static final int VERSION = 1;
 
     SpriteType spriteType;
     AnimationType animationType;
-    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize;
+    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1;
     boolean followEntity;
 
     public static class SpreadEmitterFactory {
@@ -29,7 +31,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
         Entity attachedEntity = null;
         SpriteType spriteType = null;
         AnimationType animationType = null;
-        float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1;
+        float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1, randomVelocityImpact = 1;
         boolean followEntity = false;
 
         public SpreadEmitterFactory() {
@@ -86,6 +88,11 @@ public class SpreadEmitterEffect extends ParticleEffect{
             return this;
         }
 
+        public SpreadEmitterFactory setRandomVelocityImpact(float impact) {
+            this.randomVelocityImpact = impact;
+            return this;
+        }
+
         public SpreadEmitterEffect create() {
             SpreadEmitterEffect effect = new SpreadEmitterEffect(attachedEntity);
             effect.spriteType = spriteType;
@@ -97,6 +104,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
             effect.followEntity = followEntity;
             effect.animationSpeed = animationSpeed;
             effect.areaSize = areaSize;
+            effect.randomVelocityImpact = randomVelocityImpact;
             return effect;
         }
     }
@@ -123,13 +131,18 @@ public class SpreadEmitterEffect extends ParticleEffect{
         }
     }
     ArrayList<Particle> particles = new ArrayList<Particle>();
-    float particleDelta = 0;
+    float particleDelta = -1;
 
     @Override
     public void updateParticle(GameScreen screen, float delta) {
+        if (particleDelta == -1) {
+            // On the first frame of the particle, create a particle right away.
+            particleDelta = 1f / emissionRate;
+        }
+
         particleDelta += delta;
-        if (particleDelta >= 1 / emissionRate) {
-            particleDelta -= 1 / emissionRate;
+        if (particleDelta >= 1f / emissionRate) {
+            particleDelta -= 1f / emissionRate;
             Vector2 particlePosition = new Vector2(position);
             if (followEntity) {
                 particlePosition.set(0, 0);
@@ -137,7 +150,10 @@ public class SpreadEmitterEffect extends ParticleEffect{
             float range = Tile.SIZE * this.areaSize;
             particlePosition.x += (float) (Math.random() * range - range / 2);
             particlePosition.y += (float) (Math.random() * range - range / 2);
-            Vector2 velocity = new Vector2((float) (0), (float) (Math.random()));
+            float random = (float) Math.random();
+            float calculatedRandom = 2f * random * randomVelocityImpact - randomVelocityImpact + 1f;
+            calculatedRandom /= 2f;
+            Vector2 velocity = new Vector2((float) (0), (float) (calculatedRandom));
             velocity.scl(.5f);
             particles.add(new Particle(particlePosition, velocity));
         }
@@ -191,6 +207,7 @@ public class SpreadEmitterEffect extends ParticleEffect{
     @Override
     public void serialize(DataBuffer buffer) throws IOException {
         super.serialize(buffer);
+        buffer.writeInt(VERSION);
         buffer.writeFloat(duration);
         buffer.writeFloat(scale);
         buffer.writeFloat(emissionRate);
@@ -208,11 +225,13 @@ public class SpreadEmitterEffect extends ParticleEffect{
             buffer.writeUTF("");
         }
         buffer.writeFloat(areaSize);
+        buffer.writeFloat(randomVelocityImpact);
     }
 
     @Override
     public void deserialize(DataInputStream input) throws IOException {
         super.deserialize(input);
+        int version = input.readInt();
         duration = input.readFloat();
         scale = input.readFloat();
         emissionRate = input.readFloat();
@@ -228,6 +247,9 @@ public class SpreadEmitterEffect extends ParticleEffect{
             animationType = AnimationType.valueOf(animationName);
         }
         areaSize = input.readFloat();
+        if (version >= 1) {
+            randomVelocityImpact = input.readFloat();
+        }
     }
 
 }

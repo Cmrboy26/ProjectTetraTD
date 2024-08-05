@@ -21,7 +21,7 @@ public class Settings {
     public static final String FULLSCREEN = "fullscreen";
     public static final String GAMMA = "gamma";
     // Host settings
-    public static final String USE_NPNP = "useNPnP";
+    public static final String USE_UPNP = "useUPnP";
     public static final String PORT = "port";
     public static final String MAX_PLAYERS = "maxPlayers";
     // Join settings
@@ -51,7 +51,7 @@ public class Settings {
         defaultBoolean(FULLSCREEN, false, force, preferences);
         defaultFloat(GAMMA, 1.0f, force, preferences);
 
-        defaultBoolean(USE_NPNP, true, force, preferences);
+        defaultBoolean(USE_UPNP, true, force, preferences);
         defaultInt(PORT, 11265, force, preferences);
         defaultInt(MAX_PLAYERS, 4, force, preferences);
 

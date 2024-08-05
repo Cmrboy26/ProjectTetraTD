@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.util.Sprites.SpriteType;
@@ -20,23 +21,20 @@ public class SlownessEffect extends Effect {
 
     @Override
     public void onInflict(UpdateData data) {
-        ParticleEffect effect = SpreadEmitterEffect.factory()
-                .setEntity(getEntity())
-                .setParticle(SpriteType.FROZEN)
-                .setDuration(1)
-                .setEmissionRate(3)
-                .setScale(.20f)
-                .setParticleLife(.5f)
-                .setFollowEntity(true)
-                .setAnimationSpeed(2f)
-                .create();
+        ParticleEffect effect = ParticleCatalog.frozenEffect(getEntity());
         if (data.isClient()) {
             data.getScreen().addEffect(effect);
         }
     }
 
     public static float getSlowdownMultiplier(int level) {
-        return 1f - .45f * (float) Math.log10(level + 1);
+        // 1-.075x if < 8, else 1 - (2 * arctan(.171x) / pi)
+        // return 1f - .45f * (float) Math.log10(level + 1);
+        if (level < 8) {
+            return 1f - .075f * level;
+        } else {
+            return 1f - (2f * (float) Math.atan(.171f * level) / (float) Math.PI);
+        }
     }
 
     @Override

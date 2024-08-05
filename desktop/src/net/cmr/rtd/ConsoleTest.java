@@ -11,7 +11,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
 
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.packets.AESEncryptionPacket;
 import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.DisconnectPacket;

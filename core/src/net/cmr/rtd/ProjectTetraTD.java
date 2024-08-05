@@ -3,6 +3,7 @@ package net.cmr.rtd;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
+import java.net.URI;
 import java.net.URL;
 import java.util.function.Consumer;
 
@@ -38,11 +39,7 @@ import com.esotericsoftware.kryonet.Client;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import net.cmr.rtd.game.EasterEgg;
-import net.cmr.rtd.game.GameManager;
-import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
 import net.cmr.rtd.game.Hotkeys;
-import net.cmr.rtd.game.LevelSave;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
@@ -51,12 +48,9 @@ import net.cmr.rtd.game.packets.ConnectPacket;
 import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
-import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
-import net.cmr.rtd.game.stream.LocalGameStream;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.screen.GameScreen;
-import net.cmr.rtd.screen.HostScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.shader.ShaderManager;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
@@ -340,80 +334,13 @@ public class ProjectTetraTD extends CMRGame {
 		}
 	}
 
-	@Deprecated
-	public void hostOnlineGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int teams) {
-		hostOnlineGame(details, levelSave.createSave(saveName, waveName, override), levelSave, teams);
-	}
-
-	@Deprecated
-	public void hostOnlineGame(GameManagerDetails details, GameSave save, LevelSave lsave, int teams) {
-		HostScreen screen = new HostScreen(details, save, lsave, teams);
-		setScreen(screen);
-	}
-
-	/**
-	 * Starts and joins a local/singleplayer game on the client's machine
-	 * Creates a new save folder for the selected level and wave (difficulty).
-	 * This method should be called when creating a new game (NOT loading).
-	 * @param details The details of the game manager
-	 * @param levelSave The save to use for the game
-	 * @param saveName The name of the save folder
-	 * @param waveName The name of the wave to use for the level
-	 */
-	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, int team) {
-		GameSave save = levelSave.createSave(saveName, waveName, false);
-		joinSingleplayerGame(details, save, levelSave, team);
-	}
-
-	/**
-	 * @see #joinSingleplayerGame(GameManagerDetails, LevelSave, String, String)
-	 * @param override Whether to override an existing save folder with the same name
-	 */
-	public void joinSingleplayerGame(GameManagerDetails details, LevelSave levelSave, String saveName, String waveName, boolean override, int team) {
-		GameSave save = levelSave.createSave(saveName, waveName, override);
-		joinSingleplayerGame(details, save, levelSave, team);
-	}
-
-	/**
-	 * Starts and joins a local/singleplayer game on the client's machine
-	 * Should be called when LOADING a game.
-	 */
-	@Deprecated
-	public void joinSingleplayerGame(GameManagerDetails details, GameSave save, LevelSave lsave, int team) {
-		GameManager manager = save.loadGame(details);
-		LocalGameStream[] streams = LocalGameStream.createStreamPair();
-		GameStream clientsideStream = streams[0];
-		GameStream serversideStream = streams[1];
-		serversideStream.addListener(new PacketListener() {
-			@Override
-			public void packetReceived(Packet packet) {
-				Log.debug("Server received packet: " + packet);
-			}
-		});
-		clientsideStream.addListener(new PacketListener() {
-			@Override
-			public void packetReceived(Packet packet) {
-				Log.debug("Client received packet: " + packet);
-			}
-		});
-
-		GameScreen screen = new GameScreen(clientsideStream, manager, null, team);
-
-		//manager.initialize(save); // TODO: FIX
-		setScreen(screen);
-		manager.start();
-		manager.onNewConnection(serversideStream);
-		
-		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
-	}
-
 	/**
 	 * Retrieves the external IP address of the client
 	 * @return
 	 */
 	public static String getExternalIP() {
 		try {
-			URL whatismyip = new URL("http://checkip.amazonaws.com");
+			URL whatismyip = URI.create("http://checkip.amazonaws.com").toURL();
 			BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
 			String ip = in.readLine();
 			in.close();

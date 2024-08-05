@@ -133,7 +133,7 @@ public abstract class EnemyEntity extends Entity {
         if (data.isServer()) {
             TeamData team = data.getManager().getTeam(this.team);
             team.onEnemyDeath(this, data);
-            team.rollRandomItem(data);
+            team.rollRandomItem(this, data);
         }
     }
 

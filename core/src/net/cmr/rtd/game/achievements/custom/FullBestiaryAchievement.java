@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
+import net.cmr.util.Log;
 import net.cmr.util.Sprites.SpriteType;
 
 public class FullBestiaryAchievement extends Achievement<String> {
@@ -61,7 +62,7 @@ public class FullBestiaryAchievement extends Achievement<String> {
 
     public static String addEntity(String valueString, EnemyType type) {
         if (type == null) {
-            System.out.println("WARNING: Attempted to add null enemy type to bestiary");
+            Log.warning("WARNING: Attempted to add null enemy type to bestiary");
             return valueString;
         }
         int index = type.ordinal();

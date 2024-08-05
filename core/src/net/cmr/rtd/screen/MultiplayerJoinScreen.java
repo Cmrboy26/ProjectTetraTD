@@ -55,7 +55,7 @@ public class MultiplayerJoinScreen extends AbstractScreenEX {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                game.setScreen(new NewSelectionScreen());
+                game.setScreen(new SelectionScreen());
             }
         });
         table.add(back).left().bottom().pad(5f).width(100).expandX().colspan(1);

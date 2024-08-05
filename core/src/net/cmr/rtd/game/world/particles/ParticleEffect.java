@@ -103,10 +103,10 @@ public abstract class ParticleEffect {
         String effectType = input.readUTF();
         try {
             Class<?> effectClass = Class.forName(effectType);
-            ParticleEffect effect = (ParticleEffect) effectClass.newInstance();
+            ParticleEffect effect = (ParticleEffect) effectClass.getDeclaredConstructor().newInstance();
             effect.deserialize(input);
             return effect;
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

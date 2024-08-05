@@ -36,7 +36,7 @@ import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.files.QuestFile;
-import net.cmr.rtd.screen.NewSelectionScreen.PlayType;
+import net.cmr.rtd.screen.SelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -74,7 +74,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-				game.setScreen(new NewSelectionScreen());
+				game.setScreen(new SelectionScreen());
                 //game.setScreen(new SelectionScreen());
 			}
 		});

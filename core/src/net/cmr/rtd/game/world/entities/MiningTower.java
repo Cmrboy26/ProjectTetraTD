@@ -6,11 +6,14 @@ import java.io.IOException;
 import com.badlogic.gdx.utils.DataBuffer;
 
 import net.cmr.rtd.game.GamePlayer;
+import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.Entity;
-import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
+import net.cmr.util.Sprites.SpriteType;
 
 public abstract class MiningTower extends TowerEntity {
 
@@ -87,16 +90,30 @@ public abstract class MiningTower extends TowerEntity {
 
     @Override
     protected void serializeTower(DataBuffer buffer) throws IOException {
-        
+        buffer.writeFloat(miningTimeRemaining);
     }
 
     @Override
     protected void deserializeTower(TowerEntity entity, DataInputStream input) throws IOException {
-        
+        MiningTower tower = (MiningTower) entity;
+        tower.miningTimeRemaining = input.readFloat();
     }
 
     public void onMiningComplete(UpdateData data) {
         // Override this method to handle the mining completion event
+    }
+
+    protected void displayCollectedEffect(UpdateData data, SpriteType icon) {
+        if (data.isClient()) {
+            return;
+        }
+        ParticleEffect effect = ParticleCatalog.resourceCollectedEffect(getPosition(), icon);
+        try {
+            ParticlePacket packet = new ParticlePacket(effect);
+            data.getManager().sendPacketToAll(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean validMiningTarget(TileType type) {

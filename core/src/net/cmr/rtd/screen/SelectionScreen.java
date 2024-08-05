@@ -1,426 +1,507 @@
 package net.cmr.rtd.screen;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import net.cmr.rtd.ProjectTetraTD;
-import net.cmr.rtd.game.GameManager;
-import net.cmr.rtd.game.GameManager.GameManagerDetails;
-import net.cmr.rtd.game.GameSave;
-import net.cmr.rtd.game.LevelSave;
-import net.cmr.rtd.game.world.GameObject;
-import net.cmr.rtd.game.world.TeamData;
-import net.cmr.rtd.game.world.TeamData.NullTeamException;
-import net.cmr.rtd.game.world.World;
+import net.cmr.rtd.ProjectTetraTD.LevelValueKey;
+import net.cmr.rtd.game.GameConnector;
+import net.cmr.rtd.game.files.LevelFolder;
+import net.cmr.rtd.game.files.QuestFile;
+import net.cmr.rtd.game.files.QuestTask;
+import net.cmr.rtd.game.files.WorldFolder;
 import net.cmr.rtd.game.world.store.ShopManager;
-import net.cmr.rtd.waves.WavesData;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
-import net.cmr.util.Audio.GameSFX;
+import net.cmr.util.CMRGame;
+import net.cmr.util.Log;
 import net.cmr.util.Sprites;
-import net.cmr.util.Stages;
+import net.cmr.util.Sprites.SpriteType;
 
 public class SelectionScreen extends AbstractScreenEX {
-    
-    Table details;
-    Table playOptions;
 
+    ExtendViewport viewport;
+    Stage stage;
+    final Batch batch;
+
+    Table levelsTable;
     public SelectionScreen() {
-        super(INITIALIZE_ALL);
+        batch = CMRGame.getInstance().batch();
+    }
 
-		Table table = new Table();
-		table.setFillParent(true);
+    @Override
+    public void show() {
+        super.show();
 
-        // right of the screen
-        details = new Table();
+        viewport = new ExtendViewport(640, 360);
+        stage = new Stage(viewport);
+        Gdx.input.setInputProcessor(stage);
 
-        // left of the screen
-        Table selection = new Table(Sprites.skin());
+        levelsTable = new Table();
+        levelsTable.setFillParent(true);
+        levelsTable.align(Align.center);
+        stage.addActor(levelsTable);
 
-        Label title = new Label("Select a level", Sprites.skin(), "small");
-        title.setAlignment(Align.center);
-        selection.add(title).fillX().expandX().colspan(1).top().row();
+        Table rightBottomUI = new Table();
+        rightBottomUI.setFillParent(true);
+        rightBottomUI.align(Align.bottomRight);
+        stage.addActor(rightBottomUI);
 
-        ButtonGroup<TextButton> group = new ButtonGroup<TextButton>();
-        group.setMaxCheckCount(1);
-        group.setMinCheckCount(0);
-        // Load all available levels from the levels directory
-        FileHandle[] levels = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels").list();
-        for (FileHandle level : levels) {
-            TextButton button = new TextButton(level.nameWithoutExtension(), Sprites.skin(), "toggle-small");
-            Audio.addClickSFX(button);
-            group.add(button);
-            button.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    if (button.isChecked()) {
-                        fillDetails(button);
-                    } else {
-                        details.clear();
-                    }
-                }
-            });
-            selection.add(button).pad(5f).fillX().expandX().row();
+        TextButton joinOnlineGameButton = new TextButton("Join Online", Sprites.skin(), "small");
+        Audio.addClickSFX(joinOnlineGameButton);
+        joinOnlineGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+                CMRGame.getInstance().setScreen(new MultiplayerJoinScreen());
+            }
+        });
+        joinOnlineGameButton.pad(0, 20, 0, 20);
+        rightBottomUI.add(joinOnlineGameButton).align(Align.bottomRight).pad(10f);
+
+        Table leftBottomUI = new Table();
+        leftBottomUI.setFillParent(true);
+        leftBottomUI.align(Align.bottomLeft);
+        stage.addActor(leftBottomUI);
+
+        // Create the back button
+
+        TextButton backButton = new TextButton("Back", Sprites.skin(), "small");
+        Audio.addClickSFX(backButton);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+                CMRGame.getInstance().setScreen(new MainMenuScreen());
+            }
+        });
+        backButton.pad(0, 20, 0, 20);
+
+        leftBottomUI.add(backButton).align(Align.bottomLeft).pad(10f);
+
+        // Add worlds selection
+
+        WorldFolder[] validWorlds = getValidWorlds();
+        if (validWorlds.length == 0) {
+            Label noWorldsLabel = new Label("No worlds found :/", Sprites.skin(), "small");
+            noWorldsLabel.setAlignment(Align.center);
+            leftBottomUI.add(noWorldsLabel).align(Align.left).pad(10f).colspan(1);
+            return;
         }
 
+        Label worldSelectionLabel = new Label("World: ", Sprites.skin(), "small");
+        worldSelectionLabel.setAlignment(Align.center);
+        leftBottomUI.add(worldSelectionLabel).align(Align.left).pad(10f).padLeft(20).colspan(1);
 
-        ScrollPane scrollPane = new ScrollPane(selection);
-        scrollPane.setScrollbarsVisible(true);
-        scrollPane.setScrollingDisabled(true, false);
+        SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
 
-        table.add(scrollPane).fillX().expand();
-        table.add(details).fillX().expand().row();
-        
+        float selectionBoxListSpacing = 5;
+        style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+        style.scrollStyle.background.setTopHeight(selectionBoxListSpacing);
+        style.scrollStyle.background.setBottomHeight(selectionBoxListSpacing);
+        style.scrollStyle.background.setLeftWidth(selectionBoxListSpacing);
+        style.scrollStyle.background.setRightWidth(selectionBoxListSpacing);
 
-        TextButton back = new TextButton("Back", Sprites.skin(), "small");
-        Audio.addClickSFX(back);
-        back.pad(0, 15f, 0, 15f);
-        back.addListener(new ClickListener() {
+        float backgroundSelectSpacing = 10;
+        style.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+        style.background.setLeftWidth(backgroundSelectSpacing);
+        style.background.setRightWidth(backgroundSelectSpacing);
+        SelectBox<WorldFolder> worldSelection = new SelectBox<>(style);
+        worldSelection.setItems(validWorlds);
+        worldSelection.setAlignment(Align.center);
+        worldSelection.addListener(new ChangeListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                game.setScreen(new MainMenuScreen());
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                onWorldSelected(worldSelection.getSelected());
             }
         });
-        table.add(back).left().bottom().padBottom(10f).width(120).expandX().colspan(1);
+        leftBottomUI.add(worldSelection).align(Align.left).pad(10f).colspan(1);
 
-        TextButton online = new TextButton("Join Online", Sprites.skin(), "small");
-        online.pad(0, 15f, 0, 15f);
-        Audio.addClickSFX(online);
-        online.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                game.setScreen(new MultiplayerJoinScreen());
+        String preferredWorld = ProjectTetraTD.getLastPlayedWorld();
+        WorldFolder selectedWorldFolder = validWorlds[0];
+        for (WorldFolder world : validWorlds) {
+            String worldName = world.getFolder().name();
+            if (worldName.equals(preferredWorld)) {
+                selectedWorldFolder = world;
+                break;
             }
-        });
-        table.add(online).right().bottom().padBottom(10f).width(120).expandX().colspan(1);
+        }
 
-		add(Align.center, table);
+        // Set the default selection and notify onWorldSelected
+        worldSelection.setSelected(selectedWorldFolder);
+        onWorldSelected(selectedWorldFolder);
+        Audio.addClickSFX(worldSelection);
+
     }
 
     @Override
     public void render(float delta) {
-        game.batch().setColor(Color.WHITE);
         super.render(delta);
+        viewport.apply();
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        batch.begin();
+        stage.act(delta);
+        stage.draw();
+        batch.end();
     }
     
     @Override
-    public void hide() {
-        super.hide();
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        viewport.update(width, height, true);
     }
 
-    public void fillDetails(TextButton pressed) {
-        String folderName = pressed.getText().toString();
-        FileHandle level = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/world.dat");
-        FileHandle[] difficulties = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/waves/").list();
-
-        details.clear();
-        
-        // Add a title with the level name
-        Label title = new Label(folderName, Sprites.skin(), "small");
-        title.setAlignment(Align.center);
-        details.add(title).fillX().expandX().colspan(2).row();
-
-        FileHandle worldFile = Gdx.files.external(ProjectTetraTD.EXTERNAL_FILE_NAME+"levels/" + folderName + "/world.dat");
-        World world;
-        try {
-            world = (World) GameObject.deserializeGameObject(worldFile.readBytes());
-        } catch(Exception e ) {
-            Label label = new Label("Invalid Level: Failed to load world", Sprites.skin(), "small");
-            label.setAlignment(Align.center);
-            details.add(label).fillX().expandX().colspan(2).row();
-            e.printStackTrace();
-            return;
-        }
-        int teamCounter = 0;
-        for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
-            try {
-                TeamData team = new TeamData(world, i);
-                // If this succeeded, then this team exists in the world.
-                teamCounter++;
-            } catch (NullTeamException e) {
-                // This team does not exist in the world.
-            }
-        }
-        final int teamCount = teamCounter;
-        if (teamCount == 0) {
-            Label noTeams = new Label("Invalid Level: No Teams Found", Sprites.skin(), "small");
-            noTeams.setAlignment(Align.center);
-            details.add(noTeams).fillX().expandX().colspan(2).row();
-        } else if (teamCount == 1) {
-            Label oneTeam = new Label("Solo/Co-op", Sprites.skin(), "small");
-            oneTeam.setAlignment(Align.center);
-            details.add(oneTeam).fillX().expandX().colspan(2).row();
-        } else {
-            Label multipleTeams = new Label("Competitive: "+teamCount+" Teams", Sprites.skin(), "small");
-            multipleTeams.setAlignment(Align.center);
-            details.add(multipleTeams).fillX().expandX().colspan(2).row();
-        }
-
-        ButtonGroup<TextButton> group = new ButtonGroup<TextButton>();
-        group.setMaxCheckCount(1);
-        group.setMinCheckCount(0);
-        for (final FileHandle difficulty : difficulties) {
-            // Create buttons for each type of difficulty/wave types
-            try {
-                final WavesData data = WavesData.load(difficulty);
-                String name = data.name;
-                String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
-                /*if (RetroTowerDefense.isLevelCleared(fn)) {
-                    name += " (Clear)";
-                }*/
-                TextButton button = new TextButton(name, Sprites.skin(), "toggle-small");
-                Audio.addClickSFX(button);
-                button.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        setPlayOptions(folderName, difficulty, data, button.isChecked(), teamCount);
-                    }
-                });
-                group.add(button);
-                details.add(button).pad(5f).fillX().expandX().colspan(2).row();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        playOptions = new Table();
-        details.add(playOptions).fillX().expandX().colspan(2).row();
-    }
-
-    public void setPlayOptions(String folderName, FileHandle difficultyFile, WavesData data, boolean show, final int teams) {
-
-        String fn = minimizeString(folderName) + "-" + minimizeString(data.getName());
-        LevelSave lsave = new LevelSave(folderName);
-
-        playOptions.clear();
-        if (!show) {
-            return;
-        }
-
-        Label difficultyLabel = new Label("Difficulty: " + data.getDifficulty().name(), Sprites.skin(), "small");
-        difficultyLabel.setAlignment(Align.center);
-        playOptions.add(difficultyLabel).fillX().expandX().colspan(2).row();
-
-        if (data.endlessMode) {
-            Label endless = new Label("Endless Mode", Sprites.skin(), "small");
-            endless.setAlignment(Align.center);
-            playOptions.add(endless).fillX().expandX().colspan(2).row();
-
-            //long highscore = RetroTowerDefense.getHighscore(fn);
-            //long farthestWave = RetroTowerDefense.getFarthestWave(fn);
-            //if (highscore > 0) {
-            //    Label highscoreLabel = new Label("High Score: " + ShopManager.costToString(highscore).substring(1) + ", Farthest Wave: "+farthestWave, Sprites.skin(), "small");
-            //    highscoreLabel.setAlignment(Align.center);
-            //    playOptions.add(highscoreLabel).fillX().expandX().colspan(2).row();
-            //}
-        } else {   
-            Label waveCount = new Label("Waves: " + data.getTotalWaves(), Sprites.skin(), "small");
-            waveCount.setAlignment(Align.center);
-            playOptions.add(waveCount).fillX().expandX().colspan(2).row();
-        }
-
-        TextButton resume = new TextButton("Resume", Sprites.skin(), "small");
-        Audio.addClickSFX(resume);
-        resume.addListener(new ClickListener() {
+    public enum PlayType {
+        SINGLEPLAYER {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (resume.isDisabled()) {
-                    return;
-                }
-                showPlayTypeDialog((Boolean online) -> {
-                    Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
-                        @Override
-                        public Void apply(Integer team) {
-                            try {
-                                GameManagerDetails details = new GameManagerDetails();
-                                GameSave save = new GameSave(fn);
-                                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                                if (online) {
-                                    game.hostOnlineGame(details, save, lsave, teams);
-                                } else {
-                                    game.joinSingleplayerGame(details, save, lsave, team);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                // Set screen to this screen
-                                ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                                game.setScreen(SelectionScreen.this);
-                                
-                                displayErrorDialog(e, stages);
-                            }
-                            return null;
-                        }
-                    };
-                    if (!online) {
-                        //game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
-                    } else {
-                        joinGameFunction.apply(0);
-                    }
-                });
+            public void startGame(QuestFile quest, int team) {
+                GameConnector.startSingleplayerGame(quest, team);
             }
-        });
-        playOptions.add(resume).pad(5f).fillX().expandX();
-
-        // If there is no save file, disable the resume button
-        GameSave save = new GameSave(fn);
-        if (!save.getSaveFolder().exists()) {
-            resume.setDisabled(true);
-            resume.setColor(Color.DARK_GRAY);
-            resume.getLabel().setColor(Color.GRAY);
-        }
-
-        TextButton newSave = new TextButton("New Game", Sprites.skin(), "small");
-        Audio.addClickSFX(newSave);
-        newSave.addListener(new ClickListener() {
+        },
+        HOST_ONLINE_GAME {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Runnable startGame = new Runnable() {
-                    @Override
-                    public void run() {
-                        showPlayTypeDialog((Boolean online) -> {
-                            Function<Integer, Void> joinGameFunction = new Function<Integer, Void>() {
-                                @Override
-                                public Void apply(Integer team) {
-                                    try {
-                                        GameManagerDetails details = new GameManagerDetails();
-                                        LevelSave levelSave = new LevelSave(folderName);
-                                        ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
-                                        if (online) {
-                                            game.hostOnlineGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, teams);
-                                        } else {
-                                            game.joinSingleplayerGame(details, levelSave, fn, difficultyFile.nameWithoutExtension(), true, team);
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        displayErrorDialog(e, stages);
-                                    }
-                            
-                                    return null;
-                                }
-                            };
-                            if (!online) {
-                                //game.setScreen(new TeamSelectionScreen(joinGameFunction, teams));
-                            } else {
-                                joinGameFunction.apply(0);
-                            }
-                        });
-                    }
-                };
-
-                if (!resume.isDisabled()) {
-                    Dialog dialog = new Dialog("WARNING", Sprites.skin()) {
-                        @Override
-                        protected void result(Object object) {
-                            Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
-                            if ((Boolean) object == true) {
-                                startGame.run();
-                            }
-                        }
-                    };
-
-                    dialog.getTitleLabel().setAlignment(Align.center);
-                    dialog.pad(20f);
-                    dialog.padTop(50f);
-                    Label text = new Label("A save already exists here! Do you want to override it?", Sprites.skin(), "small");
-                    text.setFontScale(.4f);
-                    text.setWidth(400);
-                    text.setWrap(true);
-                    dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-                    TextButton cancel = new TextButton("NO, CANCEL", Sprites.skin(), "small");
-                    cancel.pad(0, 10, 0, 10);
-                    dialog.button(cancel, false);
-                    TextButton confirm = new TextButton("OVERRIDE IT", Sprites.skin(), "small");
-                    confirm.pad(0, 10, 0, 10);
-                    dialog.button(confirm, true);
-                    dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
-                    dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, false);
-                    dialog.key(com.badlogic.gdx.Input.Keys.Y, true);
-                    dialog.key(com.badlogic.gdx.Input.Keys.N, false);
-                    dialog.show(stages.get(Align.center));
-                } else {
-                    startGame.run();
-                }
-            }
-        });
-        playOptions.add(newSave).pad(5f).fillX().expandX().row();
-    }
-
-    public String getNameOfLevel(FileHandle level) {
-        return level.nameWithoutExtension();
-    }
-
-    public String minimizeString(String folderName) {
-        // Remove all whitespace, keep only alphanumeric characters, and make it lowercase
-        return folderName.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-    }
-
-    // Consumer will return true if online, false if singleplayer/local
-    public void showPlayTypeDialog(Consumer<Boolean> chooseOnlineCallback) {
-        Dialog dialog = new Dialog("Choose Game Type", Sprites.skin()) {
-            @Override
-            protected void result(Object object) {
-                if (object == null) {
-                    return;
-                }
-                Audio.getInstance().playSFX(GameSFX.CLICK, 1f);
-                chooseOnlineCallback.accept((Boolean) object);
+            public void startGame(QuestFile quest, int team) {
+                HostScreen screen = new HostScreen(null, quest);
+                CMRGame.getInstance().setScreen(screen);
             }
         };
 
-        dialog.getTitleLabel().setAlignment(Align.center);
-        dialog.pad(20f);
-        dialog.padTop(50f);
-        Label text = new Label("Select Play Type:", Sprites.skin(), "small");
-        text.setFontScale(.4f);
-        text.setWidth(400);
-        text.setAlignment(Align.center);
-        text.setWrap(true);
-        dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-        TextButton cancel = new TextButton("Cancel", Sprites.skin(), "small");
-        cancel.pad(0, 10, 0, 10);
-        TextButton online = new TextButton("Online", Sprites.skin(), "small");
-        online.pad(0, 10, 0, 10);
-        TextButton singleplayer = new TextButton("Singleplayer", Sprites.skin(), "small");
-        singleplayer.pad(0, 10, 0, 10);
-        dialog.button(cancel, null);
-        dialog.button(online, true);
-        dialog.button(singleplayer, false);
-        dialog.key(com.badlogic.gdx.Input.Keys.ENTER, true);
-        dialog.key(com.badlogic.gdx.Input.Keys.ESCAPE, null);
-        dialog.key(com.badlogic.gdx.Input.Keys.O, true);
-        dialog.key(com.badlogic.gdx.Input.Keys.S, false);
-        dialog.show(stages.get(Align.center));
+        @Override
+        public String toString() {
+            if (this == SINGLEPLAYER) {
+                return "Singleplayer";
+            } else if (this == HOST_ONLINE_GAME) {
+                return "Host Online Game";
+            }
+            return super.toString();
+        }
+
+        public abstract void startGame(QuestFile quest, int team);
     }
 
-    public static void displayErrorDialog(Exception e, Stages stages) {
-        Dialog dialog = new Dialog("Error", Sprites.skin());
-        dialog.getTitleLabel().setAlignment(Align.center);
-        dialog.pad(20f);
-        dialog.padTop(50f);
-        //Label text = new Label("Failed to load save file:\n"+e, Sprites.skin(), "small");
-        Label text = new Label("An error occured performing that action:\n"+e.getMessage(), Sprites.skin(), "small");
-        text.setFontScale(.4f);
-        text.setWidth(400);
-        text.setWrap(true);
-        dialog.getContentTable().add(text).width(400).fillX().expandX().row();
-        dialog.button("OK");
+    public void onWorldSelected(final WorldFolder world) {
+        Log.info("Selected world: " + world);
+        ProjectTetraTD.setLastPlayedWorld(world.getFolder().name());
+        levelsTable.clear();
 
-        dialog.show(stages.get(Align.center));
+        Table levelSelection = new Table();
+        
+        //levelSelection.setBackground(Sprites.drawable(SpriteType.BACKGROUND));
+
+        int buttonSize = 65;
+
+        LevelFolder[] levels = world.readLevels();
+        for (LevelFolder level : levels) {
+            Table levelTable = new Table();
+            boolean locked = level.isLevelLocked();
+            levelTable.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    super.clicked(event, x, y);
+                    if (locked) {
+                        Audio.getInstance().playSFX(Audio.GameSFX.WARNING, 1f);
+
+                        Dialog dialog = new Dialog("Level Locked", Sprites.skin(), "small");
+                        dialog.setMovable(false);
+                        dialog.getTitleLabel().setAlignment(Align.center);
+                        dialog.pad(20);
+                        dialog.padTop(40);
+
+                        Label text1 = new Label("This level is locked. Complete the requirements to unlock it:", Sprites.skin(), "small");
+                        dialog.text(text1);
+                        dialog.getContentTable().row();
+
+                        for (String requirement : level.getUnlockRequirements()) {
+                            Log.info("Requirement: " + requirement);
+                            String[] parts = requirement.split("/");
+                            if (parts.length != 4) {
+                                Log.warning("Invalid unlock requirement: " + requirement);
+                                continue;
+                            }
+
+                            WorldFolder world = new WorldFolder(parts[0]);
+                            LevelFolder level = new LevelFolder(world, parts[1]);
+                            QuestFile quest = new QuestFile(level, parts[2]);
+                            QuestTask task = QuestTask.getTask(quest, Long.parseLong(parts[3]));
+                            if (task == null) {
+                                Log.warning("Invalid task ID: " + parts[3] + " in " + requirement);
+                                continue;
+                            }
+                            boolean completed = false;
+                            Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(quest, LevelValueKey.COMPLETED_TASKS, Long[].class);
+                            if (completedTasks != null) {
+                                for (Long completedTask : completedTasks) {
+                                    if (completedTask == task.id) {
+                                        completed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (completed) {
+                                continue;
+                            }
+                            String taskDescription = task.getReadableTaskDescription();
+                            String location = world.getDisplayName() + " / " + level.getDisplayName() + " / " + quest.getDisplayName();
+                            Label text = new Label("- " + taskDescription + " in \""+location+"\"", Sprites.skin(), "small");
+                            dialog.getContentTable().add(text).align(Align.left).pad(5).row();
+                        }
+
+                        TextButton close = new TextButton("Close", Sprites.skin(), "small");
+                        close.pad(0, 20, 0, 20);
+                        dialog.button(close, false);
+
+                        dialog.key(Input.Keys.ESCAPE, false);
+                        dialog.setOrigin(Align.topLeft);
+                        dialog.setScale(.75f);
+                        dialog.pack();
+                        dialog.setPosition(10, 360 - 10, Align.topLeft);
+                        dialog.show(stage, Actions.alpha(1));
+
+                        return;
+                    }
+                    Audio.getInstance().playSFX(Audio.GameSFX.CLICK, 1f);
+                    Log.info("Clicked level: " + level);
+                    Dialog levelDialog = new Dialog(level.toString(), Sprites.skin(), "small");
+                    levelDialog.getTitleLabel().setAlignment(Align.center);
+
+                    Label questTasksLabel = new Label("Tasks:", Sprites.skin(), "small");
+                    questTasksLabel.setAlignment(Align.left);
+
+                    Label questTasks = new Label("", Sprites.skin(), "small");
+                    questTasks.setAlignment(Align.left);
+
+                    Label questLabel = new Label("Quest:", Sprites.skin(), "small");
+                    questLabel.setAlignment(Align.center);
+
+                    TextButton resumeGameButton = new TextButton("Resume", Sprites.skin(), "small");
+                    Audio.addClickSFX(resumeGameButton);
+                    resumeGameButton.pad(0, 20, 0, 20);
+
+                    Label playTypeLabel = new Label("Play Type:", Sprites.skin(), "small");
+                    playTypeLabel.setAlignment(Align.center);
+
+                    Label highScoreLabel = new Label("", Sprites.skin(), "small");
+                    highScoreLabel.setAlignment(Align.center);                    
+
+                    Image trophy = new Image(Sprites.sprite(SpriteType.TROPHY));
+
+                    float labelTopPad = 3;
+
+                    SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+                    style.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+                    style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+                    float selectionBoxListSpacing = 5;
+                    style.scrollStyle.background.setTopHeight(selectionBoxListSpacing);
+                    style.scrollStyle.background.setBottomHeight(selectionBoxListSpacing);
+                    style.scrollStyle.background.setLeftWidth(selectionBoxListSpacing);
+                    style.scrollStyle.background.setRightWidth(selectionBoxListSpacing);
+
+                    SelectBox<QuestFile> questSelect = new SelectBox<>(style);
+                    questSelect.getScrollPane().setScrollbarsVisible(false);
+                    QuestFile[] questNames = getValidQuests(level);
+                    questSelect.setItems(questNames);
+                    questSelect.setAlignment(Align.center);
+                    questSelect.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            setTasksList(levelDialog, questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
+                        }
+                    });
+                    setTasksList(levelDialog, questTasks, resumeGameButton, questSelect.getSelected(), highScoreLabel, trophy);
+                    Audio.addClickSFX(questSelect);
+
+                    SelectBox<PlayType> playType = new SelectBox<>(style);
+                    playType.getScrollPane().setScrollbarsVisible(false);
+                    playType.setItems(PlayType.values());
+                    playType.setAlignment(Align.center);
+                    Audio.addClickSFX(playType);
+
+                    TextButton startButton = new TextButton("Start New", Sprites.skin(), "small");
+                    Audio.addClickSFX(startButton);
+                    startButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            super.clicked(event, x, y);
+                            Log.info("Starting level: " + level);
+                            Log.info("- Quest: " + questSelect.getSelected());
+                            Log.info("- Play Type: " + playType.getSelected().name());
+                            QuestFile quest = questSelect.getSelected();
+                            quest.createSave();
+
+                            levelDialog.hide();
+                            playType.getSelected().startGame(quest, -1);
+                        }
+                    });
+                    resumeGameButton.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            super.clicked(event, x, y);
+                            if (resumeGameButton.isDisabled()) return;
+                            Log.info("Resuming level: " + level);
+                            levelDialog.hide();
+                            playType.getSelected().startGame(new QuestFile(level, questSelect.getSelected()), -1);
+                        }
+                    });
+
+                    startButton.pad(0, 20, 0, 20);
+
+                    levelDialog.getContentTable().add(questTasksLabel).align(Align.left).colspan(2);
+                    levelDialog.getContentTable().add(highScoreLabel).align(Align.topRight).colspan(1).row();
+                    levelDialog.getContentTable().add(questTasks).align(Align.left).colspan(2);
+                    levelDialog.getContentTable().add(trophy).size(64).align(Align.right).colspan(1).row();
+
+                    levelDialog.getContentTable().add(questLabel).align(Align.center).colspan(1);
+                    levelDialog.getContentTable().add(playTypeLabel).align(Align.center).colspan(1);
+                    levelDialog.getContentTable().add(resumeGameButton).colspan(1).growX().row();
+
+                    levelDialog.getContentTable().add(questSelect).align(Align.center).pad(10).padTop(labelTopPad).colspan(1);
+                    levelDialog.getContentTable().add(playType).align(Align.center).pad(10).padTop(labelTopPad).colspan(1);
+                    levelDialog.getContentTable().add(startButton).align(Align.center).pad(10).padTop(labelTopPad).growX().colspan(1);
+
+                    TextButton closeButton = new TextButton("Close", Sprites.skin(), "small");
+                    closeButton.pad(0, 20, 0, 20);
+                    Audio.addClickSFX(closeButton);
+                    levelDialog.button(closeButton, false);
+
+                    levelDialog.pad(10);
+                    levelDialog.padTop(30);
+                    levelDialog.show(stage, Actions.alpha(1));
+                    levelDialog.setPosition(Math.round((stage.getWidth() - levelDialog.getWidth()) / 2), Math.round((stage.getHeight() - levelDialog.getHeight()) / 2));
+                    levelDialog.key(Input.Keys.ESCAPE, null);
+                }
+            });
+            levelSelection.add(levelTable).align(Align.center).pad(10);
+
+            Label name = new Label(level.toString(), Sprites.skin(), "small");
+            name.setAlignment(Align.center);
+            levelTable.add(name).align(Align.center).row();
+
+            // TODO: If the level isn't unlocked yet, gray out the image
+            // TODO: If the level is completed, make the image green or something
+            Image slot = new Image(Sprites.sprite(SpriteType.WORLD_LEVEL));
+            boolean areAllTasksCompleted = true;
+            boolean noTasksPresent = true;
+            for (QuestFile quest : getValidQuests(level)) {
+                if (!quest.hasNoTasks()) {
+                    noTasksPresent = false;
+                }
+                if (!quest.areAllTasksCompleted()) {
+                    areAllTasksCompleted = false;
+                    break;
+                }
+            }
+            if (areAllTasksCompleted && !noTasksPresent) {
+                slot.setColor(Color.GREEN);
+            } else {
+                slot.setColor(Color.WHITE);
+            }
+            if (locked) {
+                slot.setColor(Color.GRAY);
+            }
+            float ratio = 1.0f * slot.getHeight() / slot.getWidth();
+            levelTable.add(slot).size(buttonSize, buttonSize*ratio).align(Align.center).pad(5);
+        }
+
+        ScrollPane worldView = new ScrollPane(levelSelection, Sprites.skin());
+        worldView.setScrollbarsVisible(false);
+        levelsTable.add(worldView).align(Align.center).height(360).width(640).colspan(1);
     }
+
+    public WorldFolder[] getValidWorlds() {
+        return WorldFolder.listWorlds();
+    }
+
+    public QuestFile[] getValidQuests(LevelFolder level) {
+        return level.readQuests();
+    }
+
+    public void setTasksList(Dialog levelDialog, Label taskListLabel, TextButton resumeGameButton, QuestFile file, Label highScoreLabel, Image trophy) {
+        taskListLabel.setText(getTasksList(file));
+        levelDialog.getTitleLabel().setText(file.getLevel().getDisplayName() + " [" + file.getDisplayName() + " | " + file.getDifficulty().name() + "]");
+
+        boolean saveFileExists = file.questFileExists();
+        if (!saveFileExists) {
+            resumeGameButton.setDisabled(true);
+            resumeGameButton.setColor(Color.DARK_GRAY);
+            resumeGameButton.getLabel().setColor(Color.GRAY);
+        } else {
+            resumeGameButton.setDisabled(false);
+            resumeGameButton.setColor(Color.WHITE);
+            resumeGameButton.getLabel().setColor(Color.WHITE);
+        }
+
+        Long highScore = ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.HIGHSCORE, Long.class);
+        if (highScore != null) {
+            String text = "High Score: " + ShopManager.costToString(highScore).substring(1);
+            text += "\n";
+            text += "Farthest Wave: " + ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.FARTHEST_WAVE, Long.class);
+            highScoreLabel.setText(text);
+        } else {
+            highScoreLabel.setText("");
+        }
+
+        if (file.areAllTasksCompleted() && !file.hasNoTasks()) {
+            trophy.setVisible(true);
+        } else {
+            trophy.setVisible(false);
+        }
+
+        levelDialog.pack();
+    }
+
+    public String getTasksList(QuestFile file) {
+        if (file == null) {
+            return "No quests found!";
+        }
+        QuestTask[] tasks = file.getTasks();
+        if (tasks == null || tasks.length == 0) {
+            return "- No tasks found! Have fun!";
+        }
+        StringBuilder builder = new StringBuilder();
+
+        Long[] completedTasks = ProjectTetraTD.getStoredLevelValue(file, LevelValueKey.COMPLETED_TASKS, Long[].class);
+        if (completedTasks == null) {
+            completedTasks = new Long[0];
+        }
+
+        for (QuestTask task : tasks) {
+            builder.append("- ");
+            builder.append(task.toString());
+            for (Long completedTask : completedTasks) {
+                if (completedTask == task.id) {
+                    builder.append(" (Completed)");
+                    break;
+                }
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public GameMusic getScreenMusic() {
+        return GameMusic.menuMusic();
+    }
+
 }

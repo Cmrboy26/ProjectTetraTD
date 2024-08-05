@@ -18,6 +18,7 @@ import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerDescription.TowerDescriptors;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -46,16 +47,7 @@ public class IceTower extends TowerEntity {
         if (animationDelta > .5f && attacking) {
             animationDelta = 0;
             // Ice particle around the tower
-            ParticleEffect effect = SpreadEmitterEffect.factory()
-                .setEntity(this)
-                .setParticle(SpriteType.FROZEN)
-                .setDuration(2f)
-                .setEmissionRate(2 + getLevel())
-                .setScale(.15f)
-                .setParticleLife(2f)
-                .setFollowEntity(true)
-                .setAnimationSpeed(2f)
-                .create();
+            ParticleEffect effect = ParticleCatalog.iceTowerFrozenEffect(this);
             if (data.isClient()) {
                 data.getScreen().addEffect(effect);
             }
@@ -129,11 +121,11 @@ public class IceTower extends TowerEntity {
         float speedMultiplier = SlownessEffect.getSlowdownMultiplier(getLevel());
         String speedReductionPercent = ((int)((1f-speedMultiplier)*100f))+"%";
         String slowdownPercent = "Speed Reduction: "+speedReductionPercent;
-        description.createCustomSection(Sprites.drawable(SpriteType.ICE_TOWER), slowdownPercent);
-        if (getSelectedMaterial() == Material.CRYONITE) {
+        description.createCustomSection(Sprites.drawable(SpriteType.FROZEN), slowdownPercent);
+        /*if (getSelectedMaterial() == Material.CRYONITE) {
             String cryoniteSpecialAbility = "Special Ability: Enemies in range of the tower have a chance to be temporarily stunned.";
             description.createCustomSection(Sprites.drawable(SpriteType.CRYONITE), cryoniteSpecialAbility);
-        }
+        }*/
         return description.create(this);
     }
 

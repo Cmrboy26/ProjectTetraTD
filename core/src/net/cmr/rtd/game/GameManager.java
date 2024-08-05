@@ -491,7 +491,6 @@ public class GameManager implements Disposable {
                 }
             } catch (NullTeamException e) {
                 // This team does not exist in the world.
-                //System.out.println(e.getMessage());
             }
         }
         if (teams.size() == 0) {

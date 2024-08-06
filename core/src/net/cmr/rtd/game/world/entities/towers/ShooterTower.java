@@ -38,13 +38,13 @@ public class ShooterTower extends TowerEntity {
     @Override
     public boolean attack(UpdateData data) {
         super.attack(data);
-        float damage = getDamage(true);
         float range = getRange();
         ArrayList<EnemyEntity> entitiesInRange = getEnemiesInRange(range, data, getPreferedSortType());
         attacking = false;
         for (Entity entity : entitiesInRange) {
             if (entity instanceof EnemyEntity) {
                 EnemyEntity enemy = (EnemyEntity) entity;
+                float damage = getDamage(true);
                 Material.attackEnemy(enemy, this, data);
                 boolean piercing = Material.isPiercing(getSelectedMaterial());
                 ProjectileBuilder builder = new ProjectileBuilder()
@@ -62,6 +62,9 @@ public class ShooterTower extends TowerEntity {
                 Projectile.launchProjectile(data, arrow);
                 animationDelta = 0;
                 attacking = true;
+                if (wasCriticalHit(damage)) {
+                    displayCriticalHit(data);
+                }
                 return attacking;
             }
         }
@@ -91,7 +94,8 @@ public class ShooterTower extends TowerEntity {
     public float getDamage(boolean rollCritical) {
         float damage = calculateIncrementedValue(1, 1, 1);
         damage *= damage * .5f;
-        return (float) Math.ceil(damage * getScrapMetalDamageBoost() * Material.getDamageModifier(getSelectedMaterial(), rollCritical));
+        damage = (float) damage * getScrapMetalDamageBoost() * Material.getDamageModifier(getSelectedMaterial(), rollCritical);
+        return damage;
     }
 
     @Override

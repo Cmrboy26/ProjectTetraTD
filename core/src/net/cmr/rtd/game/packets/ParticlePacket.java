@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 
 public class ParticlePacket extends Packet {
@@ -19,6 +21,18 @@ public class ParticlePacket extends Packet {
         effect.serialize(buffer);
         particleData = buffer.getBuffer();
         buffer.close();
+    }
+
+    public static void sendPacket(UpdateData data, ParticleEffect effect) {
+        if (data.isClient()) {
+            return;
+        }
+        try {
+            ParticlePacket packet = new ParticlePacket(effect);
+            data.getManager().sendPacketToAll(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ParticleEffect getParticleEffect() {

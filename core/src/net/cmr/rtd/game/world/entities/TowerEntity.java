@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Null;
 
 import net.cmr.rtd.game.packets.AttackPacket;
+import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
@@ -91,6 +92,18 @@ public abstract class TowerEntity extends Entity {
                 }
             }
         }
+    }
+
+    public boolean wasCriticalHit(float damage) {
+        if (getCritChance() == 0) return false;
+        float normalDamage = getDamage(false);
+        float criticalDamage = normalDamage * getCritDamagePercent();
+        return normalDamage != criticalDamage && damage == criticalDamage;
+    }
+
+    public void displayCriticalHit(UpdateData data) {
+        ParticleEffect effect = ParticleCatalog.criticalEffect(this);
+        ParticlePacket.sendPacket(data, effect);
     }
 
     @Override

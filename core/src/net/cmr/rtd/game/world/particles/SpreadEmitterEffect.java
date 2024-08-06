@@ -19,11 +19,11 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class SpreadEmitterEffect extends ParticleEffect {
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     SpriteType spriteType;
     AnimationType animationType;
-    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1;
+    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1, gravity = 0, xRandomImpact = 0;
     boolean followEntity;
 
     public static class SpreadEmitterFactory {
@@ -32,6 +32,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
         SpriteType spriteType = null;
         AnimationType animationType = null;
         float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1, randomVelocityImpact = 1;
+        float gravity = 0, xRandomImpact = 0;
         boolean followEntity = false;
 
         public SpreadEmitterFactory() {
@@ -93,6 +94,16 @@ public class SpreadEmitterEffect extends ParticleEffect {
             return this;
         }
 
+        public SpreadEmitterFactory setGravity(float gravity) {
+            this.gravity = gravity;
+            return this;
+        }
+
+        public SpreadEmitterFactory setXRandomImpact(float ximpact) {
+            this.xRandomImpact = ximpact;
+            return this;
+        }
+
         public SpreadEmitterEffect create() {
             SpreadEmitterEffect effect = new SpreadEmitterEffect(attachedEntity);
             effect.spriteType = spriteType;
@@ -105,6 +116,8 @@ public class SpreadEmitterEffect extends ParticleEffect {
             effect.animationSpeed = animationSpeed;
             effect.areaSize = areaSize;
             effect.randomVelocityImpact = randomVelocityImpact;
+            effect.gravity = gravity;
+            effect.xRandomImpact = xRandomImpact;
             return effect;
         }
     }
@@ -153,12 +166,16 @@ public class SpreadEmitterEffect extends ParticleEffect {
             float random = (float) Math.random();
             float calculatedRandom = 2f * random * randomVelocityImpact - randomVelocityImpact + 1f;
             calculatedRandom /= 2f;
-            Vector2 velocity = new Vector2((float) (0), (float) (calculatedRandom));
+            float randomx = (float) Math.random();
+            float calculatedRandomx = 2f * randomx * xRandomImpact - xRandomImpact;
+            calculatedRandomx /= 2f;
+            Vector2 velocity = new Vector2((float) (calculatedRandomx), (float) (calculatedRandom));
             velocity.scl(.5f);
             particles.add(new Particle(particlePosition, velocity));
         }
         for (int i = 0; i < particles.size(); i++) {
             Particle particle = particles.get(i);
+            particle.velocity.sub(0, gravity*delta);
             particle.position.add(particle.velocity.cpy().scl(delta*60));
             particle.elapsedTime += delta;
             if (particle.elapsedTime >= particleLife) {
@@ -226,6 +243,8 @@ public class SpreadEmitterEffect extends ParticleEffect {
         }
         buffer.writeFloat(areaSize);
         buffer.writeFloat(randomVelocityImpact);
+        buffer.writeFloat(gravity);
+        buffer.writeFloat(xRandomImpact);
     }
 
     @Override
@@ -249,6 +268,10 @@ public class SpreadEmitterEffect extends ParticleEffect {
         areaSize = input.readFloat();
         if (version >= 1) {
             randomVelocityImpact = input.readFloat();
+        }
+        if (version >= 2) {
+            gravity = input.readFloat();
+            xRandomImpact = input.readFloat();
         }
     }
 

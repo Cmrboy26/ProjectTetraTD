@@ -69,8 +69,10 @@ public class TowerDescription {
 
         if (descriptors.contains(TowerDescriptors.DPS)) {
             Table dpsTable = new Table();
+            float damage = tower.getDamage(false) * (1 + (tower.getCritDamagePercent() - 1) * tower.getCritChance());
+            float dps = damage / tower.getAttackSpeed();
             dpsTable.add(new Image(Sprites.sprite(SpriteType.DPS_ICON))).colspan(1).left();
-            dpsTable.add(descriptionLabel("DPS: "+StringUtils.truncateFloatingPoint(tower.getDamage(false)/tower.getAttackSpeed(), 2))).colspan(1).padLeft(3).left().growX().row();
+            dpsTable.add(descriptionLabel("DPS: "+StringUtils.truncateFloatingPoint(dps, 2))).colspan(1).padLeft(3).left().growX().row();
             generalStatsTable.add(dpsTable).growX();
         }
 

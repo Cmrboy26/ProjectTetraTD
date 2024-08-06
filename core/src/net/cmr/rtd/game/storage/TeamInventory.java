@@ -168,7 +168,7 @@ public class TeamInventory {
             if (material == null) return 1;
             switch (material) {
                 case QUARTZ: {
-                    return 2.0f;
+                    return 1.5f;
                 }
                 case THORIUM: {
                     return 0.7f;
@@ -180,7 +180,7 @@ public class TeamInventory {
             if (tower.getSelectedMaterial() == null) return;
             switch (tower.getSelectedMaterial()) {
                 case CRYONITE: {
-                    float chance = 0.15f;
+                    float chance = 0.333f;
                     if (tower instanceof IceTower) {
                         chance = 0.05f;
                     }

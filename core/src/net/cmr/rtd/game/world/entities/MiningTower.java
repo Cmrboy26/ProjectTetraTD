@@ -104,16 +104,8 @@ public abstract class MiningTower extends TowerEntity {
     }
 
     protected void displayCollectedEffect(UpdateData data, SpriteType icon) {
-        if (data.isClient()) {
-            return;
-        }
         ParticleEffect effect = ParticleCatalog.resourceCollectedEffect(getPosition(), icon);
-        try {
-            ParticlePacket packet = new ParticlePacket(effect);
-            data.getManager().sendPacketToAll(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ParticlePacket.sendPacket(data, effect);
     }
 
     public boolean validMiningTarget(TileType type) {

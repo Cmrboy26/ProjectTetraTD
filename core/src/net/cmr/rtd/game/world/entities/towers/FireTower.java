@@ -26,13 +26,13 @@ import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
+import net.cmr.util.StringUtils;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class FireTower extends TowerEntity {
 
     float fireballDamage = 2;
-    float targetDPS = 1;
 
     boolean attacking = false;
     float animationDelta = 0;
@@ -63,12 +63,16 @@ public class FireTower extends TowerEntity {
                 new FireEffect(data, enemy.getEffects(), getLevel(), getFireEffectLevel());
                 actionOccured = true;
                 if (!launchedFireball && data.isServer()) {
+                    float damage = getDamage(true);
+                    if (wasCriticalHit(damage)) {
+                        displayCriticalHit(data);
+                    }
                     ProjectileBuilder builder = new ProjectileBuilder()
                         .setEntity(enemy)
                         .setAnimation(AnimationType.FIRE)
                         .setPosition(new Vector2(getPosition()))
                         .setScale(3f)
-                        .setDamage((int) (getLevel() * getLevel() * .75f))
+                        .setDamage((int) damage)
                         .setTimeToReachTarget(1)
                         .setAOE(getFireballAOE())
                         .setPrecision(1)
@@ -80,7 +84,6 @@ public class FireTower extends TowerEntity {
                         // dont launch it
                         continue;
                     }
-                    //data.getWorld().addEntity(fireball);
                     Projectile.launchProjectile(data, fireball);
                     launchedFireball = true;
                     fireballDelta = 0;
@@ -95,7 +98,7 @@ public class FireTower extends TowerEntity {
     }
 
     public int getFireEffectLevel() {
-        return (int) Math.floor(targetDPS + ((getLevel() - 1) / 5f));
+        return (int) Math.floor(1+((getLevel() - 1) / 2f));
     }
 
     public float getFireballAOE() {
@@ -103,7 +106,8 @@ public class FireTower extends TowerEntity {
     }
 
     public int getFireballDamage(boolean rollCritical) {
-        return (int) (getLevel() * getLevel() * .75f * Material.getDamageModifier(getSelectedMaterial(), rollCritical));
+        float fireballDamage = getLevel() * getLevel() + getLevel() + 5;
+        return (int) (fireballDamage * Material.getDamageModifier(getSelectedMaterial(), rollCritical));
     }
 
     @Override
@@ -128,7 +132,7 @@ public class FireTower extends TowerEntity {
     }
 
     public float calculateApproximateFireballDPS(float enemyDensity) {
-        float damagePerFireball = getLevel() * getLevel() + getLevel() + 5;
+        float damagePerFireball = getFireballDamage(false);
         float fireballDPS = damagePerFireball / getFireballPeriod();
         float areaFactor = enemyDensity * getFireballAOE();
         return fireballDPS * areaFactor;
@@ -163,7 +167,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getDamage(boolean rollCritical) {
-        return (targetDPS + (getLevel() - 1) * .5f)*getScrapMetalDamageBoost();
+        return getFireballDamage(rollCritical);
     }
 
     @Override
@@ -178,11 +182,11 @@ public class FireTower extends TowerEntity {
         description.removeDescriptor(TowerDescription.TowerDescriptors.DPS_EXTENDED);
 
         description.createCustomDoubleSection(
-            Sprites.animation(AnimationType.FIRE, 0f), "Fireball Damage: " + getFireballDamage(false),
-            Sprites.sprite(SpriteType.ATTACK_SPEED_ICON), "Fireball Period: " + getFireballPeriod()+"s"  
+            Sprites.animation(AnimationType.FIRE, 0f), "Fireball Damage: " + StringUtils.truncateFloatingPoint(getFireballDamage(false), 2),
+            Sprites.sprite(SpriteType.ATTACK_SPEED_ICON), "Fireball Period: " + StringUtils.truncateFloatingPoint(getFireballPeriod(), 2)+"s"  
         );
         description.createCustomSection(
-            Sprites.sprite(SpriteType.DPS_ICON), "Fire Effect DPS: " + FireEffect.getDPS(getFireEffectLevel())
+            Sprites.sprite(SpriteType.DPS_ICON), "Fire Effect DPS: " + StringUtils.truncateFloatingPoint(FireEffect.getDPS(getFireEffectLevel()), 2)
         );
 
         return description.create(this);

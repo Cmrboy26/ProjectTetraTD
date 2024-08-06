@@ -7,6 +7,7 @@ import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WaveUnit;
@@ -249,14 +250,18 @@ public class EndlessUtils {
                 continue;
             }
             if (tower instanceof FireTower) {
-                totalDPS += tower.getDamage(false);
+                //totalDPS += tower.getDamage(false);
                 totalDPS += ((FireTower)tower).calculateApproximateFireballDPS(Math.min(10, previousRoundDensity));
+                totalDPS += FireEffect.getDPS(((FireTower)tower).getFireEffectLevel());
                 continue;
             }
             if (tower.getAttackSpeed() == 0) {
                 continue;
             }
-            totalDPS += tower.getDamage(false) / tower.getAttackSpeed();
+
+            float damage = tower.getDamage(false) * (1 + (tower.getCritDamagePercent() - 1) * tower.getCritChance());
+            float dps = damage / tower.getAttackSpeed();
+            totalDPS += dps;
         }
         return totalDPS;
     }

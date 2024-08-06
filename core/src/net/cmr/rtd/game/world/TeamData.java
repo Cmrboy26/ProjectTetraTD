@@ -162,12 +162,7 @@ public class TeamData {
                     break;
             }
             ParticleEffect effect = ParticleCatalog.resourceCollectedEffect(entity.getPosition(), type);
-            try {
-                ParticlePacket packet = new ParticlePacket(effect);
-                data.getManager().sendPacketToAll(packet);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ParticlePacket.sendPacket(data, effect);
         }
     }
 

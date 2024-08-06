@@ -16,7 +16,7 @@ public class ParticleCatalog {
                 .setEntity(entity)
                 .setParticle(SpriteType.FROZEN)
                 .setDuration(1)
-                .setEmissionRate(3)
+                .setEmissionRate(1)
                 .setScale(.20f)
                 .setParticleLife(.5f)
                 .setFollowEntity(true)
@@ -30,7 +30,7 @@ public class ParticleCatalog {
                 .setEntity(entity)
                 .setParticle(AnimationType.FIRE)
                 .setDuration(1)
-                .setEmissionRate(2)
+                .setEmissionRate(1)
                 .setScale(.25f)
                 .setParticleLife(.5f)
                 .setFollowEntity(true)
@@ -74,6 +74,22 @@ public class ParticleCatalog {
                 .setParticleLife(.8f)
                 .setAnimationSpeed(1.5f)
                 .setAreaSize(1.2f)
+                .create();
+        effect.setPosition(new Vector2(entity.getX(), entity.getY()));
+        return effect;
+    }
+
+    public static ParticleEffect criticalEffect(Entity entity) {
+        ParticleEffect effect = SpreadEmitterEffect.factory()
+                .setParticle(SpriteType.CRITICAL_ICON)
+                .setDuration(.75f)
+                .setEmissionRate(79)
+                .setScale(.12f)
+                .setParticleLife(.4f)
+                .setAnimationSpeed(1.5f)
+                .setAreaSize(.7f)
+                .setGravity(3f)
+                .setXRandomImpact(1f)
                 .create();
         effect.setPosition(new Vector2(entity.getX(), entity.getY()));
         return effect;

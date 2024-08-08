@@ -198,7 +198,6 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
      */
     public void fadeToScreen(AbstractScreenEX newScreen, float duration, Interpolation interpolation, boolean fadeIn) {
         Objects.requireNonNull(newScreen);
-        // TODO: Allow a fading in screen to cancel the current fade and fade out.
         if (fading) {
             return;
         }

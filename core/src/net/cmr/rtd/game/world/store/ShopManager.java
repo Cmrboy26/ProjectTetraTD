@@ -21,8 +21,6 @@ import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
 import net.cmr.rtd.game.world.tile.TileData;
-import net.cmr.util.Audio;
-import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
@@ -174,12 +172,10 @@ public class ShopManager {
                 boolean success = towerAt.levelUp(option.levelUpTime.apply(currentLevel));
                 if (!success) {
                     // Tower is already upgrading
-                    System.out.println("Tower is already upgrading");
                     return;
                 }
                 if (towerAt.isBeingBuilt()) {
                     // Tower is still being built
-                    System.out.println("Tower is still being built");
                     return;
                 }
                 towerAt.updatePresenceOnClients(manager);

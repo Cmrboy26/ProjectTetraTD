@@ -25,11 +25,6 @@ public class Tile implements Collidable {
     public static final int SIZE = 32;
     public static HashMap<Integer, TileType> types = new HashMap<>();
 
-    // TODO: Find a better way to handle tiles.
-    // Maybe its best to just make tile objects for each type.
-    // Maybe tiles should be stored in a Tile object with an id, rotation, inverted flag, and collision
-    // Probably don't store just the TileType (because it can't store any rotation without creating a lot of new types)
-    // Or you could just 
     public enum TileType {
 
         FLOOR(1, 0, "hires-wallSprites20"),

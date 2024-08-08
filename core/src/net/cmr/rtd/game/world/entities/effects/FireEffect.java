@@ -9,8 +9,6 @@ import net.cmr.rtd.game.world.entities.EnemyEntity.DamageType;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
-import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
-import net.cmr.util.Sprites.AnimationType;
 
 public class FireEffect extends Effect {
 

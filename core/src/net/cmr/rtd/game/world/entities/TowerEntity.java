@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.DataBuffer;
 import com.badlogic.gdx.utils.Null;
@@ -23,10 +21,8 @@ import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
-import net.cmr.rtd.game.world.entities.TowerDescription.TowerDescriptors;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
-import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.util.Audio;
@@ -34,7 +30,6 @@ import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
-import net.cmr.util.StringUtils;
 
 public abstract class TowerEntity extends Entity {
 
@@ -49,7 +44,6 @@ public abstract class TowerEntity extends Entity {
     float placementDelta = -1;
     int level = 1;
 
-    // TODO: Add other tower upgrades
     // NOTE: The player must select only ONE type of upgrade for the tower and must stick with that path.
     static final int VERSION = 2;
     public static final int MAX_COMPONENTS = 4;

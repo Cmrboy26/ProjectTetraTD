@@ -1,7 +1,6 @@
 package net.cmr.rtd.screen;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
@@ -40,7 +39,6 @@ import net.cmr.rtd.screen.SelectionScreen.PlayType;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
-import net.cmr.util.IntroScreen;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.SpriteType;
 
@@ -203,13 +201,13 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.padTop(50);
 				creditsDialog.text("Programming, Music, Art: Colten Reissmann", small);
 				creditsDialog.getContentTable().row();
-				creditsDialog.text("Beta Testing: SirPotato42, Andrew", small);
+				creditsDialog.text("Testing: SirPotato42, Andrew, mxwl", small);
 				creditsDialog.getContentTable().row();
 				creditsDialog.text("Copyright Colten Reissmann (C)", small);
 				creditsDialog.getContentTable().row();
 
 				// April fools joke
-				if (EasterEgg.isAprilFools() || EasterEgg.isMaxwell()) {
+				if (EasterEgg.isAprilFools() || EasterEgg.isMaxwell() || EasterEgg.isFelipe()) {
 					creditsDialog.text("Icon: Barnold Barnoldfanger Sr. (from Georgia)", small);
 					Image barnold = new Image(Sprites.drawable(SpriteType.BARNOLD2));
 					creditsDialog.getContentTable().add(barnold).size(48).pad(1);

@@ -37,6 +37,7 @@ import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class SelectionScreen extends AbstractScreenEX {
@@ -212,6 +213,7 @@ public class SelectionScreen extends AbstractScreenEX {
         int buttonSize = 65;
 
         LevelFolder[] levels = world.readLevels();
+        int levelIndex = 0;
         for (LevelFolder level : levels) {
             Table levelTable = new Table();
             boolean locked = level.isLevelLocked();
@@ -397,9 +399,8 @@ public class SelectionScreen extends AbstractScreenEX {
             name.setAlignment(Align.center);
             levelTable.add(name).align(Align.center).row();
 
-            // TODO: If the level isn't unlocked yet, gray out the image
-            // TODO: If the level is completed, make the image green or something
-            Image slot = new Image(Sprites.sprite(SpriteType.WORLD_LEVEL));
+            //Image slot = new Image(Sprites.sprite(SpriteType.WORLD_LEVEL));
+            Image slot = new AnimatedImage(AnimationType.WORLD_LEVEL_ANIMATED, (levels.length - levelIndex) * 0.5f);
             boolean areAllTasksCompleted = true;
             boolean noTasksPresent = true;
             for (QuestFile quest : getValidQuests(level)) {
@@ -421,6 +422,8 @@ public class SelectionScreen extends AbstractScreenEX {
             }
             float ratio = 1.0f * slot.getHeight() / slot.getWidth();
             levelTable.add(slot).size(buttonSize, buttonSize*ratio).align(Align.center).pad(5);
+            
+            levelIndex++;
         }
 
         ScrollPane worldView = new ScrollPane(levelSelection, Sprites.skin());

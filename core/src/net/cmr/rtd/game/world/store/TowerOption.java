@@ -1,6 +1,5 @@
 package net.cmr.rtd.game.world.store;
 
-import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;

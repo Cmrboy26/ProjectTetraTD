@@ -11,13 +11,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
@@ -132,7 +127,6 @@ public class World extends GameObject {
                 waveObj = wavesData.getNextWave(this.wave, data);
                 data.getManager().onWaveChange(wave, waveObj);
             }
-            // TODO: SPAWN ENTITIES
 
             if (waveObj != null) {
                 float elapsedTime = waveObj.getWaveTime() - waveCountdown;

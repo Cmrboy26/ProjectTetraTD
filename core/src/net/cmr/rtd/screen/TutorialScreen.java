@@ -128,7 +128,7 @@ public class TutorialScreen extends GameScreen {
             case SHOW_MONEY:
                 tableText("You can purchase towers using money, which is");
                 tableText("displayed in the top left corner.");
-                tableText("To construct towers, tap the 'Shop' button");
+                tableText("To construct towers, touch the 'Shop' button");
                 tableText("at the bottom of the screen.");
                 Image image = new Image(Sprites.sprite(SpriteType.SHOP_ICON));
                 Image money = new Image(Sprites.sprite(SpriteType.CASH));
@@ -141,13 +141,13 @@ public class TutorialScreen extends GameScreen {
                 tutorialTable.add(shooterTower).size(size).colspan(2).row();
                 break;
             case PLACE_TOWER:
-                tableText("Place the tower on the map by taping a tile.");
+                tableText("Place the tower on the map by touching a tile.");
                 tableText("Please place the tower on the highlighted tile.");
                 break;
             case UNPAUSE_WAVE:
                 tableText("Excellent! The tower will be finished ");
                 tableText("constructing in just a moment.");
-                tableText("Once it is finished, tap the resume button");
+                tableText("Once it is finished, touch the resume button");
                 tableText("(right bottom) to summon a wave of enemies.");
                 Image resume = new Image(Sprites.sprite(SpriteType.RESUME));
                 tutorialTable.add(resume).size(size).colspan(2).row();
@@ -162,12 +162,12 @@ public class TutorialScreen extends GameScreen {
             case UPGRADE_TOWER:
                 tableText("Congratulations! You have survived your first wave!");
                 tableText("With this extra money, you can upgrade your tower.");
-                tableText("Tap the 'Upgrade' button at the bottom of the screen.");
+                tableText("Touch the 'Upgrade' button at the bottom of the screen.");
                 Image upgrade = new Image(Sprites.sprite(SpriteType.UPGRADE));
                 tutorialTable.add(upgrade).size(size).colspan(2).row();
                 break;
             case SELECT_TOWER_FOR_UPGRADE:
-                tableText("Tap the tower we just constructed");
+                tableText("Touch the tower we just constructed");
                 tableText("and wait for it to finish upgrading.");
                 break;
             case UPGRADE_SUCCESS:
@@ -197,17 +197,17 @@ public class TutorialScreen extends GameScreen {
             }
             case INVENTORY_OPEN:
                 tableText("Let's apply a component to your tower.");
-                tableText("Tap the 'Inventory' button at the bottom of the screen.");
+                tableText("Touch the 'Inventory' button at the bottom of the screen.");
                 break;
             case INVENTORY_SELECT: {
-                tableText("Tap the left top item in the inventory.");
+                tableText("Touch the left top item in the inventory.");
                 tableText("This is lubricant, one of the 3 types of components.");
                 Image wd40 = new Image(Sprites.sprite(SpriteType.LUBRICANT));
                 tutorialTable.add(wd40).size(size).colspan(2).row();
                 break;
             }
             case COMPONENT_APPLY:
-                tableText("Tap the tower we constructed earlier");
+                tableText("Touch the tower we constructed earlier");
                 tableText("to apply the component to it.");
                 break;
             case INVENTORY_INTRO_3:
@@ -261,14 +261,14 @@ public class TutorialScreen extends GameScreen {
                 tutorialTable.add(thorium).size(size).colspan(1).row();
                 break;
             case SELL_INTRO:
-                tableText("Finally, to view a tower's stats, you can tap it.");
+                tableText("Finally, to view a tower's stats, you can touch it.");
                 break;
             case SELL:
                 tableText("Here, you can view what components and gemstones");
                 tableText("are applied to the tower along with the tower's stats.");
                 tableText("You can also modify the tower's targeting method");
                 tableText("or sell the tower for a refund here.");
-                tableText("Please sell your tower by taping 'Sell'.");
+                tableText("Please sell your tower by touching 'Sell'.");
                 tableText("(Components and gemstones will be lost on sell.)");
                 break;
             case FINAL_INFO: {

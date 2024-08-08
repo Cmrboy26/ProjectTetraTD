@@ -79,6 +79,7 @@ public class EndlessUtils {
         int teams = teamData.size();
 
         int currentWave = gameManager.getWorld().getWave();
+        @SuppressWarnings("unchecked")
         ArrayList<TowerEntity>[] teamTowers = new ArrayList[teams];
         for (int i = 0; i < teams; i++) {
             teamTowers[i] = gameManager.getTowers(teamData.get(i).team);
@@ -131,7 +132,6 @@ public class EndlessUtils {
 
         targetDPS = Math.max(2, targetDPS); // Minimum DPS (to prevent waves with no enemies)
 
-        // TODO: FIX RESUMING ENDLESS MODE.
         int waveType = currentWave % 4; // 0 = default, 1 = small type enemy wave, 2 = large type enemy wave, 3 = default
         if (currentWave <= 3) {
             waveType = 0;

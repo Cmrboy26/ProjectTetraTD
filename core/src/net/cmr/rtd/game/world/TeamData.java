@@ -1,7 +1,5 @@
 package net.cmr.rtd.game.world;
 
-import java.io.IOException;
-
 import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;

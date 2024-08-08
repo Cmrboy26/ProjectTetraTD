@@ -50,6 +50,7 @@ import net.cmr.rtd.game.packets.Packet;
 import net.cmr.rtd.game.packets.PacketEncryption;
 import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.OnlineGameStream;
+import net.cmr.rtd.screen.FirstTimePlayingScreen;
 import net.cmr.rtd.screen.GameScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.shader.ShaderManager;
@@ -97,7 +98,13 @@ public class ProjectTetraTD extends CMRGame {
 		achievementNotificationStage.addActor(actorTable);
 
 		Settings.applySettings();
-		showIntroScreen(new MainMenuScreen());
+		AbstractScreenEX nextScreen = null;
+		if (getUsername().equals("null")) {
+			nextScreen = new FirstTimePlayingScreen();
+		} else {
+			nextScreen = new MainMenuScreen();
+		}
+		showIntroScreen(nextScreen);
 
 		if (isMobile()) {
 			// TODO: Find out why tooltips dont appear on mobile

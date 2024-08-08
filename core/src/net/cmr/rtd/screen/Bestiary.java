@@ -12,7 +12,6 @@ import net.cmr.rtd.game.world.EnemyFactory;
 import net.cmr.rtd.game.world.EnemyFactory.EnemyType;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
-import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
 
 public class Bestiary {

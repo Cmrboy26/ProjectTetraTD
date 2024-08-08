@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
-import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.EasterEgg;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
@@ -25,7 +24,6 @@ import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.effects.EntityEffects.EntityStat;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
-import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.CMRGame;
 import net.cmr.util.Sprites;
 import net.cmr.util.Sprites.AnimationType;

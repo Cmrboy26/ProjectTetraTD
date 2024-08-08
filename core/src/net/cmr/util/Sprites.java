@@ -96,7 +96,7 @@ public class Sprites implements Disposable {
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
         
-        WORLD_LEVEL("worldLevel"),
+        //WORLD_LEVEL("worldLevel"),
         ;
 
         private String spriteName;
@@ -167,6 +167,8 @@ public class Sprites implements Disposable {
 
         FIRE("fire", PlayMode.LOOP, .5f),
         SPARKLE("effects/sparkle", PlayMode.NORMAL, .075f),
+
+        WORLD_LEVEL_ANIMATED("worldLevelAnimated", PlayMode.LOOP, .2f),
         ;
 
         private String animationName;

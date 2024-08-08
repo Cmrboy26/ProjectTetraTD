@@ -18,7 +18,6 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.waves.WavesData;
 import net.cmr.rtd.waves.WavesData.DifficultyRating;
-import net.cmr.util.Log;
 
 /**
  * Represents a wave file for a level inside of a level folder

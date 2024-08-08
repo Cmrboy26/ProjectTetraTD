@@ -302,7 +302,7 @@ public class GameManager implements Disposable {
         }
         if (details.isHostedOnline()) {
             // Attempt to port forward
-            attemptPortForward();
+            upnpPortForwardFailed = !attemptPortForward();
             // Start the server
             server.start();
             try {
@@ -904,6 +904,7 @@ public class GameManager implements Disposable {
     }
 
     GatewayDiscover discover;
+    boolean upnpPortForwardFailed = false;
 
     public boolean attemptPortForward() {
         if (!details.useUPNP()) {
@@ -953,10 +954,14 @@ public class GameManager implements Disposable {
         try {
             GatewayDevice d = discover.getValidGateway();
             if (d == null) {
+                if (upnpPortForwardFailed) {
+                    // There was an error with the port forward, so don't try to remove it.
+                    return;
+                }
                 discover.discover(); // Attempt to discover the gateway again to delete the port mapping
                 d = discover.getValidGateway();
                 if (d == null) {
-                    Log.warning("Failed to remove port forward on port: "+details.getTCPPort()+"!");
+                    Log.warning("Failed to remove port forward on port "+details.getTCPPort());
                     return;
                 }
             }

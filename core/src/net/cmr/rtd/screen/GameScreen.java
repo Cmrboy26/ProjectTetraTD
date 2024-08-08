@@ -117,7 +117,6 @@ import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
-import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.Cost;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
@@ -135,7 +134,6 @@ import net.cmr.util.Log;
 import net.cmr.util.Point;
 import net.cmr.util.Settings;
 import net.cmr.util.Sprites;
-import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class GameScreen extends AbstractScreenEX {
@@ -506,8 +504,10 @@ public class GameScreen extends AbstractScreenEX {
                     productionShopTable.row();
                 }
 
-                combativeTab.setDisabled(combativeOptions.size() < 0);
-                productionTab.setDisabled(productionOptions.size() < 0);
+                System.out.println(combativeOptions.size());
+                System.out.println(productionOptions.size());
+                combativeTab.setDisabled(combativeOptions.size() == 0);
+                productionTab.setDisabled(productionOptions.size() == 0);
                 effectTab.setDisabled(true);
 
                 combatScroll.layout();
@@ -1148,7 +1148,6 @@ public class GameScreen extends AbstractScreenEX {
                 }
 
                 if (taskCompleted) {
-                    // TODO: Verify if this is the correct way to calculate the remaining tasks
                     int completedTasks = storedCompleted.size();
                     int remainingTasks = tasks.length - completedTasks;
                     if (remainingTasks > 0) {
@@ -1264,7 +1263,6 @@ public class GameScreen extends AbstractScreenEX {
 
         if (world != null) {
             // FIXME: When the window is frozen, new game objects are not added to the world. This causes newly added enemies to be bunched up after the window is unfrozen.
-            // TODO: Implement speed properly
             world.update(gameSpeed, delta, data);
         }
         processInput(delta);
@@ -1565,7 +1563,7 @@ public class GameScreen extends AbstractScreenEX {
                             super.act(delta);
                         }
                     };
-                    // TODO: add the ability to send a sorttypepacket to change the targeting style of the selected tower
+                   
                     informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
                     informationUpgradeWindow.pad(10);
                     informationUpgradeWindow.padTop(30);
@@ -1866,10 +1864,6 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public @Null Player getLocalPlayer() {
-        // TODO: uncommenting this code sometimes freezes the player and "desyncs" the players actual position and the camera
-        //if (localPlayer != null) {
-        //    return localPlayer;
-        //}
         if (world == null) { return null; }
         for (Entity entity : world.getEntities()) {
             if (entity instanceof Player) {

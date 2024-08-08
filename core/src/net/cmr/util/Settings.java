@@ -44,7 +44,7 @@ public class Settings {
         defaultFloat(MASTER_VOLUME, 0.5f, force, preferences);
         defaultFloat(MUSIC_VOLUME, 0.5f, force, preferences);
         defaultFloat(SFX_VOLUME, 0.5f, force, preferences);
-        defaultString(USERNAME, "guest", force, preferences);
+        defaultString(USERNAME, "null", force, preferences);
         defaultBoolean(SHOW_FPS, false, force, preferences);
         defaultBoolean(SHOW_PLACEMENT_GRID, false, force, preferences);
         defaultInt(FPS, -1, force, preferences);

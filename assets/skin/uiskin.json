@@ -77,6 +77,10 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 		name: white-pixel
 		color: TEXT_HIGHLIGHT
 	}
+	cursor: {
+		name: white-pixel
+		color: white
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 	default: {
@@ -213,6 +217,7 @@ com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {
 		font: default-font
 		fontColor: white
+		cursor: cursor
 		selection: TEXT_HIGHLIGHT
 	}
 	small: {

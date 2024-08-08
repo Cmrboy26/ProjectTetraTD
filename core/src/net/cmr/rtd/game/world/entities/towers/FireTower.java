@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -17,18 +16,17 @@ import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.entities.EnemyEntity;
 import net.cmr.rtd.game.world.entities.Projectile;
-import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.Projectile.ProjectileBuilder;
+import net.cmr.rtd.game.world.entities.TowerDescription;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.effects.FireEffect;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
-import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites;
-import net.cmr.util.StringUtils;
 import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
+import net.cmr.util.StringUtils;
 
 public class FireTower extends TowerEntity {
 

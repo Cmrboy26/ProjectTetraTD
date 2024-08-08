@@ -17,11 +17,6 @@
 			"id": 0,
 			"type": "REACH_WAVE",
 			"value": 15
-		},
-		{
-			"id": 1,
-			"type": "TOWER_LIMIT",
-			"value": 8
 		}
 	],
 	"waves": [

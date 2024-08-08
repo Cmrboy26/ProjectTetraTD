@@ -1,8 +1,5 @@
 package net.cmr.rtd.screen;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -13,7 +10,6 @@ import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
-import net.cmr.rtd.game.packets.GameInfoPacket;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio.GameMusic;
 import net.cmr.util.Settings;

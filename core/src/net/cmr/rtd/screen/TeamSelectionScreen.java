@@ -33,19 +33,23 @@ public class TeamSelectionScreen extends AbstractScreenEX {
         this.usePassword = usePassword;
     }
 
+    public int getSkipSelectionTeam() {
+        if (availableTeams.length == 1 && !usePassword) {
+            //joinGameCallback.accept(new ConnectionAttempt("", availableTeams[0]));
+            return availableTeams[0];
+        }
+        if (availableTeams.length == 0 && !usePassword) {
+            // Weird bug on mobile???
+            //joinGameCallback.accept(new ConnectionAttempt("", 0));
+            return availableTeams[0];
+        }
+        return -1;
+    }
+
     @Override
     public void show() {
         super.show();
         System.out.println(availableTeams.length);
-        if (availableTeams.length == 1 && !usePassword) {
-            joinGameCallback.accept(new ConnectionAttempt("", availableTeams[0]));
-            return;
-        }
-        if (availableTeams.length == 0 && !usePassword) {
-            // Weird bug on mobile???
-            joinGameCallback.accept(new ConnectionAttempt("", 0));
-            return;
-        }
 
         Table table = new Table();
 		table.setFillParent(true);

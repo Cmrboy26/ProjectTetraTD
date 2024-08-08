@@ -31,10 +31,10 @@ import net.cmr.util.Log;
 import net.cmr.util.Settings;
 
 /**
- * Holds static helper methods to join singleplayer/multiplayer games and to host multiplayer games.
+ * Holds static helper methods to join singleplayer/multiplayer games and to
+ * host multiplayer games.
  */
 public class GameConnector {
-    
 
 	public static void startSingleplayerGame(QuestFile quest) {
 		startSingleplayerGame(quest, -1);
@@ -42,10 +42,12 @@ public class GameConnector {
 
 	/**
 	 * Starts a singleplayer game with the given quest and desired team.
-	 * @param quest The quest to play.
-	 * @param desiredTeam The team the player wants to join. If -1, the player will be prompted to choose a team.
+	 * 
+	 * @param quest       The quest to play.
+	 * @param desiredTeam The team the player wants to join. If -1, the player will
+	 *                    be prompted to choose a team.
 	 */
-    public static void startSingleplayerGame(QuestFile quest, final int desiredTeam) {
+	public static void startSingleplayerGame(QuestFile quest, final int desiredTeam) {
 		GameManagerDetails details = new GameManagerDetails();
 		details.setMaxPlayers(1);
 		details.setHostedOnline(false);
@@ -53,12 +55,12 @@ public class GameConnector {
 			@Override
 			public void accept(ConnectionAttempt attempt) {
 				int team = attempt.team;
-		
+
 				GameManager manager = new GameManager(details);
 				LocalGameStream[] streams = LocalGameStream.createStreamPair();
 				GameStream clientsideStream = streams[0];
 				GameStream serversideStream = streams[1];
-		
+
 				serversideStream.addListener(new PacketListener() {
 					@Override
 					public void packetReceived(Packet packet) {
@@ -71,9 +73,9 @@ public class GameConnector {
 						Log.debug("Client received packet: " + packet);
 					}
 				});
-		
+
 				GameScreen screen = new GameScreen(clientsideStream, manager, details.getPassword(), team);
-		
+
 				manager.initialize(quest);
 				ProjectTetraTD.getInstance().setScreen(screen);
 				manager.start();
@@ -82,15 +84,22 @@ public class GameConnector {
 				if (desiredTeam != -1 && manager.areWavesPaused()) {
 					manager.resumeWaves();
 				}
-				
-				clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+
+				clientsideStream
+						.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 			}
 		};
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
 				if (desiredTeam == -1) {
-					ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
+					TeamSelectionScreen teamSelectionScreen = new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword);
+					int skipTeam = teamSelectionScreen.getSkipSelectionTeam();
+					if (skipTeam != -1) {
+						joinGameWithTeam.accept(new ConnectionAttempt("", skipTeam));
+					} else {
+						ProjectTetraTD.getInstance().setScreen(teamSelectionScreen);
+					}
 				} else {
 					ConnectionAttempt attempt = new ConnectionAttempt("", desiredTeam);
 					joinGameWithTeam.accept(attempt);
@@ -98,16 +107,16 @@ public class GameConnector {
 			}
 		};
 		getGameInfoFromFile(quest, details.getMaxPlayers(), callback);
-    }
+	}
 
-    public static void joinMultiplayerGame(String ip, int port) {
-		
+	public static void joinMultiplayerGame(String ip, int port) {
+
 		Consumer<ConnectionAttempt> joinGameWithTeam = new Consumer<ConnectionAttempt>() {
 			@Override
 			public void accept(ConnectionAttempt attempt) {
 				try {
 					int team = attempt.team;
-					
+
 					ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 					Client client = new Client(30000, 30000);
 					OnlineGameStream.registerPackets(client.getKryo());
@@ -141,39 +150,45 @@ public class GameConnector {
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
+				TeamSelectionScreen teamSelectionScreen = new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword);
+				int skipTeam = teamSelectionScreen.getSkipSelectionTeam();
+				if (skipTeam != -1) {
+					joinGameWithTeam.accept(new ConnectionAttempt("", skipTeam));
+				} else {
+					ProjectTetraTD.getInstance().setScreen(teamSelectionScreen);
+				}
 			}
 		};
 
 		getGameInfo(ip, port, callback);
-    }
+	}
 
-    public static void hostMultiplayerGame(QuestFile quest, GameManagerDetails details) {
+	public static void hostMultiplayerGame(QuestFile quest, GameManagerDetails details) {
 		Consumer<ConnectionAttempt> joinGameWithTeam = new Consumer<ConnectionAttempt>() {
 			@Override
 			public void accept(ConnectionAttempt attempt) {
 				int team = attempt.team;
-                ProjectTetraTD rtd = ProjectTetraTD.getInstance(ProjectTetraTD.class);
+				ProjectTetraTD rtd = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 
-                details.setHostedOnline(true);
-                GameManager manager = new GameManager(details);
-                LocalGameStream[] pair = LocalGameStream.createStreamPair();
-                LocalGameStream clientsidestream = pair[0];
+				details.setHostedOnline(true);
+				GameManager manager = new GameManager(details);
+				LocalGameStream[] pair = LocalGameStream.createStreamPair();
+				LocalGameStream clientsidestream = pair[0];
 
 				manager.initialize(quest);
-                manager.start();
-                GameScreen screen = new GameScreen(clientsidestream, manager, details.getPassword(), team);
-                rtd.setScreen(screen);
+				manager.start();
+				GameScreen screen = new GameScreen(clientsidestream, manager, details.getPassword(), team);
+				rtd.setScreen(screen);
 
-                clientsidestream.addListener(new PacketListener() {
-                    @Override
-                    public void packetReceived(Packet packet) {
+				clientsidestream.addListener(new PacketListener() {
+					@Override
+					public void packetReceived(Packet packet) {
 						if (packet instanceof PlayerPositionsPacket) {
 							return;
 						}
-                        Log.debug("Client received packet: " + packet);
-                    }
-                });
+						Log.debug("Client received packet: " + packet);
+					}
+				});
 				pair[1].addListener(new PacketListener() {
 
 					@Override
@@ -181,37 +196,44 @@ public class GameConnector {
 						Log.debug("Server received packet: " + packet);
 					}
 				});
-                manager.onNewConnection(pair[1]);
-                clientsidestream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
-            }
-        };
+				manager.onNewConnection(pair[1]);
+				clientsidestream
+						.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
+			}
+		};
 
 		Consumer<GameInfoPacket> callback = new Consumer<GameInfoPacket>() {
 			@Override
 			public void accept(GameInfoPacket t) {
-				ProjectTetraTD.getInstance().setScreen(new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword));
+				TeamSelectionScreen teamSelectionScreen = new TeamSelectionScreen(joinGameWithTeam, t.teams, t.playersOnTeam, t.hasPassword);
+				int skipTeam = teamSelectionScreen.getSkipSelectionTeam();
+				if (skipTeam != -1) {
+					joinGameWithTeam.accept(new ConnectionAttempt("", skipTeam));
+				} else {
+					ProjectTetraTD.getInstance().setScreen(teamSelectionScreen);
+				}
 			}
 		};
 
 		getGameInfoFromFile(quest, details.getMaxPlayers(), callback);
-    }
+	}
 
 	private static void getGameInfoFromFile(QuestFile file, int maxPlayers, Consumer<GameInfoPacket> callback) {
 		ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
 		World world = file.loadWorld();
-		
+
 		ArrayList<Integer> availableTeams = new ArrayList<Integer>();
-        int teamCounter = 0;
-        for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
-            try {
-                TeamData team = new TeamData(world, i);
-                // If this succeeded, then this team exists in the world.
-                teamCounter++;
+		int teamCounter = 0;
+		for (int i = 0; i < GameManager.MAX_TEAMS; i++) {
+			try {
+				TeamData team = new TeamData(world, i);
+				// If this succeeded, then this team exists in the world.
+				teamCounter++;
 				availableTeams.add(i);
-            } catch (NullTeamException e) {
-                // This team does not exist in the world.
-            }
-        }
+			} catch (NullTeamException e) {
+				// This team does not exist in the world.
+			}
+		}
 		int[] teams = new int[availableTeams.size()];
 		int[] players = new int[availableTeams.size()];
 		for (int i = 0; i < availableTeams.size(); i++) {
@@ -242,7 +264,8 @@ public class GameConnector {
 				public void packetReceived(Packet packet) {
 					if (packet instanceof GameInfoPacket) {
 						GameInfoPacket info = (GameInfoPacket) packet;
-						Log.debug("Received game info: " + info.teams + " teams, " + info.players + " players, " + info.maxPlayers + " max players.");
+						Log.debug("Received game info: " + info.teams + " teams, " + info.players + " players, "
+								+ info.maxPlayers + " max players.");
 						callback.accept(info);
 						stream.onClose();
 					}
@@ -277,14 +300,14 @@ public class GameConnector {
 		LocalGameStream[] streams = LocalGameStream.createStreamPair();
 		GameStream clientsideStream = streams[0];
 		GameStream serversideStream = streams[1];
-		
+
 		GameScreen screen = new TutorialScreen(clientsideStream, manager);
-		
+
 		manager.initialize(quest);
 		ProjectTetraTD.getInstance().setScreen(screen);
 		manager.start();
 		manager.onNewConnection(serversideStream);
-				
+
 		clientsideStream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
 	}
 

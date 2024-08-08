@@ -167,6 +167,9 @@ public class MainMenuScreen extends AbstractScreenEX {
 			}
 		}
 		String versionInfo = shortenedTitle+" v"+ProjectTetraTD.MAJORVERSION+"."+ProjectTetraTD.MINORVERSION+"."+ProjectTetraTD.PATCHVERSION;
+		if (ProjectTetraTD.TEST_VERSION) {
+			versionInfo += " (Development)";
+		}
 		if (Gdx.app.getType() == ApplicationType.Android) {
 			versionInfo += " (Android)";
 		}

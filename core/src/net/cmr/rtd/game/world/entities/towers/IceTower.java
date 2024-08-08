@@ -23,6 +23,7 @@ import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class IceTower extends TowerEntity {
@@ -114,14 +115,16 @@ public class IceTower extends TowerEntity {
 
     @Override
     public Table getTowerDescription() {
-        TowerDescription description = TowerDescription.getFullDescription();
-        description.removeDescriptor(TowerDescriptors.DPS);
-        description.removeDescriptor(TowerDescriptors.DPS_EXTENDED);
+        TowerDescription description = new TowerDescription();
+        //description.removeDescriptor(TowerDescriptors.DPS);
+        //description.removeDescriptor(TowerDescriptors.DPS_EXTENDED);
 
         float speedMultiplier = SlownessEffect.getSlowdownMultiplier(getLevel());
         String speedReductionPercent = ((int)((1f-speedMultiplier)*100f))+"%";
         String slowdownPercent = "Speed Reduction: "+speedReductionPercent;
-        description.createCustomSection(Sprites.drawable(SpriteType.FROZEN), slowdownPercent);
+        description.createCustomSection(Sprites.sprite(SpriteType.FROZEN), slowdownPercent);
+        description.createCustomSection(Sprites.sprite(SpriteType.FROZEN), slowdownPercent);
+        description.createCustomSection(Sprites.animation(AnimationType.FIRE, 0), slowdownPercent);
         /*if (getSelectedMaterial() == Material.CRYONITE) {
             String cryoniteSpecialAbility = "Special Ability: Enemies in range of the tower have a chance to be temporarily stunned.";
             description.createCustomSection(Sprites.drawable(SpriteType.CRYONITE), cryoniteSpecialAbility);

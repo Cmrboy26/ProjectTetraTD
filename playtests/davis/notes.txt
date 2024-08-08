@@ -1,0 +1,9 @@
+He said that in 1.2, he almost did not pass it.
+1.3 was hard for him, as he only got to wave 7.
+
+- In my playtesting, 1.3 is very hard still. Level 7 is overwhelming.
+
+Fixes:
+- I had previously altered the damage of the shooter tower. Level 2 would kill the tier 2 enemies in two hits previously,
+  but when he played it, it was actually 3. This means the level was a lot harder than previously tested. I have reverted it
+  to be 2 hits for those enemies. 

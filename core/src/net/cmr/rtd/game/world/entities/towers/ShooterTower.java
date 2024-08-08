@@ -94,7 +94,7 @@ public class ShooterTower extends TowerEntity {
     public float getDamage(boolean rollCritical) {
         float damage = calculateIncrementedValue(1, 1, 1);
         damage *= damage * .5f;
-        damage = (float) damage * getScrapMetalDamageBoost() * Material.getDamageModifier(getSelectedMaterial(), rollCritical);
+        damage = (float) Math.ceil(damage * getScrapMetalDamageBoost()) * Material.getDamageModifier(getSelectedMaterial(), rollCritical);
         return damage;
     }
 

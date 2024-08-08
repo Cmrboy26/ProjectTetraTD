@@ -1,0 +1,33 @@
+{
+    "achievements": {
+        "first_gemstone_extractor": true,
+        "diamond_miner": 33,
+        "full_bestiary": "0_1_2_3_4_5_",
+        "tutorial_completed": true,
+        "high_level_tower": 16
+    },
+    "lastPlayedWorld": "Campaign",
+    "1.3-qst1": {
+        "highscore": 962,
+        "farthest_wave": 7
+    },
+    "dpst-4s-endlssesy": {
+        "highscore": 3174345,
+        "farthest_wave": 82
+    },
+    "lastPlayedTeam": 0,
+    "1.1-qst1": {
+        "highscore": 8274,
+        "farthest_wave": 12,
+        "completed_tasks": [
+            0
+        ]
+    },
+    "1.2-qst1": {
+        "highscore": 9871,
+        "farthest_wave": 15,
+        "completed_tasks": [
+            0
+        ]
+    }
+}

@@ -6,20 +6,22 @@
   ✓ BUFFER OVERFLOW EXCPETION
   ✓ minimizing on desktop restarts the game
   ✓ middle click purchase additional tiles of selected type
-  - team order is not ordering correct
   ✓ not repeating floor tiles
-  - maxwell 
-  - felipe monicle
   ✓ show how many people are on a team in team selector
   ✓ Minimize tutorial text (it is overexplaining everything)
-  - Keybind change screen
-  ✓- Critical hit particle effect (+ sound)
-  - Reduce particle effects when many are on the screen at once
-  - Balance mining tower speeds/timings and upgrade costs
+  ✓ Critical hit particle effect
+  ✓ Balance mining tower speeds/timings and upgrade costs
   ✓ Balance the Ice Tower slowdown
-  - Find out why the ice tower description icon won't display (it has something to do with the createCustomSection function I believe)
-  - First time playing set username screen
+  ✓ Find out why the ice tower description icon won't display (it has something to do with the createCustomSection function I believe) 
+  - "First time playing, set username" screen
+  - Keybind change screen (PC only)
+  - Critical hit sound effect 
   - When going from a wave with a bunch of enemies to barely any enemies, a bunch of components get added because the chance increases with less enemies.
+  - team order is not ordering correctly
+  - Make 1.3 easier
+  - Reduce particle effects when many are on the screen at once
+  - maxwell wears something funny ig
+  - felipe monicle
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)
@@ -36,7 +38,7 @@
 - Add a "No breaks" option, which disables all preperation time as a challenge option. It would give more currency as a reward.
 - Add player customization options.
   - Make a money system outside of inside of a level (like geobits!!!!) that are granted for completing achievements and playing levels
-  - Allow them to color their avatar (might need to learn how to shift hues to do this)
+  - Allow them to color their avatar (use the custom shader to do this)
   - Accessories shop
   - Custom nametag colors
 - Create a compact version of the shop (toggleable in the settings. it should be just icons and tabs, similar to necesse inventory?)
@@ -44,10 +46,12 @@
   // All combative and mining towers are the same. Players will have access to an attacking window, 
   // which allows them to send enemies over to the other team with money.
   - Add a market tower, which passively generates money (this tower will be vital to the new offensive gamemode, as it will be how players initially generate money)
+- User-friendly editor
 - Stock Market Tower!!!!
 - mining for money
-- New Tower: Sniper Tower (large damage, slow attack speed. past a certain level, you should unlock the ability to target specific enemies with this tower).
-
+- New Tower: Sniper Tower (large damage, slow attack speed. past a certain level (or maybe with quartz applied), you should unlock the ability to target specific enemies with this tower).
+- Add a maximum towers setting in WavesData (for multiplayer and map making)
+- Create uses for surplus gemstones
 
 
 Materials Reference:

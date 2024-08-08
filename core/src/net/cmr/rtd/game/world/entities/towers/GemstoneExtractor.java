@@ -78,7 +78,7 @@ public class GemstoneExtractor extends MiningTower {
 
     @Override
     public float getMiningTime() {
-        return (float) Math.max(60 - Math.sqrt((getLevel() - 1) * 160), 5);
+        return (float) Math.max(90 - Math.sqrt((getLevel() - 1) * 200), 5);
         //return 1f;
     }
 

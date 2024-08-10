@@ -64,6 +64,7 @@ import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.screen.GameScreen;
+import net.cmr.rtd.screen.LoadingScreen.LogList;
 import net.cmr.rtd.screen.TutorialScreen;
 import net.cmr.rtd.waves.Wave;
 import net.cmr.rtd.waves.WavesData;
@@ -293,6 +294,10 @@ public class GameManager implements Disposable {
     }
 
     public void start() {
+        start(new LogList());
+    }
+
+    public void start(LogList messageSupplier) {
         // Start the game manager.
         if (running) {
             return;
@@ -302,7 +307,29 @@ public class GameManager implements Disposable {
         }
         if (details.isHostedOnline()) {
             // Attempt to port forward
-            upnpPortForwardFailed = !attemptPortForward();
+            if (details.useUPNP) {
+                messageSupplier.update("Attempting to port forward...");
+                upnpPortForwardFailed = !attemptPortForward();
+                if (upnpPortForwardFailed) {
+                    messageSupplier.update("---");
+                    messageSupplier.update("Warning: Automatic port forward failed. (Others may not be able to connect).");
+                    if (upnpErrorMessage.contains("not detected")) {
+                        messageSupplier.update("- Message: "+upnpErrorMessage+" (Either you're using mobile data or your router cannot be detected)");
+                    } else {
+                        messageSupplier.update("- Message: "+upnpErrorMessage);
+                    }
+                    messageSupplier.update("- Your router may not have uPnP enabled/available, that port may be blocked,");
+                    messageSupplier.update("  or another issue may have occured. Try manually port forwarding.");
+                    if (messageSupplier.getLoadingScreen() != null) {
+                        messageSupplier.update("Press \"Continue\" to continue with no automatic port forwarding.");
+                        messageSupplier.update("---");
+                        messageSupplier.getLoadingScreen().pauseThread();
+                    }
+                } else {
+                    messageSupplier.update("Automatic port forward successful.");
+                }
+                messageSupplier.update("Starting server...");
+            }
             // Start the server
             server.start();
             try {
@@ -311,7 +338,10 @@ public class GameManager implements Disposable {
                 e.printStackTrace();
                 return;
             }
-            Log.info("Server started on port " + details.getTCPPort());
+
+            if (details.useUPNP && !upnpPortForwardFailed) {
+                Log.info("Server open on port " + details.getTCPPort());
+            }
         }
 
         running = true;
@@ -341,7 +371,8 @@ public class GameManager implements Disposable {
         });
         updateThread.setDaemon(true);
         updateThread.start();
-        Log.info("Game started.");
+        messageSupplier.update("Server started.");
+        Log.info("Server started.");
 
         if (details.isHostedOnline()) {
             // Start the server
@@ -905,6 +936,7 @@ public class GameManager implements Disposable {
 
     GatewayDiscover discover;
     boolean upnpPortForwardFailed = false;
+    String upnpErrorMessage = "";
 
     public boolean attemptPortForward() {
         if (!details.useUPNP()) {
@@ -915,7 +947,8 @@ public class GameManager implements Disposable {
             discover.discover();
             GatewayDevice d = discover.getValidGateway();
             if (d == null) {
-                Log.warning("Failed to port forward on port: "+details.getTCPPort()+": Device not detected! A manual port forward may be required.");
+                upnpErrorMessage = "Device not detected!";
+                Log.warning("Failed to port forward on port: "+details.getTCPPort()+": "+upnpErrorMessage+" A manual port forward may be required.");
                 return false;
             }
             InetAddress localAddress = d.getLocalAddress();
@@ -943,6 +976,7 @@ public class GameManager implements Disposable {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            upnpErrorMessage = e.getMessage();
         }
         return false;
     }

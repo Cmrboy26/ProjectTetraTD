@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
@@ -18,6 +19,7 @@ import net.cmr.util.Sprites;
 public class TeamSelectionScreen extends AbstractScreenEX {
     
     Consumer<ConnectionAttempt> joinGameCallback;
+    LoadingScreen loadingScreen;
     int[] availableTeams;
     int[] playersOnTeams;
     int selectedTeam = -1;
@@ -25,8 +27,9 @@ public class TeamSelectionScreen extends AbstractScreenEX {
     boolean usePassword = false;
     TextField passwordField;
 
-    public TeamSelectionScreen(Consumer<ConnectionAttempt> joinGameCallback, int[] availableTeams, int[] playersOnTeams, boolean usePassword) {
+    public TeamSelectionScreen(LoadingScreen loadingScreen, Consumer<ConnectionAttempt> joinGameCallback, int[] availableTeams, int[] playersOnTeams, boolean usePassword) {
         super(INITIALIZE_ALL);
+        this.loadingScreen = loadingScreen;
         this.joinGameCallback = joinGameCallback;
         this.availableTeams = availableTeams;
         this.playersOnTeams = playersOnTeams;
@@ -129,7 +132,15 @@ public class TeamSelectionScreen extends AbstractScreenEX {
             countdown += delta;
         }
         if (countdown > .1f) {
-            joinGameCallback.accept(new ConnectionAttempt(passwordField.getText(), selectedTeam));
+            Thread callbackThread = new Thread() {
+                @Override
+                public void run() {
+                    ProjectTetraTD.getInstance(ProjectTetraTD.class).setScreenAsynchronous(loadingScreen);
+                    joinGameCallback.accept(new ConnectionAttempt(passwordField.getText(), selectedTeam));
+                }
+            };
+            callbackThread.setDaemon(true);
+            callbackThread.start();
         }
         super.render(delta);
     }

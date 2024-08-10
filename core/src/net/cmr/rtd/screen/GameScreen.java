@@ -117,6 +117,7 @@ import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
+import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.Cost;
 import net.cmr.rtd.game.world.store.ShopManager;
 import net.cmr.rtd.game.world.store.TowerOption;
@@ -207,9 +208,6 @@ public class GameScreen extends AbstractScreenEX {
             }
         });
         this.viewport = new ExtendViewport(640, 360);
-        this.worldStage = new Stage(viewport);
-        this.stages.addProcessor(this.worldStage);
-        this.shapeRenderer = new ShapeRenderer();
         this.data = new UpdateData(this);
         if (gameManager != null) {
             this.password = gameManager.getDetails().getPassword();
@@ -228,7 +226,10 @@ public class GameScreen extends AbstractScreenEX {
 
     @Override
     public void show() {
+        this.worldStage = new Stage(viewport);
+        this.stages.addProcessor(this.worldStage);
         super.show();
+        this.shapeRenderer = new ShapeRenderer();
         updateFrameBuffer();
 
         float iconSize = 32;
@@ -1884,6 +1885,12 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     public void addEffect(ParticleEffect effect) {
+        if (effect instanceof SpreadEmitterEffect) {
+            SpreadEmitterEffect spread = (SpreadEmitterEffect) effect;
+            if (particleEffects.size() >= 20) {
+                spread.emissionRate /= particleEffects.size() / 20f;
+            }
+        }
         particleEffects.add(effect);
     }
 

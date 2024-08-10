@@ -160,6 +160,15 @@ public class ProjectTetraTD extends CMRGame {
 		editorFolder.mkdirs();
 	}
 
+	Object screenLock = new Object();
+	Screen newScreen;
+
+	public synchronized void setScreenAsynchronous(Screen screen) {
+		synchronized (screenLock) {
+			newScreen = screen;
+		}
+	}
+
 	@Override
 	public void render () {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
@@ -171,6 +180,13 @@ public class ProjectTetraTD extends CMRGame {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F8)) {
 			shaderManager.reloadShaders();
 			Log.info("Reloaded shaders.");
+		}
+
+		synchronized (screenLock) {
+			if (newScreen != null) {
+				setScreen(newScreen);
+				newScreen = null;
+			}
 		}
 
 		ScreenUtils.clear(0, 0, 0, 1);
@@ -306,42 +322,6 @@ public class ProjectTetraTD extends CMRGame {
 		setScreen(screen);
 
 		stream.sendPacket(new ConnectPacket(Settings.getPreferences().getString(Settings.USERNAME), team));
-	}
-
-	public void getOnlineGameData(String ip, int port, Consumer<GameInfoPacket> callback) throws Exception {
-		Client client = new Client();
-		OnlineGameStream.registerPackets(client.getKryo());
-		OnlineGameStream stream = new OnlineGameStream(new PacketEncryption(), client);
-
-		Log.info("Connecting to w" + ip + ":" + port + "...");
-		client.start();
-		try {
-			client.connect(5000, ip, port);
-		} catch (Exception e) {
-			Log.error("Failed to connect to server.", e);
-			throw e;
-		}
-		Log.info("Connected.");
-		stream.sendPacket(new GameInfoPacket());
-		stream.addListener(new PacketListener() {
-			@Override
-			public void packetReceived(Packet packet) {
-				if (packet instanceof GameInfoPacket) {
-					GameInfoPacket info = (GameInfoPacket) packet;
-					Log.info("Received game info: " + info.teams + " teams, " + info.players + " players, " + info.maxPlayers + " max players.");
-					callback.accept(info);
-					stream.onClose();
-				}
-			}
-		});
-		while (stream.isOpen()) {
-			stream.update();
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/**

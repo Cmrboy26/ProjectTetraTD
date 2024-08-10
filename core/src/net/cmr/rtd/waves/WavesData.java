@@ -42,7 +42,7 @@ public class WavesData {
 
     public static int DEFAULT_STARTING_MONEY = 100;
     public static int DEFAULT_STARTING_HEALTH = 50;
-    public static int DEFAULT_WAVES_PER_COMPONENT_TARGET = 3;
+    public static int DEFAULT_WAVES_PER_COMPONENT_TARGET = 2;
 
     public int sinusoidalGameDifficultyPeriod = 7; // 7 waves to go from peak to peak of the sinusoidal function
     public float sinusoidalGameDifficultyAmplitude = 1/21f; // (1/21) * 100 = + or - 9% difficulty 
@@ -327,6 +327,14 @@ public class WavesData {
 
     public Wave getWave(int waveNumber) {
         return waves.get(waveNumber);
+    }
+
+    public int getTotalEnemiesInWave(int waveNumber) {
+        Wave wave = getWave(waveNumber);
+        if (wave == null) {
+            return 0;
+        }
+        return wave.getWaveUnits().stream().mapToInt((WaveUnit unit) -> unit.getQuantity()).sum();
     }
     
     public enum DifficultyRating {

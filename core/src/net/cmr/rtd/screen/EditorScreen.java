@@ -76,7 +76,6 @@ public class EditorScreen extends AbstractScreenEX {
     public EditorScreen(FileHandle worldFile) {
         super(INITIALIZE_ALL);
         Objects.requireNonNull(worldFile);
-        this.viewport = new ExtendViewport(640, 360);
         this.updatedata = new UpdateData((GameScreen) null);
 
         if (worldFile.exists()) {
@@ -92,6 +91,7 @@ public class EditorScreen extends AbstractScreenEX {
     @Override
     public void show() {
         super.show();
+        this.viewport = new ExtendViewport(640, 360);
         shapeRenderer = new ShapeRenderer();
 
         window = new Window("Creator", Sprites.getInstance().getSkin(), "small");

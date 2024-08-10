@@ -101,6 +101,7 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
     public final SpriteBatch batch;
     public final Stages stages;
     public final InputMultiplexer inputMultiplexer;
+    private final int[] initializeStages;
 
     /**
      * Creates a new GameScreen with the given aligns.
@@ -111,23 +112,23 @@ public abstract class AbstractScreenEX extends ScreenAdapter {
         this.game = CMRGame.getInstance();  
         this.inputMultiplexer = new InputMultiplexer();
         this.batch = game.batch();
-        this.stages = new Stages(640, 360);  
-        for(int align : initializeStages) {
-            stages.registerStage(align);
-        }
+        this.stages = new Stages(640, 360);
+        this.initializeStages = initializeStages;
     }
 
     @Override
     public void show() {
         super.show();
+        for(int align : initializeStages) {
+            stages.registerStage(align);
+        }
         Gdx.input.setInputProcessor(stages);
     }
 
-    public AbstractScreenEX fadeIn(float duration, Interpolation interpolation) {
-        for(Stage stage : stages.getRegisteredStages()) {
+    public void fadeIn(float duration, Interpolation interpolation) {
+        for (Stage stage : stages.getRegisteredStages()) {
             stage.addAction(Actions.sequence(Actions.alpha(0), Actions.fadeIn(duration, interpolation)));
         }
-        return this;
     }
 
     /**

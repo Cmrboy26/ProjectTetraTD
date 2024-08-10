@@ -16,17 +16,23 @@
   ✓ "First time playing, set username" screen
   ✓ Keybind change screen (PC only)
   ✓ High Level Tower achievement doesn't get awarded despite having a tower higher than level 8
-  - Show disconnect reason when kicked from online game
-  - When going from a wave with a bunch of enemies to barely any enemies, a bunch of components get added because the chance increases with less enemies.
-  - team order is not ordering correctly
+  ✓ Show disconnect reason when kicked from online game
   ✓ Make 1.3 easier (just slightly. wave 7/8 is very hard, so decrease the amount of enemies spawned then, or make the wave longer)
+  ✓ When going from a wave with a bunch of enemies to barely any enemies, a bunch of components get added because the chance increases with less enemies.
+    ✓ Fix this issue
+    ✓ Consider adjusting the amount of components per wave 
+  - team order is not ordering correctly
   - Critical hit sound effect 
   - Add the volume sliders to the first time joining screen for "calibration"
-  - Make range increase slower than it does now (square root of level maybe? logarithmic?)
   - Reduce particle effects when many are on the screen at once
   - maxwell wears something funny ig
   - felipe monicle 
-  - Finish/improve/expand song 3
+  
+  - Make range increase slower than it does now (square root of level maybe? logarithmic?)
+  - Finish/improve/expand song 3 
+  - Fire tower and Ice tower sprites
+    - Create new sprites for them
+
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)

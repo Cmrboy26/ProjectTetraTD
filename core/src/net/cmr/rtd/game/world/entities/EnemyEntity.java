@@ -25,9 +25,10 @@ public abstract class EnemyEntity extends Entity {
 
     public int team;
     public int health;
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
     public float distanceTraveled = 0;
     public EnemyType enemyType;
+    public int totalEnemiesInWave; // Used to calculate probability of getting a component
 
     protected EnemyEntity(int team, GameType type, EnemyType enemyType) {
         super(type);
@@ -143,6 +144,7 @@ public abstract class EnemyEntity extends Entity {
         buffer.writeInt(health);
         buffer.writeFloat(distanceTraveled);
         buffer.writeInt(enemyType.ordinal());
+        buffer.writeInt(totalEnemiesInWave);
         serializeEnemy(buffer);
     }
 
@@ -157,6 +159,9 @@ public abstract class EnemyEntity extends Entity {
         }
         if (version >= 1) {
             entity.enemyType = EnemyType.values()[input.readInt()];
+        }
+        if (version >= 2) {
+            entity.totalEnemiesInWave = input.readInt();
         }
         deserializeEnemy(object, input);
     }

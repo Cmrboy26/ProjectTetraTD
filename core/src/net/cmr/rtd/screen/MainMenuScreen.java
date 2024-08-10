@@ -49,6 +49,11 @@ public class MainMenuScreen extends AbstractScreenEX {
 
     public MainMenuScreen() {
         super(INITIALIZE_ALL);
+    }
+
+	@Override
+	public void show() {
+		super.show();
 
 		Table table = new Table();
 		table.setFillParent(true);
@@ -271,7 +276,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		icongroup.add(achievements).pad(5.0f).size(size);
 
 		add(Align.bottomRight, table2);
-    }
+	}
 
 	@Override
 	public void resume() {

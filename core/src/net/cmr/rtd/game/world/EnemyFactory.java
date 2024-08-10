@@ -87,6 +87,7 @@ public class EnemyFactory {
     private void send(EnemyEntity entity) {
         entity.setHealth(entity.getMaxHealth());
         entity.setPosition(tileX * Tile.SIZE + Tile.SIZE / 2, tileY * Tile.SIZE + Tile.SIZE / 2);
+        entity.totalEnemiesInWave = world.getWavesData().getTotalEnemiesInWave(world.getWave());
         world.addEntity(entity);
         if (data != null && data.isServer()) {
             GameObjectPacket packet = new GameObjectPacket(entity, false);

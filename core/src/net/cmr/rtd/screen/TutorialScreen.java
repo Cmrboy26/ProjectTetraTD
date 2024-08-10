@@ -64,28 +64,6 @@ public class TutorialScreen extends GameScreen {
 
     public TutorialScreen(GameStream ioStream, GameManager gameManager) {
         super(ioStream, gameManager, "", 0);
-        state = TutorialState.INTRO;
-        gameManager.setGameSpeed(1.5f);
-
-        tutorialTable = new Table(Sprites.skin());
-        tutorialWindow = new Window("Tutorial", Sprites.skin(), "small");
-        tutorialWindow.getTitleLabel().setAlignment(Align.center);
-        tutorialWindow.pad(10);
-        tutorialWindow.padTop(30);
-        tutorialWindow.add(tutorialTable).row();
-        add(Align.center, tutorialWindow);
-
-        continueButton = new TextButton("Continue", Sprites.skin(), "small");
-        continueButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                continueTutorial();
-            }
-        });
-        continueButton.pad(0, 20, 0, 20);
-        tutorialWindow.add(continueButton).padTop(10).row();
-
-        setTableContent();
     }
 
     public void setTableContent() {
@@ -579,6 +557,30 @@ public class TutorialScreen extends GameScreen {
     @Override
     public void show() {
         super.show();
+        
+        state = TutorialState.INTRO;
+        gameManager.setGameSpeed(1.5f);
+
+        tutorialTable = new Table(Sprites.skin());
+        tutorialWindow = new Window("Tutorial", Sprites.skin(), "small");
+        tutorialWindow.getTitleLabel().setAlignment(Align.center);
+        tutorialWindow.pad(10);
+        tutorialWindow.padTop(30);
+        tutorialWindow.add(tutorialTable).row();
+        add(Align.center, tutorialWindow);
+
+        continueButton = new TextButton("Continue", Sprites.skin(), "small");
+        continueButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                continueTutorial();
+            }
+        });
+        continueButton.pad(0, 20, 0, 20);
+        tutorialWindow.add(continueButton).padTop(10).row();
+
+        setTableContent();
+
         settingsButton.setVisible(false);
         skipButton.setVisible(false);
         wavePauseButton.setVisible(false);

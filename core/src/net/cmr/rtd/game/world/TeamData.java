@@ -116,19 +116,23 @@ public class TeamData {
 
     int totalEnemies = 0;
 
-    public void rollRandomItem(Entity entity, UpdateData data) {
+    public void rollRandomItem(EnemyEntity entity, UpdateData data) {
         Wave wave = data.getManager().getWorld().getCurrentWave();
         if (wave == null) {
             return;
         }
 
+        if (entity.totalEnemiesInWave == 0) {
+            return;
+        }
+        totalEnemies = entity.totalEnemiesInWave;
         WavesData wavesData = data.getManager().getWorld().getWavesData();
-        if (wave.getWaveUnits().size() != 0) {
+        /*if (wave.getWaveUnits().size() != 0) {
             totalEnemies = 0;
             for (WaveUnit unit : wave.getWaveUnits()) {
                 totalEnemies += unit.getQuantity();
             }
-        }
+        }*/
 
         if (totalEnemies == 0) {
             // When reloading a save between rounds, totalEnemies is 0, which results in all enemies giving components.

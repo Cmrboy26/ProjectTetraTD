@@ -25,10 +25,12 @@ public class SettingsScreen extends AbstractScreenEX {
 
     public SettingsScreen() {
         super(INITIALIZE_ALL);
+    }
 
-
-
-		add(Align.center, getSettingsTable(() -> {
+    @Override
+    public void show() {
+        super.show();
+        add(Align.center, getSettingsTable(() -> {
             ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
             game.setScreen(new MainMenuScreen());
         }, true));

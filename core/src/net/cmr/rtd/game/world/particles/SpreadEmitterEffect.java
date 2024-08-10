@@ -23,7 +23,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
 
     SpriteType spriteType;
     AnimationType animationType;
-    float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1, gravity = 0, xRandomImpact = 0;
+    public float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1, gravity = 0, xRandomImpact = 0;
     boolean followEntity;
 
     public static class SpreadEmitterFactory {

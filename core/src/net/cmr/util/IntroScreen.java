@@ -20,16 +20,16 @@ public class IntroScreen extends AbstractScreenEX {
         super(Align.center);
 		this.game = CMRGame.getInstance();
         this.nextScreen = nextScreen;
+    }
+
+    @Override
+    public void show() {
+        super.show();
         label = new Label("Cmrboy26", Sprites.skin());
         label.setPosition(360-label.getWidth()/2, 360/2-label.getHeight()/2);
         label.setOrigin(Align.center);
         label.setFontScale(1.3f);
         add(Align.center, label);
-    }
-
-    @Override
-    public void show() {
-        
     }
 
     @Override
@@ -54,7 +54,8 @@ public class IntroScreen extends AbstractScreenEX {
                 game.setScreen(null);
                 return;
             }
-            game.setScreen(nextScreen.fadeIn(1, Interpolation.linear));
+            game.setScreen(nextScreen);
+            nextScreen.fadeIn(1, Interpolation.linear);
             return;
         }
     }

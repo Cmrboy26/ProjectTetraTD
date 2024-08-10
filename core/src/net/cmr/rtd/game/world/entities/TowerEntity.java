@@ -516,6 +516,15 @@ public abstract class TowerEntity extends Entity {
         return levels[levels.length - 1];
     }
 
+    public SpriteType getTowerSpriteLevelDependent(SpriteType[] levels, int[] levelThresholds) {
+        for (int i = 0; i < levelThresholds.length; i++) {
+            if (getLevel() <= levelThresholds[i]) {
+                return levels[i];
+            }
+        }
+        return levels[levels.length - 1];
+    }
+
     public boolean applyLubricant(TeamInventory inventory) {
         if (!canApplyComponentLubricant()) {
             return false;

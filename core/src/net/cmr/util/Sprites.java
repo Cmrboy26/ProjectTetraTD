@@ -48,7 +48,6 @@ public class Sprites implements Disposable {
         SHOP_ICON("shopIcon"),
         INVENTORY_ICON("inventoryIcon"),
         FROZEN("frozen"),
-        ICE_TOWER("iceTower"),
         UPGRADE_FRONT("upgradeFront"),
         UPGRADE_BACK("upgradeBack"),
         WARNING("warning"),
@@ -95,6 +94,13 @@ public class Sprites implements Disposable {
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
+
+        ICE_TOWER_1("iceTower1"),
+        ICE_TOWER_2("iceTower2"),
+        ICE_TOWER_3("iceTower3"),
+        ICE_TOWER_4("iceTower4"),
+        ICE_TOWER_5("iceTower5"),
+        ICE_TOWER_6("iceTower6"),
         
         //WORLD_LEVEL("worldLevel"),
         ;

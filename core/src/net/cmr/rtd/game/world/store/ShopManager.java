@@ -37,7 +37,7 @@ public class ShopManager {
         // Register the purchase of towers
         registerTower(new TowerOption(0, GameType.SHOOTER_TOWER, AnimationType.SHOOTER_TOWER_1, Cost.money(level -> 35L), "Shooter Tower", "Shoots pellets at enemies."));
         registerTower(new TowerOption(1, GameType.FIRE_TOWER, AnimationType.FIRE_TOWER, Cost.money(level -> 70L), "Fire Tower", "Sets enemies on fire and\nshoots piercing fireballs."));
-        registerTower(new TowerOption(2, GameType.ICE_TOWER, SpriteType.ICE_TOWER, Cost.money(level -> 40L), "Ice Tower", "Slows enemies."));
+        registerTower(new TowerOption(2, GameType.ICE_TOWER, SpriteType.ICE_TOWER_1, Cost.money(level -> 40L), "Ice Tower", "Slows enemies."));
         registerTower(new TowerOption(3, GameType.DRILL_TOWER, SpriteType.DRILL_TOWER_ONE, Cost.money(level -> 90L), "Drill Tower", "Mines resources from ore veins."));
         registerTower(new TowerOption(4, GameType.GEMSTONE_EXTRACTOR, SpriteType.GEMSTONE_EXTRACTOR_ONE, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();

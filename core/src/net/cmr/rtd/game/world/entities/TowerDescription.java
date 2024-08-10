@@ -165,8 +165,8 @@ public class TowerDescription {
 
     private void addSection(Table table, Sprite icon, String text) {
         createCustomSection(icon, text);
-        Table section = customSections.getLast();
-        customSections.removeLast();
+        Table section = customSections.get(customSections.size()-1);
+        customSections.remove(customSections.size()-1);
         table.add(section).colspan(1).growX().row();
     }
 
@@ -176,8 +176,8 @@ public class TowerDescription {
     
     private void addDoubleSection(Table table, Sprite icon1, String text1, Sprite icon2, String text2) {
         createCustomDoubleSection(icon1, text1, icon2, text2);
-        Table section = customSections.getLast();
-        customSections.removeLast();
+        Table section = customSections.get(customSections.size()-1);
+        customSections.remove(customSections.size()-1);
         table.add(section).colspan(2).growX().row();
     }
 

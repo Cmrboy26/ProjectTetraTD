@@ -22,6 +22,7 @@ import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.util.Sprites;
+import net.cmr.util.Sprites.AnimationType;
 import net.cmr.util.Sprites.SpriteType;
 
 public class IceTower extends TowerEntity {
@@ -98,7 +99,20 @@ public class IceTower extends TowerEntity {
         Color color = new Color(Color.WHITE);
         color.a = batch.getColor().a;
         batch.setColor(color);
-        TextureRegion sprite = Sprites.sprite(SpriteType.ICE_TOWER);
+        SpriteType spriteType = getTowerSpriteLevelDependent(
+            new SpriteType[] {
+                SpriteType.ICE_TOWER_1, 
+                SpriteType.ICE_TOWER_2, 
+                SpriteType.ICE_TOWER_3,
+                SpriteType.ICE_TOWER_4,
+                SpriteType.ICE_TOWER_5,
+                SpriteType.ICE_TOWER_6,
+            }, 
+            new int[] {
+                1, 2, 3, 4, 5, 6
+            }
+        );
+        TextureRegion sprite = Sprites.sprite(spriteType);
         batch.draw(sprite, getX() - Tile.SIZE / 2, getY() - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         batch.setColor(Color.WHITE);
         

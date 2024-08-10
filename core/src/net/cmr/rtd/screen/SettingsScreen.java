@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.game.Hotkeys;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Settings;
@@ -33,7 +34,7 @@ public class SettingsScreen extends AbstractScreenEX {
         }, true));
     }
 
-    public static Table getSettingsTable(Runnable onBack, boolean allowUsernameChange) {
+    public static Table getSettingsTable(Runnable onBack, boolean notInGame) {
 
 		Table table = new Table();
 		table.setFillParent(true);
@@ -81,7 +82,7 @@ public class SettingsScreen extends AbstractScreenEX {
         textFieldStyle.disabledFontColor = Color.GRAY;
 
         TextField username = new TextField("Username", textFieldStyle);
-        username.setDisabled(!allowUsernameChange);
+        username.setDisabled(!notInGame);
         username.setMessageText("Username");
         username.setText(Settings.getPreferences().getString(Settings.USERNAME));
         username.setAlignment(Align.center);
@@ -166,7 +167,20 @@ public class SettingsScreen extends AbstractScreenEX {
                 backButton.setChecked(false);
             }
         });
-        horizontalGroup.add(backButton).width(200).padLeft(20f).padRight(20).growX();
+        horizontalGroup.add(backButton).width(170).padLeft(10f).padRight(10).growX();
+
+        if (notInGame && !ProjectTetraTD.isMobile()) {
+            TextButton hotkeyButton = new TextButton("Hotkeys", Sprites.skin(), labelType);
+            Audio.addClickSFX(hotkeyButton);
+            hotkeyButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
+                    game.setScreen(new KeybindScreen());
+                }
+            });
+            horizontalGroup.add(hotkeyButton).width(170).padLeft(10f).padRight(10).growX();
+        }
 
         TextButton apply = new TextButton("Apply", Sprites.skin(), labelType);
         Audio.addClickSFX(apply);
@@ -189,7 +203,7 @@ public class SettingsScreen extends AbstractScreenEX {
                 apply.setChecked(false);
             }
         });
-        horizontalGroup.add(apply).width(200).padLeft(20f).padRight(20).growX();
+        horizontalGroup.add(apply).width(170).padLeft(10f).padRight(10).growX();
 
         table.add(horizontalGroup).bottom().pad(5f).width(100).expandX().row();
         return table;

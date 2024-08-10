@@ -52,6 +52,7 @@ import net.cmr.rtd.game.stream.GameStream.PacketListener;
 import net.cmr.rtd.game.stream.OnlineGameStream;
 import net.cmr.rtd.screen.FirstTimePlayingScreen;
 import net.cmr.rtd.screen.GameScreen;
+import net.cmr.rtd.screen.KeybindScreen;
 import net.cmr.rtd.screen.MainMenuScreen;
 import net.cmr.rtd.shader.ShaderManager;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
@@ -98,6 +99,10 @@ public class ProjectTetraTD extends CMRGame {
 		achievementNotificationStage.addActor(actorTable);
 
 		Settings.applySettings();
+
+		Hotkeys.load();
+		Hotkeys.save();
+		
 		AbstractScreenEX nextScreen = null;
 		if (getUsername().equals("null")) {
 			nextScreen = new FirstTimePlayingScreen();
@@ -113,9 +118,6 @@ public class ProjectTetraTD extends CMRGame {
 
 		AchievementManager.getInstance();
 		AchievementManager.save();
-
-		Hotkeys.load();
-		Hotkeys.save();
 
 		shaderManager = new ShaderManager();
 

@@ -1,21 +1,21 @@
 package net.cmr.rtd.game;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
-import com.esotericsoftware.kryo.serializers.FieldSerializer.NotNull;
 
 import net.cmr.rtd.ProjectTetraTD;
 
 public class Hotkeys {
     public enum Key {
-        UP(Hotkey.keyboard(Input.Keys.W)), 
-        DOWN(Hotkey.keyboard(Input.Keys.S)), 
-        LEFT(Hotkey.keyboard(Input.Keys.A)), 
-        RIGHT(Hotkey.keyboard(Input.Keys.D)), 
+        MOVE_UP(Hotkey.keyboard(Input.Keys.W)), 
+        MOVE_DOWN(Hotkey.keyboard(Input.Keys.S)), 
+        MOVE_LEFT(Hotkey.keyboard(Input.Keys.A)), 
+        MOVE_RIGHT(Hotkey.keyboard(Input.Keys.D)), 
         SPRINT(Hotkey.keyboard(Input.Keys.SHIFT_LEFT)), 
         SELECT(Hotkey.mouse(Input.Buttons.LEFT)),
         INVENTORY(Hotkey.keyboard(Input.Keys.E)), 
@@ -98,6 +98,13 @@ public class Hotkeys {
         hotkeys.put(key, hotkey);
         save();
     }
+
+    public static void resetToDefaults() {
+        for (Key key : Key.values()) {
+            change(key, key.defaultHotkey);
+        }
+    }
+
     /**
      * Format:
      * KEY,INPUTTYPE,KEYCODE\n
@@ -117,6 +124,9 @@ public class Hotkeys {
     }
     public static boolean pressed(Key hotkey) {
         return get(hotkey).pressed();
+    }
+    public static Map<Key, Hotkey> getHotkeysMap() {
+        return hotkeys;
     }
 
     public static class Hotkey {
@@ -157,7 +167,31 @@ public class Hotkeys {
         }
 
         public static Hotkey emptyHotkey() {
-            return keyboard(-1);
+            return keyboard(Input.Keys.UNKNOWN);
+        }
+
+        public boolean isEmptyHotkey() {
+            return type == InputType.KEYBOARD && key == Input.Keys.UNKNOWN;
+        }
+
+        public String getReadableValue() {
+            if (type == InputType.KEYBOARD) {
+                if (key == 0) {
+                    return " ";
+                }
+                return Input.Keys.toString(key);
+            } else {
+                switch (key) {
+                    case Input.Buttons.LEFT: return "Left Mouse";
+                    case Input.Buttons.RIGHT: return "Right Mouse";
+                    case Input.Buttons.MIDDLE: return "Middle Mouse";
+                    case Input.Buttons.FORWARD: return "Forward Mouse";
+                    case Input.Buttons.BACK: return "Back Mouse";
+                    default: {
+                        return "Mouse "+(key+1);
+                    }
+                }
+            }
         }
     }
     

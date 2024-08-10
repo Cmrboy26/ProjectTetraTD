@@ -504,8 +504,6 @@ public class GameScreen extends AbstractScreenEX {
                     productionShopTable.row();
                 }
 
-                System.out.println(combativeOptions.size());
-                System.out.println(productionOptions.size());
                 combativeTab.setDisabled(combativeOptions.size() == 0);
                 productionTab.setDisabled(productionOptions.size() == 0);
                 effectTab.setDisabled(true);
@@ -899,6 +897,9 @@ public class GameScreen extends AbstractScreenEX {
                                 AchievementManager.setValue(FirstGemstoneExtractorAchievement.class, true);
                             }
                             long level = tower.getLevel();
+                            if (tower.getRemainingUpgradeTime() > 0) {
+                                level++;
+                            }
                             long storedLevel = AchievementManager.getValue(HighLevelTowerAchievement.class);
                             if (level > storedLevel) {
                                 AchievementManager.setValue(HighLevelTowerAchievement.class, level);
@@ -1697,8 +1698,8 @@ public class GameScreen extends AbstractScreenEX {
         if (getLocalPlayer() == null) {
             return;
         }
-        float vx = (Hotkeys.pressed(Key.RIGHT) ? 1 : 0) - (Hotkeys.pressed(Key.LEFT) ? 1 : 0);
-        float vy = (Hotkeys.pressed(Key.UP) ? 1 : 0) - (Hotkeys.pressed(Key.DOWN) ? 1 : 0);
+        float vx = (Hotkeys.pressed(Key.MOVE_RIGHT) ? 1 : 0) - (Hotkeys.pressed(Key.MOVE_LEFT) ? 1 : 0);
+        float vy = (Hotkeys.pressed(Key.MOVE_UP) ? 1 : 0) - (Hotkeys.pressed(Key.MOVE_DOWN) ? 1 : 0);
 
         boolean sprinting = Hotkeys.pressed(Key.SPRINT);
         if (isMobile()) {

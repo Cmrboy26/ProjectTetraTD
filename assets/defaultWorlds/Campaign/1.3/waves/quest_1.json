@@ -71,14 +71,14 @@
 			]
 		},
 		{
-			"waveTime": 30,
+			"waveTime": 40,
 			"waveUnits": [
                 {"distributedSpawn": ["BASIC_TWO", 22]},
                 {"distributedSpawn": ["BASIC_THREE", 20]}
 			]
 		},
 		{
-			"waveTime": 30,
+			"waveTime": 40,
 			"waveUnits": [
                 {"distributedSpawn": ["BASIC_THREE", 25]},
                 {"distributedSpawn": ["HEALER_ONE", 2]}

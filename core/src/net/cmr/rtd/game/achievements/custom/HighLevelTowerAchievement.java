@@ -5,7 +5,7 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class HighLevelTowerAchievement extends Achievement<Long> {
     
-    long targetLevel = 8;
+    final static long targetLevel = 8;
 
     public HighLevelTowerAchievement() {
         super();
@@ -18,7 +18,7 @@ public class HighLevelTowerAchievement extends Achievement<Long> {
 
     @Override
     public boolean isAchievementComplete() {
-        return getProgress() >= targetLevel;
+        return getProgress() >= .98; // Not one because of rounding errors :) 
     }
 
     @Override

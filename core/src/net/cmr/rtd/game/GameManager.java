@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.SecretKey;
@@ -91,7 +90,7 @@ public class GameManager implements Disposable {
     private float gameSpeed = 1.0f;
     private ArrayList<TeamData> teams;
     private ArrayList<TeamData> winningTeams = new ArrayList<TeamData>();
-    private Stack<Pair<TeamData, Integer>> teamWinOrder = new Stack<Pair<TeamData, Integer>>();
+    private ArrayList<Pair<TeamData, Integer>> teamWinOrder = new ArrayList<Pair<TeamData, Integer>>();
     private boolean pauseWaves = true;
 
     public static final int WRITE_BUFFER_SIZE = 16384 * 64;
@@ -730,13 +729,16 @@ public class GameManager implements Disposable {
         }
 
         winningTeams.remove(teams.get(team));
-        if (teamHasPlayers) {
+        /*if (teamHasPlayers) {
             if (!teamWinOrder.stream().anyMatch(pair -> pair.a.team == team)) {
                 int currentWave = world.getWave();
                 Pair<TeamData, Integer> teamData = new Pair<TeamData, Integer>(teams.get(team), currentWave);
                 teamWinOrder.push(teamData);
                 sendGameOverDisplay(teamData.a, false);
             }
+        }*/
+        if (teamHasPlayers) {
+            teamWinOrder.add(new Pair<TeamData, Integer>(teams.get(team), world.getWave()));
         }
 
         if (teamsWithPlayers > 1) {
@@ -755,7 +757,7 @@ public class GameManager implements Disposable {
         // There are no more waves in the level OR there is only one team remaining in the multiplayer match OR the player lost in the single player match.
         // Send a packet to all players to show that the game is over.
         // TODO: Find out why the game sometimes sends the game over 4 teams participating in a singleplayer games.
-        Log.info("GAME OVER!");
+        /*Log.info("GAME OVER!");
         for (TeamData data : winningTeams) {
             sendPacketToAll(new TeamUpdatePacket(data.team, false));
             if (doesTeamHavePlayers(data.team)) {
@@ -768,6 +770,18 @@ public class GameManager implements Disposable {
             if (doesTeamHavePlayers(data.team)) {
                 sendGameOverDisplay(data, true);
             }
+        }*/
+        for (TeamData data : winningTeams) {
+            sendPacketToAll(new TeamUpdatePacket(data.team, false));
+            if (doesTeamHavePlayers(data.team)) {
+                Pair<TeamData, Integer> teamData = new Pair<TeamData, Integer>(data, world.getWave());
+                teamWinOrder.add(teamData);
+            }
+        }
+        for (TeamData data : teams) {
+            if (doesTeamHavePlayers(data.team)) {
+                sendGameOverDisplay(data, true);
+            }
         }
 
         winningTeams.clear();
@@ -775,7 +789,6 @@ public class GameManager implements Disposable {
     }
 
     private void sendGameOverDisplay(TeamData data, boolean showWinOrder) {
-
         int[] teamWinOrderArray = new int[teamWinOrder.size()];
         int selectedTeamWave = -1;
         for (int i = 0; i < teamWinOrder.size(); i++) {

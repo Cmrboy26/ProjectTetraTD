@@ -21,7 +21,7 @@
   ✓ When going from a wave with a bunch of enemies to barely any enemies, a bunch of components get added because the chance increases with less enemies.
     ✓ Fix this issue
     ✓ Consider adjusting the amount of components per wave 
-  - team order is not ordering correctly
+  ✓? team order is not ordering correctly
   - Critical hit sound effect 
   - Add the volume sliders to the first time joining screen for "calibration"
   - Reduce particle effects when many are on the screen at once

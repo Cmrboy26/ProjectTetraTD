@@ -22,16 +22,16 @@
     ✓ Fix this issue
     ✓ Consider adjusting the amount of components per wave 
   ✓? team order is not ordering correctly
-  - Critical hit sound effect 
+  ✓ Critical hit sound effect 
   - Add the volume sliders to the first time joining screen for "calibration"
-  - Reduce particle effects when many are on the screen at once
+  ✓ Reduce particle effects when many are on the screen at once
   - maxwell wears something funny ig
   - felipe monicle 
   
   - Make range increase slower than it does now (square root of level maybe? logarithmic?)
   - Finish/improve/expand song 3 
-  - Fire tower and Ice tower sprites
-    - Create new sprites for them
+  ✓ Fire tower and Ice tower sprites
+    ✓ Create new sprites for them
 
 
   Feedback:

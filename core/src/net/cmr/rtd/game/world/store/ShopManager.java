@@ -56,7 +56,7 @@ public class ShopManager {
             return inventory;
         }), level -> 5f + (level)));
         registerUpgrade(new UpgradeOption(GameType.FIRE_TOWER, Cost.money(level -> 50L + (level + 2) * level * level * 50L),    level -> 5f + level * 2f));
-        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, Cost.money(level -> level * level * 30L),                         level -> 5f + level / 3f));
+        registerUpgrade(new UpgradeOption(GameType.ICE_TOWER, Cost.money(level -> level * level * 50L),                         level -> 5f + level * 2f));
         registerUpgrade(new UpgradeOption(GameType.DRILL_TOWER, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
             inventory.cash = level * level * 50L;

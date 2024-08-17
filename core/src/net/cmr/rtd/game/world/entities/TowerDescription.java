@@ -93,7 +93,7 @@ public class TowerDescription {
 
         if (descriptors.contains(TowerDescriptors.CRITICAL)) {
             if (tower.getCritDamagePercent() != 1) {
-                String critDamageString = "Crit Multiplier: "+StringUtils.truncateFloatingPoint(tower.getDamage(false) * tower.getCritDamagePercent(), 2);
+                String critDamageString = "Crit Multiplier: "+StringUtils.truncateFloatingPoint(tower.getDamage(false) * tower.getCritDamagePercent(), 2)+"%";
                 String critChanceString = "Crit Chance: "+StringUtils.truncateFloatingPoint(tower.getCritChance()*100, 2)+"%";
                 addDoubleSection(table, Sprites.sprite(SpriteType.CRITICAL_ICON), critDamageString, Sprites.sprite(SpriteType.CRITICAL_CHANCE_ICON), critChanceString);
             }

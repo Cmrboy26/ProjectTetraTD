@@ -118,6 +118,7 @@ public class ParticleCatalog {
                 .setFollowEntity(false)
                 .setAreaSize(0)
                 .setRandomVelocityImpact(0)
+                .spawnInstantly(true)
                 .create();
         effect.setPosition(position.cpy());
         return effect;

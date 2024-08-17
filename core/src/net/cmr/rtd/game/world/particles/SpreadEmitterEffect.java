@@ -19,12 +19,13 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class SpreadEmitterEffect extends ParticleEffect {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
-    SpriteType spriteType;
-    AnimationType animationType;
+    public SpriteType spriteType;
+    public AnimationType animationType;
     public float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1, gravity = 0, xRandomImpact = 0;
     boolean followEntity;
+    boolean spawnInstantly = false;
 
     public static class SpreadEmitterFactory {
 
@@ -33,6 +34,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
         AnimationType animationType = null;
         float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1, randomVelocityImpact = 1;
         float gravity = 0, xRandomImpact = 0;
+        boolean spawnInstantly = false;
         boolean followEntity = false;
 
         public SpreadEmitterFactory() {
@@ -104,6 +106,11 @@ public class SpreadEmitterEffect extends ParticleEffect {
             return this;
         }
 
+        public SpreadEmitterFactory spawnInstantly(boolean spawnInstantly) {
+            this.spawnInstantly = spawnInstantly;
+            return this;
+        }
+
         public SpreadEmitterEffect create() {
             SpreadEmitterEffect effect = new SpreadEmitterEffect(attachedEntity);
             effect.spriteType = spriteType;
@@ -118,6 +125,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
             effect.randomVelocityImpact = randomVelocityImpact;
             effect.gravity = gravity;
             effect.xRandomImpact = xRandomImpact;
+            effect.spawnInstantly = spawnInstantly;
             return effect;
         }
     }
@@ -148,9 +156,12 @@ public class SpreadEmitterEffect extends ParticleEffect {
 
     @Override
     public void updateParticle(GameScreen screen, float delta) {
-        if (particleDelta == -1) {
-            // On the first frame of the particle, create a particle right away.
+        if (particleDelta == -1 && spawnInstantly) {
+            // On the first frame of the particle, create a particle right away. (Used in resource collection effect).
             particleDelta = 1f / emissionRate;
+        } else {
+            // Otherwise, start the particle delta at a random value to spread out the particles. (Useful for fire and ice effects).
+            particleDelta = (float) ((1f / emissionRate) * Math.random()); 
         }
 
         particleDelta += delta;
@@ -245,6 +256,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
         buffer.writeFloat(randomVelocityImpact);
         buffer.writeFloat(gravity);
         buffer.writeFloat(xRandomImpact);
+        buffer.writeBoolean(spawnInstantly);
     }
 
     @Override
@@ -272,6 +284,9 @@ public class SpreadEmitterEffect extends ParticleEffect {
         if (version >= 2) {
             gravity = input.readFloat();
             xRandomImpact = input.readFloat();
+        }
+        if (version >= 3) {
+            spawnInstantly = input.readBoolean();
         }
     }
 

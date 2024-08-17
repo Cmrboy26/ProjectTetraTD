@@ -925,6 +925,14 @@ public class GameScreen extends AbstractScreenEX {
         if (packet instanceof ParticlePacket) {
             ParticlePacket particlePacket = (ParticlePacket) packet;
             ParticleEffect effect = particlePacket.getParticleEffect();
+
+            if (effect instanceof SpreadEmitterEffect) {
+                SpreadEmitterEffect spreadEffect = (SpreadEmitterEffect) effect;
+                if (spreadEffect.spriteType == SpriteType.CRITICAL_ICON) {
+                    Audio.getInstance().playSFX(GameSFX.CRITICAL_HIT, .8f);
+                }
+            }
+
             if (effect != null) {
                 addEffect(effect);
             }
@@ -1887,8 +1895,9 @@ public class GameScreen extends AbstractScreenEX {
     public void addEffect(ParticleEffect effect) {
         if (effect instanceof SpreadEmitterEffect) {
             SpreadEmitterEffect spread = (SpreadEmitterEffect) effect;
-            if (particleEffects.size() >= 20) {
-                spread.emissionRate /= particleEffects.size() / 20f;
+            System.out.println(particleEffects.size());
+            if (particleEffects.size() >= 150) {
+                spread.emissionRate /= particleEffects.size() / 150f;
             }
         }
         particleEffects.add(effect);

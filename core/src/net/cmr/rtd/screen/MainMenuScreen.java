@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -36,6 +37,8 @@ import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.SelectionScreen.PlayType;
+import net.cmr.rtd.shader.ShaderManager;
+import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -66,6 +69,19 @@ public class MainMenuScreen extends AbstractScreenEX {
 		float widthHeightRatio = 136.0f / 32.0f;
 		float height = 96.0f;
 		float width = height * widthHeightRatio;
+
+		/*Image background = new Image(Sprites.drawable(SpriteType.AREA)) {
+			@Override
+			public void draw(Batch batch, float parentAlpha) {
+				ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.enableShader(batch, CustomShader.HEAT);
+				batch.setColor(Color.BLUE);
+				super.draw(batch, parentAlpha);
+				batch.setColor(Color.WHITE);
+				ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.disableShader(batch);
+			}
+		};
+		background.setFillParent(true);
+		background.getColor().a = .5f;*/
 
 		table.add(new Image(Sprites.drawable(SpriteType.TITLE))).height(height).width(width).pad(0, 50, 0, 50).colspan(outsideSpan * 2 + insideSpan).row();
 
@@ -287,7 +303,9 @@ public class MainMenuScreen extends AbstractScreenEX {
     @Override
     public void render(float delta) {
         game.batch().setColor(Color.WHITE);
+		//ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.enableShader(batch, CustomShader.HEAT);
         super.render(delta);
+		//ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.disableShader(batch);
     }
     
     @Override

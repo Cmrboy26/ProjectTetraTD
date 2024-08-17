@@ -1895,7 +1895,6 @@ public class GameScreen extends AbstractScreenEX {
     public void addEffect(ParticleEffect effect) {
         if (effect instanceof SpreadEmitterEffect) {
             SpreadEmitterEffect spread = (SpreadEmitterEffect) effect;
-            System.out.println(particleEffects.size());
             if (particleEffects.size() >= 150) {
                 spread.emissionRate /= particleEffects.size() / 150f;
             }

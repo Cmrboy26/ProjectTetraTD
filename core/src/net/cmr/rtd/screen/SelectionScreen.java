@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -31,6 +34,7 @@ import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.game.files.QuestTask;
 import net.cmr.rtd.game.files.WorldFolder;
 import net.cmr.rtd.game.world.store.ShopManager;
+import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -58,6 +62,21 @@ public class SelectionScreen extends AbstractScreenEX {
         viewport = new ExtendViewport(640, 360);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
+
+        SpriteType backgroundSprite = SpriteType.WORLDS_BACKGROUND; 
+
+        Image background = new Image(Sprites.drawable(backgroundSprite)) {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+				ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.enableShader(batch, CustomShader.BACKGROUND);
+				batch.setColor(Color.BLUE);
+				super.draw(batch, parentAlpha);
+				batch.setColor(Color.WHITE);
+				ProjectTetraTD.getInstance(ProjectTetraTD.class).shaderManager.disableShader(batch);
+            }
+        };
+        background.setFillParent(true);
+        stage.addActor(background);
 
         levelsTable = new Table();
         levelsTable.setFillParent(true);
@@ -426,7 +445,10 @@ public class SelectionScreen extends AbstractScreenEX {
             levelIndex++;
         }
 
-        ScrollPane worldView = new ScrollPane(levelSelection, Sprites.skin());
+        ScrollPaneStyle scrollStyle = Sprites.skin().get("default", ScrollPaneStyle.class);
+        scrollStyle.background = null;
+
+        ScrollPane worldView = new ScrollPane(levelSelection, scrollStyle);
         worldView.setScrollbarsVisible(false);
         levelsTable.add(worldView).align(Align.center).height(360).width(640).colspan(1);
     }

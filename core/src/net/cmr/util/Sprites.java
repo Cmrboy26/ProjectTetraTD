@@ -101,6 +101,8 @@ public class Sprites implements Disposable {
         ICE_TOWER_4("iceTower4"),
         ICE_TOWER_5("iceTower5"),
         ICE_TOWER_6("iceTower6"),
+
+        WORLDS_BACKGROUND("background"),
         
         //WORLD_LEVEL("worldLevel"),
         ;

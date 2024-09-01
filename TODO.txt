@@ -28,8 +28,8 @@
   - maxwell wears something funny ig
   - felipe monicle 
   
-  - Make range increase slower than it does now (square root of level maybe? logarithmic?)
-  - Finish/improve/expand song 3 
+  ✓ Make range increase slower than it does now (square root of level maybe? logarithmic?)
+  X- Finish/improve/expand song 3 
   ✓ Fire tower and Ice tower sprites
     ✓ Create new sprites for them
 

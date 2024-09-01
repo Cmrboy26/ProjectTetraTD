@@ -172,7 +172,7 @@ public class FireTower extends TowerEntity {
 
     @Override
     public float getRange() {
-        return (float) (2 + Math.sqrt(getLevel() / 6f))*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
+        return (float) (2 + Math.sqrt((getLevel() - 1) / 32f))*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
     }
 
     @Override

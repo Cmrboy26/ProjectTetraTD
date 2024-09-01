@@ -99,7 +99,9 @@ public class ShooterTower extends TowerEntity {
 
     @Override
     public float getRange() {
-        return calculateIncrementedValue(3, .25f, 2.25f)*getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial());
+        //return calculateIncrementedValue(3, .25f, 2.25f)*getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial());
+        double calculatedRange = Math.sqrt(Math.floor(getLevel() - 1) / 64d) + 2.25;
+        return (float) (calculatedRange * getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial()));
     }
 
     @Override

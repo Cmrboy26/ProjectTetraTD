@@ -30,7 +30,6 @@ public class IceTower extends TowerEntity {
     boolean attacking = false;
     float animationDelta = 0;
     final float persistence = 1;
-    float range = 2;
 
     public IceTower() {
         super(GameType.ICE_TOWER, 0);
@@ -77,7 +76,9 @@ public class IceTower extends TowerEntity {
 
     @Override
     public float getRange() {
-        return calculateIncrementedValue(3, .25f, range)*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
+        //return calculateIncrementedValue(3, .25f, 2)*getScopeRangeBoost()*Material.getRangeModifier(getSelectedMaterial());
+        double calculatedRange = Math.sqrt(Math.floor(getLevel() - 1) / 64d) + 2;
+        return (float) (calculatedRange * getScopeRangeBoost() * Material.getRangeModifier(getSelectedMaterial()));
     }
 
     @Override

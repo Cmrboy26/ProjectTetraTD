@@ -114,12 +114,15 @@ import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
+import net.cmr.rtd.game.world.entities.splashes.SplashAOE;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
+import net.cmr.rtd.game.world.store.ConsumableOption;
 import net.cmr.rtd.game.world.store.Cost;
 import net.cmr.rtd.game.world.store.ShopManager;
+import net.cmr.rtd.game.world.store.StoreOption;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
 import net.cmr.rtd.game.world.tile.Tile;
@@ -469,10 +472,16 @@ public class GameScreen extends AbstractScreenEX {
                 combativeTable.add(combatScroll).grow().pad(1).padTop(5);
 
                 ArrayList<TowerOption> buyableTowers = new ArrayList<TowerOption>();
+                ArrayList<ConsumableOption> consumableOptions = new ArrayList<ConsumableOption>();
+
                 for (GameType type : types) {
                     TowerOption option = ShopManager.getTowerCatalog().get(type);
                     if (option != null) {
                         buyableTowers.add(option);
+                    }
+                    ConsumableOption consumableOption = ShopManager.getConsumableCatalog().get(type);
+                    if (consumableOption != null) {
+                        consumableOptions.add(consumableOption);
                     }
                 }
 
@@ -505,9 +514,30 @@ public class GameScreen extends AbstractScreenEX {
                     productionShopTable.row();
                 }
 
+                Table effectShopTable = new Table();
+                ScrollPane effectScroll = new ScrollPane(effectShopTable, scrollStyle);
+                effectScroll.setScrollingDisabled(true, false);
+                effectScroll.setScrollbarsVisible(false);
+                effectScroll.setOverscroll(false, false);
+                effectTable.add(effectScroll).grow().pad(1).padTop(5);
+
+                ArrayList<ConsumableOption> effectOptions = new ArrayList<ConsumableOption>(consumableOptions);
+                effectOptions.sort((a, b) -> a.order - b.order);
+                //effectOptions.removeIf(option -> SplashAOE.class.isAssignableFrom(option.type.getGameObjectClass()));
+                for (ConsumableOption option : effectOptions) {
+                    GameType type = option.type;
+                    //Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                    Drawable drawable = Sprites.drawable(SpriteType.BARNOLD);
+                    Table storeSection = getStoreSection(drawable, type, option.name, option.cost, "", () -> {
+                        enterPlacementMode(type);
+                    });
+                    effectShopTable.add(storeSection).pad(5).growX();
+                    effectShopTable.row();
+                }
+
                 combativeTab.setDisabled(combativeOptions.size() == 0);
                 productionTab.setDisabled(productionOptions.size() == 0);
-                effectTab.setDisabled(true);
+                effectTab.setDisabled(effectOptions.size() == 0);
 
                 combatScroll.layout();
                 productionScroll.layout();
@@ -1973,6 +2003,12 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private Table getTowerSection(Drawable drawable, GameType type, String name, Cost cost, String tooltipDescription) {
+        return getStoreSection(drawable, type, name, cost, tooltipDescription, () -> {
+            enterPlacementMode(type);
+        });
+    }
+
+    private Table getStoreSection(Drawable drawable, GameType type, String name, Cost cost, String tooltipDescription, Runnable onBuyButton) {
         Table table = new Table();
         Image towerImage = new Image(drawable);
         float fontScale = .5f;
@@ -1992,7 +2028,7 @@ public class GameScreen extends AbstractScreenEX {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 // transition to the place tower mode
-                enterPlacementMode(type);
+                onBuyButton.run();
                 Audio.getInstance().playSFX(GameSFX.SELECT, 1);
             }
         });
@@ -2022,7 +2058,10 @@ public class GameScreen extends AbstractScreenEX {
     public void enterPlacementMode(GameType type) {
         typeToPurchase = type;
         entityToPlace = type.createEntity();
-        TowerEntity.displayRange((TowerEntity) entityToPlace);
+        // To ensure things other than towers can be placed
+        if (entityToPlace instanceof TowerEntity) {
+            TowerEntity.displayRange((TowerEntity) entityToPlace);
+        }
         placementMode = PlacementMode.PLACE;
         shopButton.setDisabled(true);
         inventoryButton.setDisabled(true);
@@ -2091,8 +2130,8 @@ public class GameScreen extends AbstractScreenEX {
             if (placementMode == PlacementMode.PLACE) {
                 packet = new PurchaseItemPacket(PurchaseAction.TOWER, typeToPurchase, tileX, tileY);
                 boolean canPlace = true;
-                TowerOption option = ShopManager.towerCatalog.get(typeToPurchase);
-                TowerEntity newTower = (TowerEntity) typeToPurchase.createEntity();
+                StoreOption option = ShopManager.getAllCatalog().get(typeToPurchase);
+                Entity newTower = (Entity) typeToPurchase.createEntity();
                 TileType below = data.getWorld().getTile(tileX, tileY, 0);
                 if (!allowedToPlaceTowerAt(data, newTower, tileX, tileY)) {
                     notification(SpriteType.STRUCTURE, "Cannot place here!");

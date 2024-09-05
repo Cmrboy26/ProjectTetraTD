@@ -3,6 +3,8 @@ package net.cmr.rtd.game.world.store;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import com.badlogic.gdx.math.Vector2;
+
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.GamePlayer;
 import net.cmr.rtd.game.packets.PurchaseItemPacket;
@@ -11,7 +13,6 @@ import net.cmr.rtd.game.storage.TeamInventory;
 import net.cmr.rtd.game.storage.TeamInventory.Material;
 import net.cmr.rtd.game.storage.TeamInventory.MaterialType;
 import net.cmr.rtd.game.world.Entity;
-import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.GameObject.GameType;
 import net.cmr.rtd.game.world.TeamData;
 import net.cmr.rtd.game.world.UpdateData;
@@ -32,6 +33,7 @@ public class ShopManager {
 
     public static final HashMap<GameType, TowerOption> towerCatalog = new HashMap<GameType, TowerOption>();
     public static final HashMap<GameType, UpgradeOption> upgradeCatalog = new HashMap<GameType, UpgradeOption>();
+    public static final HashMap<GameType, ConsumableOption> consumableCatalog = new HashMap<GameType, ConsumableOption>();
 
     static {
         // Register the purchase of towers
@@ -47,10 +49,8 @@ public class ShopManager {
         }), "Gemstone Extractor", "Extracts various gems from gem veins."));
 
         // Register the purchase of upgrades
-        //registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.money(level -> 30L + (level - 1) * level * 20L),         level -> 5f + (level)));
         registerUpgrade(new UpgradeOption(GameType.SHOOTER_TOWER, Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
-            //inventory.setCash(30L + (level - 1) * level * 20L);
             level += 1;
             inventory.setCash(5L * level * level * (level - 1));
             return inventory;
@@ -71,6 +71,13 @@ public class ShopManager {
             inventory.steel = level + 2;
             return inventory;
         }), level -> 10f + level * 2));
+
+        // Register Consumables
+        registerConsumable(new ConsumableOption(0, GameType.SLOWNESS_AOE, "Slowness Splash", Cost.create(level -> {
+            TeamInventory inventory = new TeamInventory();
+            inventory.setCash(10L);
+            return inventory;
+        })));
     }
 
     private static void registerTower(TowerOption item) {
@@ -79,12 +86,25 @@ public class ShopManager {
     private static void registerUpgrade(UpgradeOption item) {
         upgradeCatalog.put(item.type, item);
     }
+    private static void registerConsumable(ConsumableOption item) {
+        consumableCatalog.put(item.type, item);
+    }
+
+    public static HashMap<GameType, StoreOption> getAllCatalog() {
+        HashMap<GameType, StoreOption> all = new HashMap<>();
+        all.putAll(towerCatalog);
+        all.putAll(consumableCatalog);
+        return all;
+    }
 
     public static HashMap<GameType, TowerOption> getTowerCatalog() {
         return towerCatalog;
     }
     public static HashMap<GameType, UpgradeOption> getUpgradeCatalog() {
         return upgradeCatalog;
+    }
+    public static HashMap<GameType, ConsumableOption> getConsumableCatalog() {
+        return consumableCatalog;
     }
 
     public static GameType[] getAllTowerTypes() {
@@ -110,13 +130,19 @@ public class ShopManager {
 
         switch (action) {
             case TOWER: {
-                if (towerAt != null) {
-                    // Tower exists at the position
-                    System.out.println("Tower exists at the position");
-                    return;
+                StoreOption option = getAllCatalog().get(type);
+
+                if (option instanceof TowerOption) {
+                    TowerOption towerOption = (TowerOption) option;
+
+                    if (towerAt != null) {
+                        // Tower exists at the position
+                        System.out.println("Tower exists at the position");
+                        return;
+                    }
                 }
-                TowerOption option = towerCatalog.get(type);
                 Cost cost = option.cost;
+
                 TeamData data = manager.getTeam(player.getTeam());
                 if (!cost.canPurchase(data.getInventory())) {
                     // Not enough money
@@ -129,25 +155,33 @@ public class ShopManager {
                     Log.debug("Tiles are blocking");
                     return;
                 }
-                TowerEntity tower = newTower(packet.type, player.getTeam());
-                if (tower == null) {
-                    // Not a tower
-                    Log.debug("Not a tower");
-                    return; 
-                }
-                if (tower instanceof MiningTower) {
-                    // Mining tower
-                    MiningTower miningTower = (MiningTower) tower;
-                    if (!miningTower.validMiningTarget(manager.getUpdateData().getWorld().getTile(packet.x, packet.y, 0))) {
-                        // Invalid mining target
-                        Log.debug("Invalid mining target");
-                        return;
+                
+                Vector2 placePosition = new Vector2((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
+                Entity endEntity = option.createEntity(player, placePosition);
+                if (option instanceof TowerOption) {
+                    TowerEntity tower = (TowerEntity) endEntity;
+                    if (tower == null) {
+                        // Not a tower
+                        Log.debug("Not a tower");
+                        return; 
                     }
+                    if (tower instanceof MiningTower) {
+                        // Mining tower
+                        MiningTower miningTower = (MiningTower) tower;
+                        if (!miningTower.validMiningTarget(manager.getUpdateData().getWorld().getTile(packet.x, packet.y, 0))) {
+                            // Invalid mining target
+                            Log.debug("Invalid mining target");
+                            return;
+                        }
+                    }
+                    tower.setBuildDelta(3); // 3 seconds to construct tower
+                } else {
+
                 }
-                tower.setBuildDelta(3); // 3 seconds to construct tower
-                tower.setPosition((packet.x + .5f) * Tile.SIZE, (packet.y + .5f) * Tile.SIZE);
-                manager.getWorld().addEntity(tower);
-                tower.updatePresenceOnClients(manager);
+
+                endEntity.setPosition(placePosition);
+                manager.getWorld().addEntity(endEntity);
+                endEntity.updatePresenceOnClients(manager);
                 // Construction particle?
                 // Update the team's money.
                 cost.purchase(data.getInventory());
@@ -233,18 +267,6 @@ public class ShopManager {
             default:
                 break; 
         }
-    }
-    
-    private static TowerEntity newTower(GameType type, int team) {
-        Class<? extends GameObject> clazz = type.getGameObjectClass();  
-        if (TowerEntity.class.isAssignableFrom(clazz)) {
-            try {
-                return (TowerEntity) clazz.getConstructor(int.class).newInstance(team);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
     
     private static TowerEntity towerAt(GameManager manager, int x, int y) {

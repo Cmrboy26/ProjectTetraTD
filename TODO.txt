@@ -33,6 +33,8 @@
   ✓ Fire tower and Ice tower sprites
     ✓ Create new sprites for them
 
+  - Make ONE AOE effect
+    - There should not be a separate/bottle entity. Only one entity, which displays the bottle and where it was thrown from
 
   Feedback:
   - a lot of moving between windows (try to make windows less intrusive)

@@ -4,6 +4,6 @@
 	"name": "Endless Impossible",
 	"endlessMode": true,
 	"startingHealth": 10,
-	"startingMoney": 70000000,
+	"startingMoney": 70,
 	"waves": []
 }

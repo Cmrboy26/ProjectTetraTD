@@ -4,15 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Null;
 
+import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameConnector;
 import net.cmr.rtd.game.GameManager.GameManagerDetails;
 import net.cmr.rtd.game.files.QuestFile;
@@ -130,6 +133,24 @@ public class HostScreen extends AbstractScreenEX {
         contentTable.add(portForwardOptions).width(200).pad(5).colspan(1).center();
 
         contentTable.row();
+
+        TextButton retrieveExternalIP = new TextButton("Retrieve External IP", Sprites.skin(), "small");
+        retrieveExternalIP.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String ip = ProjectTetraTD.getExternalIP();
+                Dialog dialog = new Dialog("External IP (Send this to your friends to join!)", Sprites.skin(), "small");
+                dialog.pad(30, 20, 10, 20);
+                dialog.text(ip, dialog.getSkin().get("small", LabelStyle.class));
+                TextButton okayButton = new TextButton("OK", Sprites.skin(), "small");
+                okayButton.pad(0, 20, 0, 20);
+                dialog.button(okayButton, false);
+                dialog.show(stages.get(Align.center));
+            }
+        });
+        retrieveExternalIP.pad(0, 50, 0, 50);
+        retrieveExternalIP.addListener(BUTTON_AUDIO_LISTENER);
+        contentTable.add(retrieveExternalIP).width(200).pad(5).colspan(2).center();
     }
 
     @Override

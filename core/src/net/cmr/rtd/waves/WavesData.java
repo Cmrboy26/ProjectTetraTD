@@ -142,6 +142,10 @@ public class WavesData {
             for (GameType tower : ShopManager.getAllTowerTypes()) {
                 towers.add(tower);
             }
+            // Add all consumables
+            for (GameType consumable : ShopManager.getConsumableCatalog().keySet()) {
+                towers.add(consumable);
+            }
         }
 
         GameType[] towerArray = new GameType[towers.size()];
@@ -233,10 +237,13 @@ public class WavesData {
             main.put("stagnationThreshold", stagnationThreshold);
         }
 
-        JSONArray buyableTowers = new JSONArray();
+        /*JSONArray buyableTowers = new JSONArray();
         for (GameType tower : this.buyableTowers) {
             buyableTowers.add(tower.toString());
         }
+        for (GameType consumables : ShopManager.getConsumableCatalog().keySet()) {
+            buyableTowers.add(consumables.toString());
+        }*/
 
         main.put("preparationTime", preparationTime);
         

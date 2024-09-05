@@ -15,6 +15,8 @@ import net.cmr.rtd.game.world.entities.BasicEnemy;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.Projectile;
+import net.cmr.rtd.game.world.entities.splashes.SlownessAOE;
+import net.cmr.rtd.game.world.entities.splashes.SplashAOE;
 import net.cmr.rtd.game.world.entities.towers.DrillTower;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
@@ -42,6 +44,7 @@ public abstract class GameObject {
         GEMSTONE_EXTRACTOR(GemstoneExtractor.class),
 
         PROJECTILE(Projectile.class), 
+        SLOWNESS_AOE(SlownessAOE.class)
         ;
 
         private final Class<? extends GameObject> clazz;

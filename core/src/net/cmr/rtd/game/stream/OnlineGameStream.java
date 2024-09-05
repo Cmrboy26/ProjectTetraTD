@@ -3,7 +3,6 @@ package net.cmr.rtd.game.stream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;

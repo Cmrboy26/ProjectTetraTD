@@ -19,6 +19,7 @@ public class SlownessEffect extends Effect {
 
     @Override
     public void onInflict(UpdateData data) {
+        if (!target.getDisplayParticles()) return;
         ParticleEffect effect = ParticleCatalog.frozenEffect(getEntity());
         if (data.isClient()) {
             data.getScreen().addEffect(effect);

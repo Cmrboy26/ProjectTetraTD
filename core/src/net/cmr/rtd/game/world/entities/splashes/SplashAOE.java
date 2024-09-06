@@ -2,10 +2,11 @@ package net.cmr.rtd.game.world.entities.splashes;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
@@ -19,8 +20,8 @@ import net.cmr.util.Sprites.SpriteType;
 public abstract class SplashAOE extends Entity {
 
     final static int VERSION = 0;
-    final static float THROW_TIME = 0.5f;
-    final static float SPLASH_RANGE = 2.5f;
+    final static float THROW_TIME = 0.75f;
+    final static float SPLASH_RANGE = 1.5f;
 
     private Vector2 throwOffset;
     private int lingerDuration;
@@ -55,6 +56,7 @@ public abstract class SplashAOE extends Entity {
         buffer.writeFloat(throwOffset.y);
         buffer.writeInt(lingerDuration);
         buffer.writeInt(team);
+        buffer.writeFloat(timeAlive);
     }
 
     @Override
@@ -64,6 +66,7 @@ public abstract class SplashAOE extends Entity {
         splash.throwOffset = new Vector2(input.readFloat(), input.readFloat());
         splash.lingerDuration = input.readInt();
         splash.team = input.readInt();
+        splash.timeAlive = input.readFloat();
     }
 
     @Override
@@ -79,12 +82,11 @@ public abstract class SplashAOE extends Entity {
 
         // Apply AOE to targets in range
         for (Entity entity : data.getWorld().getEntities()) {
-            // TODO: The splash AOE itself gets inflicted with the debuff. This is not intended.
             float distance = entity.getPosition().dst(getPosition());
-            if (distance <= SPLASH_RANGE) {
+            if (distance <= SPLASH_RANGE * Tile.SIZE) {
                 if (targetsPlayers() && entity.type == GameType.PLAYER) {
                     applyEffect(data, entity);
-                } else if (targetsEnemies() && entity.type != GameType.PLAYER) {
+                } else if (targetsEnemies() && entity.type != GameType.PLAYER && !(entity instanceof SplashAOE)) {
                     applyEffect(data, entity);
                 }
             }
@@ -105,19 +107,29 @@ public abstract class SplashAOE extends Entity {
 
         float splashProgress = Math.min(timeAlive / THROW_TIME, 1);
         if (splashProgress < 1) {
+            float size = Tile.SIZE * (3/4f);
             // Have the splash's y position go up and down as it is thrown
             Vector2 renderPosition = getPosition().cpy().sub(throwOffset.cpy().scl(1 - splashProgress));
-            renderPosition.add(0, Tile.SIZE / 2f);
+            Function<Float, Float> riseFallFunction = (Float t) -> {
+                // yes gravity is quadratic, but idc lol
+                return (float) Math.sin(t * Math.PI);
+            };
+            Function<Float, Float> rotationFunction = (Float t) -> {
+                return (float) t * 360 * 1.5f;
+            };
+            float riseFallPercent = riseFallFunction.apply(splashProgress);
+            renderPosition.add(0, riseFallPercent * Tile.SIZE);
+
             batch.setColor(getColor());
-            batch.draw(Sprites.sprite(SpriteType.BARNOLD), renderPosition.x, renderPosition.y, Tile.SIZE / 2f, Tile.SIZE / 2f);
+            renderPosition.add(-size / 2, -size / 2);
+            batch.draw(Sprites.sprite(SpriteType.SLOWNESS_BOTTLE), renderPosition.x, renderPosition.y, size / 2f, size / 2f, size, size, 1, 1, rotationFunction.apply(splashProgress));
             batch.setColor(Color.WHITE);
         } else {
             float lingerProgress = Math.min((timeAlive - THROW_TIME) / lingerDuration, 1);
-            //if (lingerProgress < 1) {
-                batch.setColor(getColor());
-                batch.draw(Sprites.sprite(SpriteType.AREA), getX() - (SPLASH_RANGE * Tile.SIZE), getY() - (SPLASH_RANGE * Tile.SIZE), SPLASH_RANGE * 2 * Tile.SIZE, SPLASH_RANGE * 2 * Tile.SIZE);
-                batch.setColor(Color.WHITE);
-            //}
+            Color color = getColor();
+            batch.setColor(color.r, color.g, color.b, 0.5f * (1 - lingerProgress));
+            batch.draw(Sprites.sprite(SpriteType.JOYSTICK_BACKGROUND), getX() - (SPLASH_RANGE * Tile.SIZE), getY() - (SPLASH_RANGE * Tile.SIZE), SPLASH_RANGE * 2 * Tile.SIZE, SPLASH_RANGE * 2 * Tile.SIZE);
+            batch.setColor(Color.WHITE);
         }
     }
 

@@ -21,7 +21,7 @@ public class SlownessAOE extends SplashAOE {
 
     @Override
     public boolean targetsPlayers() {
-        return true;
+        return false;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class SlownessAOE extends SplashAOE {
     @Override
     public void applyEffect(UpdateData data, Entity entity) {
         // TODO: This must be implemented correctly.
-        new SlownessEffect(data, entity.getEffects(), 3, 1);
+        new SlownessEffect(data, entity.getEffects(), 1, 10);
     }
     
 }

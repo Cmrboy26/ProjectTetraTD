@@ -114,7 +114,9 @@ import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.Player;
 import net.cmr.rtd.game.world.entities.TowerEntity;
 import net.cmr.rtd.game.world.entities.TowerEntity.SortType;
-import net.cmr.rtd.game.world.entities.splashes.SplashAOE;
+import net.cmr.rtd.game.world.entities.effects.BlindnessEffect;
+import net.cmr.rtd.game.world.entities.effects.ShaderEffect;
+import net.cmr.rtd.game.world.entities.splashes.BlindnessAOE;
 import net.cmr.rtd.game.world.entities.towers.GemstoneExtractor;
 import net.cmr.rtd.game.world.particles.ParticleCatalog;
 import net.cmr.rtd.game.world.particles.ParticleEffect;
@@ -122,6 +124,7 @@ import net.cmr.rtd.game.world.particles.SpreadEmitterEffect;
 import net.cmr.rtd.game.world.store.ConsumableOption;
 import net.cmr.rtd.game.world.store.Cost;
 import net.cmr.rtd.game.world.store.ShopManager;
+import net.cmr.rtd.game.world.store.ShopManager.StoreException;
 import net.cmr.rtd.game.world.store.StoreOption;
 import net.cmr.rtd.game.world.store.TowerOption;
 import net.cmr.rtd.game.world.store.UpgradeOption;
@@ -508,8 +511,8 @@ public class GameScreen extends AbstractScreenEX {
                 productionOptions.removeIf(option -> !MiningTower.class.isAssignableFrom(option.type.getGameObjectClass()));
                 for (TowerOption option : productionOptions) {
                     GameType type = option.type;
-                    Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-                    Table towerSection = getTowerSection(drawable, type, option.name, option.cost, option.description);
+                    //Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
+                    Table towerSection = getTowerSection(option.getIcon(), type, option.name, option.cost, option.description);
                     productionShopTable.add(towerSection).pad(5).growX();
                     productionShopTable.row();
                 }
@@ -527,8 +530,7 @@ public class GameScreen extends AbstractScreenEX {
                 for (ConsumableOption option : effectOptions) {
                     GameType type = option.type;
                     //Drawable drawable = option.sprite != null ? Sprites.drawable(option.sprite) : Sprites.drawable(option.animation);
-                    Drawable drawable = Sprites.drawable(SpriteType.BARNOLD);
-                    Table storeSection = getStoreSection(drawable, type, option.name, option.cost, "", () -> {
+                    Table storeSection = getStoreSection(option.getIcon(), type, option.name, option.cost, option.description, () -> {
                         enterPlacementMode(type);
                     });
                     effectShopTable.add(storeSection).pad(5).growX();
@@ -1381,8 +1383,8 @@ public class GameScreen extends AbstractScreenEX {
             Player player = getLocalPlayer();
             if (player != null) {
                 OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-                float x = player.getX() + player.getBounds().getWidth() / 2;
-                float y = player.getY() + player.getBounds().getHeight() / 2;
+                float x = player.getX();
+                float y = player.getY() + Tile.SIZE / 2f;
                 if (Hotkeys.pressed(Key.PAN)) {
                     int sw = Gdx.graphics.getWidth();
                     int sh = Gdx.graphics.getHeight();
@@ -1761,7 +1763,7 @@ public class GameScreen extends AbstractScreenEX {
 
     float elapsedTime = 0;
     float alphaPulsePeriod = 2f;
-    FrameBuffer fbo;
+    FrameBuffer fbo1, fbo2;
     Matrix4 identity = new Matrix4();
 
     @Override
@@ -1779,16 +1781,31 @@ public class GameScreen extends AbstractScreenEX {
 
             float gamma = Settings.getPreferences().getFloat(Settings.GAMMA);
 
-            fbo.begin();
+            fbo1.begin();
             Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             world.render(data, batch, delta, gameSpeed);
             batch.flush();
-            fbo.end();
+            fbo1.end();
 
             batch.setProjectionMatrix(identity);
+            fbo2.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 0);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+            CustomShader shader = CustomShader.PASSTHROUGH;
+            if (getLocalPlayer() != null && getLocalPlayer().getEffects().getEffect(BlindnessEffect.class) != null) {
+                ShaderEffect effect = (ShaderEffect) getLocalPlayer().getEffects().getEffect(BlindnessEffect.class);
+                shader = effect.getShader();
+            }
+            game.enableShader(batch, shader, .1f);
+            batch.draw(fbo1.getColorBufferTexture(), -1, 1, 2, -2);
+            game.disableShader(batch);
+            batch.flush();
+            fbo2.end();
+
             game.enableShader(batch, CustomShader.GAMMA, gamma);
-            batch.draw(fbo.getColorBufferTexture(), -1, 1, 2, -2);
+            batch.draw(fbo2.getColorBufferTexture(), -1, 1, 2, -2);
             game.disableShader(batch);
             batch.flush();
             
@@ -1849,12 +1866,16 @@ public class GameScreen extends AbstractScreenEX {
     }
 
     private void updateFrameBuffer() {
-        if (fbo != null) {
-            fbo.dispose();
+        if (fbo1 != null) {
+            fbo1.dispose();
+        }
+        if (fbo2 != null) {
+            fbo2.dispose();
         }
         int width = Math.max(1, Gdx.graphics.getWidth());
         int height = Math.max(1, Gdx.graphics.getHeight());
-        fbo = new FrameBuffer(Format.RGBA8888, width, height, false);
+        fbo1 = new FrameBuffer(Format.RGBA8888, width, height, false);
+        fbo2 = new FrameBuffer(Format.RGBA8888, width, height, false);
     }
 
     @Override
@@ -1862,7 +1883,8 @@ public class GameScreen extends AbstractScreenEX {
         super.dispose();
         worldStage.dispose();
         shapeRenderer.dispose();
-        fbo.dispose();
+        fbo1.dispose();
+        fbo2.dispose();
     }
 
     @Override
@@ -2133,30 +2155,23 @@ public class GameScreen extends AbstractScreenEX {
                 StoreOption option = ShopManager.getAllCatalog().get(typeToPurchase);
                 Entity newTower = (Entity) typeToPurchase.createEntity();
                 TileType below = data.getWorld().getTile(tileX, tileY, 0);
+
+                // Used exclusively by TutorialScreen
                 if (!allowedToPlaceTowerAt(data, newTower, tileX, tileY)) {
                     notification(SpriteType.STRUCTURE, "Cannot place here!");
                     canPlace = false;
-                } else if (ShopManager.areTilesBlocking(data, tileX, tileY)) {
-                    notification(SpriteType.STRUCTURE, "Cannot place here!");
-                    canPlace = false;
-                } else if (ShopManager.towerAt(world, tileX, tileY) != null) {
-                    notification(SpriteType.STRUCTURE, "Tower already exists here!");
-                    canPlace = false;
-                } else if (newTower instanceof MiningTower && !((MiningTower) newTower).validMiningTarget(below)) {
-                    notification(SpriteType.STRUCTURE, "This mining tower cannot\nbe placed here!");
-                    canPlace = false;
-                } else if (option != null) {
-                    if (inventory.getCash() < option.cost.apply(0).getCash()) {
-                        notification(SpriteType.CASH, "Not enough money! ($"+ShopManager.costToString(option.cost.apply(0).getCash()).substring(1)+")");
-                        canPlace = false;
-                    } else if (!option.cost.canPurchase(inventory)) {
-                        notification(SpriteType.CASH, "Not enough resources!");
-                        canPlace = false;
-                    }
                 }
+                
+                try {
+                    ShopManager.canPlace(option, tileX, tileY, team, data);
+                } catch (StoreException e) {
+                    notification(SpriteType.STRUCTURE, e.getMessage());
+                    canPlace = false;
+                }
+
                 if (canPlace) {
                     ioStream.sendPacket(packet);
-                    Audio.getInstance().playSFX(GameSFX.random(GameSFX.PLACE1, GameSFX.PLACE2), 1f);
+                    Audio.getInstance().playSFX(option.getPurchaseSFX(), 1f);
                 } else {
                     Audio.getInstance().playSFX(GameSFX.WARNING, 1);
                 }

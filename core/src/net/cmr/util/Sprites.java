@@ -91,6 +91,8 @@ public class Sprites implements Disposable {
         DESCRIPTION_ICON("description"),
         RANGE_ICON("range"),
         MINING_SPEED_ICON("mining_speed"),
+        SLOWNESS_BOTTLE("slowness_bottle"),
+        BLINDNESS_BOTTLE("blindness_bottle"),
 
         DRILL_TOWER_ONE("drill/drillTower1"),
         GEMSTONE_EXTRACTOR_ONE("drill/gemstoneExtractor1"),
@@ -179,6 +181,7 @@ public class Sprites implements Disposable {
 
         FIRE("fire", PlayMode.LOOP, .5f),
         SPARKLE("effects/sparkle", PlayMode.NORMAL, .075f),
+        POTION("potion_particle", PlayMode.NORMAL, .1f),
 
         WORLD_LEVEL_ANIMATED("worldLevelAnimated", PlayMode.LOOP, .2f),
         ;

@@ -40,6 +40,7 @@ public class Player extends Entity {
         super(GameType.PLAYER);
         this.velocity = new Vector2();
         this.health = getMaxHealth();
+        this.getEffects().setDisplayParticles(false);
     }
 
     public Player(final String username) {
@@ -66,6 +67,7 @@ public class Player extends Entity {
 
     @Override
     public void update(float delta, UpdateData data) {
+        super.update(delta, data);
         World world = data.getWorld();
         if (world == null) return;
         // Collision detection and response
@@ -97,7 +99,7 @@ public class Player extends Entity {
             if(layout == null) {
                 layout = new GlyphLayout(font, username);
             }
-            font.draw(batch, username, getX() - Tile.SIZE * 1f/8f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f + (jumpY*(Tile.SIZE*jumpHeight)));
+            font.draw(batch, username, getX() - Tile.SIZE * 1f/2f + Tile.SIZE / 2f - layout.width/2f, getY() + Tile.SIZE * 1.25f + (jumpY*(Tile.SIZE*jumpHeight)));
             font.getData().setScale(scaleBefore);
         }
 
@@ -106,7 +108,7 @@ public class Player extends Entity {
         TextureRegion sprite = Sprites.animation(getAnimationFromMovement(), movementCountdown);
         // TODO: Reimplement shaders in the future for custom player colors
         //((ProjectTetraTD)screen.game).enableShader(batch, CustomShader.PLAYER, (float) (Math.sin(animationDelta) * .5f + .5f), .66f, 1f);
-        batch.draw(sprite, getX() - Tile.SIZE * 1f/8f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);
+        batch.draw(sprite, getX() - Tile.SIZE * 1f/2f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);
         //((ProjectTetraTD)screen.game).disableShader(batch);
         if (getAccessoryFromMovement() != null) {
             batch.draw(Sprites.animation(getAccessoryFromMovement(), movementCountdown), getX() - Tile.SIZE * 1f/8f, getY()+jumpY*(Tile.SIZE*jumpHeight), Tile.SIZE, Tile.SIZE);

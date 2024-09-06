@@ -22,6 +22,7 @@ public class EntityEffects {
     private HashSet<Effect> effects;
     private HashSet<Class<? extends Effect>> immunity;
     private final Entity entity;
+    private boolean displayParticles = true;
 
     public static enum EntityStat {
         SPEED,
@@ -52,6 +53,14 @@ public class EntityEffects {
 
     public HashSet<Effect> get() {
         return effects;
+    }
+
+    public boolean getDisplayParticles() {
+        return displayParticles;
+    }
+    
+    public void setDisplayParticles(boolean displayParticles) {
+        this.displayParticles = displayParticles;
     }
 
     public void addEffect(UpdateData data, Effect effect) {

@@ -9,7 +9,9 @@
 		"SHOOTER_TOWER",
 		"ICE_TOWER",
 		"FIRE_TOWER",
-		"DRILL_TOWER"
+		"DRILL_TOWER",
+		"SLOWNESS_AOE",
+		"BLINDNESS_AOE"
 	],
 	"quests": [
 		{

@@ -182,38 +182,40 @@ public class WavesData {
         }
         
         JSONArray waves = (JSONArray) main.get("waves");
-        for (Object wave : waves) {
-            JSONObject waveObject = (JSONObject) wave;
-            Wave newWave = new Wave(((Number) waveObject.get("waveTime")).floatValue());
-            if (waveObject.containsKey("warnPlayer")) {
-                boolean warnPlayer = (Boolean) waveObject.get("warnPlayer");
-                newWave.setWarnPlayer(warnPlayer);
-            }
-            if (waveObject.containsKey("additionalPrep")) {
-                int additionalPreparationTime = ((Number) waveObject.get("additionalPrep")).intValue();
-                newWave.setAdditionalPrepTime(additionalPreparationTime);
-            }
-            JSONArray waveUnits = (JSONArray) waveObject.get("waveUnits");
-            for (Object waveUnit : waveUnits) {
-                JSONObject waveUnitObject = (JSONObject) waveUnit;
-
-                boolean distributedSpawn = waveUnitObject.containsKey("distributedSpawn");
-                if (distributedSpawn) {
-                    JSONArray miniArray = (JSONArray) waveUnitObject.get("distributedSpawn");
-                    EnemyType type = EnemyType.valueOf((String) miniArray.get(0));
-                    int quantity = ((Number) miniArray.get(1)).intValue();
-                    float startTime = 0, endTime = newWave.getWaveTime();
-                    newWave.addWaveUnit(new WaveUnit(startTime, endTime, type, quantity));
-                } else {
-                    newWave.addWaveUnit(new WaveUnit(
-                            ((Number) waveUnitObject.get("startTime")).floatValue(),
-                            ((Number) waveUnitObject.get("endTime")).floatValue(),
-                            EnemyType.valueOf((String) waveUnitObject.get("type")),
-                            ((Number) waveUnitObject.get("quantity")).intValue()
-                    ));
+        if (waves != null) {
+            for (Object wave : waves) {
+                JSONObject waveObject = (JSONObject) wave;
+                Wave newWave = new Wave(((Number) waveObject.get("waveTime")).floatValue());
+                if (waveObject.containsKey("warnPlayer")) {
+                    boolean warnPlayer = (Boolean) waveObject.get("warnPlayer");
+                    newWave.setWarnPlayer(warnPlayer);
                 }
+                if (waveObject.containsKey("additionalPrep")) {
+                    int additionalPreparationTime = ((Number) waveObject.get("additionalPrep")).intValue();
+                    newWave.setAdditionalPrepTime(additionalPreparationTime);
+                }
+                JSONArray waveUnits = (JSONArray) waveObject.get("waveUnits");
+                for (Object waveUnit : waveUnits) {
+                    JSONObject waveUnitObject = (JSONObject) waveUnit;
+
+                    boolean distributedSpawn = waveUnitObject.containsKey("distributedSpawn");
+                    if (distributedSpawn) {
+                        JSONArray miniArray = (JSONArray) waveUnitObject.get("distributedSpawn");
+                        EnemyType type = EnemyType.valueOf((String) miniArray.get(0));
+                        int quantity = ((Number) miniArray.get(1)).intValue();
+                        float startTime = 0, endTime = newWave.getWaveTime();
+                        newWave.addWaveUnit(new WaveUnit(startTime, endTime, type, quantity));
+                    } else {
+                        newWave.addWaveUnit(new WaveUnit(
+                                ((Number) waveUnitObject.get("startTime")).floatValue(),
+                                ((Number) waveUnitObject.get("endTime")).floatValue(),
+                                EnemyType.valueOf((String) waveUnitObject.get("type")),
+                                ((Number) waveUnitObject.get("quantity")).intValue()
+                        ));
+                    }
+                }
+                data.waves.put(data.waves.size() + 1, newWave);
             }
-            data.waves.put(data.waves.size() + 1, newWave);
         }
 
         return data;

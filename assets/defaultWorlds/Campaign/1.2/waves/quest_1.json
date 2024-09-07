@@ -7,7 +7,9 @@
 	"startingMoney": 35,
 	"towerWhitelist": [
 		"SHOOTER_TOWER",
-		"ICE_TOWER"
+		"ICE_TOWER",
+		"SLOWNESS_AOE",
+		"BLINDNESS_AOE"
 	],
 	"quests": [
 		{

@@ -6,22 +6,27 @@ import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DataBuffer;
 
+import net.cmr.rtd.game.packets.ParticlePacket;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject;
 import net.cmr.rtd.game.world.UpdateData;
+import net.cmr.rtd.game.world.particles.ParticleCatalog;
+import net.cmr.rtd.game.world.particles.ParticleEffect;
 import net.cmr.rtd.game.world.tile.Tile;
+import net.cmr.util.Audio;
 import net.cmr.util.Sprites;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Sprites.SpriteType;
 
 public abstract class SplashAOE extends Entity {
 
-    final static int VERSION = 0;
-    final static float THROW_TIME = 0.75f;
-    final static float SPLASH_RANGE = 1.5f;
+    public final static int VERSION = 0;
+    public final static int MAX_THROW_DISTANCE = 10;
+    public final static float THROW_TIME = 0.75f;
+    public final static float SPLASH_RANGE = 1.5f;
 
     private Vector2 throwOffset;
     private int lingerDuration;
@@ -76,6 +81,7 @@ public abstract class SplashAOE extends Entity {
         if (timeAlive < THROW_TIME) {
             return;
         }
+        onLinger(data);
 
         float totalLingeringTime = lingerDuration + THROW_TIME;
         boolean isInstant = lingerDuration == 0;
@@ -95,6 +101,21 @@ public abstract class SplashAOE extends Entity {
         if (isInstant || timeAlive > totalLingeringTime) {
             removeFromWorld();
         }
+    }
+
+    boolean lingerStarted = false;
+
+    public void onLinger(UpdateData data) {
+        if (lingerStarted) {
+            return;
+        }
+        if (data.isClient()) {
+            Audio.getInstance().playSFX(GameSFX.BOTTLE_BREAK, 1f, (float) (1f + Math.random() * 0.1));
+        }
+        lingerStarted = true;
+        // Create a particle effect
+        ParticleEffect effect = ParticleCatalog.splashEffect(getPosition(), getColor(), lingerDuration);
+        ParticlePacket.sendPacket(data, effect);
     }
 
     @Override
@@ -118,18 +139,18 @@ public abstract class SplashAOE extends Entity {
                 return (float) t * 360 * 1.5f;
             };
             float riseFallPercent = riseFallFunction.apply(splashProgress);
-            renderPosition.add(0, riseFallPercent * Tile.SIZE);
+            renderPosition.add(0, riseFallPercent * Tile.SIZE * 1.5f);
 
-            batch.setColor(getColor());
             renderPosition.add(-size / 2, -size / 2);
-            batch.draw(Sprites.sprite(SpriteType.SLOWNESS_BOTTLE), renderPosition.x, renderPosition.y, size / 2f, size / 2f, size, size, 1, 1, rotationFunction.apply(splashProgress));
-            batch.setColor(Color.WHITE);
+
+            batch.draw(Sprites.sprite(SpriteType.BOTTLE_SHADOW), renderPosition.x, renderPosition.y - riseFallPercent * Tile.SIZE * 1.5f, size / 2f, size / 2f, size, size, 1, 1, 0);
+            batch.draw(Sprites.sprite(getThrownSprite()), renderPosition.x, renderPosition.y, size / 2f, size / 2f, size, size, 1, 1, rotationFunction.apply(splashProgress));
         } else {
             float lingerProgress = Math.min((timeAlive - THROW_TIME) / lingerDuration, 1);
-            Color color = getColor();
+            /*Color color = getColor();
             batch.setColor(color.r, color.g, color.b, 0.5f * (1 - lingerProgress));
             batch.draw(Sprites.sprite(SpriteType.JOYSTICK_BACKGROUND), getX() - (SPLASH_RANGE * Tile.SIZE), getY() - (SPLASH_RANGE * Tile.SIZE), SPLASH_RANGE * 2 * Tile.SIZE, SPLASH_RANGE * 2 * Tile.SIZE);
-            batch.setColor(Color.WHITE);
+            batch.setColor(Color.WHITE);*/
         }
     }
 
@@ -139,5 +160,6 @@ public abstract class SplashAOE extends Entity {
     public Color getColor() {
         return Color.WHITE;
     }
+    public abstract SpriteType getThrownSprite();
     
 }

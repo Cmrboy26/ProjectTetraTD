@@ -31,6 +31,7 @@ public class ShaderManager implements Disposable {
         GAMMA("gamma.frag", "passthrough.vert", 1),
         BACKGROUND("background.frag", "passthrough.vert"),
         PASSTHROUGH("passthrough.frag", "passthrough.vert"),
+        BLINDNESS("blindness.frag", "passthrough.vert"),
         ;
 
         public final String fragmentShaderLocation;

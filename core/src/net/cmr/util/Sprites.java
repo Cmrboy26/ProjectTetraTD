@@ -91,6 +91,7 @@ public class Sprites implements Disposable {
         DESCRIPTION_ICON("description"),
         RANGE_ICON("range"),
         MINING_SPEED_ICON("mining_speed"),
+        BOTTLE_SHADOW("bottle_shadow"),
         SLOWNESS_BOTTLE("slowness_bottle"),
         BLINDNESS_BOTTLE("blindness_bottle"),
 

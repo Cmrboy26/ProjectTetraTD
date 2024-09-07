@@ -20,6 +20,7 @@ import net.cmr.rtd.game.world.UpdateData;
 import net.cmr.rtd.game.world.World;
 import net.cmr.rtd.game.world.entities.MiningTower;
 import net.cmr.rtd.game.world.entities.TowerEntity;
+import net.cmr.rtd.game.world.entities.splashes.SplashAOE;
 import net.cmr.rtd.game.world.store.ShopManager.StoreException.StoreExceptionType;
 import net.cmr.rtd.game.world.tile.Tile;
 import net.cmr.rtd.game.world.tile.Tile.TileType;
@@ -86,13 +87,13 @@ public class ShopManager {
             TeamInventory inventory = new TeamInventory();
             inventory.setCash(30L);
             return inventory;
-        }), "Inflicts slowness to enemies in range.", 15));
+        }), "Inflicts slowness upon enemies in range.", 15));
         registerConsumable(new ConsumableOption(1, GameType.BLINDNESS_AOE, SpriteType.BLINDNESS_BOTTLE, "Blindness Splash", Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
             inventory.setCash(150L);
             inventory.titanium = 1;
             return inventory;
-        }), "Temporarily blinds enemy players in range.\nOnly useful in multiplayer games.", 20));
+        }), "Temporarily blinds enemy players in range. Stand back!\nOnly useful in multiplayer games.", 0));
     }
 
     private static void registerTower(TowerOption item) {
@@ -156,7 +157,7 @@ public class ShopManager {
 
                 UpdateData data = manager.getUpdateData();
                 try {
-                    canPlace(option, packet.x, packet.y, player.getTeam(), data);
+                    canPlace(option, packet.x, packet.y, Entity.getTileX(player.getPlayer()), Entity.getTileY(player.getPlayer()), player.getTeam(), data);
                 } catch (StoreException e) {
                     Log.debug("StoreException: " + e.getMessage());
                     return;
@@ -427,7 +428,7 @@ public class ShopManager {
      * @param data Called from the server side and the client side.
      * @return True if the placement was successful.
      */
-    public static boolean canPlace(StoreOption option, int x, int y, int team, UpdateData data) throws StoreException {
+    public static boolean canPlace(StoreOption option, int x, int y, int playerX, int playerY, int team, UpdateData data) throws StoreException {
         Objects.requireNonNull(option);
         Objects.requireNonNull(data);
 
@@ -454,6 +455,14 @@ public class ShopManager {
         }
         if (option instanceof ConsumableOption) {
             ConsumableOption consumableOption = (ConsumableOption) option;
+            Vector2 placePosition = new Vector2(x, y);
+            Vector2 playerPosition = new Vector2(playerX, playerY);
+            
+            float distance = placePosition.dst(playerPosition);
+            if (distance > SplashAOE.MAX_THROW_DISTANCE) {
+                // Too far away
+                throw new StoreException(StoreExceptionType.INVALID_PLACEMENT, "Too far away from target");
+            }
         }
 
         return true;

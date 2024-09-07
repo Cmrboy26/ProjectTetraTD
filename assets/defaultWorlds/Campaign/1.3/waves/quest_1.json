@@ -10,7 +10,9 @@
 		"ICE_TOWER",
 		"FIRE_TOWER",
 		"DRILL_TOWER",
-		"GEMSTONE_EXTRACTOR"
+		"GEMSTONE_EXTRACTOR",
+		"SLOWNESS_AOE",
+		"BLINDNESS_AOE"
 	],
 	"quests": [
 		{

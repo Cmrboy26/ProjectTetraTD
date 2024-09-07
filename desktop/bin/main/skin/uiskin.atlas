@@ -11,13 +11,6 @@ white-pixel
   orig: 1, 1
   offset: 0, 0
   index: -1
-x
-  rotate: false
-  xy: 515, 538
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
 box
   rotate: false
   xy: 1, 1
@@ -98,6 +91,13 @@ seymourDefault
   xy: 1, 42
   size: 512, 512
   orig: 512, 512
+  offset: 0, 0
+  index: -1
+x
+  rotate: false
+  xy: 515, 538
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 xDisabled

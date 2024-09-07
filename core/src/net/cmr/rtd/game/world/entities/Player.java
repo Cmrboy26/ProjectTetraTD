@@ -189,7 +189,7 @@ public class Player extends Entity {
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(getX(), getY(), Tile.SIZE * (3f/4f), Tile.SIZE / 2f);
+        return new Rectangle(getX() - (Tile.SIZE * (3f/4f) / 2f), getY(), Tile.SIZE * (3f/4f), Tile.SIZE / 2f);
     }
 
     @Override

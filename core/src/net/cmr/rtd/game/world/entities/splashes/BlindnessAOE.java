@@ -1,5 +1,6 @@
 package net.cmr.rtd.game.world.entities.splashes;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import net.cmr.rtd.game.world.Entity;
@@ -8,6 +9,7 @@ import net.cmr.rtd.game.world.entities.effects.BlindnessEffect;
 import net.cmr.rtd.game.world.entities.effects.ShaderEffect;
 import net.cmr.rtd.game.world.entities.effects.SlownessEffect;
 import net.cmr.rtd.shader.ShaderManager.CustomShader;
+import net.cmr.util.Sprites.SpriteType;
 
 public class BlindnessAOE extends SplashAOE {
     
@@ -34,7 +36,17 @@ public class BlindnessAOE extends SplashAOE {
 
     @Override
     public void applyEffect(UpdateData data, Entity entity) {
-        new BlindnessEffect(data, entity.getEffects(), 3);
+        new BlindnessEffect(data, entity.getEffects(), 13);
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.BLACK;
+    }
+
+    @Override
+    public SpriteType getThrownSprite() {
+        return SpriteType.BLINDNESS_BOTTLE;
     }
     
 }

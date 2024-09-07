@@ -7,7 +7,8 @@
 	"startingMoney": 35,
 	"towerWhitelist": [
 		"SHOOTER_TOWER",
-		"DRILL_TOWER"
+		"DRILL_TOWER",
+		"SLOWNESS_AOE"
 	],
 	"quests": [
 		{

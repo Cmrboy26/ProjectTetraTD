@@ -9,7 +9,9 @@
 		"SHOOTER_TOWER",
 		"ICE_TOWER",
 		"FIRE_TOWER",
-		"DRILL_TOWER"
+		"DRILL_TOWER",
+		"SLOWNESS_AOE",
+		"BLINDNESS_AOE"
 	],
 	"quests": [
 		{
@@ -19,7 +21,7 @@
 		},
 		{
 			"id": 1,
-			"type": "NO_DAMAGE",
+			"type": "NO_DAMAGE"
 		},
 		{
 			"id": 2,

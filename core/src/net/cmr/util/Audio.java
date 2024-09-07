@@ -58,6 +58,8 @@ public class Audio implements Disposable {
         UPGRADE_COMPLETE("upgrade_complete.wav"),
         ACHIEVEMENT_GET("achievement_get.wav"),
         CRITICAL_HIT("critical_hit.wav"),
+        BOTTLE_BREAK("bottle_break.wav"),
+        BOTTLE_THROW("bottle_throw.wav"),
         ;
 
         private final String fileName;

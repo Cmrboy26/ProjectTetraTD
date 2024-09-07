@@ -1,9 +1,12 @@
 package net.cmr.rtd.game.world.particles;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.entities.HealerEnemy;
+import net.cmr.rtd.game.world.entities.splashes.BlindnessAOE;
+import net.cmr.rtd.game.world.entities.splashes.SplashAOE;
 import net.cmr.rtd.game.world.entities.towers.FireTower;
 import net.cmr.rtd.game.world.entities.towers.IceTower;
 import net.cmr.util.Sprites.AnimationType;
@@ -118,6 +121,29 @@ public class ParticleCatalog {
                 .setFollowEntity(false)
                 .setAreaSize(0)
                 .setRandomVelocityImpact(0)
+                .spawnInstantly(true)
+                .create();
+        effect.setPosition(position.cpy());
+        return effect;
+    }
+
+    public static ParticleEffect splashEffect(Vector2 position, Color color, float duration) {
+        boolean instant = duration == 0;
+        int emissionRate = instant ? 10000 : 70;
+        float realDuration = instant ? 1f : duration;
+        ParticleEffect effect = SpreadEmitterEffect.factory()
+                .setParticle(AnimationType.POTION)
+                .setDuration(realDuration)
+                .setEmissionRate(emissionRate)
+                .setScale(.5f)
+                .setParticleLife(2f)
+                .setFollowEntity(false)
+                .setAreaSize(1.5f)
+                .setRadiusArea(true)
+                .setRandomVelocityImpact(1)
+                .setGravity(.25f)
+                .setXRandomImpact(1)
+                .setRGB(color.r, color.g, color.b)
                 .spawnInstantly(true)
                 .create();
         effect.setPosition(position.cpy());

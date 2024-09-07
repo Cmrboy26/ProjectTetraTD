@@ -2,16 +2,19 @@ package net.cmr.rtd.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Null;
 
@@ -122,7 +125,15 @@ public class HostScreen extends AbstractScreenEX {
         portForwardType.setAlignment(Align.center);
         contentTable.add(portForwardType).width(200).pad(5).center();
 
-        portForwardOptions = new SelectBox<String>(Sprites.skin(), "small");
+        SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+        float selectionBoxListSpacing = 5;
+        style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+        style.scrollStyle.background.setTopHeight(selectionBoxListSpacing);
+        style.scrollStyle.background.setBottomHeight(selectionBoxListSpacing);
+        style.scrollStyle.background.setLeftWidth(selectionBoxListSpacing);
+        style.scrollStyle.background.setRightWidth(selectionBoxListSpacing);
+
+        portForwardOptions = new SelectBox<String>(style);
         portForwardOptions.setAlignment(Align.center);
         portForwardOptions.setItems("Automatic (UPnP)", "Manual (Port Forwarding)");
         if (Settings.getPreferences().getBoolean(Settings.USE_UPNP)) {

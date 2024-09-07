@@ -1527,7 +1527,7 @@ public class GameScreen extends AbstractScreenEX {
         
         if (inPlacementMode()) {
             updatePlacementMode(tileX, tileY);
-            String action = placementMode == PlacementMode.UPGRADE ? "upgrade tower" : (placementMode == PlacementMode.PLACE ? "place tower" : "set gemstone");
+            String action = placementMode == PlacementMode.UPGRADE ? "upgrade tower" : (placementMode == PlacementMode.PLACE ? "place" : "set gemstone");
             if (placementMode == PlacementMode.COMPONENT) {
                 action = "insert component";
             }
@@ -1785,6 +1785,9 @@ public class GameScreen extends AbstractScreenEX {
             Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             world.render(data, batch, delta, gameSpeed);
+            for (ParticleEffect effect : particleEffects) {
+                effect.render(batch);
+            }
             batch.flush();
             fbo1.end();
 
@@ -1845,9 +1848,7 @@ public class GameScreen extends AbstractScreenEX {
                 batch.begin();
             }
 
-            for (ParticleEffect effect : particleEffects) {
-                effect.render(batch);
-            }
+            
 
             batch.end();
             batch.begin();
@@ -1948,7 +1949,7 @@ public class GameScreen extends AbstractScreenEX {
         if (effect instanceof SpreadEmitterEffect) {
             SpreadEmitterEffect spread = (SpreadEmitterEffect) effect;
             if (particleEffects.size() >= 150) {
-                spread.emissionRate /= particleEffects.size() / 150f;
+                spread.emissionRate /= particleEffects.size() / 100f;
             }
         }
         particleEffects.add(effect);
@@ -2147,6 +2148,11 @@ public class GameScreen extends AbstractScreenEX {
             lastTouched = Hotkeys.pressed(Key.SELECT);
         }
 
+        if (getLocalPlayer() == null) {
+            return;
+        }
+        Vector2 playerPosition = getLocalPlayer().getPosition();
+
         if (placementConfirm) {
             PurchaseItemPacket packet = null;
             if (placementMode == PlacementMode.PLACE) {
@@ -2161,9 +2167,9 @@ public class GameScreen extends AbstractScreenEX {
                     notification(SpriteType.STRUCTURE, "Cannot place here!");
                     canPlace = false;
                 }
-                
+
                 try {
-                    ShopManager.canPlace(option, tileX, tileY, team, data);
+                    ShopManager.canPlace(option, tileX, tileY, Entity.getTileX(playerPosition.x), Entity.getTileY(playerPosition.y), team, data);
                 } catch (StoreException e) {
                     notification(SpriteType.STRUCTURE, e.getMessage());
                     canPlace = false;

@@ -39,12 +39,11 @@ public class ConsumableOption extends StoreOption {
             }
         }
         return null;
-        //return new BlindnessAOE(purchaser.getPlayer().getPosition(), placePosition, 5, purchaser.getTeam());
     }
 
     @Override
     public GameSFX getPurchaseSFX() {
-        return GameSFX.SCARY_WARNING;
+        return GameSFX.BOTTLE_THROW;
     }
 
     @Override

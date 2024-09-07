@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
@@ -19,13 +20,15 @@ import net.cmr.util.Sprites.SpriteType;
 
 public class SpreadEmitterEffect extends ParticleEffect {
 
-    public static final int VERSION = 3;
+    public static final int VERSION = 5;
 
     public SpriteType spriteType;
     public AnimationType animationType;
     public float duration, scale, emissionRate, particleLife, animationSpeed, areaSize, randomVelocityImpact = 1, gravity = 0, xRandomImpact = 0;
+    float red = 1, green = 1, blue = 1;
     boolean followEntity;
     boolean spawnInstantly = false;
+    boolean radiusArea = false;
 
     public static class SpreadEmitterFactory {
 
@@ -34,8 +37,10 @@ public class SpreadEmitterEffect extends ParticleEffect {
         AnimationType animationType = null;
         float duration = 1, scale = 1, emissionRate = 1, particleLife = 1, animationSpeed = 1, areaSize = 1, randomVelocityImpact = 1;
         float gravity = 0, xRandomImpact = 0;
+        float red = 1, green = 1, blue = 1;
         boolean spawnInstantly = false;
         boolean followEntity = false;
+        boolean radiusArea = false;
 
         public SpreadEmitterFactory() {
             
@@ -111,6 +116,18 @@ public class SpreadEmitterEffect extends ParticleEffect {
             return this;
         }
 
+        public SpreadEmitterFactory setRadiusArea(boolean radiusArea) {
+            this.radiusArea = radiusArea;
+            return this;
+        }
+
+        public SpreadEmitterFactory setRGB(float red, float green, float blue) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            return this;
+        }
+
         public SpreadEmitterEffect create() {
             SpreadEmitterEffect effect = new SpreadEmitterEffect(attachedEntity);
             effect.spriteType = spriteType;
@@ -126,6 +143,10 @@ public class SpreadEmitterEffect extends ParticleEffect {
             effect.gravity = gravity;
             effect.xRandomImpact = xRandomImpact;
             effect.spawnInstantly = spawnInstantly;
+            effect.radiusArea = radiusArea;
+            effect.red = red;
+            effect.green = green;
+            effect.blue = blue;
             return effect;
         }
     }
@@ -172,8 +193,17 @@ public class SpreadEmitterEffect extends ParticleEffect {
                 particlePosition.set(0, 0);
             }
             float range = Tile.SIZE * this.areaSize;
-            particlePosition.x += (float) (Math.random() * range - range / 2);
-            particlePosition.y += (float) (Math.random() * range - range / 2);
+            Vector2 randomVec = new Vector2();
+            if (!radiusArea) {
+                randomVec.set((float) (Math.random() * range - range / 2), (float) (Math.random() * range - range / 2));
+            } else {
+                float angle = (float) (Math.random() * Math.PI * 2);
+                float radius = (float) (Math.random() * range);
+                randomVec.set((float) (Math.cos(angle) * radius), (float) (Math.sin(angle) * radius));
+            }
+
+            particlePosition.x += randomVec.x;
+            particlePosition.y += randomVec.y;
             float random = (float) Math.random();
             float calculatedRandom = 2f * random * randomVelocityImpact - randomVelocityImpact + 1f;
             calculatedRandom /= 2f;
@@ -203,7 +233,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
         for (int i = 0; i < particles.size(); i++) {
             Particle particle = particles.get(i);
             float alpha = 1 - particle.elapsedTime / particleLife;
-            batch.setColor(1, 1, 1, alpha * mainAlpha);
+            batch.setColor(red, green, blue, alpha * mainAlpha);
             float x = particle.position.x - Tile.SIZE / 2;
             float y = particle.position.y - Tile.SIZE / 2;
             if (followEntity) {
@@ -211,6 +241,7 @@ public class SpreadEmitterEffect extends ParticleEffect {
                 y += position.y;
             }
             batch.draw(getParticleTexture(particle.elapsedTime), x, y, Tile.SIZE / 2, Tile.SIZE / 2, Tile.SIZE, Tile.SIZE, scale, scale, 0);
+            batch.setColor(Color.WHITE);
         }
         //batch.draw(Sprites.sprite(spriteType), position.x - Tile.SIZE / 2, position.y - Tile.SIZE / 2, Tile.SIZE, Tile.SIZE);
         super.render(batch);
@@ -257,6 +288,10 @@ public class SpreadEmitterEffect extends ParticleEffect {
         buffer.writeFloat(gravity);
         buffer.writeFloat(xRandomImpact);
         buffer.writeBoolean(spawnInstantly);
+        buffer.writeBoolean(radiusArea);
+        buffer.writeFloat(red);
+        buffer.writeFloat(green);
+        buffer.writeFloat(blue);
     }
 
     @Override
@@ -287,6 +322,14 @@ public class SpreadEmitterEffect extends ParticleEffect {
         }
         if (version >= 3) {
             spawnInstantly = input.readBoolean();
+        }
+        if (version >= 4) {
+            radiusArea = input.readBoolean();
+        }
+        if (version >= 5) {
+            red = input.readFloat();
+            green = input.readFloat();
+            blue = input.readFloat();
         }
     }
 

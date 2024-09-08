@@ -1,6 +1,7 @@
 package net.cmr.rtd;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.URI;
@@ -39,7 +40,9 @@ import com.esotericsoftware.kryonet.Client;
 
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import net.cmr.rtd.game.EasterEgg;
+import net.cmr.rtd.game.Feedback;
 import net.cmr.rtd.game.Hotkeys;
+import net.cmr.rtd.game.Feedback.FeedbackForm;
 import net.cmr.rtd.game.achievements.Achievement;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
@@ -174,6 +177,16 @@ public class ProjectTetraTD extends CMRGame {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
 			CMRGame.setDebug(!CMRGame.isDebug());
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+			try {
+				System.out.println("Retrieving feedback form... REMOVE THIS CODE BEFORE RELEASE!!!");
+				FeedbackForm form = Feedback.retrieveFeedbackForm();
+				form.submit();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		if (Gdx.input.isKeyJustPressed(Input.Keys.Q) && EasterEgg.isFelipe()) {
 			onAchievementComplete(Achievement.createAchievementInstance(TutorialCompleteAchievement.class));
 		}

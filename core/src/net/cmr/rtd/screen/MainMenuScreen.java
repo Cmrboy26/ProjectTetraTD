@@ -7,7 +7,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -37,8 +36,6 @@ import net.cmr.rtd.game.achievements.Achievement.AchievementDisplay;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.files.QuestFile;
 import net.cmr.rtd.screen.SelectionScreen.PlayType;
-import net.cmr.rtd.shader.ShaderManager;
-import net.cmr.rtd.shader.ShaderManager.CustomShader;
 import net.cmr.util.AbstractScreenEX;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameMusic;
@@ -201,6 +198,18 @@ public class MainMenuScreen extends AbstractScreenEX {
 		Table icongroup = new Table();
 		table2.add(icongroup).expand().align(Align.bottomRight);
 		int size = 30;
+
+		TextButton feedback = new TextButton("Feedback", Sprites.skin(), labelType);
+		Audio.addClickSFX(feedback);
+		feedback.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				ProjectTetraTD game = ProjectTetraTD.getInstance(ProjectTetraTD.class);
+				game.setScreen(new FeedbackScreen());
+			}
+		});
+		feedback.pad(0, 15, 0, 15);
+		icongroup.add(feedback).pad(10.0f).expandX();
 
 		TextButton credits = new TextButton("Credits", Sprites.skin(), labelType);
 		Audio.addClickSFX(credits);

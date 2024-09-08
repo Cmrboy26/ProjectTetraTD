@@ -90,8 +90,8 @@ public class ShopManager {
         }), "Inflicts slowness upon enemies in range.", 15));
         registerConsumable(new ConsumableOption(1, GameType.BLINDNESS_AOE, SpriteType.BLINDNESS_BOTTLE, "Blindness Splash", Cost.create(level -> {
             TeamInventory inventory = new TeamInventory();
-            inventory.setCash(150L);
-            inventory.titanium = 1;
+            inventory.setCash(-150000L);
+            inventory.titanium = -1;
             return inventory;
         }), "Temporarily blinds enemy players in range. Stand back!\nOnly useful in multiplayer games.", 0));
     }

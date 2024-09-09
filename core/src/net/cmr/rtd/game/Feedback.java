@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -20,17 +19,25 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox.SelectBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
-import net.cmr.rtd.screen.MainMenuScreen;
+import net.cmr.util.Audio;
+import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
 import net.cmr.util.Sprites;
 
@@ -161,8 +168,10 @@ public class Feedback {
         ArrayList<Entry> entryList;
         long formId;
         TextField emailField;
+        JSONObject form;
 
         public FeedbackForm(JSONObject json) throws InvalidObjectException {
+            this.form = json;
             // Construct the feedback form object from the JSON object
             try {
                 JSONObject formData = (JSONObject) json.get("formData");
@@ -197,6 +206,7 @@ public class Feedback {
             style.fontColor = Color.LIGHT_GRAY;
             Label emailLabel = new Label("Your Email", Sprites.skin(), "small");
             emailField = new TextField("", style);
+            emailField.setName("email");
             emailField.setAlignment(Align.center);
             emailField.setMaxLength(120);
             emailField.setMessageText("Type here...");
@@ -218,12 +228,31 @@ public class Feedback {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     super.clicked(event, x, y);
+                    boolean emailIsPresent = emailField.getText() != null && !emailField.getText().isEmpty() && emailField.getText().contains("@");
+                    if (!emailIsPresent) {
+                        submitButton.addAction(Actions.sequence(
+                            Actions.run(() -> submitButton.setText("Please enter your email.")),
+                            Actions.delay(3),
+                            Actions.run(() -> submitButton.setText("Submit"))
+                        ));
+                        return;
+                    }
                     if (!canSubmit()) {
+                        submitButton.addAction(Actions.sequence(
+                            Actions.run(() -> submitButton.setText("Please fill out all required fields.")),
+                            Actions.delay(3),
+                            Actions.run(() -> submitButton.setText("Submit"))
+                        ));
                         return;
                     }
                     try {
                         submitButton.remove();
                         submit();
+
+                        table.clear();
+                        table.add("Thank you for your feedback! :)", "small").pad(10).row();
+                        table.add("Your feedback has been\nsubmitted successfully.", "small").pad(10).row();
+                        Audio.getInstance().playSFX(GameSFX.ACHIEVEMENT_GET, 1);
                     } catch (IOException e) {
                         e.printStackTrace();
                         // TODO: Display error message
@@ -254,21 +283,55 @@ public class Feedback {
         }
 
         public boolean canSubmit() {
-            // TODO: Check if all the required fields are filled out enough to submit
+            for (Entry entry : entryList) {
+                if (entry.isRequired()) {
+                    // Check if the entry is required
+                    if (entry.getResponse() == null || entry.getResponse().isEmpty()) {
+                        // Check if the entry is empty
+                        return false;
+                    }
+                }
+            }
             return true;
         }
 
         public enum EntryType {
-            SCALE_10(() -> {
+            SCALE_10((entry) -> {
                 Table table = new Table(Sprites.skin());
+                ButtonGroup<TextButton> buttonGroup = new ButtonGroup<TextButton>();
+                buttonGroup.setMaxCheckCount(1);
+                buttonGroup.setMinCheckCount(0);
+                for (int i = 1; i <= 10; i++) {
+                    TextButton button = new TextButton(i + "", Sprites.skin(), "toggle-small");
+                    button.setName(i + "");
+                    buttonGroup.add(button);
+                    button.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            super.clicked(event, x, y);
+                            for (int j = 0; j < 10; j++) {
+                                TextButton button = (TextButton) table.findActor((j + 1) + "");
+                                button.setChecked(false);
+                            }
+                            button.setChecked(true);
+                        }
+                    });
+                    table.add(button).size(25).pad(5);
+                }
                 return table;
             }, (table) -> {
                 JSONObject response = new JSONObject();
-                return response;
+                for (int i = 1; i <= 10; i++) {
+                    TextButton button = table.findActor(i + "");
+                    if (button.isChecked()) {
+                        response.put("response", i);
+                        return response;
+                    }
+                }
+                return null;
             }),
-            SHORT_TEXT(() -> {
+            SHORT_TEXT((entry) -> {
                 final int MAX_LENGTH = 50;
-
                 Table table = new Table(Sprites.skin());
                 TextFieldStyle style = new TextFieldStyle(Sprites.skin().get("small", TextFieldStyle.class));
                 style.fontColor = Color.LIGHT_GRAY;
@@ -282,13 +345,19 @@ public class Feedback {
             }, (table) -> {
                 JSONObject response = new JSONObject();
                 TextField field = table.findActor("short-text");
+                if (field.getText().isEmpty()) {
+                    return null;
+                }
                 response.put("response", field.getText());
                 return response;
             }),
-            LONG_TEXT(() -> {
+            LONG_TEXT((entry) -> {
                 final int MAX_LENGTH = 1000;
-
                 Table table = new Table(Sprites.skin());
+                Label minLengthDataLabel = new Label(entry.get("minLength")+"", Sprites.skin(), "small");
+                minLengthDataLabel.setName("minLength");
+                minLengthDataLabel.setVisible(false);
+                table.add(minLengthDataLabel).size(0);
                 TextFieldStyle style = new TextFieldStyle(Sprites.skin().get("small", TextFieldStyle.class));
                 style.fontColor = Color.LIGHT_GRAY;
                 TextArea textArea = new TextArea("", style);
@@ -301,28 +370,69 @@ public class Feedback {
             }, (table) -> {
                 JSONObject response = new JSONObject();
                 TextArea field = table.findActor("long-text");
+
+                if (field.getText().isEmpty()) {
+                    return null;
+                }
+                long minLength = (long) Long.parseLong(((Label) table.findActor("minLength")).getText().toString());
+                if (field.getText().length() < minLength) {
+                    return null;
+                }
+
                 response.put("response", field.getText());
                 return response;
             }),
-            MULTIPLE_CHOICE(() -> {
+            MULTIPLE_CHOICE((entry) -> {
                 Table table = new Table(Sprites.skin());
+                SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+
+                float selectionBoxListSpacing = 5;
+                style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+                style.scrollStyle.background.setTopHeight(selectionBoxListSpacing);
+                style.scrollStyle.background.setBottomHeight(selectionBoxListSpacing);
+                style.scrollStyle.background.setLeftWidth(selectionBoxListSpacing);
+                style.scrollStyle.background.setRightWidth(selectionBoxListSpacing);
+                style.fontColor = Color.LIGHT_GRAY;
+                SelectBox<String> selectBox = new SelectBox<>(style);
+                selectBox.setName("multiple-choice");
+                JSONArray choices = (JSONArray) entry.get("choices");
+                ArrayList<String> choiceList = new ArrayList<>();
+                for (int i = 0; i < choices.size(); i++) {
+                    choiceList.add((String) choices.get(i));
+                }
+                choiceList.add(0, "Select an option...");
+                selectBox.setItems(choiceList.toArray(new String[0]));
+                selectBox.setAlignment(Align.center);
+                selectBox.setSelectedIndex(0);
+                table.add(selectBox).width(640 * (2/4f)).height(30).row();
+                
                 return table;
             }, (table) -> {
                 JSONObject response = new JSONObject();
+                SelectBox<String> field = table.findActor("multiple-choice");
+                if (field.getSelectedIndex() == 0) {
+                    return null;
+                }
+                response.put("response", field.getSelected());
                 return response;
             }),
-            BOOLEAN(() -> {
+            BOOLEAN((entry) -> {
                 Table table = new Table(Sprites.skin());
+                CheckBox checkBox = new CheckBox("", Sprites.skin());
+                checkBox.setName("boolean");
+                table.add(checkBox).size(40).row();
                 return table;
             }, (table) -> {
                 JSONObject response = new JSONObject();
+                CheckBox field = table.findActor("boolean");
+                response.put("response", field.isChecked());
                 return response;
             });
 
-            Callable<Table> inputTableCallable;
+            Function<JSONObject, Table> inputTableCallable;
             Function<Table, JSONObject> responseHandlerCallable;
 
-            EntryType(Callable<Table> inputTableCallable, Function<Table, JSONObject> responseHandlerCallable) {
+            EntryType(Function<JSONObject, Table> inputTableCallable, Function<Table, JSONObject> responseHandlerCallable) {
                 this.inputTableCallable = inputTableCallable;
                 this.responseHandlerCallable = responseHandlerCallable;
             }
@@ -333,14 +443,17 @@ public class Feedback {
             EntryType type;
             final String label;
             final boolean required;
+            final JSONObject json;
             Table responseTable;
+
             public Entry(EntryType type, JSONObject json) {
                 // Construct the entry object from the JSON object
                 this.type = type;
+                this.json = json;
                 label = (String) json.get("label");
                 required = (boolean) json.get("required");
                 try {
-                    responseTable = type.inputTableCallable.call();
+                    responseTable = type.inputTableCallable.apply(json);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -354,6 +467,11 @@ public class Feedback {
             public boolean isRequired() {
                 // Return whether the entry is required
                 return required;
+            }
+
+            public JSONObject getJSON() {
+                // Return the JSON object of the entry
+                return json;
             }
 
             public JSONObject getResponse() {

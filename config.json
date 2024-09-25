@@ -9,6 +9,10 @@
 	"vmargs": [
 		"-Xmx1G"
 	],
+	"resources": [
+		"assets"
+	],
 	"verbose": "true",
-	"output": "../PTTDExported"
+	"output": "../PTTDExported",
+    "minimizejre": "soft"
 }

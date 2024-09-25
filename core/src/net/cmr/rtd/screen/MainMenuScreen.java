@@ -231,7 +231,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 				creditsDialog.padTop(50);
 				creditsDialog.text("Programming, Music, Art: Colten Reissmann", small);
 				creditsDialog.getContentTable().row();
-				creditsDialog.text("Testing: SirPotato42, Andrew, mxwl", small);
+				creditsDialog.text("Testing: Felipe, Andrew, Maxwell", small);
 				creditsDialog.getContentTable().row();
 				creditsDialog.text("Copyright Colten Reissmann (C)", small);
 				creditsDialog.getContentTable().row();
@@ -357,7 +357,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		scrollPane.setScrollbarsOnTop(false);
 		scrollPane.setScrollbarsVisible(true);
 
-		window.add(scrollPane).width(300).height(260).expand().fill().row();;
+		window.add(scrollPane).width(400).height(200).expand().fill().row();;
 		
 		TextButton close = new TextButton("Close", Sprites.skin(), "small");
 		Audio.addClickSFX(close);
@@ -372,6 +372,7 @@ public class MainMenuScreen extends AbstractScreenEX {
 		stages.get(Align.center).addActor(window);
 		window.pack();
 		window.setPosition(640/2, 360/2, Align.center);
+		window.toFront();
 	}
 
     @Override

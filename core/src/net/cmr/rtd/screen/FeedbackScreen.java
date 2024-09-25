@@ -19,6 +19,7 @@ public class FeedbackScreen extends AbstractScreenEX {
 
     FeedbackForm form;
     boolean formRetrievalProcessed = false;
+    boolean alreadySubmitted = false;
     Thread formThread;
 
     Label statusLabel;
@@ -65,11 +66,17 @@ public class FeedbackScreen extends AbstractScreenEX {
             scrollPane.setPosition(640 / 2f, 360 / 2f, Align.center);
             add(Align.center, scrollPane);
         }
+        
         if (form == null && !formThread.isAlive() && !formRetrievalProcessed) {
             formRetrievalProcessed = true;
             // Error occured
-            Log.info("Failed to retrieve feedback form :(");
-            statusLabel.setText("Failed to retrieve feedback form :(");
+
+            String message = "Failed to retrieve feedback form :(";
+            if (alreadySubmitted) {
+                message = "You have already submitted feedback!\nCome back some other time.";
+            }
+            Log.info(message);
+            statusLabel.setText(message);
         }
 
         super.render(delta);
@@ -81,6 +88,9 @@ public class FeedbackScreen extends AbstractScreenEX {
                 form = Feedback.retrieveFeedbackForm();
             } catch (Exception e) {
                 e.printStackTrace();
+                if (e.getMessage().contains("already")) {
+                    alreadySubmitted = true;
+                }
             }
         });
     }

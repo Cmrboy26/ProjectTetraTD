@@ -95,8 +95,8 @@ project(":android") {
 
     configurations {
         natives
-        api.exclude group: 'com.esotericsoftware', module: 'minlog'
-        api.exclude group: 'com.esotericsoftware', module: 'reflectasm'
+        // api.exclude group: 'com.esotericsoftware', module: 'minlog'
+        // api.exclude group: 'com.esotericsoftware', module: 'reflectasm'
     }
 
     dependencies {

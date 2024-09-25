@@ -36,6 +36,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Align;
 
+import net.cmr.rtd.ProjectTetraTD;
+import net.cmr.rtd.game.achievements.AchievementManager;
+import net.cmr.rtd.game.achievements.custom.FeedbackAchievement;
+import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
 import net.cmr.util.Audio;
 import net.cmr.util.Audio.GameSFX;
 import net.cmr.util.Log;
@@ -131,7 +135,13 @@ public class Feedback {
         JSONObject json = (JSONObject) parser.parse(feedbackPageData);
         Log.debug("Feedback", "Received feedback form: " + json.toJSONString());
         //json = (JSONObject) parser.parse("");
-        return new FeedbackForm(json);
+        FeedbackForm form = new FeedbackForm(json);
+        Long lastForm = ProjectTetraTD.getLastFormID();
+        Long formId = form.formId;
+        if (formId == lastForm) {
+            throw new IOException("Feedback form already submitted.");
+        }
+        return form;
     }
 
     private static void submitFeedback(FeedbackForm form) throws IOException{
@@ -154,6 +164,7 @@ public class Feedback {
             con.disconnect();
             if (responseCode == 200) {
                 Log.info("Feedback form submitted successfully");
+                ProjectTetraTD.setLastFormID(form.formId);
             } else {
                 throw new IOException("Failed to submit feedback form: Got response code " + responseCode +", expected 200");
             }
@@ -224,6 +235,7 @@ public class Feedback {
             }
 
             TextButton submitButton = new TextButton("Submit", Sprites.skin(), "small");
+            submitButton.setOrigin(Align.bottom);
             submitButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -237,9 +249,11 @@ public class Feedback {
                         ));
                         return;
                     }
-                    if (!canSubmit()) {
+                    SubmitResponse response = canSubmit();
+                    if (!response.sendResponse) {
+                        String message = response.message;
                         submitButton.addAction(Actions.sequence(
-                            Actions.run(() -> submitButton.setText("Please fill out all required fields.")),
+                            Actions.run(() -> submitButton.setText(message)),
                             Actions.delay(3),
                             Actions.run(() -> submitButton.setText("Submit"))
                         ));
@@ -252,7 +266,7 @@ public class Feedback {
                         table.clear();
                         table.add("Thank you for your feedback! :)", "small").pad(10).row();
                         table.add("Your feedback has been\nsubmitted successfully.", "small").pad(10).row();
-                        Audio.getInstance().playSFX(GameSFX.ACHIEVEMENT_GET, 1);
+                        AchievementManager.getInstance().setAchievementValue(FeedbackAchievement.class, true);
                     } catch (IOException e) {
                         e.printStackTrace();
                         // TODO: Display error message
@@ -282,17 +296,45 @@ public class Feedback {
             submitFeedback(this);
         }
 
-        public boolean canSubmit() {
+        public SubmitResponse canSubmit() {
             for (Entry entry : entryList) {
+                // Check if the entry is required
                 if (entry.isRequired()) {
-                    // Check if the entry is required
+                    // Check if the entry is empty
                     if (entry.getResponse() == null || entry.getResponse().isEmpty()) {
-                        // Check if the entry is empty
-                        return false;
+                        if (entry.type == EntryType.LONG_TEXT) {
+                            return SubmitResponse.NOT_LONG_ENOUGH;
+                        }
+                        if (entry.type == EntryType.SHORT_TEXT) {
+                            return SubmitResponse.NOT_LONG_ENOUGH;
+                        }
+                        if (entry.type == EntryType.MULTIPLE_CHOICE) {
+                            return SubmitResponse.EMPTY;
+                        }
+                        return SubmitResponse.EMPTY;
                     }
                 }
             }
-            return true;
+            return SubmitResponse.SUCCESS;
+        }
+
+        public enum SubmitResponse {
+            SUCCESS,
+            EMPTY("One or more entries are empty."),
+            NOT_LONG_ENOUGH("Response in one or more text\nentries must be longer.")
+            ;
+
+            final String message;
+            final boolean sendResponse;
+
+            SubmitResponse() {
+                this.message = "";
+                this.sendResponse = true;
+            }
+            SubmitResponse(String message) {
+                this.message = message;
+                this.sendResponse = false;
+            }
         }
 
         public enum EntryType {

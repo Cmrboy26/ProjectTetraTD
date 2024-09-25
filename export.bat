@@ -6,7 +6,7 @@ call java -jar packr-all-4.0.0.jar config.json
 call echo Game successfully converted to executable!
 call echo Copying game files to final folder...
 REM xcopy "desktop\build\libs\pttd.jar" "..\PTTDExported"
-xcopy "assets" "..\PTTDExported\assets\" /s /e /A
+call echo NO LONGER NEEDED: xcopy "assets" "..\PTTDExported\assets\" /s /e /A
 call echo Finished copying game assets to the final folder
 call echo Compressing exported game...
 jar -cfM "../PTTD.zip" "../PTTDExported/"

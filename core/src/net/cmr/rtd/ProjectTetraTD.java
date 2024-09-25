@@ -476,6 +476,14 @@ public class ProjectTetraTD extends CMRGame {
 		writeUserData("lastPlayedWorld", world);
 	}
 
+	public static @Null Long getLastFormID() {
+		return readUserData("lastFormID", Long.class, -1L);
+	}
+
+	public static void setLastFormID(Long formID) {
+		writeUserData("lastFormID", formID);
+	}
+
 	public static void writeUserData(String key, Object value) {
 		Object writeValue = value;
 		if (value != null && value.getClass().isArray()) {

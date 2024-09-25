@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 
 import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.achievements.custom.DiamondMinerAchievement;
+import net.cmr.rtd.game.achievements.custom.FeedbackAchievement;
 import net.cmr.rtd.game.achievements.custom.FirstGemstoneExtractorAchievement;
 import net.cmr.rtd.game.achievements.custom.FullBestiaryAchievement;
 import net.cmr.rtd.game.achievements.custom.HighLevelTowerAchievement;
@@ -34,6 +35,7 @@ public abstract class Achievement<T> {
         initialize(DiamondMinerAchievement.class);
         initialize(FullBestiaryAchievement.class);
         initialize(HighLevelTowerAchievement.class);
+        initialize(FeedbackAchievement.class);
     }
     
     private T value;
@@ -44,7 +46,7 @@ public abstract class Achievement<T> {
 
     public static ArrayList<Class<? extends Achievement<?>>> getAchievementRegisterOrder() {
         return achievementRegisterOrder;
-    }
+    } 
 
     public static Class<? extends Achievement<?>> getAchievement(String id) {
         return achievementRegistry.get(id);

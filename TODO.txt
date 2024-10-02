@@ -2,10 +2,10 @@ Feedback:
   - a lot of moving between windows (try to make windows less intrusive)
 
 - Getting it out there
-  - Get others to try it out (maybe noblelemon, post stuff in libgdx discord, have friends test)
-    - Create something (google form probably) that allows me to get structured feedback from people about the game 
-    - Create an information log that gets sent to me through api calls with debug information/playtest information perhaps?
-    - Add a report/suggest feature into the game? maybe make it go through api.coltenreissmann.me
+  [DONE] Get others to try it out (maybe noblelemon, post stuff in libgdx discord, have friends test)
+    [DONE] Create something (google form probably) that allows me to get structured feedback from people about the game 
+    [DONE] Create an information log that gets sent to me through api calls with debug information/playtest information perhaps?
+    [DONE] Add a report/suggest feature into the game? maybe make it go through api.coltenreissmann.me
   - Make a simple trailer: grab attention at the beginning, showcase the music and gameplay, end with call to action.
   - Post teasers and short clips. Maybe make some devlog videos
 

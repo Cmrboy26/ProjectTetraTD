@@ -1597,116 +1597,8 @@ public class GameScreen extends AbstractScreenEX {
                         removeInfoWindow();
                     }
                     TowerEntity.displayRange(tower);
-                    boolean materialPresent = tower.getSelectedMaterial() != null;
 
-                    informationUpgradeWindow = new Window(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
-                        @Override
-                        public void act(float delta) {
-                            super.act(delta);
-                        }
-                    };
-                   
-                    informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
-                    informationUpgradeWindow.pad(10);
-                    informationUpgradeWindow.padTop(30);
-                    informationUpgradeWindow.setSize(225, 250);
-                    informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
-                    informationUpgradeWindow.setMovable(true);
-                    informationUpgradeWindow.setVisible(true);
-                    informationUpgradeWindow.setResizable(true);
-
-                    Table towerInformation = tower.getTowerDescription();
-                    //Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
-                    informationUpgradeWindow.add(towerInformation).grow().colspan(2).row();
-
-                    if (materialPresent) {
-                        Image materialImage = new Image(Sprites.drawable(tower.getSelectedMaterial().image));
-                        materialImage.setSize(24, 24);
-                        informationUpgradeWindow.add(materialImage).size(24).colspan(1).expand(0, 0);
-                    }
-
-                    int buttonHeight = 20;
-                    float pad = 3;
-                    float spacing = 10;
-
-                    if (tower.canEditSortType()) {
-                        SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
-
-                        style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
-                        style.scrollStyle.background.setTopHeight(spacing / 2);
-                        style.scrollStyle.background.setBottomHeight(spacing / 2);
-                        style.scrollStyle.background.setLeftWidth(spacing / 2);
-                        style.scrollStyle.background.setRightWidth(spacing / 2);
-                        
-                        SelectBox<SortType> targetMethodSelectBox = new SelectBox<SortType>(style);
-                        targetMethodSelectBox.setScale(.8f);
-                        targetMethodSelectBox.setAlignment(Align.center);
-                        targetMethodSelectBox.setItems(SortType.HIGHEST_HEALTH,
-                            SortType.LOWEST_HEALTH,
-                            SortType.STRUCTURE_DISTANCE,
-                            SortType.STRUCTURE_DISTANCE_REVERSE,
-                            SortType.TOWER_DISTANCE,
-                            SortType.ANY);
-                        targetMethodSelectBox.setSelected(tower.getPreferedSortType());
-                        targetMethodSelectBox.addListener(new ChangeListener() {
-                            @Override
-                            public void changed(ChangeEvent event, Actor actor) {
-                                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                                SortType type = targetMethodSelectBox.getSelected();
-                                SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
-                                ioStream.sendPacket(packet);
-                            } 
-                        });
-
-                        informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(1 + (materialPresent ? 0 : 1)).growX().row();
-                    }
-
-                    TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin(), "small");
-                    upgradeButton.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            if (tower.isBeingBuilt() || tower.getRemainingUpgradeTime() > 0) {
-                                notification(SpriteType.WARNING, "Tower is being upgraded!", 3);
-                                Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
-                                return;
-                            }
-                            Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
-                            removeInfoWindow();
-                            upgradeDialog(tower, false);
-                        }
-                    });
-                    informationUpgradeWindow.add(upgradeButton).bottom().pad(pad).colspan(2).maxHeight(buttonHeight).growX().row();
-                    informationUpgradeWindow.row();
-
-                    TextButton sellButton = new TextButton("Sell", Sprites.skin(), "small");
-                    sellButton.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            if (sellButton.isChecked()) {
-                                Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
-                                sellButton.setText("Confirm?");
-                            } else {
-                                Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
-                                PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
-                                ioStream.sendPacket(packet);
-                                removeInfoWindow();
-                            }
-                        }
-                    });
-                    informationUpgradeWindow.add(sellButton).left().bottom().pad(pad).maxHeight(buttonHeight).growX().colspan(1);
-
-                    TextButton closeButton = new TextButton("Close", Sprites.skin(), "small");
-                    closeButton.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            Audio.getInstance().playSFX(GameSFX.DESELECT, 1f);
-                            removeInfoWindow();
-                        }
-                    });
-                    informationUpgradeWindow.add(closeButton).right().bottom().pad(pad).maxHeight(buttonHeight).growX();
-
-                    informationUpgradeWindow.layout();
-
+                    informationUpgradeWindow = createInformationUpgradeWindow(tower, tileX, tileY);
                     
                     stages.get(Align.center).addActor(informationUpgradeWindow);
                     if (infoWindowX != -1 && infoWindowY != -1) {
@@ -1717,6 +1609,119 @@ public class GameScreen extends AbstractScreenEX {
                 }
             }
         }
+    }
+
+    public Window createInformationUpgradeWindow(TowerEntity tower, int tileX, int tileY) {
+        boolean materialPresent = tower.getSelectedMaterial() != null;
+        informationUpgradeWindow = new Window(tower.getClass().getSimpleName(), Sprites.skin(), "small") {
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+            }
+        };
+       
+        informationUpgradeWindow.getTitleLabel().setAlignment(Align.center);
+        informationUpgradeWindow.pad(10);
+        informationUpgradeWindow.padTop(30);
+        informationUpgradeWindow.setSize(225, 250);
+        informationUpgradeWindow.setPosition(640 - 10, 180, Align.right);
+        informationUpgradeWindow.setMovable(true);
+        informationUpgradeWindow.setVisible(true);
+        informationUpgradeWindow.setResizable(true);
+
+        Table towerInformation = tower.getTowerDescription();
+        //Label label = new Label(tower.getTowerDescription(), Sprites.skin(), "small");
+        informationUpgradeWindow.add(towerInformation).grow().colspan(2).row();
+
+        if (materialPresent) {
+            Image materialImage = new Image(Sprites.drawable(tower.getSelectedMaterial().image));
+            materialImage.setSize(24, 24);
+            informationUpgradeWindow.add(materialImage).size(24).colspan(1).expand(0, 0);
+        }
+
+        int buttonHeight = 20;
+        float pad = 3;
+        float spacing = 10;
+
+        if (tower.canEditSortType()) {
+            SelectBoxStyle style = new SelectBoxStyle(Sprites.skin().get("small", SelectBoxStyle.class));
+
+            style.scrollStyle.background = new NinePatchDrawable(Sprites.skin().get("box", NinePatch.class));
+            style.scrollStyle.background.setTopHeight(spacing / 2);
+            style.scrollStyle.background.setBottomHeight(spacing / 2);
+            style.scrollStyle.background.setLeftWidth(spacing / 2);
+            style.scrollStyle.background.setRightWidth(spacing / 2);
+            
+            SelectBox<SortType> targetMethodSelectBox = new SelectBox<SortType>(style);
+            targetMethodSelectBox.setScale(.8f);
+            targetMethodSelectBox.setAlignment(Align.center);
+            targetMethodSelectBox.setItems(SortType.HIGHEST_HEALTH,
+                SortType.LOWEST_HEALTH,
+                SortType.STRUCTURE_DISTANCE,
+                SortType.STRUCTURE_DISTANCE_REVERSE,
+                SortType.TOWER_DISTANCE,
+                SortType.ANY);
+            targetMethodSelectBox.setSelected(tower.getPreferedSortType());
+            targetMethodSelectBox.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                    SortType type = targetMethodSelectBox.getSelected();
+                    SortTypePacket packet = new SortTypePacket(tileX, tileY, type);
+                    ioStream.sendPacket(packet);
+                } 
+            });
+
+            informationUpgradeWindow.add(targetMethodSelectBox).pad(pad).maxHeight(buttonHeight).colspan(1 + (materialPresent ? 0 : 1)).growX().row();
+        }
+
+        TextButton upgradeButton = new TextButton("Upgrade", Sprites.skin(), "small");
+        upgradeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (tower.isBeingBuilt() || tower.getRemainingUpgradeTime() > 0) {
+                    notification(SpriteType.WARNING, "Tower is being upgraded!", 3);
+                    Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
+                    return;
+                }
+                Audio.getInstance().playSFX(GameSFX.SELECT, 1f);
+                removeInfoWindow();
+                upgradeDialog(tower, false);
+            }
+        });
+        informationUpgradeWindow.add(upgradeButton).bottom().pad(pad).colspan(2).maxHeight(buttonHeight).growX().row();
+        informationUpgradeWindow.row();
+
+        TextButton sellButton = new TextButton("Sell", Sprites.skin(), "small");
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (sellButton.isChecked()) {
+                    Audio.getInstance().playSFX(GameSFX.WARNING, 1f);
+                    sellButton.setText("Confirm?");
+                } else {
+                    Audio.getInstance().playSFX(GameSFX.SHOOT, 1f);
+                    PurchaseItemPacket packet = new PurchaseItemPacket(PurchaseAction.SELL, null, tileX, tileY);
+                    ioStream.sendPacket(packet);
+                    removeInfoWindow();
+                }
+            }
+        });
+        informationUpgradeWindow.add(sellButton).left().bottom().pad(pad).maxHeight(buttonHeight).growX().colspan(1);
+
+        TextButton closeButton = new TextButton("Close", Sprites.skin(), "small");
+        closeButton.setName("closeButton");
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Audio.getInstance().playSFX(GameSFX.DESELECT, 1f);
+                removeInfoWindow();
+            }
+        });
+        informationUpgradeWindow.add(closeButton).right().bottom().pad(pad).maxHeight(buttonHeight).growX();
+
+        informationUpgradeWindow.layout();
+        return informationUpgradeWindow;
     }
 
     void removeInfoWindow() {

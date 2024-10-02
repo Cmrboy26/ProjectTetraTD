@@ -3,6 +3,7 @@ package net.cmr.rtd.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -14,6 +15,7 @@ import net.cmr.rtd.ProjectTetraTD;
 import net.cmr.rtd.game.GameManager;
 import net.cmr.rtd.game.achievements.AchievementManager;
 import net.cmr.rtd.game.achievements.custom.TutorialCompleteAchievement;
+import net.cmr.rtd.game.packets.PurchaseItemPacket.PurchaseAction;
 import net.cmr.rtd.game.stream.GameStream;
 import net.cmr.rtd.game.world.Entity;
 import net.cmr.rtd.game.world.GameObject.GameType;
@@ -114,18 +116,19 @@ public class TutorialScreen extends GameScreen {
                 tutorialTable.add(image).size(size).colspan(1).row();
                 break;
             case BUY_TOWER:
-                tableText("Purchase the 'Shooter Tower', the most basic tower.");
+                tableText("In the 'Combat' section of the shop menu,");
+                tableText("purchase the 'Shooter Tower'.");
                 Image shooterTower = new Image(Sprites.animation(AnimationType.SHOOTER_TOWER_1, 0));
                 tutorialTable.add(shooterTower).size(size).colspan(2).row();
                 break;
             case PLACE_TOWER:
-                tableText("Place the tower on the map by touching a tile.");
+                tableText("Place the tower on the map by tapping a tile.");
                 tableText("Please place the tower on the highlighted tile.");
                 break;
             case UNPAUSE_WAVE:
                 tableText("Excellent! The tower will be finished ");
                 tableText("constructing in just a moment.");
-                tableText("Once it is finished, touch the resume button");
+                tableText("Once it is finished, tap the resume button");
                 tableText("(right bottom) to summon a wave of enemies.");
                 Image resume = new Image(Sprites.sprite(SpriteType.RESUME));
                 tutorialTable.add(resume).size(size).colspan(2).row();
@@ -146,7 +149,8 @@ public class TutorialScreen extends GameScreen {
                 break;
             case SELECT_TOWER_FOR_UPGRADE:
                 tableText("Touch the tower we just constructed");
-                tableText("and wait for it to finish upgrading.");
+                tableText("to upgrade it. Select \"Yes\" on the confirmation");
+                tableText("window and wait for it to finish upgrading.");
                 break;
             case UPGRADE_SUCCESS:
                 tableText("Great job! Your tower has been upgraded.");
@@ -178,7 +182,7 @@ public class TutorialScreen extends GameScreen {
                 tableText("Touch the 'Inventory' button at the bottom of the screen.");
                 break;
             case INVENTORY_SELECT: {
-                tableText("Touch the left top item in the inventory.");
+                tableText("Select the left top item in the inventory.");
                 tableText("This is lubricant, one of the 3 types of components.");
                 Image wd40 = new Image(Sprites.sprite(SpriteType.LUBRICANT));
                 tutorialTable.add(wd40).size(size).colspan(2).row();
@@ -239,15 +243,16 @@ public class TutorialScreen extends GameScreen {
                 tutorialTable.add(thorium).size(size).colspan(1).row();
                 break;
             case SELL_INTRO:
-                tableText("Finally, to view a tower's stats, you can touch it.");
+                tableText("Finally, you can tap a tower to its stats.");
                 break;
             case SELL:
-                tableText("Here, you can view what components and gemstones");
-                tableText("are applied to the tower along with the tower's stats.");
-                tableText("You can also modify the tower's targeting method");
-                tableText("or sell the tower for a refund here.");
-                tableText("Please sell your tower by touching 'Sell'.");
-                tableText("(Components and gemstones will be lost on sell.)");
+                tableText("After tapping the tower, you can view what components");
+                tableText("and gemstones are applied to it along with the");
+                tableText("tower's stats. You can also modify the tower's");
+                tableText("targeting method or sell the tower for a refund here.");
+                tableText("With the stats menu open, please touch");
+                tableText("the 'Sell' button twice to sell the tower.");
+                tableText("(Components and gemstones will be when sold.)");
                 break;
             case FINAL_INFO: {
                 Image speedIcon = new Image(Sprites.sprite(SpriteType.SPEED_1));
@@ -375,6 +380,7 @@ public class TutorialScreen extends GameScreen {
                 }
                 return false;
             case SELECT_TOWER_FOR_UPGRADE:
+                enterUpgradeMode();
                 for (Entity entity : gameManager.getWorld().getEntities()) {
                     if (entity instanceof ShooterTower) {
                         ShooterTower shooterTower = (ShooterTower) entity;
@@ -400,6 +406,10 @@ public class TutorialScreen extends GameScreen {
                 }
                 return false;
             case COMPONENT_APPLY:
+                enterComponentMode();
+                if (placementMode == PlacementMode.COMPONENT) {
+                    componentAction = PurchaseAction.APPLY_LUBRICANT;
+                }
                 for (Entity entity : gameManager.getWorld().getEntities()) {
                     if (entity instanceof ShooterTower) {
                         ShooterTower shooterTower = (ShooterTower) entity;
@@ -510,8 +520,14 @@ public class TutorialScreen extends GameScreen {
                 upgradeButton.setVisible(true);
                 break;
             case SELECT_TOWER_FOR_UPGRADE:
+                focusTileX = shooterTowerPositionX;
+                focusTileY = shooterTowerPositionY + 3;
+                showTileHighlight = false;
                 break;
             case UPGRADE_SUCCESS:
+                focusTileX = -1;
+                focusTileY = -1;
+                showTileHighlight = true;
                 break;
             case INVENTORY_INTRO_1:
             case INVENTORY_INTRO_2:
@@ -523,7 +539,19 @@ public class TutorialScreen extends GameScreen {
                 gameManager.getTeam(0).getInventory().addWd40();
                 gameManager.updateTeamStats(0);
                 break;
+            case COMPONENT_APPLY:
+                focusTileX = shooterTowerPositionX;
+                focusTileY = shooterTowerPositionY + 3;
+                showTileHighlight = false;
+                break;
+            case INVENTORY_INTRO_3:
+                focusTileX = -1;
+                focusTileY = -1;
+                showTileHighlight = true;
+                break;
             case FINAL_INFO:
+                focusTileX = -1;
+                focusTileY = -1;
                 skipButton.setVisible(true);
                 speedButton.setVisible(true);
                 restartButton.setVisible(true);
@@ -633,7 +661,9 @@ public class TutorialScreen extends GameScreen {
             float centerY = focusTileY * Tile.SIZE + Tile.SIZE / 2f;
             float leftBottomX = centerX - size / 2f;
             float leftBottomY = centerY - size / 2f;
-            batch.draw(Sprites.animation(animationType, targetElapsedTime), leftBottomX, leftBottomY, size, size);
+            if (showTileHighlight) {
+                batch.draw(Sprites.animation(animationType, targetElapsedTime), leftBottomX, leftBottomY, size, size);
+            }
             batch.end();
         }
     }
@@ -661,6 +691,7 @@ public class TutorialScreen extends GameScreen {
     }
 
     int focusTileX = -1, focusTileY = -1;
+    boolean showTileHighlight = true;
 
     @Override
     public void updateCamera() {
@@ -682,6 +713,13 @@ public class TutorialScreen extends GameScreen {
         y = Interpolation.linear.apply(camera.position.y, y, lerp);
         camera.position.x = x;
         camera.position.y = y;
+    }
+
+    @Override
+    public Window createInformationUpgradeWindow(TowerEntity tower, int tileX, int tileY) {
+        Window window = super.createInformationUpgradeWindow(tower, tileX, tileY);
+        ((Button) window.findActor("closeButton")).setDisabled(true);
+        return window;
     }
     
 }

@@ -173,7 +173,6 @@ public class Feedback {
         }
     }
 
-    // TODO: Implement the FeedbackForm class
     public static class FeedbackForm {
 
         ArrayList<Entry> entryList;
@@ -269,7 +268,6 @@ public class Feedback {
                         AchievementManager.getInstance().setAchievementValue(FeedbackAchievement.class, true);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        // TODO: Display error message
                         table.clear();
                         table.add(e.getMessage(), "small").pad(10).row();
                         Label errorLabel = new Label(e.getCause().getMessage(), Sprites.skin(), "small");

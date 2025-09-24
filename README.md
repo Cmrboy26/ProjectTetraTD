@@ -8,10 +8,9 @@
 
 An endless tower defense game made in Java with <a href="https://github.com/libgdx/libgdx">libGDX</a>, supporting online multiplayer powered by <a href="https://github.com/EsotericSoftware/kryonet">KryoNet</a>.
 
+[![Play on itch.io](https://img.shields.io/badge/Play%20Now-itch.io-orange?style=for-the-badge&logo=itch.io)](https://cmrboy26.itch.io/project-tetra-td)
 
 ## About PTTD
-
-To jump straight in, click here: <a href="https://cmrboy26.itch.io/project-tetra-td">itch.io</a>
 
 Project Tetra TD is a fast-paced tower defense game where players construct towers, extract resources to upgrade, and outlast their opponents. 
 In online mode, players can either work together or compete to survive the longest through strategy, time management, and resource allocation.
@@ -26,10 +25,10 @@ The game is playable on both Windows and Android.
 - Custom music tracks, audio, and retro-style graphics
 
 ### Technologies Used
-- Programming Language: Java
-- Frameworks: <a href="https://github.com/libgdx/libgdx">libGDX</a> (a game development framework), <a href="https://github.com/EsotericSoftware/kryonet">KryoNet</a> (a TCP/UDP client-server network library)
-- Tools: Gradle, Git, Aseprite, FL Studio, Audacity
-- Platforms: Windows, Android
+- **Programming Language:** Java
+- **Frameworks:** <a href="https://github.com/libgdx/libgdx">libGDX</a> (a game development framework), <a href="https://github.com/EsotericSoftware/kryonet">KryoNet</a> (a TCP/UDP client-server network library)
+- **Tools:** Gradle, Git, Aseprite, FL Studio, Audacity
+- **Platforms:** Windows, Android
 
 ## Personal Goals
 

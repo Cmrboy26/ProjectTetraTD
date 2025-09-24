@@ -1,6 +1,9 @@
 # Project Tetra TD
 
-<img src="https://img.itch.zone/aW1nLzE2NzkyMjA4LnBuZw==/315x250%23c/I2pzYe.png">
+<div style="display: block-inline">
+  <img src="https://img.itch.zone/aW1nLzE2NzkyMjA4LnBuZw==/315x250%23c/I2pzYe.png" height="200"/>
+  <img src="https://github.com/user-attachments/assets/c520383f-f099-493f-8072-aa1236f64759" height="200"/>
+</div>
 
 A simple, pixel-art-styled, endless tower defense game with online multiplayer support.
 

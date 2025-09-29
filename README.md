@@ -23,10 +23,11 @@ The game is playable on both Windows and Android.
 - Save and load progress
 - Battle or cooperate with friends online
 - Custom music tracks, audio, and retro-style graphics
+- Upload feedback directly to the developer via RESTful API
 
 ### Technologies Used
 - **Programming Language:** Java
-- **Frameworks:** <a href="https://github.com/libgdx/libgdx">libGDX</a> (a game development framework), <a href="https://github.com/EsotericSoftware/kryonet">KryoNet</a> (a TCP/UDP client-server network library)
+- **Frameworks:** <a href="https://github.com/libgdx/libgdx">libGDX</a> (a game development framework), <a href="https://github.com/EsotericSoftware/kryonet">KryoNet</a> (a TCP/UDP client-server network library), Node.js, Express
 - **Tools:** Gradle, Git, Aseprite, FL Studio, Audacity
 - **Platforms:** Windows, Android
 
@@ -43,7 +44,7 @@ Finishing this project has taught me everything above and, unexpectedly, these n
 - Swept AABB
 - Minkowski sums
 - Vector concepts (dot products and normals)
-- SQL databases (used to store player feedback)
+- SQL databases, Node.js, and Express (used to store player feedback)
 
 ## Installation and Usage
 

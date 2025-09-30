@@ -23,7 +23,7 @@ The game is playable on both Windows and Android.
 - Save and load progress
 - Battle or cooperate with friends online
 - Custom music tracks, audio, and retro-style graphics
-- Upload feedback directly to the developer via RESTful API
+- Upload feedback directly to the developer via RESTful API (see [here](#backend-feedback-server))
 
 ### Technologies Used
 - **Programming Language:** Java
@@ -70,5 +70,27 @@ Run dedicated server: ``gradlew desktop:run-server`` <br>
 
 Run JUnit tests on Windows: ``gradlew tests:test`` <br>
 
+## Backend Feedback Server
 
+A backend RESTful API for the Project Tetra TD game that collects player feedback and stores it in a MySQL database.
 
+**Tech Stack:** Node.js, Express.js, MYSQL, HTTPS
+
+The feedback server was constructed using Node.js, Express.js, and MySQL to collect feedback responses from players through an in-game UI. The backend is a RESTful API that stores POST request data to a locally-run MySQL database. Data transfer to and from the database is secured with an HTTPS connection.
+
+### Installation and Usage
+
+<ol>
+  <li>Install dependencies using `npm install`</li>
+  <li>Replace `cert.pem` and `key.pem` with your HTTPS credentials</li>
+  <li>
+    Create the MySQL database locally with the following table named `Response`: 
+    <ul>
+      <li>formId INT</li>
+      <li>responseData TEXT</li>
+      <li>submitterEmail VARCHAR(255)</li>
+    </ul>
+  </li>
+  <li>Update database login credentials in `config.json`</li>
+  <li>Run `node app.js`</li>
+</ol>

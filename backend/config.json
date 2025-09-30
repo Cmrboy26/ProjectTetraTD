@@ -1,0 +1,22 @@
+{
+    "activeSections": [
+        "pttdfeedback"
+    ],
+    "port": 443,
+    "useHTTPS": true,
+    "ssl": {
+        "key": "key.pem",
+        "cert": "cert.pem"
+    },
+    "sqlConnection": {
+        "host": "HOST_HERE",
+        "user": "USERNAME_HERE",
+        "password": "PASSWORD_HERE",
+        "port": 3306,
+        "connectionLimit": 2,
+        "enableKeepAlive": true,
+        "waitForConnections": true,
+        "queueLimit": 0,
+        "idleTimeout": 60000
+    }
+}
